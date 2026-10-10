@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth, useClerk } from "@clerk/react";
 import { useGetWorkspaceSession } from "@workspace/api-client-react";
 import { FileText, Inbox, LayoutDashboard, UserRound, UsersRound } from "lucide-react";
+import { Toaster } from "sonner";
 
 export function WorkspaceLayout({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
@@ -77,6 +78,7 @@ export function WorkspaceLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <div className="flex-1 flex flex-col">{children}</div>
+      <Toaster position="bottom-right" richColors />
     </div>
   );
 }
