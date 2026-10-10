@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { 
   useGetWorkspaceSession, 
@@ -129,7 +130,7 @@ export default function WorkspaceProfile() {
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    if (!form.formState.isDirty || !saveFeedback) return;
+    if (!form.formState.isDirty || saveFeedback !== "saved") return;
     setSaveFeedback(null);
     setSaveMessage("");
   }, [form.formState.isDirty, saveFeedback]);
@@ -157,6 +158,8 @@ export default function WorkspaceProfile() {
   });
 
   const onSubmit = (data: ProfileFormValues, statusOverride: "draft" | "published") => {
+    setSaveFeedback(null);
+    setSaveMessage("");
     updateProfile.mutate(
       {
         data: {
@@ -488,6 +491,19 @@ export default function WorkspaceProfile() {
             <div>
               <p className="font-semibold mb-1">Almost ready to publish</p>
               <p className="leading-relaxed">{publishValidationMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {saveFeedback === "error" && saveMessage && (
+          <div
+            className="flex max-w-full items-start gap-3 border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive page-reveal"
+            role="alert"
+          >
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-semibold mb-1">Your profile was not saved</p>
+              <p className="leading-relaxed">{saveMessage}</p>
             </div>
           </div>
         )}
