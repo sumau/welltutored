@@ -5,7 +5,22 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { cn } from '@/lib/utils';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 
-const Select = SelectPrimitive.Root;
+// Radix Select reports "" when a controlled value is set after mount (a form
+// loading saved data), which would wipe the field and send an invalid value.
+// No option can have the value "", so an empty change is never a real choice.
+function Select({
+  onValueChange,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Root>) {
+  return (
+    <SelectPrimitive.Root
+      onValueChange={(value) => {
+        if (value) onValueChange?.(value);
+      }}
+      {...props}
+    />
+  );
+}
 
 const SelectGroup = SelectPrimitive.Group;
 

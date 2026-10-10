@@ -15,7 +15,7 @@ const session: WorkspaceSession = {
   role: "tutor",
   email: "maya@example.com",
   displayName: "Maya Shah",
-  availableTutorAccents: ["#8EA8CE"],
+  availableTutorAccents: ["#8EA8CE", "#A997C7"],
   tutor: {
     id: 2,
     slug: "maya-shah",
@@ -38,8 +38,8 @@ const session: WorkspaceSession = {
     ],
     profileStatus: "published",
     rate: 45,
-    availability: "accepting",
-    tint: "#8EA8CE",
+    availability: "limited",
+    tint: "#A997C7",
     resources: [],
   },
 };
@@ -162,6 +162,39 @@ test("a rejected profile save shows the server's reason on the page", async () =
       (element) => element.textContent?.includes("already in use by another tutor"),
     );
     assert(alert, "Expected the save error to be shown on the page");
+  } finally {
+    globalThis.fetch = originalFetch;
+    await cleanupPage(rendered);
+  }
+});
+
+test("saving sends the tutor's stored accent and availability, not empty ones", async () => {
+  const originalFetch = globalThis.fetch;
+  const bodies: unknown[] = [];
+  globalThis.fetch = async (_input, init) => {
+    bodies.push(JSON.parse(String(init?.body)));
+    return new Response(JSON.stringify({ ...session.tutor, profileStatus: "draft" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+  const rendered = await renderPage();
+
+  try {
+    await act(async () => {
+      setFieldValue(
+        rendered.container.querySelector<HTMLInputElement>('input[name="firstName"]')!,
+        "Mayah",
+      );
+    });
+
+    await act(async () => {
+      buttonWithText(rendered.container, "Save Draft").click();
+    });
+
+    assert.equal(bodies.length, 1);
+    assert.equal((bodies[0] as { tint: string }).tint, "#A997C7");
+    assert.equal((bodies[0] as { availability: string }).availability, "limited");
   } finally {
     globalThis.fetch = originalFetch;
     await cleanupPage(rendered);
