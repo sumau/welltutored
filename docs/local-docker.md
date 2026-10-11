@@ -209,9 +209,9 @@ and is worth doing once if this login is meant to last.
 - `linux/amd64`: the same overrides keep only the `linux-x64` esbuild binary.
 - pnpm is pinned in the image to the exact version in the root
   `package.json` `packageManager` field.
-  Two versions of pnpm writing `pnpm-lock.yaml` produce churn, and both CI and the
-  deployment build install with `--frozen-lockfile`, so a mismatch fails the deploy rather than resolving
-  itself.
+  Two versions of pnpm writing `pnpm-lock.yaml` produce churn, and both CI and
+  the deployment build install with `--frozen-lockfile`, so a mismatch fails
+  the deploy rather than resolving itself.
 - The pnpm store lives at `.pnpm-store/` in the repository (gitignored). It
   has to share a filesystem with the installed packages so that hardlinking
   works, and node_modules is in the bind mount; a named volume would sit on
