@@ -28,6 +28,16 @@ export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
   );
 }
 
+export function TutorAvailability({ tutor }: { tutor: Tutor }) {
+  if (!tutor.availability) return null;
+  return (
+    <div className="grid grid-cols-[125px_1fr] gap-[22px] py-[17px] border-b border-border text-[13px] leading-[1.55]" data-testid="tutor-availability">
+      <b className="font-bold text-foreground">Availability</b>
+      <span className="text-muted-foreground">{tutor.availability}</span>
+    </div>
+  );
+}
+
 export default function TutorProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { data: tutor, isLoading, error, refetch } = useGetTutor(slug as string, {
@@ -117,6 +127,7 @@ export default function TutorProfile() {
                 <b className="font-bold text-foreground">Session rate</b>
                 <span className="text-muted-foreground">Illustrative rate · £{tutor.rate} per 60-minute session</span>
               </div>
+              <TutorAvailability tutor={tutor} />
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px] mt-[28px]">

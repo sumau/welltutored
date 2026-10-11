@@ -38,6 +38,7 @@ const validProfile = {
     { title: "Edit kindly", body: "Use specific feedback to make one useful improvement at a time." },
   ],
   rate: 45,
+  availability: "Weekday evenings after 4pm",
   intake: "accepting",
   tint: "#D98F7F",
 };
@@ -63,6 +64,16 @@ test("rejects a profile with the wrong number of teaching points", () => {
       ...validProfile,
       teachingPoints: validProfile.teachingPoints.slice(0, 2),
     }),
+    false,
+  );
+});
+test("accepts a profile without availability", () => {
+  assert.equal(isPublishableProfile({ ...validProfile, availability: "" }), true);
+});
+
+test("rejects availability longer than 120 characters", () => {
+  assert.equal(
+    isPublishableProfile({ ...validProfile, availability: "a".repeat(121) }),
     false,
   );
 });

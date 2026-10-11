@@ -39,6 +39,7 @@ export const tutorProfileDraftsTable = pgTable(
       .notNull()
       .default([]),
     rate: numeric("rate", { precision: 8, scale: 2 }).notNull(),
+    availability: text("availability").notNull().default(""),
     intake: tutorIntake("intake").notNull(),
     tint: text("tint").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

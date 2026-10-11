@@ -27,6 +27,8 @@ export const listTutorsResponseTeachingPointsItemTitleMin = 2;
 export const listTutorsResponseTeachingPointsItemBodyMin = 10;
 
 
+export const listTutorsResponseAvailabilityMax = 120;
+
 
 
 export const ListTutorsResponseItem = zod.object({
@@ -48,6 +50,7 @@ export const ListTutorsResponseItem = zod.object({
   "body": zod.string().min(listTutorsResponseTeachingPointsItemBodyMin)
 })).min(1),
   "rate": zod.number(),
+  "availability": zod.string().max(listTutorsResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -86,6 +89,8 @@ export const getTutorResponseTeachingPointsItemTitleMin = 2;
 export const getTutorResponseTeachingPointsItemBodyMin = 10;
 
 
+export const getTutorResponseAvailabilityMax = 120;
+
 
 
 export const GetTutorResponse = zod.object({
@@ -107,6 +112,7 @@ export const GetTutorResponse = zod.object({
   "body": zod.string().min(getTutorResponseTeachingPointsItemBodyMin)
 })).min(1),
   "rate": zod.number(),
+  "availability": zod.string().max(getTutorResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -349,6 +355,8 @@ export const RetryWorkspaceEnquiryResponse = zod.object({
  */
 export const getWorkspaceSessionResponseTutorOneProfileSummaryMax = 200;
 
+export const getWorkspaceSessionResponseTutorOneAvailabilityMax = 120;
+
 
 
 export const GetWorkspaceSessionResponse = zod.object({
@@ -377,6 +385,7 @@ export const GetWorkspaceSessionResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
+  "availability": zod.string().max(getWorkspaceSessionResponseTutorOneAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -547,6 +556,8 @@ export const updateWorkspaceProfileBodyTeachingPointsMax = 3;
 
 export const updateWorkspaceProfileBodyRateMin = 0;
 
+export const updateWorkspaceProfileBodyAvailabilityMax = 120;
+
 
 
 export const UpdateWorkspaceProfileBody = zod.object({
@@ -566,12 +577,15 @@ export const UpdateWorkspaceProfileBody = zod.object({
   "body": zod.string()
 })).max(updateWorkspaceProfileBodyTeachingPointsMax).optional(),
   "rate": zod.number().min(updateWorkspaceProfileBodyRateMin).optional(),
+  "availability": zod.string().max(updateWorkspaceProfileBodyAvailabilityMax).optional(),
   "intake": zod.enum(['accepting', 'limited', 'full']).optional(),
   "tint": zod.enum(['#D98F7F', '#D8B267', '#B5A1CC', '#83B7B0', '#9DBB83', '#8EA8CE', '#C98B9B', '#A88DBD', '#7FA6A0', '#8B9FC2', '#D08C76', '#C2A06E', '#B48C9E', '#8C8FB5', '#73A9A1', '#8FAE7E', '#A997C7', '#7899B5', '#C18A9A', '#9C9A72']).optional(),
   "status": zod.enum(['draft', 'published']).optional()
 })
 
 export const updateWorkspaceProfileResponseProfileSummaryMax = 200;
+
+export const updateWorkspaceProfileResponseAvailabilityMax = 120;
 
 
 
@@ -595,6 +609,7 @@ export const UpdateWorkspaceProfileResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
+  "availability": zod.string().max(updateWorkspaceProfileResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -620,6 +635,8 @@ export const UpdateWorkspaceProfileResponse = zod.object({
  */
 export const discardWorkspaceProfileDraftResponseProfileSummaryMax = 200;
 
+export const discardWorkspaceProfileDraftResponseAvailabilityMax = 120;
+
 
 
 export const DiscardWorkspaceProfileDraftResponse = zod.object({
@@ -642,6 +659,7 @@ export const DiscardWorkspaceProfileDraftResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
+  "availability": zod.string().max(discardWorkspaceProfileDraftResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -667,6 +685,8 @@ export const DiscardWorkspaceProfileDraftResponse = zod.object({
  */
 export const listWorkspaceTutorsResponseProfileSummaryMax = 200;
 
+export const listWorkspaceTutorsResponseAvailabilityMax = 120;
+
 
 
 export const ListWorkspaceTutorsResponseItem = zod.object({
@@ -689,6 +709,7 @@ export const ListWorkspaceTutorsResponseItem = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
+  "availability": zod.string().max(listWorkspaceTutorsResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -723,6 +744,8 @@ export const CreateWorkspaceTutorBody = zod.object({
 
 export const createWorkspaceTutorResponseProfileSummaryMax = 200;
 
+export const createWorkspaceTutorResponseAvailabilityMax = 120;
+
 
 
 export const CreateWorkspaceTutorResponse = zod.object({
@@ -745,6 +768,7 @@ export const CreateWorkspaceTutorResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
+  "availability": zod.string().max(createWorkspaceTutorResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -777,6 +801,8 @@ export const ArchiveWorkspaceTutorParams = zod.object({
 
 export const archiveWorkspaceTutorResponseProfileSummaryMax = 200;
 
+export const archiveWorkspaceTutorResponseAvailabilityMax = 120;
+
 
 
 export const ArchiveWorkspaceTutorResponse = zod.object({
@@ -799,6 +825,7 @@ export const ArchiveWorkspaceTutorResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
+  "availability": zod.string().max(archiveWorkspaceTutorResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
@@ -831,6 +858,8 @@ export const RestoreWorkspaceTutorParams = zod.object({
 
 export const restoreWorkspaceTutorResponseProfileSummaryMax = 200;
 
+export const restoreWorkspaceTutorResponseAvailabilityMax = 120;
+
 
 
 export const RestoreWorkspaceTutorResponse = zod.object({
@@ -853,6 +882,7 @@ export const RestoreWorkspaceTutorResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
+  "availability": zod.string().max(restoreWorkspaceTutorResponseAvailabilityMax),
   "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({

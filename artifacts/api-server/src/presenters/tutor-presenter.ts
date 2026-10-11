@@ -45,6 +45,7 @@ export function applyTutorDraft(
     teachingIntro: draft.teachingIntro,
     teachingPoints: draft.teachingPoints,
     rate: draft.rate,
+    availability: draft.availability,
     intake: draft.intake,
     tint: draft.tint,
     profileStatus:

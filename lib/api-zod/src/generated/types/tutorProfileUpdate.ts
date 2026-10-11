@@ -29,6 +29,8 @@ export interface TutorProfileUpdate {
   teachingPoints?: WorkspaceTeachingPoint[];
   /** @minimum 0 */
   rate?: number;
+  /** @maxLength 120 */
+  availability?: string;
   intake?: TutorProfileUpdateIntake;
   tint?: TutorProfileUpdateTint;
   status?: TutorProfileUpdateStatus;

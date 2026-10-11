@@ -28,6 +28,8 @@ export interface WorkspaceTutor {
   teachingPoints: WorkspaceTeachingPoint[];
   profileStatus: WorkspaceTutorProfileStatus;
   rate: number;
+  /** @maxLength 120 */
+  availability: string;
   intake: WorkspaceTutorIntake;
   tint: string;
   resources: Resource[];
