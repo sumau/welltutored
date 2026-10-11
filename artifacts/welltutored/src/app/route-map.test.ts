@@ -58,7 +58,7 @@ test("keeps page metadata aligned with public and workspace routes", () => {
       path: "/tutors/alice-smith",
       title: "Alice Smith | Well Tutored",
       description:
-        "View this tutor’s subject expertise, qualifications, teaching style and named-tutor enquiry form.",
+        "View this tutor’s subject expertise, qualifications, teaching approach and named-tutor enquiry form.",
     },
     {
       path: "/enquire",

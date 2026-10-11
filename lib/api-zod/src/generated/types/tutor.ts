@@ -23,7 +23,6 @@ export interface Tutor {
   university: string;
   qualification: string;
   bio: string;
-  style: string;
   teachingIntro: string;
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];

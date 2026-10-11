@@ -34,7 +34,6 @@ export function isPublishableProfile(profile: {
   university: string;
   qualification: string;
   bio: string;
-  style: string;
   teachingIntro: string;
   teachingPoints: Array<{ title: string; body: string }>;
   rate: number;
@@ -51,7 +50,6 @@ export function isPublishableProfile(profile: {
     profile.university.trim().length >= 2 &&
     profile.qualification.trim().length >= 2 &&
     profile.bio.trim().length >= 20 &&
-    profile.style.trim().length >= 2 &&
     profile.teachingIntro.trim().length >= 20 &&
     profile.teachingIntro.trim().length <= 200 &&
     profile.teachingPoints.length === 3 &&

@@ -109,6 +109,23 @@ connection string is not pointing where you think it is. When you are unsure
 what a push will do to existing rows, run it on a copy first — see
 [Rehearsing a push on a Neon branch](#rehearsing-a-push-on-a-neon-branch).
 
+Dropping a column prompts with a count of the rows that hold a value. Removing
+the tutor `style` field (issue #53) looked like this against seeded data:
+
+```
+ Warning  Found data-loss statements:
+· You're about to delete style column in tutors table with 5 items
+· You're about to delete style column in tutor_profile_drafts table with 1 items
+
+THIS ACTION WILL CAUSE DATA LOSS AND CANNOT BE REVERTED
+
+Do you still want to push changes?
+```
+
+Answer yes only when every listed column is one the schema diff removes on
+purpose. The live code still reads a dropped column until the merge deploys, so
+merge straight after the push.
+
 **Renames are the exception, and they prompt on any database, empty or not.**
 `push` diffs states, so it cannot tell a renamed type or constraint from a
 dropped one and a new one — it asks. The highlighted default is `create`, which

@@ -24,7 +24,6 @@ export interface WorkspaceTutor {
   university: string;
   qualification: string;
   bio: string;
-  style: string;
   teachingIntro: string;
   teachingPoints: WorkspaceTeachingPoint[];
   profileStatus: WorkspaceTutorProfileStatus;

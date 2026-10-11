@@ -45,7 +45,6 @@ export const tutorsTable = pgTable("tutors", {
   university: text("university").notNull(),
   qualification: text("qualification").notNull(),
   bio: text("bio").notNull(),
-  style: text("style").notNull(),
   teachingIntro: text("teaching_intro").notNull().default(""),
   teachingPoints: jsonb("teaching_points")
     .$type<TeachingPoint[]>()

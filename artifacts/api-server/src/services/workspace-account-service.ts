@@ -179,7 +179,6 @@ export async function ensureTutorDraft(
         university: "",
         qualification: "",
         bio: "",
-        style: "",
         profileSummary: "",
         teachingIntro: "",
         teachingPoints: [],

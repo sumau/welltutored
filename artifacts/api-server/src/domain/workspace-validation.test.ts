@@ -30,7 +30,6 @@ const validProfile = {
   university: "University of Cambridge",
   qualification: "First-class BA (Hons), English",
   bio: "Maya helps students develop clear, confident arguments through careful discussion and specific feedback.",
-  style: "Warm and detail-led",
   teachingIntro:
     "Sessions are built around conversation, careful questions, and practical next steps that students can use straight away.",
   teachingPoints: [

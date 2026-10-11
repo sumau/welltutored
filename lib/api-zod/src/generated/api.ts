@@ -42,7 +42,6 @@ export const ListTutorsResponseItem = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string().min(listTutorsResponseTeachingPointsItemTitleMin),
@@ -102,7 +101,6 @@ export const GetTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string().min(getTutorResponseTeachingPointsItemTitleMin),
@@ -372,7 +370,6 @@ export const GetWorkspaceSessionResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -563,7 +560,6 @@ export const UpdateWorkspaceProfileBody = zod.object({
   "university": zod.string().optional(),
   "qualification": zod.string().optional(),
   "bio": zod.string().optional(),
-  "style": zod.string().optional(),
   "teachingIntro": zod.string().max(updateWorkspaceProfileBodyTeachingIntroMax).optional(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -592,7 +588,6 @@ export const UpdateWorkspaceProfileResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -640,7 +635,6 @@ export const DiscardWorkspaceProfileDraftResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -688,7 +682,6 @@ export const ListWorkspaceTutorsResponseItem = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -745,7 +738,6 @@ export const CreateWorkspaceTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -800,7 +792,6 @@ export const ArchiveWorkspaceTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -855,7 +846,6 @@ export const RestoreWorkspaceTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
-  "style": zod.string(),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),

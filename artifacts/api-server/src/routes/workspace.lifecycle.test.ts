@@ -117,7 +117,6 @@ const tutorInput = {
   university: "University of Bristol",
   qualification: "First-class BA (Hons), History",
   bio: "A patient history tutor who turns difficult source work into clear, manageable steps.",
-  style: "Calm, structured, question-led",
   rate: 42,
   availability: "accepting",
   tint: testTint,
@@ -205,7 +204,6 @@ before(async () => {
     university: "University of Bristol",
     qualification: "First-class BA (Hons), English",
     bio: "A supportive English tutor for this isolated lifecycle run.",
-    style: "Clear, encouraging, structured",
     teachingPoints: [
       { title: "Clarity", body: "We make difficult texts easier to understand." },
       { title: "Practice", body: "We build confidence through focused questions." },
@@ -518,7 +516,6 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
         university: "University of London",
         qualification: "BA History",
         bio: "A thoughtful tutor helping students build clear, confident historical arguments.",
-        style: "Patient and structured",
         teachingIntro: "Lessons are calm, focused, and tailored to each student's goals.",
         teachingPoints: [
           { title: "Clarity", body: "We turn complex topics into clear next steps." },
@@ -1112,12 +1109,12 @@ test("owner can link their own account to a tutor profile and edit it", async ()
     "/api/workspace/profile",
     {
       method: "PATCH",
-      body: JSON.stringify({ status: "draft", style: "Owner-edited style" }),
+      body: JSON.stringify({ status: "draft", subject: "Owner-edited subject" }),
     },
     ownerUserId,
   );
   assert.equal(savedDraft.response.status, 200);
-  assert.equal(savedDraft.body.style, "Owner-edited style");
+  assert.equal(savedDraft.body.subject, "Owner-edited subject");
 
   const discarded = await request(
     "/api/workspace/profile/draft",

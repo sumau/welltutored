@@ -18,7 +18,6 @@ const unavailableTutor: Tutor = {
   university: "University of Cambridge",
   qualification: "BA Mathematics",
   bio: "Maya helps students build confidence.",
-  style: "Calm and structured",
   teachingIntro: "Clear explanations and practical guidance.",
   teachingPoints: [{ title: "Clarity", body: "Lessons are structured around the student's goals." }],
   rate: 45,

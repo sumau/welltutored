@@ -29,7 +29,6 @@ const session: WorkspaceSession = {
     university: "University of Cambridge",
     qualification: "BA Mathematics",
     bio: "Maya helps students build confidence in mathematics.",
-    style: "Calm and structured",
     teachingIntro: "Clear explanations and practical guidance for every student.",
     teachingPoints: [
       { title: "Clarity", body: "Lessons are structured around the student's goals." },

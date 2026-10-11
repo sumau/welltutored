@@ -126,7 +126,7 @@ export function routeMetadataForPath(pathname: string): RouteMetadata {
     return {
       title: `${humanizeSlug(pathname.replace("/tutors/", ""))} | Well Tutored`,
       description:
-        "View this tutor’s subject expertise, qualifications, teaching style and named-tutor enquiry form.",
+        "View this tutor’s subject expertise, qualifications, teaching approach and named-tutor enquiry form.",
     };
   }
 

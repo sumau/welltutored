@@ -85,7 +85,6 @@ router.post("/workspace/tutors", async (req, res): Promise<void> => {
       university: "",
       qualification: "",
       bio: "",
-      style: "",
       profileSummary: "",
       teachingIntro: "",
       teachingPoints: [],

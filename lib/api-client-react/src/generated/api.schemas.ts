@@ -65,7 +65,6 @@ export interface Tutor {
   university: string;
   qualification: string;
   bio: string;
-  style: string;
   teachingIntro: string;
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];
@@ -112,7 +111,6 @@ export interface WorkspaceTutor {
   university: string;
   qualification: string;
   bio: string;
-  style: string;
   teachingIntro: string;
   teachingPoints: WorkspaceTeachingPoint[];
   profileStatus: WorkspaceTutorProfileStatus;
@@ -341,7 +339,6 @@ export interface TutorProfileUpdate {
   university?: string;
   qualification?: string;
   bio?: string;
-  style?: string;
   /** @maxLength 200 */
   teachingIntro?: string;
   /** @maxItems 3 */
