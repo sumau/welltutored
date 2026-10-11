@@ -14,7 +14,7 @@ flowchart LR
 
   subgraph browser["Browser: React app"]
     public["Public website<br/>(never loads Clerk)"]
-    workspace["Workspace<br/>(lazy-loaded with Clerk)"]
+    workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
   end
 
   workspace -- "sign in" --> clerk["Clerk"]
@@ -80,7 +80,7 @@ public bundle.
 Browser API requests use Clerk's same-origin session cookies; bearer-token
 wiring is reserved for mobile clients.
 
-## Workspace
+## Private Workspace
 
 Workspace routes are protected by Clerk and the workspace account boundary:
 
