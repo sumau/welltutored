@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { PublicResourcesNotice } from "@/components/workspace/PublicResourcesNotice";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -274,6 +275,7 @@ export default function WorkspaceResourceEditor() {
           <h1 className="text-3xl font-serif text-foreground">
             {isNew ? "New Draft" : "Edit Resource"}
           </h1>
+          <PublicResourcesNotice />
           {!isNew && currentStatus && (
             <p className="text-sm text-muted-foreground mt-2">
               Status: <span className="font-medium text-foreground">{currentStatus === 'published' ? 'Published' : 'Draft'}</span>

@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
+import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
@@ -128,13 +129,15 @@ export default function Enquiry() {
                 </p>
               </div>
             </div>
-            <Link
-              href="/resources"
-              className="mt-[34px] inline-flex items-center gap-2 text-[12px] font-bold text-foreground hover:text-primary transition-colors"
-              data-testid="enquiry-resources-link"
-            >
-              Read our subject resources <ArrowRight size={14} />
-            </Link>
+            {PUBLIC_RESOURCES_ENABLED && (
+              <Link
+                href="/resources"
+                className="mt-[34px] inline-flex items-center gap-2 text-[12px] font-bold text-foreground hover:text-primary transition-colors"
+                data-testid="enquiry-resources-link"
+              >
+                Read our subject resources <ArrowRight size={14} />
+              </Link>
+            )}
           </div>
 
            <EnquiryForm tutors={contactableTutors} />

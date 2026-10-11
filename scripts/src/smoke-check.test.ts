@@ -107,10 +107,8 @@ function writeHealthyResponse(
   }
   if (
     path === "/" ||
-    path === "/resources" ||
     path === "/enquire" ||
-    path === `/tutors/${encodeURIComponent(tutor.slug)}` ||
-    path === `/resources/${encodeURIComponent(resource.slug)}`
+    path === `/tutors/${encodeURIComponent(tutor.slug)}`
   ) {
     writePage(response);
     return;
@@ -557,6 +555,33 @@ test("an empty deployment fails the launch check without the waiver", async () =
   }
 });
 
+test("a published Tutor without Resources passes without the waiver", async () => {
+  const fixture = await startFixture({
+    name: "tutor without resources",
+    expectedMessage: "",
+    respond: (request, response) => {
+      if (request.url === "/api/tutors") {
+        writeJson(response, [{ ...tutor, resources: [] }]);
+        return true;
+      }
+      if (request.url === "/api/resources") {
+        writeJson(response, []);
+        return true;
+      }
+      return false;
+    },
+  });
+
+  try {
+    const result = await runSmokeCommand(fixture.url);
+
+    assert.equal(result.exitCode, 0, result.output);
+    assert.doesNotMatch(result.output, /^\s+- /m);
+  } finally {
+    await fixture.close();
+  }
+});
+
 test("--allow-empty waives the content assertions an empty deployment cannot meet", async () => {
   const fixture = await startFixture({
     name: "empty deployment with the waiver",
@@ -581,9 +606,7 @@ test("--allow-empty waives the content assertions an empty deployment cannot mee
       skippedChecks,
       [
         "/api/tutors has a published Tutor (deployment is empty)",
-        "/api/resources has a published Resource (deployment is empty)",
         "/tutors/:slug (no published Tutor to address)",
-        "/resources/:slug (no published Resource to address)",
       ],
       result.output,
     );
@@ -595,7 +618,6 @@ test("--allow-empty waives the content assertions an empty deployment cannot mee
       "GET /api/tutors",
       "GET /api/resources",
       "GET /",
-      "GET /resources",
       "GET /enquire",
       "POST /api/enquiries",
       "GET /api/healthz",
@@ -619,11 +641,6 @@ test("--allow-empty waives nothing once the deployment has content", async () =>
     assert.doesNotMatch(result.output, /^\s+- /m);
     assert.equal(
       fixture.requests.includes("GET /tutors/ada%20lovelace"),
-      true,
-      result.output,
-    );
-    assert.equal(
-      fixture.requests.includes("GET /resources/learning%20%26%20mathematics"),
       true,
       result.output,
     );
@@ -841,10 +858,8 @@ test("healthy launch checks pass entirely against the loopback fixture", async (
       "/api/tutors",
       "/api/resources",
       "/",
-      "/resources",
       "/enquire",
       "/tutors/ada%20lovelace",
-      "/resources/learning%20%26%20mathematics",
       "POST /api/enquiries (invalid payload)",
       "/api/healthz after invalid enquiry",
     ];
@@ -869,10 +884,8 @@ test("healthy launch checks pass entirely against the loopback fixture", async (
       "GET /api/tutors",
       "GET /api/resources",
       "GET /",
-      "GET /resources",
       "GET /enquire",
       "GET /tutors/ada%20lovelace",
-      "GET /resources/learning%20%26%20mathematics",
       "POST /api/enquiries",
       "GET /api/healthz",
     ]);

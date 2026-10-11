@@ -5,7 +5,7 @@ const BASE_URL_ENV_KEY = "SMOKE_BASE_URL";
 const REDIRECT_FROM_ENV_KEY = "SMOKE_REDIRECT_FROM";
 const CLERK_FRONTEND_API_ENV_KEY = "SMOKE_CLERK_FRONTEND_API";
 // A page path with a query, so a redirect that drops either is caught.
-const REDIRECT_PROBE_PATH = "/resources?smoke=redirect";
+const REDIRECT_PROBE_PATH = "/enquire?smoke=redirect";
 export const SMOKE_TIMEOUT_MIN_MS = 100;
 export const SMOKE_TIMEOUT_MAX_MS = 60_000;
 export const SMOKE_TOTAL_TIMEOUT_MIN_MS = 1_000;
@@ -553,22 +553,15 @@ async function runSmokeCheckSteps(
       );
     }
   }
-  if (resources.length === 0) {
-    if (!modes.allowsEmptyContent) {
-      throw new SmokeCheckError(
-        "/api/resources: expected at least one published resource.",
-      );
-    }
-    skipped.push(
-      "/api/resources has a published Resource (deployment is empty)",
-    );
-  }
-  const parsedResources = resources.map((resource, index) =>
+  // Resources are hidden from visitors (PUBLIC_RESOURCES_ENABLED in the web
+  // app), so a usable Deployment needs none, and their pages are not checked.
+  // Restore both when that switch turns on; see issue #61.
+  resources.forEach((resource, index) =>
     expectResource(resource, `/api/resources[${index}]`),
   );
   passed.push("/api/resources");
 
-  for (const path of ["/", "/resources", "/enquire"]) {
+  for (const path of ["/", "/enquire"]) {
     await checkPublicPage(baseUrl, path, timeoutMs, deadline);
     passed.push(path);
   }
@@ -580,15 +573,6 @@ async function runSmokeCheckSteps(
     const tutorPath = `/tutors/${encodeURIComponent(tutorSlug)}`;
     await checkPublicPage(baseUrl, tutorPath, timeoutMs, deadline);
     passed.push(tutorPath);
-  }
-
-  if (parsedResources.length === 0) {
-    skipped.push("/resources/:slug (no published Resource to address)");
-  } else {
-    const resourceSlug = parsedResources[0].slug as string;
-    const resourcePath = `/resources/${encodeURIComponent(resourceSlug)}`;
-    await checkPublicPage(baseUrl, resourcePath, timeoutMs, deadline);
-    passed.push(resourcePath);
   }
 
   const invalidEnquiry = await request(

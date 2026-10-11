@@ -18,8 +18,6 @@ test("keeps public pages on their expected route map", () => {
     [
       ["/", "Home"],
       ["/tutors/:slug", "TutorProfile"],
-      ["/resources", "Resources"],
-      ["/resources/:slug", "ResourceDetail"],
       ["/enquire", "Enquiry"],
     ],
   );
@@ -29,9 +27,17 @@ test("keeps public pages on their expected route map", () => {
     kind: "page",
     page: "TutorProfile",
   });
+});
+
+test("hides resource pages from visitors while public resources are off", () => {
+  assert.deepEqual(resolveRoute("/resources"), { kind: "page", page: "NotFound" });
   assert.deepEqual(resolveRoute("/resources/essay-planning"), {
     kind: "page",
-    page: "ResourceDetail",
+    page: "NotFound",
+  });
+  assert.deepEqual(resolveRoute("/workspace/resources/new", true), {
+    kind: "page",
+    page: "WorkspaceResourceEditor",
   });
 });
 
@@ -41,18 +47,17 @@ test("keeps page metadata aligned with public and workspace routes", () => {
       path: "/",
       title: "Well Tutored | Women tutors for secondary and A-level students",
       description:
-        "Browse women tutors, read their subject resources and submit a named-tutor enquiry.",
+        "Browse women tutors and submit a named-tutor enquiry.",
     },
     {
       path: "/resources",
-      title: "Insights & Resources | Well Tutored",
-      description:
-        "Read illustrative guides, revision notes and subject resources from Well Tutored tutors.",
+      title: "Well Tutored | Women tutors for secondary and A-level students",
+      description: "Browse women tutors and submit a named-tutor enquiry.",
     },
     {
       path: "/resources/essay-planning",
-      title: "Essay Planning | Well Tutored Resources",
-      description: "Read an illustrative tutor-written resource from Well Tutored.",
+      title: "Well Tutored | Women tutors for secondary and A-level students",
+      description: "Browse women tutors and submit a named-tutor enquiry.",
     },
     {
       path: "/tutors/alice-smith",

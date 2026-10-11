@@ -139,7 +139,7 @@ jobs:
       # smoke is fetch-based, so no browser is needed here.
       #
       # "incomplete" is the one condition this Deployment is still in, waived
-      # by --allow-empty in the script: it has no published content. When it
+      # by --allow-empty in the script: it has no published Tutor. When it
       # has, this becomes `pnpm run smoke:launch` and the script entry goes.
       #
       # SMOKE_REDIRECT_FROM is every other hostname the Deployment answers on;

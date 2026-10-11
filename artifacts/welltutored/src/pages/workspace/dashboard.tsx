@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PublicResourcesNotice } from "@/components/workspace/PublicResourcesNotice";
 import { FileText, Trash2, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
@@ -85,8 +86,9 @@ export default function WorkspaceDashboard() {
         </div>
       </div>
 
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8">
         <h2 className="text-xl font-serif">Your Resources</h2>
+        <PublicResourcesNotice />
       </div>
 
       {isLoading ? (
