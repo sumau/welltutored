@@ -59,9 +59,9 @@ test("validates root and filtered workspace scripts", () => {
   assert.deepEqual(
     validateDocumentedCommands(
       [
-        { filePath: "PROJECT.md", lineNumber: 1, command: "pnpm run build" },
+        { filePath: "README.md", lineNumber: 1, command: "pnpm run build" },
         {
-          filePath: "PROJECT.md",
+          filePath: "README.md",
           lineNumber: 2,
           command: "pnpm --filter @workspace/api-server run dev",
         },

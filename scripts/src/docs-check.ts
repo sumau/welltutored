@@ -62,9 +62,9 @@ function walkFiles(directory: string, fileName?: string): string[] {
 
 function documentationFiles(rootDir: string): string[] {
   return [
-    ...(existsSync(join(rootDir, "PROJECT.md"))
-      ? [join(rootDir, "PROJECT.md")]
-      : []),
+    ...["README.md", "CONTRIBUTING.md"]
+      .map((fileName) => join(rootDir, fileName))
+      .filter((filePath) => existsSync(filePath)),
     ...walkFiles(join(rootDir, "docs")),
   ]
     .filter((filePath) => filePath.endsWith(".md"))
