@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { Tutor } from "@workspace/api-client-react";
 import { TutorEnquiry } from "./TutorProfile";
 
-const unavailableTutor: Tutor = {
+const fullTutor: Tutor = {
   id: 2,
   slug: "maya-shah",
   name: "Maya Shah",
@@ -21,13 +21,13 @@ const unavailableTutor: Tutor = {
   teachingIntro: "Clear explanations and practical guidance.",
   teachingPoints: [{ title: "Clarity", body: "Lessons are structured around the student's goals." }],
   rate: 45,
-  availability: "unavailable",
+  intake: "full",
   tint: "#123456",
   resources: [],
 };
 
-test("unavailable tutor profiles explain the enquiry restriction without rendering a form", () => {
-  const markup = renderToStaticMarkup(<TutorEnquiry tutor={unavailableTutor} />);
+test("full tutor profiles explain the enquiry restriction without rendering a form", () => {
+  const markup = renderToStaticMarkup(<TutorEnquiry tutor={fullTutor} />);
 
   assert.match(markup, /data-testid="tutor-enquiry-unavailable"/);
   assert.match(markup, /Maya Shah is not currently accepting enquiries/);

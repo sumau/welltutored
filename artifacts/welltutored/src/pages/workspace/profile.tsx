@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertCircle, Check, Loader2, ExternalLink } from "lucide-react";
-import { TutorProfileUpdateAvailability } from "@workspace/api-client-react";
+import { TutorProfileUpdateIntake } from "@workspace/api-client-react";
 import {
   normalizeTutorAccent,
   TUTOR_ACCENTS,
@@ -58,10 +58,10 @@ const profileSchema = z.object({
   teachingIntro: z.string().min(20, "Teaching introduction should be at least 20 characters").max(200, "Teaching approach must be 200 characters or fewer"),
   teachingPoints: z.array(teachingPointSchema).length(3),
   rate: z.coerce.number<number>().min(0, "Rate must be positive"),
-  availability: z.enum([
-    TutorProfileUpdateAvailability.accepting,
-    TutorProfileUpdateAvailability.limited,
-    TutorProfileUpdateAvailability.unavailable
+  intake: z.enum([
+    TutorProfileUpdateIntake.accepting,
+    TutorProfileUpdateIntake.limited,
+    TutorProfileUpdateIntake.full
   ]),
   tint: z.enum(TUTOR_ACCENT_VALUES),
 });
@@ -84,7 +84,7 @@ function profileFormValues(tutor: WorkspaceTutor): ProfileFormValues {
       ...Array.from({ length: 3 }, () => ({ title: "", body: "" })),
     ].slice(0, 3),
     rate: tutor.rate,
-    availability: tutor.availability as TutorProfileUpdateAvailability,
+    intake: tutor.intake as TutorProfileUpdateIntake,
     tint: normalizeTutorAccent(tutor.tint),
   };
 }
@@ -119,7 +119,7 @@ export default function WorkspaceProfile() {
           { title: "", body: "" },
         ],
       rate: 0,
-      availability: TutorProfileUpdateAvailability.accepting,
+      intake: TutorProfileUpdateIntake.accepting,
       tint: "#8EA8CE",
     }
   });
@@ -687,21 +687,21 @@ export default function WorkspaceProfile() {
 
               <FormField
                 control={form.control}
-                name="availability"
+                name="intake"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Status</FormLabel>
-                    <FormDescription className="text-xs">Controls the availability message shown on your public tutor profile.</FormDescription>
+                    <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Intake</FormLabel>
+                    <FormDescription className="text-xs">Whether you are taking new students. Families cannot send you an enquiry while you are full.</FormDescription>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="rounded-none border-border bg-transparent shadow-none h-10">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder="Select intake" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="rounded-none border-border shadow-md">
-                        <SelectItem value="accepting" className="rounded-none">Accepting enquiries</SelectItem>
-                        <SelectItem value="limited" className="rounded-none">Limited availability</SelectItem>
-                        <SelectItem value="unavailable" className="rounded-none">Not currently accepting enquiries</SelectItem>
+                        <SelectItem value="accepting" className="rounded-none">Taking new students</SelectItem>
+                        <SelectItem value="limited" className="rounded-none">Limited spaces</SelectItem>
+                        <SelectItem value="full" className="rounded-none">Not taking new students</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage className="text-xs" />

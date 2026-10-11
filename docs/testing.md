@@ -127,7 +127,7 @@ The suite checks:
 - Public and workspace route resolution, metadata, redirects, and Clerk
   callback routes.
 - Homepage loading, successful tutor rendering, and retry behavior.
-- Tutor profile behavior, including unavailable tutors.
+- Tutor profile behavior, including tutors whose intake is full.
 - Enquiry form validation, keyboard navigation, focus management, disabled
   submit behavior, announced errors, retry behavior, and successful receipts.
 - Public tutor-query caching, expiry, and mutation invalidation.

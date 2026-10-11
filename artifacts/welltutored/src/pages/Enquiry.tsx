@@ -30,7 +30,7 @@ export default function Enquiry() {
     );
   }
 
-  const contactableTutors = tutors?.filter((tutor) => tutor.availability !== "unavailable") ?? [];
+  const contactableTutors = tutors?.filter((tutor) => tutor.intake !== "full") ?? [];
 
   if (!contactableTutors.length) {
     return (

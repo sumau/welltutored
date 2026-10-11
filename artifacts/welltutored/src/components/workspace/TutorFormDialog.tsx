@@ -116,7 +116,7 @@ export function TutorFormDialog({
             <div className="border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
               This creates a private draft. Assign the profile to the tutor’s
                workspace account from the account management table so they can add
-              their biography, teaching approach, availability, and other
+              their biography, teaching approach, intake, and other
               public details.
             </div>
 

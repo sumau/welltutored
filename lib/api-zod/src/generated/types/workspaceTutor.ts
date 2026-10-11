@@ -7,7 +7,7 @@
  */
 import type { Resource } from './resource';
 import type { WorkspaceTeachingPoint } from './workspaceTeachingPoint';
-import type { WorkspaceTutorAvailability } from './workspaceTutorAvailability';
+import type { WorkspaceTutorIntake } from './workspaceTutorIntake';
 import type { WorkspaceTutorProfileStatus } from './workspaceTutorProfileStatus';
 
 export interface WorkspaceTutor {
@@ -28,7 +28,7 @@ export interface WorkspaceTutor {
   teachingPoints: WorkspaceTeachingPoint[];
   profileStatus: WorkspaceTutorProfileStatus;
   rate: number;
-  availability: WorkspaceTutorAvailability;
+  intake: WorkspaceTutorIntake;
   tint: string;
   resources: Resource[];
 }

@@ -12,10 +12,10 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const tutorAvailability = pgEnum("tutor_availability", [
+export const tutorIntake = pgEnum("tutor_intake", [
   "accepting",
   "limited",
-  "unavailable",
+  "full",
 ]);
 
 export const tutorProfileStatus = pgEnum("tutor_profile_status", [
@@ -51,7 +51,7 @@ export const tutorsTable = pgTable("tutors", {
     .notNull()
     .default([]),
   rate: numeric("rate", { precision: 8, scale: 2 }).notNull(),
-  availability: tutorAvailability("availability").notNull().default("accepting"),
+  intake: tutorIntake("intake").notNull().default("accepting"),
   tint: text("tint").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

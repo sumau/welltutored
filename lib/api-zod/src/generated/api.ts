@@ -48,7 +48,7 @@ export const ListTutorsResponseItem = zod.object({
   "body": zod.string().min(listTutorsResponseTeachingPointsItemBodyMin)
 })).min(1),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -107,7 +107,7 @@ export const GetTutorResponse = zod.object({
   "body": zod.string().min(getTutorResponseTeachingPointsItemBodyMin)
 })).min(1),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -377,7 +377,7 @@ export const GetWorkspaceSessionResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -566,7 +566,7 @@ export const UpdateWorkspaceProfileBody = zod.object({
   "body": zod.string()
 })).max(updateWorkspaceProfileBodyTeachingPointsMax).optional(),
   "rate": zod.number().min(updateWorkspaceProfileBodyRateMin).optional(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']).optional(),
+  "intake": zod.enum(['accepting', 'limited', 'full']).optional(),
   "tint": zod.enum(['#D98F7F', '#D8B267', '#B5A1CC', '#83B7B0', '#9DBB83', '#8EA8CE', '#C98B9B', '#A88DBD', '#7FA6A0', '#8B9FC2', '#D08C76', '#C2A06E', '#B48C9E', '#8C8FB5', '#73A9A1', '#8FAE7E', '#A997C7', '#7899B5', '#C18A9A', '#9C9A72']).optional(),
   "status": zod.enum(['draft', 'published']).optional()
 })
@@ -595,7 +595,7 @@ export const UpdateWorkspaceProfileResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -642,7 +642,7 @@ export const DiscardWorkspaceProfileDraftResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -689,7 +689,7 @@ export const ListWorkspaceTutorsResponseItem = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -745,7 +745,7 @@ export const CreateWorkspaceTutorResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -799,7 +799,7 @@ export const ArchiveWorkspaceTutorResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),
@@ -853,7 +853,7 @@ export const RestoreWorkspaceTutorResponse = zod.object({
 })),
   "profileStatus": zod.enum(['draft', 'published', 'archived']),
   "rate": zod.number(),
-  "availability": zod.enum(['accepting', 'limited', 'unavailable']),
+  "intake": zod.enum(['accepting', 'limited', 'full']),
   "tint": zod.string(),
   "resources": zod.array(zod.object({
   "id": zod.int(),

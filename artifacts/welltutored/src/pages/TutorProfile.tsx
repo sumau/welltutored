@@ -12,14 +12,14 @@ import {
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
-const availabilityDescriptions = {
-  accepting: "Accepting enquiries",
-  limited: "Limited availability",
-  unavailable: "Not currently accepting enquiries",
+const intakeDescriptions = {
+  accepting: "Taking new students",
+  limited: "Limited spaces",
+  full: "Not taking new students",
 } as const;
 
 export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
-  return tutor.availability === "unavailable" ? (
+  return tutor.intake === "full" ? (
     <div className="bg-card p-8 text-sm text-muted-foreground leading-[1.6]" data-testid="tutor-enquiry-unavailable">
       {tutor.name} is not currently accepting enquiries. Please check back later or choose another tutor.
     </div>
@@ -78,8 +78,8 @@ export default function TutorProfile() {
         <aside className="relative p-[30px] min-h-[295px] flex flex-col justify-between" style={{ backgroundColor: tutor.tint }}>
           <div>
             <div className="inline-flex items-center gap-[7px] rounded-full bg-card text-foreground px-3 py-2 text-[10px] font-bold border border-border shadow-sm">
-              <i className={`w-2 h-2 rounded-full ${tutor.availability === 'accepting' ? 'bg-green-600' : tutor.availability === 'limited' ? 'bg-amber-500' : 'bg-red-500'}`} />
-              {availabilityDescriptions[tutor.availability]}
+              <i className={`w-2 h-2 rounded-full ${tutor.intake === 'accepting' ? 'bg-green-600' : tutor.intake === 'limited' ? 'bg-amber-500' : 'bg-red-500'}`} />
+              {intakeDescriptions[tutor.intake]}
             </div>
           </div>
           <div>

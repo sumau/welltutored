@@ -23,7 +23,7 @@ const tutor: Tutor = {
   teachingIntro: "Clear explanations and practical guidance.",
   teachingPoints: [{ title: "Clarity", body: "Lessons are structured around the student's goals." }],
   rate: 45,
-  availability: "accepting",
+  intake: "accepting",
   tint: "#123456",
   resources: [],
 };

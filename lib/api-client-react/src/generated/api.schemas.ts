@@ -9,13 +9,13 @@ export interface HealthStatus {
   status: string;
 }
 
-export type TutorAvailability = typeof TutorAvailability[keyof typeof TutorAvailability];
+export type TutorIntake = typeof TutorIntake[keyof typeof TutorIntake];
 
 
-export const TutorAvailability = {
+export const TutorIntake = {
   accepting: 'accepting',
   limited: 'limited',
-  unavailable: 'unavailable',
+  full: 'full',
 } as const;
 
 export interface TeachingPoint {
@@ -69,7 +69,7 @@ export interface Tutor {
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];
   rate: number;
-  availability: TutorAvailability;
+  intake: TutorIntake;
   tint: string;
   resources: Resource[];
 }
@@ -83,13 +83,13 @@ export const WorkspaceTutorProfileStatus = {
   archived: 'archived',
 } as const;
 
-export type WorkspaceTutorAvailability = typeof WorkspaceTutorAvailability[keyof typeof WorkspaceTutorAvailability];
+export type WorkspaceTutorIntake = typeof WorkspaceTutorIntake[keyof typeof WorkspaceTutorIntake];
 
 
-export const WorkspaceTutorAvailability = {
+export const WorkspaceTutorIntake = {
   accepting: 'accepting',
   limited: 'limited',
-  unavailable: 'unavailable',
+  full: 'full',
 } as const;
 
 export interface WorkspaceTeachingPoint {
@@ -115,7 +115,7 @@ export interface WorkspaceTutor {
   teachingPoints: WorkspaceTeachingPoint[];
   profileStatus: WorkspaceTutorProfileStatus;
   rate: number;
-  availability: WorkspaceTutorAvailability;
+  intake: WorkspaceTutorIntake;
   tint: string;
   resources: Resource[];
 }
@@ -283,13 +283,13 @@ export interface WorkspaceResourceUpdate {
   status?: WorkspaceResourceUpdateStatus;
 }
 
-export type TutorProfileUpdateAvailability = typeof TutorProfileUpdateAvailability[keyof typeof TutorProfileUpdateAvailability];
+export type TutorProfileUpdateIntake = typeof TutorProfileUpdateIntake[keyof typeof TutorProfileUpdateIntake];
 
 
-export const TutorProfileUpdateAvailability = {
+export const TutorProfileUpdateIntake = {
   accepting: 'accepting',
   limited: 'limited',
-  unavailable: 'unavailable',
+  full: 'full',
 } as const;
 
 export type TutorProfileUpdateTint = typeof TutorProfileUpdateTint[keyof typeof TutorProfileUpdateTint];
@@ -345,7 +345,7 @@ export interface TutorProfileUpdate {
   teachingPoints?: WorkspaceTeachingPoint[];
   /** @minimum 0 */
   rate?: number;
-  availability?: TutorProfileUpdateAvailability;
+  intake?: TutorProfileUpdateIntake;
   tint?: TutorProfileUpdateTint;
   status?: TutorProfileUpdateStatus;
 }

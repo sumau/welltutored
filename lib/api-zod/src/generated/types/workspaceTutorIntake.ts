@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type TutorAvailability = typeof TutorAvailability[keyof typeof TutorAvailability];
+export type WorkspaceTutorIntake = typeof WorkspaceTutorIntake[keyof typeof WorkspaceTutorIntake];
 
 
-export const TutorAvailability = {
+export const WorkspaceTutorIntake = {
   accepting: 'accepting',
   limited: 'limited',
-  unavailable: 'unavailable',
+  full: 'full',
 } as const;
