@@ -576,21 +576,6 @@ export default function WorkspaceProfile() {
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="subject"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Subject Expertise</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g. A-level Mathematics & Physics" className="rounded-none border-border bg-transparent shadow-none h-10" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
               </div>
 
               <div className="space-y-6">
@@ -621,58 +606,25 @@ export default function WorkspaceProfile() {
                     </FormItem>
                   )}
                 />
-                
-                <FormField
-                  control={form.control}
-                  name="tint"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                        Profile Accent Color
-                      </FormLabel>
-                      <FormDescription className="text-xs">
-                        Choose an available accent for your public profile. Each accent can belong to one tutor only.
-                      </FormDescription>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger aria-label="Profile accent color" className="rounded-none border-border bg-transparent shadow-none">
-                            <SelectValue placeholder="Choose an accent" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {TUTOR_ACCENTS.map((accent) => {
-                            const isAvailable =
-                              session?.availableTutorAccents?.includes(accent.value) ?? false;
-                            const isCurrent = field.value === accent.value;
-                            return (
-                              <SelectItem
-                                key={accent.value}
-                                value={accent.value}
-                                disabled={!isAvailable && !isCurrent}
-                              >
-                                <span className="flex items-center gap-2">
-                                  <span
-                                    className="h-4 w-4 shrink-0 border border-foreground/10"
-                                    style={{ backgroundColor: accent.value }}
-                                  />
-                                  <span>{accent.label}</span>
-                                  {!isAvailable && !isCurrent && (
-                                    <span className="text-muted-foreground">(in use)</span>
-                                  )}
-                                </span>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <FormField
+                control={form.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Subject Expertise</FormLabel>
+                  <FormDescription className="text-xs">The subjects and levels you teach.</FormDescription>
+                    <FormControl>
+                      <Input {...field} placeholder="e.g. A-level Mathematics & Physics" className="rounded-none border-border bg-transparent shadow-none h-10" />
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="support"
@@ -683,6 +635,54 @@ export default function WorkspaceProfile() {
                     <FormControl>
                       <Input {...field} placeholder="e.g. Exam confidence & revision" className="rounded-none border-border bg-transparent shadow-none h-10" />
                     </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tint"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                      Profile Accent Color
+                    </FormLabel>
+                    <FormDescription className="text-xs">
+                      Choose an available accent for your public profile. Each accent can belong to one tutor only.
+                    </FormDescription>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger aria-label="Profile accent color" className="rounded-none border-border bg-transparent shadow-none">
+                          <SelectValue placeholder="Choose an accent" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TUTOR_ACCENTS.map((accent) => {
+                          const isAvailable =
+                            session?.availableTutorAccents?.includes(accent.value) ?? false;
+                          const isCurrent = field.value === accent.value;
+                          return (
+                            <SelectItem
+                              key={accent.value}
+                              value={accent.value}
+                              disabled={!isAvailable && !isCurrent}
+                            >
+                              <span className="flex items-center gap-2">
+                                <span
+                                  className="h-4 w-4 shrink-0 border border-foreground/10"
+                                  style={{ backgroundColor: accent.value }}
+                                />
+                                <span>{accent.label}</span>
+                                {!isAvailable && !isCurrent && (
+                                  <span className="text-muted-foreground">(in use)</span>
+                                )}
+                              </span>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}
