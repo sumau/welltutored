@@ -200,6 +200,32 @@ below `create`. Between the `ALTER TYPE` and the merge, the live code still
 writes the old label, so saving a profile as `unavailable` fails until the
 deploy lands. Push and merge back to back.
 
+**If a push has already stopped partway**, do not run it again as it is. A
+rerun generates statements from whatever state was left, and it fails at the
+same row. When #56 was merged without the `ALTER TYPE` above, the first push
+renamed the type and the columns, then left `intake` as plain `text` with two
+rows still holding `unavailable`. The live site kept working, since a `text`
+column holds the same values.
+
+To recover, fix the rows by hand first. A `text` column takes the new label
+directly, and the `::text` comparison works whatever the column's type is:
+
+```
+docker compose run --rm -T -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
+  -lc 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -1' <<'SQL'
+update tutors set intake = 'full' where intake::text = 'unavailable';
+update tutor_profile_drafts set intake = 'full' where intake::text = 'unavailable';
+SQL
+```
+
+Then `push` again. The names already match, so it asks nothing; it casts the
+column back with `SET DATA TYPE ... USING intake::tutor_intake`, restores the
+default, and applies anything else pending. Push a second time to confirm it
+reports `No changes detected`. Before touching the Deployment, rebuild the
+half-applied state in a local scratch database (`create database ... template
+welltutored`, then undo the parts that did not land) and rehearse both steps
+there.
+
 Renaming a constraint additionally asks whether to truncate the table before
 adding the new one — answer no; the default is already no.
 
