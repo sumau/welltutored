@@ -44,6 +44,9 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   ([docs/ci-validation.md](docs/ci-validation.md)).
 - For a UI or build change, click through the running app as well
   (`docker compose up api web`).
+- For a change to routing, public API responses, deployment configuration or
+  the enquiry journey, also run the development smoke against the local stack
+  ([docs/testing.md](docs/testing.md)).
 - **The lockfile must stay stable.** CI and the deployment build both install
   with `--frozen-lockfile`. `package.json` pins `packageManager`, and
   `docker/Dockerfile.dev` pins the matching pnpm; change them together or the

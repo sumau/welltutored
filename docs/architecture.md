@@ -37,6 +37,9 @@ its themes, and the workspace routes. Keep public route modules, shared
 providers, and route metadata free of Clerk imports, or Clerk lands in the
 public bundle.
 
+Browser API requests use Clerk's same-origin session cookies; bearer-token
+wiring is reserved for mobile clients.
+
 ## Workspace
 
 Workspace routes are protected by Clerk and the workspace account boundary:
@@ -86,8 +89,10 @@ Workspace code is split by responsibility:
 
 The intended direction for future workspace changes is to keep route handlers
 thin: authenticate, validate the request, call a domain/service function, and
-present the response. Generated API clients and schemas remain generated
-artifacts and should not be edited manually.
+present the response. `lib/api-spec/openapi.yaml` generates both the React
+Query hooks and the Zod schemas, which keeps client and server contracts
+aligned. Generated API clients and schemas remain generated artifacts and
+should not be edited manually.
 
 ## Publishing rules
 

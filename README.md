@@ -92,12 +92,8 @@ images override them.
   public site; a placeholder serves it, and a real key enables workspace
   sign-in. The Deployment runs on a Clerk production instance at
   `clerk.welltutored.co.uk`, with no Frontend API proxy.
-- Integration tests require a separate `TEST_DATABASE_URL`. The integration
-  test script sets `NODE_ENV=test`, so the database package uses
-  `TEST_DATABASE_URL` only for that process and rejects a test URL identical to
-  `DATABASE_URL`. `pnpm run verify:ci` provisions a temporary local PostgreSQL
-  connection when no dedicated URL is supplied, or uses the supplied dedicated
-  URL, then applies the current schema before running the API suite.
+- Integration tests need a separate `TEST_DATABASE_URL`, never the same as
+  `DATABASE_URL` — see [docs/testing.md](docs/testing.md).
 
 ## Deploying
 
@@ -114,17 +110,14 @@ The Deployment is served at `https://welltutored.co.uk`, its Public Origin.
 `welltutored.fly.dev` all redirect there, because `PUBLIC_ORIGIN` in `fly.toml`
 says so.
 
-The trap worth knowing: `TRUSTED_ORIGINS` must name the public origin exactly.
-Nothing infers it, and an empty trusted-origin set rejects every credentialed
-request, the public enquiry included.
+The trap worth knowing: `TRUSTED_ORIGINS` must name the public origin exactly,
+or every credentialed request fails, the public enquiry included
+([docs/deploy.md](docs/deploy.md#configuration-reference)).
 
-## Architecture decisions
+## Architecture
 
-- The frontend and the API are served from one origin, by one container — [ADR-0001](docs/adr/0001-single-origin-deployment.md).
-- The public site remains accessible without an account; Clerk gates only the private workspace.
-- `clerkMiddleware` is mounted under `/api` rather than globally: Clerk answers
-  `text/html` requests with a handshake redirect, which would otherwise
-  intercept every page load, since the API also serves the frontend build.
-- Browser API requests use Clerk's same-origin session cookies; bearer-token wiring is reserved for mobile clients.
-- Public tutor/resource content is served through the API and seeded for a useful first preview.
-- OpenAPI generates both React Query hooks and Zod schemas to keep client/server contracts aligned.
+One container serves the frontend and the API from one origin
+([ADR-0001](docs/adr/0001-single-origin-deployment.md)). The public site needs
+no account; Clerk gates only the private workspace. The routes, API boundaries
+and publishing rules are in [docs/architecture.md](docs/architecture.md), and
+every decision a reader will question has an ADR in [docs/adr/](docs/adr/).

@@ -240,7 +240,6 @@ pnpm run build
 Run the launch or enquiry smoke checks when the change affects routing, public
 API responses, deployment configuration, or the enquiry journey.
 
-Before merging, use `pnpm run verify:ci` for the complete check. It requires
-and prepares the dedicated test database before running the database-backed API
-lifecycle tests. That is the same gate CI runs, and on `main` it is what a
-deploy waits for.
+`pnpm run verify:ci` is the complete check, the same gate CI runs. What has to
+pass before a pull request is in
+[CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).
