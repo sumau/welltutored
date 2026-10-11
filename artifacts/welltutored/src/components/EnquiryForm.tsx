@@ -160,7 +160,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
 
   return (
     <div className={`${compact ? 'bg-card p-8' : ''}`} id="enquire" data-testid="enquiry-form-container">
-      {tutor?.availability === "unavailable" ? (
+      {tutor?.intake === "full" ? (
         <div className="border border-border bg-background p-6 text-sm text-muted-foreground leading-[1.6]" data-testid="enquiry-unavailable">
           {tutor.name} is not currently accepting enquiries. Please choose another tutor or check back later.
         </div>

@@ -99,7 +99,7 @@ router.get("/tutors", async (_req, res): Promise<void> => {
     teachingIntro: truncateAtWordBoundary(tutor.teachingIntro, 200),
     teachingPoints: tutor.teachingPoints,
     rate: Number(tutor.rate),
-    availability: tutor.availability,
+    intake: tutor.intake,
     tint: normalizeTutorTint(tutor.tint),
     resources: resources
       .filter((row) => row.resource.tutorId === tutor.id)
@@ -141,7 +141,7 @@ router.get("/tutors/:slug", async (req, res): Promise<void> => {
       teachingIntro: truncateAtWordBoundary(tutor.teachingIntro, 200),
       teachingPoints: tutor.teachingPoints,
       rate: Number(tutor.rate),
-      availability: tutor.availability,
+      intake: tutor.intake,
        tint: normalizeTutorTint(tutor.tint),
       resources: resources
         .filter((row) => row.resource.tutorId === tutor.id)

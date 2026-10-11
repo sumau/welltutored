@@ -9,16 +9,16 @@ import {
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
-const availabilityLabels = {
-  accepting: "Available",
-  limited: "Limited",
-  unavailable: "Unavailable",
+const intakeLabels = {
+  accepting: "Taking students",
+  limited: "Few spaces",
+  full: "Full",
 } as const;
 
-const availabilityDotClasses = {
+const intakeDotClasses = {
   accepting: "bg-green-600",
   limited: "bg-amber-500",
-  unavailable: "bg-red-500",
+  full: "bg-red-500",
 } as const;
 
 export default function Home() {
@@ -97,10 +97,10 @@ export default function Home() {
                     <span
                       className="inline-flex shrink-0 items-center gap-[6px] rounded-full px-[9px] py-[6px] text-[9px] uppercase tracking-[0.1em] font-bold text-foreground/80"
                       style={{ backgroundColor: tutor.tint }}
-                      aria-label={`Availability: ${availabilityLabels[tutor.availability]}`}
+                      aria-label={`Intake: ${intakeLabels[tutor.intake]}`}
                     >
-                      <span className={`w-[7px] h-[7px] rounded-full ${availabilityDotClasses[tutor.availability]}`} aria-hidden="true" />
-                      {availabilityLabels[tutor.availability]}
+                      <span className={`w-[7px] h-[7px] rounded-full ${intakeDotClasses[tutor.intake]}`} aria-hidden="true" />
+                      {intakeLabels[tutor.intake]}
                     </span>
                   </div>
                   <p className="text-[12px] text-muted-foreground leading-[1.55] mt-0 mb-[20px] flex-1 line-clamp-3">

@@ -35,7 +35,7 @@ export async function findPublishedTutor(slug: string) {
 }
 
 export function canReceivePublicEnquiries(
-  tutor: Pick<typeof tutorsTable.$inferSelect, "availability">,
+  tutor: Pick<typeof tutorsTable.$inferSelect, "intake">,
 ) {
-  return tutor.availability !== "unavailable";
+  return tutor.intake !== "full";
 }

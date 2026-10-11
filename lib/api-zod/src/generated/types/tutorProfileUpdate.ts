@@ -5,7 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { TutorProfileUpdateAvailability } from './tutorProfileUpdateAvailability';
+import type { TutorProfileUpdateIntake } from './tutorProfileUpdateIntake';
 import type { TutorProfileUpdateStatus } from './tutorProfileUpdateStatus';
 import type { TutorProfileUpdateTint } from './tutorProfileUpdateTint';
 import type { WorkspaceTeachingPoint } from './workspaceTeachingPoint';
@@ -29,7 +29,7 @@ export interface TutorProfileUpdate {
   teachingPoints?: WorkspaceTeachingPoint[];
   /** @minimum 0 */
   rate?: number;
-  availability?: TutorProfileUpdateAvailability;
+  intake?: TutorProfileUpdateIntake;
   tint?: TutorProfileUpdateTint;
   status?: TutorProfileUpdateStatus;
 }

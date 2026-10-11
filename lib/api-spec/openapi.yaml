@@ -596,7 +596,7 @@ components:
         - status
     Tutor:
       type: object
-      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, rate, availability, tint, resources]
+      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, rate, intake, tint, resources]
       properties:
         id: { type: integer }
         slug: { type: string }
@@ -617,7 +617,7 @@ components:
           items:
             $ref: "#/components/schemas/TeachingPoint"
         rate: { type: number }
-        availability: { type: string, enum: [accepting, limited, unavailable] }
+        intake: { type: string, enum: [accepting, limited, full] }
         tint: { type: string }
         resources:
           type: array
@@ -625,7 +625,7 @@ components:
             $ref: "#/components/schemas/Resource"
     WorkspaceTutor:
       type: object
-      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, profileStatus, rate, availability, tint, resources]
+      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, profileStatus, rate, intake, tint, resources]
       properties:
         id: { type: integer }
         slug: { type: string }
@@ -646,7 +646,7 @@ components:
             $ref: "#/components/schemas/WorkspaceTeachingPoint"
         profileStatus: { type: string, enum: [draft, published, archived] }
         rate: { type: number }
-        availability: { type: string, enum: [accepting, limited, unavailable] }
+        intake: { type: string, enum: [accepting, limited, full] }
         tint: { type: string }
         resources:
           type: array
@@ -811,7 +811,7 @@ components:
           items:
             $ref: "#/components/schemas/WorkspaceTeachingPoint"
         rate: { type: number, minimum: 0 }
-        availability: { type: string, enum: [accepting, limited, unavailable] }
+        intake: { type: string, enum: [accepting, limited, full] }
         tint:
           type: string
           enum: ["#D98F7F", "#D8B267", "#B5A1CC", "#83B7B0", "#9DBB83", "#8EA8CE", "#C98B9B", "#A88DBD", "#7FA6A0", "#8B9FC2", "#D08C76", "#C2A06E", "#B48C9E", "#8C8FB5", "#73A9A1", "#8FAE7E", "#A997C7", "#7899B5", "#C18A9A", "#9C9A72"]

@@ -7,7 +7,7 @@
  */
 import type { Resource } from './resource';
 import type { TeachingPoint } from './teachingPoint';
-import type { TutorAvailability } from './tutorAvailability';
+import type { TutorIntake } from './tutorIntake';
 
 export interface Tutor {
   id: number;
@@ -27,7 +27,7 @@ export interface Tutor {
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];
   rate: number;
-  availability: TutorAvailability;
+  intake: TutorIntake;
   tint: string;
   resources: Resource[];
 }

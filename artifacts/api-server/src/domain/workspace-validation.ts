@@ -37,7 +37,7 @@ export function isPublishableProfile(profile: {
   teachingIntro: string;
   teachingPoints: Array<{ title: string; body: string }>;
   rate: number;
-  availability: string;
+  intake: string;
   tint: string;
 }) {
   return (
@@ -59,7 +59,7 @@ export function isPublishableProfile(profile: {
         point.body.trim().length >= 10,
     ) &&
     profile.rate >= 0 &&
-    ["accepting", "limited", "unavailable"].includes(profile.availability) &&
+    ["accepting", "limited", "full"].includes(profile.intake) &&
     APPROVED_TUTOR_ACCENTS.includes(
       profile.tint as (typeof APPROVED_TUTOR_ACCENTS)[number],
     )

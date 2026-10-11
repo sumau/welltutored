@@ -147,11 +147,58 @@ type — which, for a pure rename where the label set is unchanged, lands on the
 same state. Verified against a populated table: rows survive intact, and a
 second `push` reports no changes.
 
-The default is only dangerous when the rename also **changes the labels**. Then
-the cast through `text` fails on any row holding a label the new type lacks, and
-you get a partly applied push instead of a clean one. Pick the rename line
-anyway — it is the honest description of the change, and it does not depend on
-the labels happening to match.
+Pick the rename line anyway — it is the honest description of the change.
+
+**Neither answer copes with a changed label.** `push` has no way to rename an
+enum value: whichever line you pick, a label set that differs from the
+database's makes it cast the column to `text`, drop the type, create it with
+the new labels and cast back. Any row still holding a label the new type lacks
+fails the cast back, and `push` stops there, partway through and outside a
+transaction, leaving the column as plain `text`. Renaming the Intake value
+`unavailable` to `full` (issue #55) did exactly that in rehearsal:
+
+```
+ALTER TABLE "tutors" ALTER COLUMN "intake" SET DATA TYPE text;
+...
+DROP TYPE "public"."tutor_intake";
+CREATE TYPE "public"."tutor_intake" AS ENUM('accepting', 'limited', 'full');
+...
+error: invalid input value for enum tutor_intake: "unavailable"
+```
+
+So rename the label yourself first, in place, which rewrites every row holding
+it at once:
+
+```
+docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
+  -lc "psql \"\$DATABASE_URL\" -c \"ALTER TYPE tutor_availability RENAME VALUE 'unavailable' TO 'full'\""
+```
+
+The labels then match, and `push` asks only about names. For #55, answer
+`rename` to all three prompts:
+
+```
+Is tutor_intake enum created or renamed from another enum?
+  ~ tutor_availability › tutor_intake rename enum
+Is intake column in tutors table created or renamed from another column?
+  ~ availability › intake rename column
+Is intake column in tutor_profile_drafts table created or renamed from another column?
+  ~ availability › intake rename column
+```
+
+and it emits renames and nothing else:
+
+```
+ALTER TYPE "public"."tutor_availability" RENAME TO "tutor_intake";
+ALTER TABLE "tutors" RENAME COLUMN "availability" TO "intake";
+ALTER TABLE "tutor_profile_drafts" RENAME COLUMN "availability" TO "intake";
+```
+
+The column prompts list every column of that table the schema no longer has,
+so read the names, not the position: `rename` is not always the line directly
+below `create`. Between the `ALTER TYPE` and the merge, the live code still
+writes the old label, so saving a profile as `unavailable` fails until the
+deploy lands. Push and merge back to back.
 
 Renaming a constraint additionally asks whether to truncate the table before
 adding the new one — answer no; the default is already no.

@@ -38,7 +38,7 @@ const validProfile = {
     { title: "Edit kindly", body: "Use specific feedback to make one useful improvement at a time." },
   ],
   rate: 45,
-  availability: "accepting",
+  intake: "accepting",
   tint: "#D98F7F",
 };
 

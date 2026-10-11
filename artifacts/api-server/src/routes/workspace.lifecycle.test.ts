@@ -118,7 +118,7 @@ const tutorInput = {
   qualification: "First-class BA (Hons), History",
   bio: "A patient history tutor who turns difficult source work into clear, manageable steps.",
   rate: 42,
-  availability: "accepting",
+  intake: "accepting",
   tint: testTint,
 };
 
@@ -210,7 +210,7 @@ before(async () => {
       { title: "Progress", body: "We adapt lessons to each student's goals." },
     ],
     rate: "40",
-    availability: "accepting",
+    intake: "accepting",
     tint: baselineTutorTint,
   });
 
@@ -523,7 +523,7 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
           { title: "Progress", body: "We review progress and adapt each lesson." },
         ],
         rate: 45,
-        availability: "accepting",
+        intake: "accepting",
         tint: pendingSession.body.tutor.tint,
         status: "published",
       }),

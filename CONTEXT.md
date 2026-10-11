@@ -33,9 +33,16 @@ a visitor does, and the only way an unauthenticated person writes to the
 system.
 _Avoid_: Contact, lead, message, request
 
+**Intake**:
+Whether a Tutor is taking new students: `accepting`, `limited` or `full`. A
+`full` Tutor cannot receive Enquiries. Distinct from whether their profile is
+published.
+_Avoid_: Availability, status
+
 **Availability**:
-Whether a Tutor is `accepting`, `limited` or `unavailable` for new students.
-Distinct from whether their profile is published.
+When a Tutor teaches — the days and times they offer sessions, in the Tutor's
+own words. Not whether they are taking new students; that is Intake.
+_Avoid_: Schedule, hours
 
 ### The private area
 
