@@ -1,8 +1,11 @@
 # Well Tutored architecture
 
-This project keeps the existing React, Express, Drizzle, Clerk, and generated
-OpenAPI client stack. The application is organized around two user-facing
-surfaces and a shared API/data layer.
+A React frontend and an Express API share one origin, a Drizzle/PostgreSQL
+data layer, and a generated OpenAPI client. The application is organized
+around two user-facing surfaces: the public website and the private Workspace.
+
+Every route below is defined in `artifacts/welltutored/src/app/route-map.ts`,
+which is the source of truth if this list and the code disagree.
 
 ## Public website
 
@@ -22,7 +25,8 @@ Workspace.
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
 the public visual language. Public API handlers live in
 `artifacts/api-server/src/routes/content.ts` and
-`artifacts/api-server/src/routes/enquiries.ts`.
+`artifacts/api-server/src/routes/enquiries.ts`. `content.ts` also holds the
+saved-resources endpoints, which no page uses yet (#69).
 
 ## Authentication
 
@@ -55,6 +59,8 @@ Workspace routes are protected by Clerk and the workspace account boundary:
 `/workspace/articles/new` and `/workspace/articles/:id` remain compatibility
 aliases and redirect to the canonical resource URLs. Workspace accounts are
 stored in the `workspace_accounts` table.
+
+## Forms
 
 A form that must submit once guards itself with a synchronous ref as well as
 the mutation's pending state, as `submissionInFlight` does in `EnquiryForm`.
@@ -121,10 +127,11 @@ private draft alongside a live published version.
 ## Styling payload
 
 The Well Tutored Vite build enables Tailwind's production Lightning CSS
-optimization. The primary stylesheet is currently 115,031 bytes raw and
-19,737 bytes gzip, with a budget of 115,200 raw and 19,800 gzip; run
+optimization. `artifacts/welltutored/scripts/verify-css-build.mjs` holds a size
+budget for the primary stylesheet; run
 `pnpm --filter @workspace/welltutored run build` followed by
-`pnpm --filter @workspace/welltutored run verify:css` to verify the budget.
+`pnpm --filter @workspace/welltutored run verify:css` to check it, and the
+script prints the current size.
 
 The remaining global CSS is intentional: Tailwind preflight, theme variables,
 utilities used by both public and authenticated routes, motion states, and
