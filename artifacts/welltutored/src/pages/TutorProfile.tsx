@@ -39,6 +39,29 @@ export function TutorAvailability({ tutor }: { tutor: Tutor }) {
   );
 }
 
+export function TutorBackground({ tutor }: { tutor: Tutor }) {
+  const columns = [
+    { label: "Experience", text: tutor.experience, testId: "tutor-experience" },
+    { label: "Education", text: tutor.education, testId: "tutor-education" },
+  ].filter((column) => column.text);
+  if (columns.length === 0) return null;
+
+  return (
+    <section className="px-6 md:px-[30px] max-w-[1210px] mx-auto mb-[80px]" id="background">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-[40px] md:gap-[86px] border-t border-border pt-[40px]">
+        {columns.map((column) => (
+          <div key={column.label}>
+            <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary mb-4">{column.label}</span>
+            <div className="text-muted-foreground text-[13px] leading-[1.7] whitespace-pre-wrap" data-testid={column.testId}>
+              {column.text}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function TutorResources({ tutor }: { tutor: Tutor }) {
   if (!PUBLIC_RESOURCES_ENABLED || tutor.resources.length === 0) {
     return null;
@@ -206,6 +229,8 @@ export default function TutorProfile() {
           </div>
         </div>
       </section>
+
+      <TutorBackground tutor={tutor} />
 
       {/* Teaching Style */}
       <section className="bg-foreground text-background px-6 md:px-[30px] py-[60px] md:py-[88px]">

@@ -34,6 +34,8 @@ export function isPublishableProfile(profile: {
   university: string;
   qualification: string;
   bio: string;
+  experience: string;
+  education: string;
   teachingIntro: string;
   teachingPoints: Array<{ title: string; body: string }>;
   rate: number;
@@ -60,6 +62,8 @@ export function isPublishableProfile(profile: {
         point.body.trim().length >= 10,
     ) &&
     profile.rate >= 0 &&
+    profile.experience.trim().length <= 4000 &&
+    profile.education.trim().length <= 4000 &&
     profile.availability.trim().length <= 120 &&
     ["accepting", "limited", "full"].includes(profile.intake) &&
     APPROVED_TUTOR_ACCENTS.includes(

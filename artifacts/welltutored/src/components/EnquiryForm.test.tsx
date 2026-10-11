@@ -20,6 +20,8 @@ const tutor: Tutor = {
   university: "University of Oxford",
   qualification: "BA English",
   bio: "Alice helps students build confidence.",
+  experience: "",
+  education: "",
   teachingIntro: "Clear explanations and practical guidance.",
   teachingPoints: [{ title: "Clarity", body: "Lessons are structured around the student's goals." }],
   rate: 45,

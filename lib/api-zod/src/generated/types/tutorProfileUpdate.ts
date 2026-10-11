@@ -23,6 +23,10 @@ export interface TutorProfileUpdate {
   university?: string;
   qualification?: string;
   bio?: string;
+  /** @maxLength 4000 */
+  experience?: string;
+  /** @maxLength 4000 */
+  education?: string;
   /** @maxLength 200 */
   teachingIntro?: string;
   /** @maxItems 3 */

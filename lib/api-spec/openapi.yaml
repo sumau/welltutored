@@ -596,7 +596,7 @@ components:
         - status
     Tutor:
       type: object
-      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, rate, availability, intake, tint, resources]
+      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, experience, education, teachingIntro, teachingPoints, rate, availability, intake, tint, resources]
       properties:
         id: { type: integer }
         slug: { type: string }
@@ -610,6 +610,8 @@ components:
         university: { type: string }
         qualification: { type: string }
         bio: { type: string }
+        experience: { type: string, maxLength: 4000 }
+        education: { type: string, maxLength: 4000 }
         teachingIntro: { type: string }
         teachingPoints:
           type: array
@@ -626,7 +628,7 @@ components:
             $ref: "#/components/schemas/Resource"
     WorkspaceTutor:
       type: object
-      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, profileStatus, rate, availability, intake, tint, resources]
+      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, experience, education, teachingIntro, teachingPoints, profileStatus, rate, availability, intake, tint, resources]
       properties:
         id: { type: integer }
         slug: { type: string }
@@ -640,6 +642,8 @@ components:
         university: { type: string }
         qualification: { type: string }
         bio: { type: string }
+        experience: { type: string, maxLength: 4000 }
+        education: { type: string, maxLength: 4000 }
         teachingIntro: { type: string }
         teachingPoints:
           type: array
@@ -806,6 +810,8 @@ components:
         university: { type: string }
         qualification: { type: string }
         bio: { type: string }
+        experience: { type: string, maxLength: 4000 }
+        education: { type: string, maxLength: 4000 }
         teachingIntro: { type: string, maxLength: 200 }
         teachingPoints:
           type: array

@@ -23,6 +23,10 @@ export interface Tutor {
   university: string;
   qualification: string;
   bio: string;
+  /** @maxLength 4000 */
+  experience: string;
+  /** @maxLength 4000 */
+  education: string;
   teachingIntro: string;
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];

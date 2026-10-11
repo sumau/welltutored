@@ -55,6 +55,8 @@ const profileSchema = z.object({
   university: z.string().min(2, "University is required"),
   qualification: z.string().min(2, "Qualification is required"),
   bio: z.string().min(20, "Bio should be at least 20 characters"),
+  experience: z.string().max(4000, "Experience must be 4,000 characters or fewer"),
+  education: z.string().max(4000, "Education must be 4,000 characters or fewer"),
   teachingIntro: z.string().min(20, "Teaching introduction should be at least 20 characters").max(200, "Teaching approach must be 200 characters or fewer"),
   teachingPoints: z.array(teachingPointSchema).length(3),
   rate: z.coerce.number<number>().min(0, "Rate must be positive"),
@@ -68,6 +70,21 @@ const profileSchema = z.object({
 });
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+const cvFields = [
+  {
+    name: "experience",
+    label: "Experience",
+    description: "Optional. Jobs, volunteering, tutoring and career breaks. Leave blank to hide it.",
+    placeholder: "e.g. Sep 2018 – Mar 2024 | Scientific Investigator, GSK",
+  },
+  {
+    name: "education",
+    label: "Education",
+    description: "Optional. Your full educational history. Leave blank to hide it.",
+    placeholder: "e.g. Oct 2010 – Jan 2015 | PhD Immunology, Imperial College London",
+  },
+] as const;
+
 function profileFormValues(tutor: WorkspaceTutor): ProfileFormValues {
   return {
     firstName: tutor.firstName,
@@ -79,6 +96,8 @@ function profileFormValues(tutor: WorkspaceTutor): ProfileFormValues {
     university: tutor.university,
     qualification: tutor.qualification,
     bio: tutor.bio,
+    experience: tutor.experience,
+    education: tutor.education,
     teachingIntro: tutor.teachingIntro,
     teachingPoints: [
       ...tutor.teachingPoints,
@@ -114,6 +133,8 @@ export default function WorkspaceProfile() {
       university: "",
       qualification: "",
       bio: "",
+      experience: "",
+      education: "",
         teachingIntro: "",
         teachingPoints: [
           { title: "", body: "" },
@@ -812,7 +833,7 @@ export default function WorkspaceProfile() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Biography</FormLabel>
-                    <FormDescription className="text-xs">Your full background, experience, and academic journey.</FormDescription>
+                    <FormDescription className="text-xs">A short introduction in your own words. If you'd like to list your working history or education, there are optional Experience and Education fields below.</FormDescription>
                     <FormControl>
                       <Textarea {...field} className="min-h-[150px] rounded-none border-border bg-transparent shadow-none resize-y" />
                     </FormControl>
@@ -820,6 +841,27 @@ export default function WorkspaceProfile() {
                   </FormItem>
                 )}
               />
+
+              {cvFields.map(({ name, label, description, placeholder }) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name}
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between gap-4">
+                        <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{label}</FormLabel>
+                        <span className="text-xs text-muted-foreground">{field.value.length}/4000</span>
+                      </div>
+                      <FormDescription className="text-xs">{description}</FormDescription>
+                      <FormControl>
+                        <Textarea {...field} maxLength={4000} placeholder={placeholder} className="min-h-[150px] rounded-none border-border bg-transparent shadow-none resize-y" />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+              ))}
             </div>
 
           </form>

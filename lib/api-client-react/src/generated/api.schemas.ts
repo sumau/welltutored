@@ -65,6 +65,10 @@ export interface Tutor {
   university: string;
   qualification: string;
   bio: string;
+  /** @maxLength 4000 */
+  experience: string;
+  /** @maxLength 4000 */
+  education: string;
   teachingIntro: string;
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];
@@ -113,6 +117,10 @@ export interface WorkspaceTutor {
   university: string;
   qualification: string;
   bio: string;
+  /** @maxLength 4000 */
+  experience: string;
+  /** @maxLength 4000 */
+  education: string;
   teachingIntro: string;
   teachingPoints: WorkspaceTeachingPoint[];
   profileStatus: WorkspaceTutorProfileStatus;
@@ -343,6 +351,10 @@ export interface TutorProfileUpdate {
   university?: string;
   qualification?: string;
   bio?: string;
+  /** @maxLength 4000 */
+  experience?: string;
+  /** @maxLength 4000 */
+  education?: string;
   /** @maxLength 200 */
   teachingIntro?: string;
   /** @maxItems 3 */
