@@ -12,7 +12,6 @@ const ignoredDirectories = new Set([
   ".cache",
   ".git",
   ".local",
-  "attached_assets",
   "dist",
   "node_modules",
 ]);

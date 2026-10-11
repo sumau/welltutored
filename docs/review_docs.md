@@ -27,7 +27,6 @@ repository root.
 - `node_modules/**`
 - `dist/**`
 - Generated output
-- `attached_assets/**`
 - Any repository other than this one
 
 ## Rules
