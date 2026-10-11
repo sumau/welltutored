@@ -55,7 +55,6 @@ const profileSchema = z.object({
   university: z.string().min(2, "University is required"),
   qualification: z.string().min(2, "Qualification is required"),
   bio: z.string().min(20, "Bio should be at least 20 characters"),
-  style: z.string().min(2, "Teaching style is required"),
   teachingIntro: z.string().min(20, "Teaching introduction should be at least 20 characters").max(200, "Teaching approach must be 200 characters or fewer"),
   teachingPoints: z.array(teachingPointSchema).length(3),
   rate: z.coerce.number<number>().min(0, "Rate must be positive"),
@@ -79,7 +78,6 @@ function profileFormValues(tutor: WorkspaceTutor): ProfileFormValues {
     university: tutor.university,
     qualification: tutor.qualification,
     bio: tutor.bio,
-    style: tutor.style,
     teachingIntro: tutor.teachingIntro,
     teachingPoints: [
       ...tutor.teachingPoints,
@@ -114,7 +112,6 @@ export default function WorkspaceProfile() {
       university: "",
       qualification: "",
       bio: "",
-      style: "",
         teachingIntro: "",
         teachingPoints: [
           { title: "", body: "" },
@@ -244,7 +241,6 @@ export default function WorkspaceProfile() {
         university: "a university",
         qualification: "a qualification",
         bio: "a biography of at least 20 characters",
-        style: "a teaching style",
         teachingIntro: "a teaching approach of at least 20 characters",
         teachingPoints: "three complete teaching principles",
         rate: "a valid hourly rate",
@@ -733,20 +729,6 @@ export default function WorkspaceProfile() {
             />
 
             <div className="space-y-6 pt-4 border-t border-border">
-              <FormField
-                control={form.control}
-                name="style"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Teaching Style</FormLabel>
-                    <FormDescription className="text-xs">A short sentence describing your approach.</FormDescription>
-                    <FormControl>
-                      <Input {...field} placeholder="Patient, methodical, and focused on exam technique." className="rounded-none border-border bg-transparent shadow-none h-10" />
-                    </FormControl>
-                    <FormMessage className="text-xs" />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="teachingIntro"

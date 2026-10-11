@@ -42,7 +42,6 @@ export function applyTutorDraft(
     university: draft.university,
     qualification: draft.qualification,
     bio: draft.bio,
-    style: draft.style,
     teachingIntro: draft.teachingIntro,
     teachingPoints: draft.teachingPoints,
     rate: draft.rate,

@@ -108,7 +108,6 @@ export default function Home() {
                   </p>
                   <div className="border-t border-border pt-[13px] text-[11px] text-muted-foreground flex justify-between gap-[12px] mt-auto">
                     <span><b className="text-foreground font-semibold">{tutor.university}</b><br />{tutor.qualification}</span>
-                    <span className="text-right max-w-[100px]">{tutor.style}</span>
                   </div>
                 </Link>
               ))}

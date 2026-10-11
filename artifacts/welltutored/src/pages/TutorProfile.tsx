@@ -117,10 +117,6 @@ export default function TutorProfile() {
                 <b className="font-bold text-foreground">Session rate</b>
                 <span className="text-muted-foreground">Illustrative rate · £{tutor.rate} per 60-minute session</span>
               </div>
-              <div className="grid grid-cols-[125px_1fr] gap-[22px] py-[17px] border-b border-border text-[13px] leading-[1.55]">
-                <b className="font-bold text-foreground">Session feel</b>
-                <span className="text-muted-foreground">{tutor.style}</span>
-              </div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px] mt-[28px]">

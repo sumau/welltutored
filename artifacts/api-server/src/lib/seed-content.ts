@@ -18,7 +18,6 @@ const tutorSeeds = [
     university: "University of Cambridge",
     qualification: "First-class BA (Hons), English",
     bio: "A Cambridge-educated English tutor who helps students turn half-formed thoughts into arguments they can stand behind.",
-    style: "Warm, conversational, detail-led",
     profileSummary:
       "Maya helps GCSE and A-level English students turn half-formed ideas into clear, confident arguments they can make their own.",
     teachingIntro:
@@ -52,7 +51,6 @@ const tutorSeeds = [
     university: "University of Oxford",
     qualification: "MChem, Chemistry",
     bio: "An Oxford-educated tutor who makes difficult problems feel structured, patient and possible.",
-    style: "Methodical, calm, example-led",
     profileSummary:
       "Sophie helps GCSE and A-level students make sense of maths and chemistry by making difficult ideas feel manageable and connected.",
     teachingIntro:
@@ -86,7 +84,6 @@ const tutorSeeds = [
     university: "University of Edinburgh",
     qualification: "BSc (Hons), Neuroscience",
     bio: "An Edinburgh-educated tutor who helps students connect the detail of science with the bigger picture.",
-    style: "Encouraging, visual, curious",
     profileSummary:
       "Amina helps GCSE and A-level students connect complex biology and psychology ideas through clear explanations and memorable examples.",
     teachingIntro:
@@ -120,7 +117,6 @@ const tutorSeeds = [
     university: "London School of Economics",
     qualification: "BA (Hons), History",
     bio: "An LSE-educated tutor who helps students build confident arguments from careful reading and lively discussion.",
-    style: "Thoughtful, structured, discussion-led",
     profileSummary:
       "Clara helps GCSE and A-level students turn detailed reading into confident arguments, with structure that makes complex ideas feel manageable.",
     teachingIntro:
@@ -154,7 +150,6 @@ const tutorSeeds = [
     university: "University of Bristol",
     qualification: "BSc (Hons), Physics",
     bio: "A physics tutor who helps students make sense of challenging ideas through clear explanations and patient problem-solving.",
-    style: "Clear, patient, confidence-building",
     profileSummary:
       "Nora helps GCSE and A-level students make difficult physics and mathematics ideas feel clear, connected and manageable.",
     teachingIntro:
