@@ -4,6 +4,39 @@ A React frontend and an Express API share one origin, a Drizzle/PostgreSQL
 data layer, and a generated OpenAPI client. The application is organized
 around two user-facing surfaces: the public website and the private Workspace.
 
+```mermaid
+flowchart LR
+  visitor["Visitor"] --> public
+  tutor["Tutor or owner"] --> workspace
+
+  subgraph browser["Browser: React app"]
+    public["Public website<br/>(never loads Clerk)"]
+    workspace["Workspace<br/>(lazy-loaded with Clerk)"]
+  end
+
+  workspace -- "sign in" --> clerk["Clerk"]
+
+  subgraph container["Container, one origin"]
+    static["Frontend build<br/>(WEB_CLIENT_ROOT)"]
+    api["Express API under /api<br/>clerkMiddleware, Zod validation"]
+  end
+
+  browser -- "page loads" --> static
+  public -- "public reads, enquiries" --> api
+  workspace -- "session cookie" --> api
+  api -- "Drizzle" --> db[("PostgreSQL")]
+
+  spec["openapi.yaml"] -. "codegen" .-> hooks["React Query hooks"]
+  spec -. "codegen" .-> zod["Zod schemas"]
+  hooks -. "used by" .-> browser
+  zod -. "used by" .-> api
+```
+
+Solid arrows are runtime requests. Dotted arrows are code generated from
+`lib/api-spec/openapi.yaml`, which keeps the client and server agreeing on one
+contract. Serving everything from one origin is
+[ADR-0001](adr/0001-single-origin-deployment.md).
+
 Every route below is defined in `artifacts/welltutored/src/app/route-map.ts`,
 which is the source of truth if this list and the code disagree.
 
