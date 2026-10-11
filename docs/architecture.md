@@ -9,8 +9,10 @@ private Workspace.
 
 ```mermaid
 flowchart LR
-  visitor["Visitor"] --> public
-  tutor["Tutor or owner"] --> workspace
+  visitor(["👤 Visitor"]) --> public
+  tutor(["👤 Tutor or owner"]) --> workspace
+  classDef person fill:#fde68a,stroke:#b45309,stroke-width:2px,color:#1f2937
+  class visitor,tutor person
 
   subgraph browser["Browser: React app"]
     public["Public website<br/>(never loads Clerk)"]
