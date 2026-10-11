@@ -19,25 +19,32 @@ flowchart LR
     workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
   end
 
-  workspace -- "sign in" --> clerk["Clerk"]
+  workspace -- "sign in" --> clerk["Clerk<br/>(hosted)"]
 
   subgraph container["Container: one origin"]
-    static["Frontend build<br/>(WEB_CLIENT_ROOT)"]
+    static["Frontend build<br/>(static files)"]
     api["Express API under /api<br/>clerkMiddleware, Zod validation"]
   end
 
   browser -- "page loads" --> static
   public -- "public reads, enquiries" --> api
   workspace -- "session cookie" --> api
-  api -- "Drizzle" --> db[("PostgreSQL")]
+  api -- "Drizzle" --> db[("PostgreSQL<br/>(Neon in production)")]
 
   spec["openapi.yaml"] -. "codegen" .-> hooks["React Query hooks"]
   spec -. "codegen" .-> zod["Zod schemas"]
   hooks -. "used by" .-> browser
   zod -. "used by" .-> api
+
+  classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
+  classDef buildtime fill:#f9fafb,stroke:#9ca3af,stroke-dasharray:5 5,color:#4b5563
+  class clerk,db external
+  class spec,hooks,zod buildtime
 ```
 
-Solid arrows are runtime requests. Dotted arrows are code generated from
+Amber shapes are people, grey boxes are hosted services outside the container,
+and dashed boxes are build-time code rather than running parts. Solid arrows
+are runtime requests. Dotted arrows are code generated from
 `lib/api-spec/openapi.yaml`, which keeps the client and server agreeing on one
 contract. Serving everything from one origin is
 [ADR-0001](adr/0001-single-origin-deployment.md).
