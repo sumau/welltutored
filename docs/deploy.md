@@ -453,9 +453,8 @@ rather than a leak: a publishable key is public by design and is served to every
 visitor in the JavaScript. The three secrets above are the opposite case and
 must never appear in this file.
 
-**`TRUSTED_ORIGINS` must match the deployed hostname exactly.** A mismatch
-rejects every credentialed request, the public enquiry POST included, so the
-site looks fine until someone tries to use it.
+**`TRUSTED_ORIGINS` must match the deployed hostname exactly** — see the
+[configuration reference](#configuration-reference).
 
 The health check is already pointed at `/api/healthz`.
 
@@ -554,11 +553,9 @@ repeat run changes nothing.
 
 ## Workspace sign-in
 
-`clerkMiddleware` is mounted under `/api`, not globally. Clerk answers a request
-that accepts `text/html` with a handshake redirect when it cannot establish a
-session, so a globally mounted Clerk would bounce every page load away from the
-app, since this server serves the HTML. The SPA authenticates client-side
-through `@clerk/react`.
+`clerkMiddleware` is mounted under `/api`, not globally
+([ADR-0001](adr/0001-single-origin-deployment.md) says why). The SPA
+authenticates client-side through `@clerk/react`.
 
 ## Verifying the image locally
 

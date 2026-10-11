@@ -155,15 +155,9 @@ broken public page. It is not the known-empty state, and it is not something to
 wave through. Only the flagless `pnpm run smoke:launch`, run by hand, fails on
 absent content.
 
-## Recommended release sequence
+## Why three separate gates
 
-1. Run `pnpm run verify:ci`. It prepares and uses only the dedicated
-   integration-test database for database-backed tests.
-2. Bring the local stack up and run the development smoke against it.
-3. Apply any schema change to the Deployment database first —
-   [ADR-0002](adr/0002-schema-by-deliberate-push.md).
-4. Merge. That deploys, and the deploy job runs the launch smoke.
-
-The development smoke is deliberately separate from `verify:ci` because it
-needs a running stack, and the launch smoke is separate because it validates
-the Deployment visitors actually reach.
+`verify:ci`, the development smoke and the launch smoke stay separate. The
+development smoke needs a running stack, and the launch smoke validates the
+Deployment visitors actually reach. The order to run them in before merging is
+in [CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).

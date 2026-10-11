@@ -1,8 +1,56 @@
 # Well Tutored architecture
 
-This project keeps the existing React, Express, Drizzle, Clerk, and generated
-OpenAPI client stack. The application is organized around two user-facing
-surfaces and a shared API/data layer.
+One container serves both the React frontend and the Express API from the same
+origin (scheme, host and port), so the browser treats them as one site. Only
+the API talks to the PostgreSQL database, through Drizzle, and a client
+generated from the OpenAPI spec keeps the two sides in step. The application
+is organized around two user-facing surfaces: the public website and the
+private Workspace.
+
+```mermaid
+flowchart LR
+  visitor(["👤 Visitor"]) --> public
+  tutor(["👤 Tutor or owner"]) --> workspace
+  classDef person fill:#fde68a,stroke:#b45309,stroke-width:2px,color:#1f2937
+  class visitor,tutor person
+
+  subgraph browser["Browser: React app"]
+    public["Public website<br/>(never loads Clerk)"]
+    workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
+  end
+
+  workspace -- "sign in" --> clerk["Clerk<br/>(hosted)"]
+
+  subgraph container["Container: one origin"]
+    static["Frontend build<br/>(static files)"]
+    api["Express API under /api<br/>clerkMiddleware, Zod validation"]
+  end
+
+  browser -- "page loads" --> static
+  public -- "public reads, enquiries" --> api
+  workspace -- "session cookie" --> api
+  api -- "Drizzle" --> db[("PostgreSQL<br/>(Neon in production)")]
+
+  spec["openapi.yaml"] -. "codegen" .-> hooks["React Query hooks"]
+  spec -. "codegen" .-> zod["Zod schemas"]
+  hooks -. "used by" .-> browser
+  zod -. "used by" .-> api
+
+  classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
+  classDef buildtime fill:#f9fafb,stroke:#9ca3af,stroke-dasharray:5 5,color:#4b5563
+  class clerk,db external
+  class spec,hooks,zod buildtime
+```
+
+Amber shapes are people, grey boxes are hosted services outside the container,
+and dashed boxes are build-time code rather than running parts. Solid arrows
+are runtime requests. Dotted arrows are code generated from
+`lib/api-spec/openapi.yaml`, which keeps the client and server agreeing on one
+contract. Serving everything from one origin is
+[ADR-0001](adr/0001-single-origin-deployment.md).
+
+Every route below is defined in `artifacts/welltutored/src/app/route-map.ts`,
+which is the source of truth if this list and the code disagree.
 
 ## Public website
 
@@ -22,7 +70,8 @@ Workspace.
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
 the public visual language. Public API handlers live in
 `artifacts/api-server/src/routes/content.ts` and
-`artifacts/api-server/src/routes/enquiries.ts`.
+`artifacts/api-server/src/routes/enquiries.ts`. `content.ts` also holds the
+saved-resources endpoints, which no page uses yet (#69).
 
 ## Authentication
 
@@ -37,7 +86,10 @@ its themes, and the workspace routes. Keep public route modules, shared
 providers, and route metadata free of Clerk imports, or Clerk lands in the
 public bundle.
 
-## Workspace
+Browser API requests use Clerk's same-origin session cookies; bearer-token
+wiring is reserved for mobile clients.
+
+## Private Workspace
 
 Workspace routes are protected by Clerk and the workspace account boundary:
 
@@ -52,6 +104,8 @@ Workspace routes are protected by Clerk and the workspace account boundary:
 `/workspace/articles/new` and `/workspace/articles/:id` remain compatibility
 aliases and redirect to the canonical resource URLs. Workspace accounts are
 stored in the `workspace_accounts` table.
+
+## Forms
 
 A form that must submit once guards itself with a synchronous ref as well as
 the mutation's pending state, as `submissionInFlight` does in `EnquiryForm`.
@@ -86,8 +140,10 @@ Workspace code is split by responsibility:
 
 The intended direction for future workspace changes is to keep route handlers
 thin: authenticate, validate the request, call a domain/service function, and
-present the response. Generated API clients and schemas remain generated
-artifacts and should not be edited manually.
+present the response. `lib/api-spec/openapi.yaml` generates both the React
+Query hooks and the Zod schemas, which keeps client and server contracts
+aligned. Generated API clients and schemas remain generated artifacts and
+should not be edited manually.
 
 ## Publishing rules
 
@@ -116,10 +172,11 @@ private draft alongside a live published version.
 ## Styling payload
 
 The Well Tutored Vite build enables Tailwind's production Lightning CSS
-optimization. The primary stylesheet is currently 115,031 bytes raw and
-19,737 bytes gzip, with a budget of 115,200 raw and 19,800 gzip; run
+optimization. `artifacts/welltutored/scripts/verify-css-build.mjs` holds a size
+budget for the primary stylesheet; run
 `pnpm --filter @workspace/welltutored run build` followed by
-`pnpm --filter @workspace/welltutored run verify:css` to verify the budget.
+`pnpm --filter @workspace/welltutored run verify:css` to check it, and the
+script prints the current size.
 
 The remaining global CSS is intentional: Tailwind preflight, theme variables,
 utilities used by both public and authenticated routes, motion states, and
