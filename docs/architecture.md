@@ -1,8 +1,11 @@
 # Well Tutored architecture
 
-A React frontend and an Express API share one origin, a Drizzle/PostgreSQL
-data layer, and a generated OpenAPI client. The application is organized
-around two user-facing surfaces: the public website and the private Workspace.
+One container serves both the React frontend and the Express API from the same
+origin (scheme, host and port), so the browser treats them as one site. Only
+the API talks to the PostgreSQL database, through Drizzle, and a client
+generated from the OpenAPI spec keeps the two sides in step. The application
+is organized around two user-facing surfaces: the public website and the
+private Workspace.
 
 ```mermaid
 flowchart LR
@@ -16,7 +19,7 @@ flowchart LR
 
   workspace -- "sign in" --> clerk["Clerk"]
 
-  subgraph container["Container, one origin"]
+  subgraph container["Container: one origin"]
     static["Frontend build<br/>(WEB_CLIENT_ROOT)"]
     api["Express API under /api<br/>clerkMiddleware, Zod validation"]
   end
