@@ -117,6 +117,7 @@ router.patch("/workspace/profile", async (req, res): Promise<void> => {
     teachingIntro: body.data.teachingIntro ?? editableTutor.teachingIntro,
     teachingPoints: body.data.teachingPoints ?? editableTutor.teachingPoints,
     rate: rate == null ? Number(editableTutor.rate) : rate,
+    availability: (body.data.availability ?? editableTutor.availability).trim(),
     intake: body.data.intake ?? editableTutor.intake,
     tint: body.data.tint ?? normalizeTutorTint(editableTutor.tint),
   };
@@ -144,6 +145,7 @@ router.patch("/workspace/profile", async (req, res): Promise<void> => {
     teachingIntro: truncateAtWordBoundary(publishableProfile.teachingIntro, 200),
     teachingPoints: publishableProfile.teachingPoints,
     rate: publishableProfile.rate,
+    availability: publishableProfile.availability,
     intake: publishableProfile.intake,
     tint: publishableProfile.tint,
   };

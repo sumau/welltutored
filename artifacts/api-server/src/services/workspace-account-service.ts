@@ -183,6 +183,7 @@ export async function ensureTutorDraft(
         teachingIntro: "",
         teachingPoints: [],
         rate: "0",
+        availability: "",
         intake: "full",
         tint: defaultTint,
         profileStatus: "draft",

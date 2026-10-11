@@ -596,7 +596,7 @@ components:
         - status
     Tutor:
       type: object
-      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, rate, intake, tint, resources]
+      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, rate, availability, intake, tint, resources]
       properties:
         id: { type: integer }
         slug: { type: string }
@@ -617,6 +617,7 @@ components:
           items:
             $ref: "#/components/schemas/TeachingPoint"
         rate: { type: number }
+        availability: { type: string, maxLength: 120 }
         intake: { type: string, enum: [accepting, limited, full] }
         tint: { type: string }
         resources:
@@ -625,7 +626,7 @@ components:
             $ref: "#/components/schemas/Resource"
     WorkspaceTutor:
       type: object
-      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, profileStatus, rate, intake, tint, resources]
+      required: [id, slug, name, firstName, lastName, initials, subject, support, profileSummary, university, qualification, bio, teachingIntro, teachingPoints, profileStatus, rate, availability, intake, tint, resources]
       properties:
         id: { type: integer }
         slug: { type: string }
@@ -646,6 +647,7 @@ components:
             $ref: "#/components/schemas/WorkspaceTeachingPoint"
         profileStatus: { type: string, enum: [draft, published, archived] }
         rate: { type: number }
+        availability: { type: string, maxLength: 120 }
         intake: { type: string, enum: [accepting, limited, full] }
         tint: { type: string }
         resources:
@@ -811,6 +813,7 @@ components:
           items:
             $ref: "#/components/schemas/WorkspaceTeachingPoint"
         rate: { type: number, minimum: 0 }
+        availability: { type: string, maxLength: 120 }
         intake: { type: string, enum: [accepting, limited, full] }
         tint:
           type: string

@@ -37,6 +37,7 @@ const session: WorkspaceSession = {
     ],
     profileStatus: "published",
     rate: 45,
+    availability: "Saturday mornings",
     intake: "limited",
     tint: "#A997C7",
     resources: [],
@@ -167,7 +168,7 @@ test("a rejected profile save shows the server's reason on the page", async () =
   }
 });
 
-test("saving sends the tutor's stored accent and intake, not empty ones", async () => {
+test("saving sends the tutor's stored accent, intake and availability, not empty ones", async () => {
   const originalFetch = globalThis.fetch;
   const bodies: unknown[] = [];
   globalThis.fetch = async (_input, init) => {
@@ -194,6 +195,7 @@ test("saving sends the tutor's stored accent and intake, not empty ones", async 
     assert.equal(bodies.length, 1);
     assert.equal((bodies[0] as { tint: string }).tint, "#A997C7");
     assert.equal((bodies[0] as { intake: string }).intake, "limited");
+    assert.equal((bodies[0] as { availability: string }).availability, "Saturday mornings");
   } finally {
     globalThis.fetch = originalFetch;
     await cleanupPage(rendered);

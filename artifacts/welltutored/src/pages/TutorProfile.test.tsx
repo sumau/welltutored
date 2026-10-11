@@ -3,7 +3,7 @@ import test from "node:test";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Tutor } from "@workspace/api-client-react";
-import { TutorEnquiry } from "./TutorProfile";
+import { TutorAvailability, TutorEnquiry } from "./TutorProfile";
 
 const fullTutor: Tutor = {
   id: 2,
@@ -21,6 +21,7 @@ const fullTutor: Tutor = {
   teachingIntro: "Clear explanations and practical guidance.",
   teachingPoints: [{ title: "Clarity", body: "Lessons are structured around the student's goals." }],
   rate: 45,
+  availability: "Weekday evenings after 4pm",
   intake: "full",
   tint: "#123456",
   resources: [],
@@ -34,4 +35,19 @@ test("full tutor profiles explain the enquiry restriction without rendering a fo
   assert.doesNotMatch(markup, /data-testid="enquiry-form"/);
   assert.doesNotMatch(markup, /data-testid="button-submit-enquiry"/);
   assert.doesNotMatch(markup, /<form/);
+});
+test("tutor profiles show availability when the tutor has given it", () => {
+  const markup = renderToStaticMarkup(<TutorAvailability tutor={fullTutor} />);
+
+  assert.match(markup, /data-testid="tutor-availability"/);
+  assert.match(markup, /Availability/);
+  assert.match(markup, /Weekday evenings after 4pm/);
+});
+
+test("tutor profiles hide the availability row when it is empty", () => {
+  const markup = renderToStaticMarkup(
+    <TutorAvailability tutor={{ ...fullTutor, availability: "" }} />,
+  );
+
+  assert.equal(markup, "");
 });

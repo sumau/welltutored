@@ -69,6 +69,8 @@ export interface Tutor {
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];
   rate: number;
+  /** @maxLength 120 */
+  availability: string;
   intake: TutorIntake;
   tint: string;
   resources: Resource[];
@@ -115,6 +117,8 @@ export interface WorkspaceTutor {
   teachingPoints: WorkspaceTeachingPoint[];
   profileStatus: WorkspaceTutorProfileStatus;
   rate: number;
+  /** @maxLength 120 */
+  availability: string;
   intake: WorkspaceTutorIntake;
   tint: string;
   resources: Resource[];
@@ -345,6 +349,8 @@ export interface TutorProfileUpdate {
   teachingPoints?: WorkspaceTeachingPoint[];
   /** @minimum 0 */
   rate?: number;
+  /** @maxLength 120 */
+  availability?: string;
   intake?: TutorProfileUpdateIntake;
   tint?: TutorProfileUpdateTint;
   status?: TutorProfileUpdateStatus;

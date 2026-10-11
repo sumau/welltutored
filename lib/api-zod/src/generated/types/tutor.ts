@@ -27,6 +27,8 @@ export interface Tutor {
   /** @minItems 1 */
   teachingPoints: TeachingPoint[];
   rate: number;
+  /** @maxLength 120 */
+  availability: string;
   intake: TutorIntake;
   tint: string;
   resources: Resource[];

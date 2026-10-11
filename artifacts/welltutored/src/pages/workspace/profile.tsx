@@ -58,6 +58,7 @@ const profileSchema = z.object({
   teachingIntro: z.string().min(20, "Teaching introduction should be at least 20 characters").max(200, "Teaching approach must be 200 characters or fewer"),
   teachingPoints: z.array(teachingPointSchema).length(3),
   rate: z.coerce.number<number>().min(0, "Rate must be positive"),
+  availability: z.string().max(120, "Availability must be 120 characters or fewer"),
   intake: z.enum([
     TutorProfileUpdateIntake.accepting,
     TutorProfileUpdateIntake.limited,
@@ -84,6 +85,7 @@ function profileFormValues(tutor: WorkspaceTutor): ProfileFormValues {
       ...Array.from({ length: 3 }, () => ({ title: "", body: "" })),
     ].slice(0, 3),
     rate: tutor.rate,
+    availability: tutor.availability,
     intake: tutor.intake as TutorProfileUpdateIntake,
     tint: normalizeTutorAccent(tutor.tint),
   };
@@ -119,6 +121,7 @@ export default function WorkspaceProfile() {
           { title: "", body: "" },
         ],
       rate: 0,
+      availability: "",
       intake: TutorProfileUpdateIntake.accepting,
       tint: "#8EA8CE",
     }
@@ -709,6 +712,24 @@ export default function WorkspaceProfile() {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="availability"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between gap-4">
+                    <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Availability</FormLabel>
+                    <span className="text-xs text-muted-foreground">{field.value.length}/120</span>
+                  </div>
+                  <FormDescription className="text-xs">When you teach, shown under your session rate. Leave blank to hide it.</FormDescription>
+                  <FormControl>
+                    <Input {...field} maxLength={120} placeholder="e.g. Weekday evenings after 4pm and Saturday mornings" className="rounded-none border-border bg-transparent shadow-none h-10" />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

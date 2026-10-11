@@ -51,6 +51,7 @@ export const tutorsTable = pgTable("tutors", {
     .notNull()
     .default([]),
   rate: numeric("rate", { precision: 8, scale: 2 }).notNull(),
+  availability: text("availability").notNull().default(""),
   intake: tutorIntake("intake").notNull().default("accepting"),
   tint: text("tint").notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
