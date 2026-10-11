@@ -44,6 +44,17 @@ When a Tutor teaches — the days and times they offer sessions, in the Tutor's
 own words. Not whether they are taking new students; that is Intake.
 _Avoid_: Schedule, hours
 
+**Experience**:
+A Tutor's working history in their own words — jobs, volunteering, tutoring
+and career breaks alike. Optional; not limited to paid employment.
+_Avoid_: Employment history, career, work history
+
+**Education**:
+A Tutor's full educational history in their own words. Optional. Distinct from
+the University and Qualification a Tutor is summarised by, which stay as
+headline facts.
+_Avoid_: Qualifications, academic history
+
 ### The private area
 
 **Workspace**:

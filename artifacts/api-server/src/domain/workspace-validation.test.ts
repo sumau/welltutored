@@ -38,6 +38,8 @@ const validProfile = {
     { title: "Edit kindly", body: "Use specific feedback to make one useful improvement at a time." },
   ],
   rate: 45,
+  experience: "Sep 2018 – Mar 2024 | Maths teacher, Example School",
+  education: "Sep 2014 – Jun 2017 | BA Mathematics, University of Oxford",
   availability: "Weekday evenings after 4pm",
   intake: "accepting",
   tint: "#D98F7F",
@@ -67,6 +69,24 @@ test("rejects a profile with the wrong number of teaching points", () => {
     false,
   );
 });
+test("accepts a profile without experience or education", () => {
+  assert.equal(
+    isPublishableProfile({ ...validProfile, experience: "", education: "" }),
+    true,
+  );
+});
+
+test("rejects experience or education longer than 4,000 characters", () => {
+  assert.equal(
+    isPublishableProfile({ ...validProfile, experience: "a".repeat(4001) }),
+    false,
+  );
+  assert.equal(
+    isPublishableProfile({ ...validProfile, education: "a".repeat(4001) }),
+    false,
+  );
+});
+
 test("accepts a profile without availability", () => {
   assert.equal(isPublishableProfile({ ...validProfile, availability: "" }), true);
 });

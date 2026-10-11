@@ -18,6 +18,24 @@ const tutorSeeds = [
     university: "University of Cambridge",
     qualification: "First-class BA (Hons), English",
     bio: "A Cambridge-educated English tutor who helps students turn half-formed thoughts into arguments they can stand behind.",
+    experience: [
+      "Sep 2021 – Present | Private English tutor",
+      "GCSE and A-level English Literature and Language, with a focus on essay writing.",
+      "",
+      "Sep 2018 – Jul 2021 | English teacher, a secondary school in Cambridge",
+      "Taught Key Stage 3 to A level and ran the sixth-form debating society.",
+      "",
+      "Jul 2017 – Aug 2017 | Editorial intern, an educational publisher",
+    ].join("\n"),
+    education: [
+      "Sep 2017 – Jul 2018 | PGCE Secondary English, University of Cambridge",
+      "",
+      "Oct 2014 – Jun 2017 | University of Cambridge",
+      "BA (Hons) English, First Class",
+      "",
+      "Sep 2012 – Jun 2014 | A levels",
+      "English Literature (A*), History (A*), French (A)",
+    ].join("\n"),
     profileSummary:
       "Maya helps GCSE and A-level English students turn half-formed ideas into clear, confident arguments they can make their own.",
     teachingIntro:
@@ -52,6 +70,15 @@ const tutorSeeds = [
     university: "University of Oxford",
     qualification: "MChem, Chemistry",
     bio: "An Oxford-educated tutor who makes difficult problems feel structured, patient and possible.",
+    experience: [
+      "Sep 2020 – Present | Private maths and chemistry tutor",
+      "GCSE and A-level students, including exam preparation and Oxbridge interview practice.",
+      "",
+      "Sep 2017 – Aug 2020 | Analytical chemist, a pharmaceutical company",
+      "Developed and validated test methods, and trained new laboratory staff.",
+      "",
+      "Oct 2016 – Jun 2017 | Volunteer maths mentor, a local secondary school",
+    ].join("\n"),
     profileSummary:
       "Sophie helps GCSE and A-level students make sense of maths and chemistry by making difficult ideas feel manageable and connected.",
     teachingIntro:
@@ -350,6 +377,21 @@ export async function ensureSeedContent(): Promise<void> {
           eq(tutorsTable.profileSummary, ""),
         ),
       );
+    if (tutor.experience || tutor.education) {
+      await db
+        .update(tutorsTable)
+        .set({
+          experience: tutor.experience ?? "",
+          education: tutor.education ?? "",
+        })
+        .where(
+          and(
+            eq(tutorsTable.slug, tutor.slug),
+            eq(tutorsTable.experience, ""),
+            eq(tutorsTable.education, ""),
+          ),
+        );
+    }
   }
 
   const tutors = await db

@@ -22,6 +22,10 @@ export const HealthCheckResponse = zod.object({
  */
 export const listTutorsResponseProfileSummaryMax = 200;
 
+export const listTutorsResponseExperienceMax = 4000;
+
+export const listTutorsResponseEducationMax = 4000;
+
 export const listTutorsResponseTeachingPointsItemTitleMin = 2;
 
 export const listTutorsResponseTeachingPointsItemBodyMin = 10;
@@ -44,6 +48,8 @@ export const ListTutorsResponseItem = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(listTutorsResponseExperienceMax),
+  "education": zod.string().max(listTutorsResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string().min(listTutorsResponseTeachingPointsItemTitleMin),
@@ -84,6 +90,10 @@ export const GetTutorParams = zod.object({
 
 export const getTutorResponseProfileSummaryMax = 200;
 
+export const getTutorResponseExperienceMax = 4000;
+
+export const getTutorResponseEducationMax = 4000;
+
 export const getTutorResponseTeachingPointsItemTitleMin = 2;
 
 export const getTutorResponseTeachingPointsItemBodyMin = 10;
@@ -106,6 +116,8 @@ export const GetTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(getTutorResponseExperienceMax),
+  "education": zod.string().max(getTutorResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string().min(getTutorResponseTeachingPointsItemTitleMin),
@@ -355,6 +367,10 @@ export const RetryWorkspaceEnquiryResponse = zod.object({
  */
 export const getWorkspaceSessionResponseTutorOneProfileSummaryMax = 200;
 
+export const getWorkspaceSessionResponseTutorOneExperienceMax = 4000;
+
+export const getWorkspaceSessionResponseTutorOneEducationMax = 4000;
+
 export const getWorkspaceSessionResponseTutorOneAvailabilityMax = 120;
 
 
@@ -378,6 +394,8 @@ export const GetWorkspaceSessionResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(getWorkspaceSessionResponseTutorOneExperienceMax),
+  "education": zod.string().max(getWorkspaceSessionResponseTutorOneEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -550,6 +568,10 @@ export const updateWorkspaceProfileBodyInitialsMax = 4;
 
 export const updateWorkspaceProfileBodyProfileSummaryMax = 200;
 
+export const updateWorkspaceProfileBodyExperienceMax = 4000;
+
+export const updateWorkspaceProfileBodyEducationMax = 4000;
+
 export const updateWorkspaceProfileBodyTeachingIntroMax = 200;
 
 export const updateWorkspaceProfileBodyTeachingPointsMax = 3;
@@ -571,6 +593,8 @@ export const UpdateWorkspaceProfileBody = zod.object({
   "university": zod.string().optional(),
   "qualification": zod.string().optional(),
   "bio": zod.string().optional(),
+  "experience": zod.string().max(updateWorkspaceProfileBodyExperienceMax).optional(),
+  "education": zod.string().max(updateWorkspaceProfileBodyEducationMax).optional(),
   "teachingIntro": zod.string().max(updateWorkspaceProfileBodyTeachingIntroMax).optional(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -584,6 +608,10 @@ export const UpdateWorkspaceProfileBody = zod.object({
 })
 
 export const updateWorkspaceProfileResponseProfileSummaryMax = 200;
+
+export const updateWorkspaceProfileResponseExperienceMax = 4000;
+
+export const updateWorkspaceProfileResponseEducationMax = 4000;
 
 export const updateWorkspaceProfileResponseAvailabilityMax = 120;
 
@@ -602,6 +630,8 @@ export const UpdateWorkspaceProfileResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(updateWorkspaceProfileResponseExperienceMax),
+  "education": zod.string().max(updateWorkspaceProfileResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -635,6 +665,10 @@ export const UpdateWorkspaceProfileResponse = zod.object({
  */
 export const discardWorkspaceProfileDraftResponseProfileSummaryMax = 200;
 
+export const discardWorkspaceProfileDraftResponseExperienceMax = 4000;
+
+export const discardWorkspaceProfileDraftResponseEducationMax = 4000;
+
 export const discardWorkspaceProfileDraftResponseAvailabilityMax = 120;
 
 
@@ -652,6 +686,8 @@ export const DiscardWorkspaceProfileDraftResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(discardWorkspaceProfileDraftResponseExperienceMax),
+  "education": zod.string().max(discardWorkspaceProfileDraftResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -685,6 +721,10 @@ export const DiscardWorkspaceProfileDraftResponse = zod.object({
  */
 export const listWorkspaceTutorsResponseProfileSummaryMax = 200;
 
+export const listWorkspaceTutorsResponseExperienceMax = 4000;
+
+export const listWorkspaceTutorsResponseEducationMax = 4000;
+
 export const listWorkspaceTutorsResponseAvailabilityMax = 120;
 
 
@@ -702,6 +742,8 @@ export const ListWorkspaceTutorsResponseItem = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(listWorkspaceTutorsResponseExperienceMax),
+  "education": zod.string().max(listWorkspaceTutorsResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -744,6 +786,10 @@ export const CreateWorkspaceTutorBody = zod.object({
 
 export const createWorkspaceTutorResponseProfileSummaryMax = 200;
 
+export const createWorkspaceTutorResponseExperienceMax = 4000;
+
+export const createWorkspaceTutorResponseEducationMax = 4000;
+
 export const createWorkspaceTutorResponseAvailabilityMax = 120;
 
 
@@ -761,6 +807,8 @@ export const CreateWorkspaceTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(createWorkspaceTutorResponseExperienceMax),
+  "education": zod.string().max(createWorkspaceTutorResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -801,6 +849,10 @@ export const ArchiveWorkspaceTutorParams = zod.object({
 
 export const archiveWorkspaceTutorResponseProfileSummaryMax = 200;
 
+export const archiveWorkspaceTutorResponseExperienceMax = 4000;
+
+export const archiveWorkspaceTutorResponseEducationMax = 4000;
+
 export const archiveWorkspaceTutorResponseAvailabilityMax = 120;
 
 
@@ -818,6 +870,8 @@ export const ArchiveWorkspaceTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(archiveWorkspaceTutorResponseExperienceMax),
+  "education": zod.string().max(archiveWorkspaceTutorResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),
@@ -858,6 +912,10 @@ export const RestoreWorkspaceTutorParams = zod.object({
 
 export const restoreWorkspaceTutorResponseProfileSummaryMax = 200;
 
+export const restoreWorkspaceTutorResponseExperienceMax = 4000;
+
+export const restoreWorkspaceTutorResponseEducationMax = 4000;
+
 export const restoreWorkspaceTutorResponseAvailabilityMax = 120;
 
 
@@ -875,6 +933,8 @@ export const RestoreWorkspaceTutorResponse = zod.object({
   "university": zod.string(),
   "qualification": zod.string(),
   "bio": zod.string(),
+  "experience": zod.string().max(restoreWorkspaceTutorResponseExperienceMax),
+  "education": zod.string().max(restoreWorkspaceTutorResponseEducationMax),
   "teachingIntro": zod.string(),
   "teachingPoints": zod.array(zod.object({
   "title": zod.string(),

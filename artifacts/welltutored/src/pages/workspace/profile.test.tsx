@@ -29,6 +29,8 @@ const session: WorkspaceSession = {
     university: "University of Cambridge",
     qualification: "BA Mathematics",
     bio: "Maya helps students build confidence in mathematics.",
+    experience: "Sep 2018 – Present | Maths teacher, Example School",
+    education: "",
     teachingIntro: "Clear explanations and practical guidance for every student.",
     teachingPoints: [
       { title: "Clarity", body: "Lessons are structured around the student's goals." },
@@ -168,7 +170,7 @@ test("a rejected profile save shows the server's reason on the page", async () =
   }
 });
 
-test("saving sends the tutor's stored accent, intake and availability, not empty ones", async () => {
+test("saving sends the tutor's stored accent, intake, availability and experience, not empty ones", async () => {
   const originalFetch = globalThis.fetch;
   const bodies: unknown[] = [];
   globalThis.fetch = async (_input, init) => {
@@ -196,6 +198,10 @@ test("saving sends the tutor's stored accent, intake and availability, not empty
     assert.equal((bodies[0] as { tint: string }).tint, "#A997C7");
     assert.equal((bodies[0] as { intake: string }).intake, "limited");
     assert.equal((bodies[0] as { availability: string }).availability, "Saturday mornings");
+    assert.equal(
+      (bodies[0] as { experience: string }).experience,
+      "Sep 2018 – Present | Maths teacher, Example School",
+    );
   } finally {
     globalThis.fetch = originalFetch;
     await cleanupPage(rendered);

@@ -518,6 +518,7 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
         university: "University of London",
         qualification: "BA History",
         bio: "A thoughtful tutor helping students build clear, confident historical arguments.",
+        experience: "  Sep 2018 – Present | History teacher, Example School\n",
         teachingIntro: "Lessons are calm, focused, and tailored to each student's goals.",
         teachingPoints: [
           { title: "Clarity", body: "We turn complex topics into clear next steps." },
@@ -546,6 +547,11 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
     publicTutorProfile.body.availability,
     "Weekday evenings after 4pm",
   );
+  assert.equal(
+    publicTutorProfile.body.experience,
+    "Sep 2018 – Present | History teacher, Example School",
+  );
+  assert.equal(publicTutorProfile.body.education, "");
 
   const tooLongAvailability = await request(
     "/api/workspace/profile",
@@ -560,6 +566,18 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
   );
   assert.equal(tooLongAvailability.response.status, 400);
 
+  for (const field of ["experience", "education"]) {
+    const tooLong = await request(
+      "/api/workspace/profile",
+      {
+        method: "PATCH",
+        body: JSON.stringify({ [field]: "a".repeat(4001), status: "draft" }),
+      },
+      pendingUserId,
+    );
+    assert.equal(tooLong.response.status, 400, field);
+  }
+
   const draftAfterPublish = await request(
     "/api/workspace/profile",
     {
@@ -567,12 +585,17 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
       body: JSON.stringify({
         firstName: "Drafted",
         availability: "Saturday mornings only",
+        education: "Sep 2014 – Jun 2017 | BA History, University of London",
         status: "draft",
       }),
     },
     pendingUserId,
   );
   assert.equal(draftAfterPublish.response.status, 200);
+  assert.equal(
+    draftAfterPublish.body.education,
+    "Sep 2014 – Jun 2017 | BA History, University of London",
+  );
   assert.equal(draftAfterPublish.body.firstName, "Drafted");
   assert.equal(draftAfterPublish.body.availability, "Saturday mornings only");
   assert.equal(draftAfterPublish.body.profileStatus, "draft");
@@ -620,6 +643,7 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
     publishedTutorWithDraft.availability,
     "Weekday evenings after 4pm",
   );
+  assert.equal(publishedTutorWithDraft.education, "");
 
   const ownerTutorProfilesWithDraft = await request(
     "/api/workspace/tutors",
@@ -698,6 +722,10 @@ test("owner tutor lifecycle works end to end and remains owner-only", async () =
   assert.equal(republishedProfile.response.status, 200);
   assert.equal(republishedProfile.body.firstName, "Drafted");
   assert.equal(republishedProfile.body.availability, "Saturday mornings only");
+  assert.equal(
+    republishedProfile.body.experience,
+    "Sep 2018 – Present | History teacher, Example School",
+  );
   assert.equal(republishedProfile.body.profileStatus, "published");
 
   const draftsAfterRepublish = await db

@@ -33,6 +33,8 @@ export const tutorProfileDraftsTable = pgTable(
     university: text("university").notNull(),
     qualification: text("qualification").notNull(),
     bio: text("bio").notNull(),
+    experience: text("experience").notNull().default(""),
+    education: text("education").notNull().default(""),
     teachingIntro: text("teaching_intro").notNull().default(""),
     teachingPoints: jsonb("teaching_points")
       .$type<TeachingPoint[]>()
