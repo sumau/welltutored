@@ -25,7 +25,7 @@ Plus a PostgreSQL database, hosted separately from the container — see
 
 Each step has its own section below; this is the order they have to happen in.
 
-1. **[Database](#database)** — create the Neon project, take the pooled and
+1. **[Database](#database)** — create the Neon project in London, take the pooled and
    direct connection strings.
 2. **[Apply the schema](#applying-the-schema)** — from this checkout, using the
    direct string. Nothing does this for you.
@@ -46,7 +46,15 @@ backups, and — the part that matters operationally — is reachable over the
 public internet, so every step that runs from this checkout (the schema push
 below, seeding, copying data in) needs no tunnel.
 
-Create a project, then take **two** connection strings from its dashboard. Neon
+Create the project in **AWS Europe West 2 (London)**, the region nearest
+`primary_region = "lhr"` in `fly.toml`. Neon cannot move a project afterwards,
+and distance costs more than it looks: every query is a round trip, and `pg`
+drops a connection after 10 seconds idle, so on a quiet site most visitors pay
+for a fresh TCP, TLS and Postgres handshake too. With the database in Ohio
+that came to about 0.7s a request, against 0.15s on a warm connection (issue
+#65). If `primary_region` ever changes, move the database with it.
+
+Then take **two** connection strings from its dashboard. Neon
 marks the pooled one with `-pooler` in the hostname, and they are not
 interchangeable:
 
