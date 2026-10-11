@@ -70,6 +70,15 @@ const tutorSeeds = [
     university: "University of Oxford",
     qualification: "MChem, Chemistry",
     bio: "An Oxford-educated tutor who makes difficult problems feel structured, patient and possible.",
+    experience: [
+      "Sep 2020 – Present | Private maths and chemistry tutor",
+      "GCSE and A-level students, including exam preparation and Oxbridge interview practice.",
+      "",
+      "Sep 2017 – Aug 2020 | Analytical chemist, a pharmaceutical company",
+      "Developed and validated test methods, and trained new laboratory staff.",
+      "",
+      "Oct 2016 – Jun 2017 | Volunteer maths mentor, a local secondary school",
+    ].join("\n"),
     profileSummary:
       "Sophie helps GCSE and A-level students make sense of maths and chemistry by making difficult ideas feel manageable and connected.",
     teachingIntro:
