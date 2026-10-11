@@ -8,11 +8,9 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ignoredDirectories = new Set([
-  ".agents",
   ".cache",
   ".git",
   ".local",
-  "attached_assets",
   "dist",
   "node_modules",
 ]);

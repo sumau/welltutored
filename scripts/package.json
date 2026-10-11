@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "hello": "tsx ./src/hello.ts",
     "docs:check": "tsx ./src/docs-check.ts",
     "check:test-database": "tsx ./src/test-database.ts",
     "prepare:test-database": "tsx ./src/prepare-test-database.ts",

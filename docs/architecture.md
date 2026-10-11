@@ -31,6 +31,12 @@ Clerk provides the sign-in and sign-up pages:
 - `/sign-in` — sign-in flow (including Clerk's nested flow paths)
 - `/sign-up` — sign-up flow (including Clerk's nested flow paths)
 
+Public visitors never load Clerk. `App.tsx` lazy-loads `PublicApp` or
+`AuthenticatedApp` by path, and only the authenticated side brings in Clerk,
+its themes, and the workspace routes. Keep public route modules, shared
+providers, and route metadata free of Clerk imports, or Clerk lands in the
+public bundle.
+
 ## Workspace
 
 Workspace routes are protected by Clerk and the workspace account boundary:
@@ -46,6 +52,11 @@ Workspace routes are protected by Clerk and the workspace account boundary:
 `/workspace/articles/new` and `/workspace/articles/:id` remain compatibility
 aliases and redirect to the canonical resource URLs. Workspace accounts are
 stored in the `workspace_accounts` table.
+
+A form that must submit once guards itself with a synchronous ref as well as
+the mutation's pending state, as `submissionInFlight` does in `EnquiryForm`.
+Keyboard activation can fire a second submit before React renders the first
+one as pending, so the pending flag alone lets a duplicate through.
 
 ## API boundaries
 

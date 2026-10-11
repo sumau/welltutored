@@ -114,6 +114,12 @@ target and fails with a connection-specific message if that database is not
 reachable. Each process also uses a unique fixture namespace, so overlapping
 runs do not reuse or delete one another's records.
 
+The test database holds the schema and no seed data, so a lifecycle test must
+create every row it asserts against, such as a second tutor, and clean up only
+its own namespace. To stub Clerk, replace the method on the shared users API
+prototype: `clerkClient.users` can return a fresh object on each access, so a
+stub assigned through it is silently discarded and the route reaches Clerk.
+
 ### Web application
 
 Run the Well Tutored web tests with:
@@ -137,6 +143,22 @@ The suite checks:
 React components are rendered either into JSDOM or to static markup. Network
 and query behavior is supplied by test doubles rather than making real
 production requests.
+
+The command runs `tsx` from the API package, which has neither Vite's aliases
+nor its JSX transform, so when adding a web test:
+
+- Keep `--tsconfig ../welltutored/tsconfig.json`, which resolves the `@/*`
+  aliases, and import `React` explicitly in test files and the components they
+  render.
+- Put the JSDOM window, its event constructors, `location`, `history`, and the
+  window event listener functions on `globalThis` before importing
+  `react-dom/client` or rendering a Wouter page. Importing ReactDOM first makes
+  it fall back to its legacy input events, and Wouter fails without the
+  globals.
+- Keep `--test-concurrency=1`: the suites share process-wide globals. Let
+  async error states settle inside `act` with a short timer rather than a
+  single microtask, or React Query's cache timers can leave the runner looking
+  hung.
 
 ### Repository scripts
 
