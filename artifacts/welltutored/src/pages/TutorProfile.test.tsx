@@ -3,7 +3,7 @@ import test from "node:test";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Tutor } from "@workspace/api-client-react";
-import { TutorAvailability, TutorEnquiry } from "./TutorProfile";
+import { TutorAvailability, TutorEnquiry, TutorResources } from "./TutorProfile";
 
 const fullTutor: Tutor = {
   id: 2,
@@ -47,6 +47,35 @@ test("tutor profiles show availability when the tutor has given it", () => {
 test("tutor profiles hide the availability row when it is empty", () => {
   const markup = renderToStaticMarkup(
     <TutorAvailability tutor={{ ...fullTutor, availability: "" }} />,
+  );
+
+  assert.equal(markup, "");
+});
+
+test("tutor profiles hide published resources while public resources are off", () => {
+  const markup = renderToStaticMarkup(
+    <TutorResources
+      tutor={{
+        ...fullTutor,
+        resources: [
+          {
+            id: 7,
+            slug: "proof-by-induction",
+            title: "Proof by induction",
+            subject: "Mathematics",
+            level: "A-level",
+            type: "Guide",
+            excerpt: "A short guide.",
+            readMinutes: 5,
+            tutorSlug: fullTutor.slug,
+            tutorName: fullTutor.name,
+            tutorTint: fullTutor.tint,
+            publishedAt: "2026-10-01T00:00:00.000Z",
+            tint: "#654321",
+          },
+        ],
+      }}
+    />,
   );
 
   assert.equal(markup, "");

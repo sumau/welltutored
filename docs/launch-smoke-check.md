@@ -22,12 +22,17 @@ domain. It must be a bare origin, and is validated before any request.
 - Clerk's `/v1/environment` at `SMOKE_CLERK_FRONTEND_API`, requested directly
   from Clerk, which must answer as a `production` instance — so a broken CNAME,
   a lapsed certificate or a development key shipped by mistake all fail;
-- tutor and resource catalogue responses, including non-empty published data
-  and the response fields used by public catalogue links;
-- the public home, resources, enquiry, tutor-profile, and resource-detail
-  pages, each requested with `Accept: text/html`;
+- tutor and resource catalogue responses, including a non-empty published
+  tutor list and the response fields used by public catalogue links;
+- the public home, enquiry, and tutor-profile pages, each requested with
+  `Accept: text/html`;
 - invalid enquiry recovery by sending `{}` to `POST /api/enquiries`, expecting
   a `400` validation response, and checking health again afterward.
+
+Resources are hidden from visitors for now (`PUBLIC_RESOURCES_ENABLED` in
+`artifacts/welltutored/src/lib/features.ts`), so the check needs no published
+Resource and does not request the resource pages. Restore both when that
+switch turns on.
 
 Every request must also finish on the origin it was sent to. A target that
 redirects elsewhere fails the check and reports both origins, so an old
@@ -40,7 +45,7 @@ The command exits non-zero on any failed check.
 
 `SMOKE_REDIRECT_FROM` optionally lists the other origins the Deployment answers
 on, separated by commas or spaces. Each one must answer
-`/resources?smoke=redirect` with a `301` whose `Location` is the same path and
+`/enquire?smoke=redirect` with a `301` whose `Location` is the same path and
 query on `SMOKE_BASE_URL`. A `302`, a page served in place, or a redirect that
 drops the path fails the check. Its entries are validated before any request,
 like the target: each must be a bare origin, and none may be the target itself.
@@ -64,7 +69,7 @@ reported as skipped rather than silently dropped.
 | Flag | Waives | Ends when |
 | --- | --- | --- |
 | `--dev` | the Clerk check, since a local stack runs on a development instance with no `clerk.` CNAME to check | never; development is a permanent mode |
-| `--allow-empty` | the non-empty assertions on `/api/tutors`, `/api/resources` and the pages that address a Tutor or Resource by slug | the Deployment has published content |
+| `--allow-empty` | the non-empty assertion on `/api/tutors` and the page that addresses a Tutor by slug | the Deployment has a published Tutor |
 
 Two scripts wrap them:
 

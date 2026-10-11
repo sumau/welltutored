@@ -1,7 +1,9 @@
+import * as React from "react";
 import { ReactNode } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Menu, X, ShieldCheck, PenTool } from "lucide-react";
 import { useState } from "react";
+import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 
 export function Shell({
   children,
@@ -29,7 +31,9 @@ export function Shell({
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-7 text-[12px] font-semibold">
           <Link href="/" className="hover:text-primary transition-colors" data-testid="nav-tutors">Meet our tutors</Link>
-          <Link href="/resources" className="hover:text-primary transition-colors" data-testid="nav-resources">Insights & resources</Link>
+          {PUBLIC_RESOURCES_ENABLED && (
+            <Link href="/resources" className="hover:text-primary transition-colors" data-testid="nav-resources">Insights & resources</Link>
+          )}
           <Link href="/enquire" className="flex items-center gap-2 border-b border-foreground pb-1.5 hover:text-primary hover:border-primary transition-colors" data-testid="nav-enquire">
             Enquire <ArrowRight size={13} />
           </Link>
@@ -53,7 +57,9 @@ export function Shell({
       {menuOpen && (
         <div className="md:hidden absolute top-[82px] left-0 right-0 bg-card z-30 px-6 py-6 shadow-xl border-t border-border flex flex-col gap-4 text-[14px] font-medium" data-testid="nav-mobile-menu">
           <Link href="/" onClick={closeMenu} className="hover:text-primary" data-testid="nav-mobile-tutors">Meet our tutors</Link>
-          <Link href="/resources" onClick={closeMenu} className="hover:text-primary" data-testid="nav-mobile-resources">Insights & resources</Link>
+          {PUBLIC_RESOURCES_ENABLED && (
+            <Link href="/resources" onClick={closeMenu} className="hover:text-primary" data-testid="nav-mobile-resources">Insights & resources</Link>
+          )}
           <Link href="/enquire" onClick={closeMenu} className="text-primary flex items-center gap-2" data-testid="nav-mobile-enquire">Enquire <ArrowRight size={14} /></Link>
           <Link href={isSignedIn ? "/workspace" : "/sign-in"} onClick={closeMenu} className="text-muted-foreground hover:text-foreground flex items-center gap-2 pt-4 border-t border-border" data-testid="nav-mobile-workspace">
             <PenTool size={14} /> {isSignedIn ? "Workspace" : "Workspace sign in"}
@@ -84,7 +90,9 @@ export function Shell({
           
           <div className="md:col-span-3 flex flex-col gap-3 items-start text-[#EADFD3]">
             <Link href="/" className="hover:text-primary transition-colors" data-testid="footer-tutors">Meet the tutors</Link>
-            <Link href="/resources" className="hover:text-primary transition-colors" data-testid="footer-resources">Insights & resources</Link>
+            {PUBLIC_RESOURCES_ENABLED && (
+              <Link href="/resources" className="hover:text-primary transition-colors" data-testid="footer-resources">Insights & resources</Link>
+            )}
             <Link href="/enquire" className="hover:text-primary transition-colors" data-testid="footer-enquire">Make an enquiry</Link>
           </div>
 
@@ -154,7 +162,7 @@ export function Shell({
                   <p>We only ask for the information needed to respond to an enquiry. Your details are not published on tutor profiles or shared for marketing.</p>
                   <div className="mt-6 pt-5 border-t border-border text-[13px]">
                     <strong className="text-foreground block mb-1">Your choices</strong>
-                    You can unsubscribe from resource updates at any time. Any future analytics or cookies will be explained clearly before they are used.
+                    You can unsubscribe from updates at any time. Any future analytics or cookies will be explained clearly before they are used.
                   </div>
                 </>
               )}

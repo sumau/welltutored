@@ -3,6 +3,7 @@ import { Route, Switch } from "wouter";
 import { Shell } from "@/components/layout/Shell";
 import { LoadingState } from "@/components/LoadingState";
 import NotFound from "@/pages/not-found";
+import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import { RouteMeta } from "./RouteMeta";
 import { routePaths } from "./route-map";
 
@@ -25,8 +26,12 @@ export function PublicRoutes() {
           <Switch>
             <Route path={routePaths.public.home} component={Home} />
             <Route path={routePaths.public.tutorProfile} component={TutorProfile} />
-            <Route path={routePaths.public.resources} component={Resources} />
-            <Route path={routePaths.public.resourceDetail} component={ResourceDetail} />
+            {PUBLIC_RESOURCES_ENABLED && (
+              <Route path={routePaths.public.resources} component={Resources} />
+            )}
+            {PUBLIC_RESOURCES_ENABLED && (
+              <Route path={routePaths.public.resourceDetail} component={ResourceDetail} />
+            )}
             <Route path={routePaths.public.enquiry} component={Enquiry} />
             <Route component={NotFound} />
           </Switch>

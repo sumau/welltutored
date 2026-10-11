@@ -1,3 +1,5 @@
+import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
+
 export const routePaths = {
   public: {
     home: "/",
@@ -24,13 +26,17 @@ export const routePaths = {
   },
 } as const;
 
+const resourcePages: readonly string[] = ["Resources", "ResourceDetail"];
+
 export const publicRouteDefinitions = [
   { path: routePaths.public.home, page: "Home" },
   { path: routePaths.public.tutorProfile, page: "TutorProfile" },
   { path: routePaths.public.resources, page: "Resources" },
   { path: routePaths.public.resourceDetail, page: "ResourceDetail" },
   { path: routePaths.public.enquiry, page: "Enquiry" },
-] as const;
+].filter(
+  ({ page }) => PUBLIC_RESOURCES_ENABLED || !resourcePages.includes(page),
+);
 
 export const authRouteDefinitions = [
   { path: routePaths.auth.signIn, page: "SignInPage" },
@@ -96,7 +102,7 @@ export type RouteMetadata = {
 const defaultRouteMetadata: RouteMetadata = {
   title: "Well Tutored | Women tutors for secondary and A-level students",
   description:
-    "Browse women tutors, read their subject resources and submit a named-tutor enquiry.",
+    "Browse women tutors and submit a named-tutor enquiry.",
 };
 
 function humanizeSlug(value: string) {
@@ -107,7 +113,7 @@ function humanizeSlug(value: string) {
 }
 
 export function routeMetadataForPath(pathname: string): RouteMetadata {
-  if (pathname === routePaths.public.resources) {
+  if (PUBLIC_RESOURCES_ENABLED && pathname === routePaths.public.resources) {
     return {
       title: "Insights & Resources | Well Tutored",
       description:
@@ -115,7 +121,7 @@ export function routeMetadataForPath(pathname: string): RouteMetadata {
     };
   }
 
-  if (pathname.startsWith("/resources/")) {
+  if (PUBLIC_RESOURCES_ENABLED && pathname.startsWith("/resources/")) {
     return {
       title: `${humanizeSlug(pathname.replace("/resources/", ""))} | Well Tutored Resources`,
       description: "Read an illustrative tutor-written resource from Well Tutored.",

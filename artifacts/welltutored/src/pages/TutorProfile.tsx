@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { EnquiryForm } from "@/components/EnquiryForm";
+import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import { ResourceTypeLabel } from "@/components/ResourceType";
 import {
   publicTutorQueryOptions,
@@ -38,6 +39,66 @@ export function TutorAvailability({ tutor }: { tutor: Tutor }) {
   );
 }
 
+export function TutorResources({ tutor }: { tutor: Tutor }) {
+  if (!PUBLIC_RESOURCES_ENABLED || tutor.resources.length === 0) {
+    return null;
+  }
+  const firstName = tutor.name.split(' ')[0];
+
+  return (
+    <section className="bg-secondary px-6 md:px-[30px] py-[60px] md:py-[88px]" id="resources">
+      <div className="max-w-[1150px] mx-auto">
+        <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary mb-4">From {firstName}'s desk</span>
+        <h2 className="font-serif text-[clamp(43px,5vw,67px)] leading-[0.91] tracking-tight m-0 mb-6">
+          Small notes for<br /><em>big ideas.</em>
+        </h2>
+        <p className="text-muted-foreground text-[14px] leading-[1.7] max-w-[490px]">
+          A few of {firstName}'s tutor-written resources — practical, personal and designed to be picked up between lessons.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-[1.25fr_0.75fr] gap-[14px] mt-[38px]">
+          {tutor.resources[0] && (
+            <Link href={`/resources/${tutor.resources[0].slug}`} className="bg-card p-[27px] min-h-[225px] md:min-h-[274px] text-left hover:-translate-y-1 transition-transform border border-border flex flex-col justify-between" style={{ backgroundColor: tutor.tint }}>
+               <div>
+                 <ResourceTypeLabel
+                   type={tutor.resources[0].type}
+                   className="text-[10px] uppercase tracking-[0.13em] text-foreground font-bold opacity-80"
+                 />
+                 <span className="text-[10px] uppercase tracking-[0.13em] text-foreground font-bold opacity-80">
+                   · {tutor.resources[0].readMinutes} min read
+                 </span>
+                <h3 className="font-serif text-[29px] leading-[1.03] tracking-tight mt-[25px] mb-[20px] max-w-[400px]">{tutor.resources[0].title}</h3>
+              </div>
+              <footer className="border-t border-foreground/10 pt-[12px] text-[11px] flex justify-between items-center w-full mt-auto">
+                <span className="font-medium text-foreground">By {firstName} {tutor.name.split(' ')[1]}</span>
+                 <span className="flex items-center gap-1.5 text-foreground/80">Open resource <ArrowRight size={12} /></span>
+              </footer>
+            </Link>
+          )}
+          
+          <div className="grid gap-[14px]">
+            {tutor.resources.slice(1, 3).map(resource => (
+              <Link href={`/resources/${resource.slug}`} key={resource.id} className="bg-card p-[27px] min-h-[140px] text-left hover:-translate-y-1 transition-transform border border-border flex flex-col justify-between">
+                 <div>
+                   <ResourceTypeLabel
+                     type={resource.type}
+                     className="text-[10px] uppercase tracking-[0.13em] text-primary font-bold"
+                   />
+                  <h3 className="font-serif text-[22px] leading-[1.05] tracking-tight mt-[16px] mb-[20px]">{resource.title}</h3>
+                </div>
+                <footer className="border-t border-border pt-[12px] text-[11px] flex justify-between items-center w-full mt-auto">
+                  <span className="font-medium">By {firstName}</span>
+                   <span className="text-muted-foreground flex items-center gap-1.5">Open resource <ArrowRight size={12} /></span>
+                </footer>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function TutorProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { data: tutor, isLoading, error, refetch } = useGetTutor(slug as string, {
@@ -67,7 +128,9 @@ export default function TutorProfile() {
         </Link>
         <div className="hidden sm:flex items-center gap-6">
           <button onClick={() => jumpTo('about')} className="hover:text-primary">About {firstName}</button>
-          <button onClick={() => jumpTo('resources')} className="hover:text-primary">Her resources</button>
+          {PUBLIC_RESOURCES_ENABLED && tutor.resources.length > 0 && (
+            <button onClick={() => jumpTo('resources')} className="hover:text-primary">Her resources</button>
+          )}
         </div>
       </div>
 
@@ -166,59 +229,7 @@ export default function TutorProfile() {
         </div>
       </section>
 
-      {/* Resources */}
-      {tutor.resources && tutor.resources.length > 0 && (
-        <section className="bg-secondary px-6 md:px-[30px] py-[60px] md:py-[88px]" id="resources">
-          <div className="max-w-[1150px] mx-auto">
-            <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary mb-4">From {firstName}'s desk</span>
-            <h2 className="font-serif text-[clamp(43px,5vw,67px)] leading-[0.91] tracking-tight m-0 mb-6">
-              Small notes for<br /><em>big ideas.</em>
-            </h2>
-            <p className="text-muted-foreground text-[14px] leading-[1.7] max-w-[490px]">
-              A few of {firstName}'s tutor-written resources — practical, personal and designed to be picked up between lessons.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-[1.25fr_0.75fr] gap-[14px] mt-[38px]">
-              {tutor.resources[0] && (
-                <Link href={`/resources/${tutor.resources[0].slug}`} className="bg-card p-[27px] min-h-[225px] md:min-h-[274px] text-left hover:-translate-y-1 transition-transform border border-border flex flex-col justify-between" style={{ backgroundColor: tutor.tint }}>
-                   <div>
-                     <ResourceTypeLabel
-                       type={tutor.resources[0].type}
-                       className="text-[10px] uppercase tracking-[0.13em] text-foreground font-bold opacity-80"
-                     />
-                     <span className="text-[10px] uppercase tracking-[0.13em] text-foreground font-bold opacity-80">
-                       · {tutor.resources[0].readMinutes} min read
-                     </span>
-                    <h3 className="font-serif text-[29px] leading-[1.03] tracking-tight mt-[25px] mb-[20px] max-w-[400px]">{tutor.resources[0].title}</h3>
-                  </div>
-                  <footer className="border-t border-foreground/10 pt-[12px] text-[11px] flex justify-between items-center w-full mt-auto">
-                    <span className="font-medium text-foreground">By {firstName} {tutor.name.split(' ')[1]}</span>
-                     <span className="flex items-center gap-1.5 text-foreground/80">Open resource <ArrowRight size={12} /></span>
-                  </footer>
-                </Link>
-              )}
-              
-              <div className="grid gap-[14px]">
-                {tutor.resources.slice(1, 3).map(resource => (
-                  <Link href={`/resources/${resource.slug}`} key={resource.id} className="bg-card p-[27px] min-h-[140px] text-left hover:-translate-y-1 transition-transform border border-border flex flex-col justify-between">
-                     <div>
-                       <ResourceTypeLabel
-                         type={resource.type}
-                         className="text-[10px] uppercase tracking-[0.13em] text-primary font-bold"
-                       />
-                      <h3 className="font-serif text-[22px] leading-[1.05] tracking-tight mt-[16px] mb-[20px]">{resource.title}</h3>
-                    </div>
-                    <footer className="border-t border-border pt-[12px] text-[11px] flex justify-between items-center w-full mt-auto">
-                      <span className="font-medium">By {firstName}</span>
-                       <span className="text-muted-foreground flex items-center gap-1.5">Open resource <ArrowRight size={12} /></span>
-                    </footer>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      <TutorResources tutor={tutor} />
 
       {/* Enquire */}
       <section className="bg-foreground text-background px-6 md:px-[30px] py-[60px] md:py-[88px]">

@@ -86,8 +86,9 @@ The act of shipping the current `main` to the Deployment.
 _Avoid_: Publish, ship, release, launch
 
 **Launch Smoke**:
-The check that a Deployment is *usable* — it has a published Tutor, a
-published Resource, its pages render, and an Enquiry can be submitted. A
+The check that a Deployment is *usable* — it has a published Tutor, its pages
+render, and an Enquiry can be submitted. While Resources are hidden from
+visitors, a usable Deployment needs no published Resource. A
 successful Deploy does not imply a passing Launch Smoke; they assert different
 things.
 _Avoid_: Health check, published smoke

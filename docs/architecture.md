@@ -14,6 +14,11 @@ The React app serves the public experience:
 - `/resources/:slug` — published resource detail
 - `/enquire` — enquiry form
 
+The two resource routes, and every link to them, exist only while
+`PUBLIC_RESOURCES_ENABLED` in `src/lib/features.ts` is on. It is off for now,
+so visitors see no resources; tutors still write and publish them in the
+Workspace.
+
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
 the public visual language. Public API handlers live in
 `artifacts/api-server/src/routes/content.ts` and
