@@ -72,12 +72,15 @@ Nothing applies the schema for you, and the Deploy job deliberately does not —
 the only mechanism this project has; run it deliberately against the Deployment
 database from a checkout.
 
-Export that connection string once per shell, then pass it in **expanded**:
+Read the **direct** connection string into a shell variable once per terminal.
+`read -rs` takes it without echoing it or writing it to shell history; paste it,
+`?sslmode=require` included, and press Enter. Every database command in this
+document then uses it as-is, so keep that terminal open for the session:
 
 ```
-export DATABASE_URL='postgres://...?sslmode=require'
+read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
 
-docker compose run --rm -e DATABASE_URL="$DATABASE_URL" --entrypoint bash migrate \
+docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
   -lc 'pnpm --filter @workspace/db run push'
 ```
 
@@ -86,7 +89,7 @@ it, so the connection string has to be supplied here.
 
 Three things about that command:
 
-- **Pass `-e DATABASE_URL="$DATABASE_URL"`, expanded, not bare `-e
+- **Pass `-e DATABASE_URL="$DIRECT_DATABASE_URL"`, expanded, not bare `-e
   DATABASE_URL`.** `docker-compose.yml` sets `DATABASE_URL` on the `migrate`
   service to the local development database, and an explicit `environment:`
   entry beats anything from `.env`. The bare form asks Compose to forward the
@@ -156,7 +159,7 @@ adding the new one — answer no; the default is already no.
 Check what landed, and check *where* it landed at the same time:
 
 ```
-docker compose run --rm -e DATABASE_URL="$DATABASE_URL" --entrypoint bash migrate \
+docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
   -lc 'psql "$DATABASE_URL" -c "\conninfo" -c "\dt"'
 ```
 
@@ -205,7 +208,7 @@ moment you create it, made in seconds, with its own connection strings.
    ```
 
    It is read as `REHEARSAL_DATABASE_URL` so that it cannot be confused with
-   the `DATABASE_URL` you export for the real push.
+   the `DIRECT_DATABASE_URL` you read for the real push.
 4. **Check the result** with the `\conninfo` and `\dt` command above, passing
    `"$REHEARSAL_DATABASE_URL"`. The host in `\conninfo` should be the branch's
    endpoint, which differs from the Deployment's. Query the tables the change
@@ -295,7 +298,7 @@ has to be done before the switch.
 Afterwards, look at what is there:
 
 ```
-docker compose run --rm -e DATABASE_URL="$DATABASE_URL" --entrypoint bash migrate \
+docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
   -lc 'psql "$DATABASE_URL" -c "SELECT id, clerk_user_id, email, role, tutor_id, created_at FROM workspace_accounts ORDER BY id"'
 ```
 
@@ -329,7 +332,7 @@ fly secrets set \
 ```
 
 The connection string is read as `POOLED_DATABASE_URL`, not `DATABASE_URL`, so
-it cannot be confused with the `DATABASE_URL` you exported for
+it cannot be confused with the `DIRECT_DATABASE_URL` you read for
 [schema work](#applying-the-schema). They are different strings: this one is
 the **pooled** endpoint the application runs against, the other is the
 **direct** endpoint for DDL. Passing the direct one here works and then quietly
