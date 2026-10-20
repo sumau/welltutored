@@ -71,17 +71,22 @@ reported as skipped rather than silently dropped.
 | `--dev` | the Clerk check, since a local stack runs on a development instance with no `clerk.` CNAME to check | never; development is a permanent mode |
 | `--allow-empty` | the non-empty assertion on `/api/tutors` and the page that addresses a Tutor by slug | the Deployment has a published Tutor |
 
-Two scripts wrap them:
+`smoke:dev` wraps `--dev`:
 
 ```sh
 SMOKE_BASE_URL=http://prod:8080 pnpm smoke:dev
-SMOKE_BASE_URL=https://welltutored.co.uk \
-  SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk pnpm smoke:launch:incomplete
 ```
 
-`smoke:launch:incomplete` carries `--allow-empty` and is what the deploy job in
-`.github/workflows/ci.yml` runs. Once the Deployment has content it becomes
-`pnpm run smoke:launch`, and the script entry goes with it.
+The Deployment has a published Tutor, so the deploy job in
+`.github/workflows/ci.yml` runs `smoke:launch` with no waiver. `--allow-empty`
+stays for a Deployment rebuilt from an empty database (#48), and has no script
+entry. Pass it through `smoke:launch` until the rebuilt Deployment has a
+published Tutor again:
+
+```sh
+SMOKE_BASE_URL=https://welltutored.co.uk \
+  SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk pnpm smoke:launch --allow-empty
+```
 
 ## Timeout controls
 

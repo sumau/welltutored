@@ -175,7 +175,7 @@ test("extracts pnpm commands from inline and block run steps", () => {
       "      - name: Smoke",
       "        run: |",
       "          echo checking",
-      "          pnpm run smoke:launch:incomplete",
+      "          pnpm run smoke:launch",
       "      - name: Deploy",
       "        run: flyctl deploy --remote-only",
     ].join("\n"),
@@ -197,7 +197,7 @@ test("extracts pnpm commands from inline and block run steps", () => {
     {
       filePath: ".github/workflows/ci.yml",
       lineNumber: 12,
-      command: "pnpm run smoke:launch:incomplete",
+      command: "pnpm run smoke:launch",
     },
   ]);
 });

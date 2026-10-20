@@ -531,17 +531,17 @@ things behave differently and neither is a fault:
 
 - The directory and resource library render their empty states, and `/api/tutors`
   returns an empty list.
-- `pnpm run smoke:launch`, run by hand, **fails**, because it asserts at least
-  one published tutor and one published resource.
-  `pnpm run smoke:launch:incomplete` waives exactly those assertions, and is
-  what CI runs while the Deployment is empty. Everything that does not depend on
-  content still runs. The two are easy to conflate: **the deploy job's Launch
-  smoke step is green on an empty Deployment**, so a red one there is a genuine
-  failure rather than this expected state. Drop back to `smoke:launch` once
-  there is content, and delete the waived variant:
+- `pnpm run smoke:launch` **fails**, because it asserts a published Tutor and
+  that Tutor's profile page, and so does the deploy job's Launch smoke step,
+  which runs it. `--allow-empty` waives exactly those assertions; everything
+  that does not depend on content still runs
+  ([launch-smoke-check.md](launch-smoke-check.md#waivers)). Run it by hand
+  while the Deployment is empty, and drop it once there is a published Tutor:
 
   ```
-  SMOKE_BASE_URL=https://welltutored.co.uk pnpm run smoke:launch
+  SMOKE_BASE_URL=https://welltutored.co.uk \
+    SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
+    pnpm run smoke:launch --allow-empty
   ```
 
 To get the illustrative tutors and resources without copying a database, point

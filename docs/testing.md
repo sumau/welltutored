@@ -14,43 +14,13 @@ live smoke checks that target either the local development stack or the
 Deployment. The CI integration tests use a temporary database, but the smoke
 helper tests do not target that database.
 
-```mermaid
-flowchart TB
-  subgraph automated["Automated gates"]
-    ci["CI: verify job<br/>verify:ci"] --> ciHelpers["test:smoke<br/>smoke-check.test.ts"]
-    ci --> ciDb["Temporary PostgreSQL database<br/>for API lifecycle integration tests"]
-    deploy["CI: deploy job<br/>push to main"] --> flyDeploy["flyctl deploy"]
-    flyDeploy --> deployLaunch["smoke:launch:incomplete<br/>--allow-empty"]
-    deployLaunch --> deployTarget["https://welltutored.co.uk<br/>SMOKE_BASE_URL"]
-    deployTarget --> deployCoverage["Health, catalogue, public pages,<br/>invalid-enquiry recovery,<br/>Clerk production instance<br/>content waived"]
-  end
-
-  subgraph development["Live development smoke"]
-    manualDev["Manual, against the local stack"] --> devLaunch["smoke:dev<br/>smoke-check.ts --dev"]
-    manualDev --> devBrowser["smoke:enquiry<br/>needs SMOKE_CHROMIUM_PATH"]
-    devLaunch --> devTarget["http://localhost:5173<br/>Vite dev server, proxying /api"]
-    devBrowser --> devTarget
-    devLaunch --> devCoverage["Health, catalogue, public pages,<br/>invalid-enquiry recovery<br/>Clerk check skipped"]
-    devBrowser --> devBrowserCoverage["Keyboard flow, validation,<br/>retry, success receipt<br/>requests intercepted"]
-  end
-
-  classDef gate fill:#e8eefc,stroke:#4666a8,color:#172554
-  classDef target fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
-  classDef coverage fill:#fff7df,stroke:#b7791f,color:#713f12
-  class ci,deploy,manualDev gate
-  class devTarget,deployTarget target
-  class devCoverage,devBrowserCoverage,deployCoverage,ciDb coverage
-```
-
-In short:
-
 - `test:smoke` is a code-level test suite for target selection, waivers,
   redirects, timeouts, and response handling. It runs inside `verify:ci`; it
   does not contact a live site.
 - `smoke:dev` and `smoke:enquiry` run manually against the local stack.
-- `smoke:launch:incomplete` runs automatically in the deploy job. `smoke:launch`
-  is the same check without the waiver, and is what to run by hand once the
-  Deployment has content.
+- `smoke:launch` runs automatically in the deploy job, against the
+  Deployment. Run it by hand with the command under [Launch and browser smoke
+  checks](#launch-and-browser-smoke-checks) to check the live site.
 - Every mode requires `SMOKE_BASE_URL`; nothing has a default target.
 - The browser enquiry checks intercept the submission response, so they do not
   create a real enquiry. The launch checks send an intentionally invalid
