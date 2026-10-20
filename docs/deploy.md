@@ -467,6 +467,45 @@ seconds sit above Neon's wake-from-suspend time and below the check's 5-second
 After that, merging to `main` deploys. `fly deploy` from a checkout still works
 and is how you would ship a first image before any of this is merged.
 
+### Blue-green deploys
+
+`fly.toml` sets `strategy = "bluegreen"`. A deploy boots a new machine beside
+the current one, waits for it to pass the Health Check, moves traffic to it, and
+then destroys the old one. So a version that doesn't start, or can't reach the
+database, never takes traffic. The machine also gets a new ID on every deploy,
+so nothing may depend on one.
+
+What it does **not** catch: broken pages, a missing Tutor, or code that doesn't
+match the live schema, which still answers `SELECT 1`. Those surface in the
+Launch Smoke, which runs after the switch, against the version visitors already
+see.
+
+**A failed deploy** is a red `Deploy to Fly` step. `flyctl` reports the new
+machine failing its checks, and the old machine keeps serving the previous
+version. Run `fly machines list` afterwards: if a machine from the failed
+attempt is still there, destroy it with `fly machines destroy <id> --force`.
+
+**A deploy that passes but breaks the site** is a red Launch smoke after a
+green `Deploy to Fly`. The new version is live, and nothing rolls it back by
+itself. To go back to the previous image:
+
+```
+fly releases --image          # the image reference of each release
+fly deploy --image <previous image reference>
+```
+
+Run it from a checkout of `main`, since it still reads `fly.toml` from there.
+Then revert the change on `main`, or the next merge ships it again.
+
+**Rolling back past a schema push is only safe if the push was additive.** The
+schema is pushed before merge ([ADR-0002](adr/0002-schema-by-deliberate-push.md)),
+so the previous image runs against the new schema. A new nullable column or
+table is fine. A renamed or dropped column breaks the old code too, and the
+rollback then means pushing the old schema back by hand.
+
+Deploying this way was chosen instead of a staging environment
+([ADR-0003](adr/0003-no-staging-environment.md)).
+
 ## Attaching a custom domain
 
 The Deployment starts on the `*.fly.dev` hostname `fly apps create` gives it.

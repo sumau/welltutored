@@ -158,6 +158,14 @@ once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
 is what makes a failure in either stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
 runs the launch smoke against the live site.
 
+The deploy is blue-green: the new machine takes traffic only once it passes the
+Health Check, `/api/healthz`, which needs the database to answer. So a version
+that won't start or can't reach the database fails the `Deploy to Fly` step and
+never goes live. Anything else surfaces in the launch smoke, after the switch.
+[deploy.md](deploy.md#blue-green-deploys) covers failures and rollback, and
+[ADR-0003](adr/0003-no-staging-environment.md) why there is no staging
+environment in front of this.
+
 It has its own `concurrency` group, without `cancel-in-progress`. The
 workflow-level group cancels superseded pull-request runs, which is right for
 verification and wrong for a deploy: a cancelled one leaves the Deployment
