@@ -126,7 +126,12 @@ The dedicated test database is therefore the only external dependency the
 deterministic gate has.
 
 The Image Smoke job is the exception, for the Sign-in Smoke. It reads three
-repository secrets from the Clerk **development** instance:
+repository secrets from the **development** instance of the Clerk application
+in the dashboard, the one whose production instance serves
+`welltutored.co.uk`. That is not necessarily the instance in a local `.env`,
+which may be an accountless application
+([local-docker.md](local-docker.md#which-clerk-instance-is-which)). The test
+user is created in that instance's dashboard, under Users.
 
 | Secret | Used for |
 | --- | --- |

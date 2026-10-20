@@ -120,7 +120,9 @@ Get a set of keys in one of these ways:
   application and writes its keys, with no Clerk account or login. Run it in a
   scratch directory and copy the keys over: it is framework-aware and will
   otherwise try to scaffold Clerk into this repository, which already has it
-  wired up.
+  wired up. The application is not in your Clerk dashboard, so its users are
+  only the ones who sign up at `localhost`, and it is not the instance CI uses
+  (see [Which Clerk instance is which](#which-clerk-instance-is-which)).
 - `npx clerk@latest env pull` writes the keys of an application you already
   own, after logging in.
 - Copy them from <https://dashboard.clerk.com/~/api-keys>.
@@ -138,6 +140,22 @@ Then recreate the containers. A plain restart keeps the old environment:
 ```
 docker compose up -d --force-recreate api web
 ```
+
+### Which Clerk instance is which
+
+Three Clerk instances can be in play, and each has its own users:
+
+| Instance | Where its keys live | Who it signs in |
+| --- | --- | --- |
+| An accountless development application, if `.env` came from `--accountless` | `.env` | Whoever signed up at `localhost`. Not visible in the dashboard. |
+| The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([ci-validation.md](ci-validation.md#credentials)) | The Sign-in Smoke's `+clerk_test` user, created in the dashboard |
+| The production instance of the same application | `fly.toml` and Fly secrets ([deploy.md](deploy.md)) | Tutors on `welltutored.co.uk` |
+
+A user exists only in the instance it was created in. "Couldn't find your
+account" for an address you know you created usually means the keys name a
+different instance. The publishable key says which one: the part after
+`pk_test_` is base64 for the instance's Frontend API host, such as
+`example-name-12.clerk.accounts.dev`.
 
 ## Signing in to the workspace
 

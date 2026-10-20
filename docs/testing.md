@@ -200,7 +200,9 @@ The Sign-in Smoke signs in through the real Clerk form, so its target must be
 built and run with Clerk **development** keys, and its database must be a
 fresh, seeded one with no owner: the check promotes its user to owner there. It
 refuses a database that is not local. `SMOKE_SIGN_IN_EMAIL` must be a
-`+clerk_test` user of that instance, and `SMOKE_FAILURE_SCREENSHOT` optionally
+`+clerk_test` user of the instance those keys belong to, which may not be the
+one CI uses ([local-docker.md](local-docker.md#which-clerk-instance-is-which)),
+and `SMOKE_FAILURE_SCREENSHOT` optionally
 names a file for a screenshot of the page when it fails:
 
 ```sh
