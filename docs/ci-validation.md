@@ -134,7 +134,7 @@ The deploy job finishes by running the launch smoke against the live site:
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \
   SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
-  pnpm run smoke:launch:incomplete
+  pnpm run smoke:launch
 ```
 
 CI also sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the
@@ -144,16 +144,11 @@ A successful Deploy does not mean a usable Deployment, which is why this runs
 at all. The check fails if the site is unhealthy or redirects to another
 origin.
 
-`smoke:launch:incomplete` is the ordinary launch smoke with one waiver, for the
-condition this Deployment is still in: it has no published content. Once it
-has, this becomes `pnpm run smoke:launch`.
-
-**This step is expected to pass, including while the Deployment is empty** —
-the waiver is exactly what makes that true. So a red Launch smoke on a merge
-to `main` is a real failure: an unhealthy site, a redirect to another origin, a
-broken public page. It is not the known-empty state, and it is not something to
-wave through. Only the flagless `pnpm run smoke:launch`, run by hand, fails on
-absent content.
+It runs without waivers, so it also asserts a published Tutor and that
+Tutor's profile page. **A red Launch smoke on a merge to `main` is a real
+failure**: an unhealthy site, a redirect to another origin, a broken public
+page, or published content that has gone missing. It is not something to wave
+through.
 
 ## Why three separate gates
 

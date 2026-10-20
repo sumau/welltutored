@@ -138,10 +138,6 @@ jobs:
       # A Deploy succeeding does not mean the Deployment is usable. The launch
       # smoke is fetch-based, so no browser is needed here.
       #
-      # "incomplete" is the one condition this Deployment is still in, waived
-      # by --allow-empty in the script: it has no published Tutor. When it
-      # has, this becomes `pnpm run smoke:launch` and the script entry goes.
-      #
       # SMOKE_REDIRECT_FROM is every other hostname the Deployment answers on;
       # each must redirect permanently to the Public Origin, so a lapsed
       # certificate or a broken DNS record fails here. SMOKE_CLERK_FRONTEND_API
@@ -155,4 +151,4 @@ jobs:
             https://welltutored.com
             https://www.welltutored.com
             https://welltutored.fly.dev
-        run: pnpm run smoke:launch:incomplete
+        run: pnpm run smoke:launch
