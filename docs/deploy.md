@@ -456,7 +456,13 @@ must never appear in this file.
 **`TRUSTED_ORIGINS` must match the deployed hostname exactly** — see the
 [configuration reference](#configuration-reference).
 
-The health check is already pointed at `/api/healthz`.
+The health check is already pointed at `/api/healthz`, the Health Check. It
+answers `200` only when the database answers a `SELECT 1` within 3 seconds, and
+`503` otherwise, so a wrong `DATABASE_URL` or an unreachable Neon takes the
+machine out of rotation. Fly then serves its own proxy error rather than the
+app's. That is accepted, since every page needs the database anyway. The 3
+seconds sit above Neon's wake-from-suspend time and below the check's 5-second
+`timeout`.
 
 After that, merging to `main` deploys. `fly deploy` from a checkout still works
 and is how you would ship a first image before any of this is merged.

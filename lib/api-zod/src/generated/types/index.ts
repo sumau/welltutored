@@ -12,6 +12,7 @@ export * from './enquiryReceipt';
 export * from './error';
 export * from './forbiddenResponse';
 export * from './healthStatus';
+export * from './healthStatusStatus';
 export * from './listResourcesParams';
 export * from './notFoundResponse';
 export * from './resource';

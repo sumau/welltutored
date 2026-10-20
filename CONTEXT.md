@@ -96,6 +96,12 @@ _Avoid_: Primary domain, main URL, canonical domain
 The act of shipping the current `main` to the Deployment.
 _Avoid_: Publish, ship, release, launch
 
+**Health Check**:
+Whether a machine of the Deployment may take traffic: its process is up and the
+database answers. Gates the switch to a new version during a Deploy. Says
+nothing about whether the site is usable; that is the Launch Smoke.
+_Avoid_: Liveness, readiness, ping
+
 **Launch Smoke**:
 The check that a Deployment is *usable* — it has a published Tutor, its pages
 render, and an Enquiry can be submitted. While Resources are hidden from

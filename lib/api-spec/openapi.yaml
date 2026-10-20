@@ -23,11 +23,17 @@ paths:
     get:
       operationId: healthCheck
       tags: [health]
-      summary: Health check
-      description: Returns server health status
+      summary: Health Check
+      description: Whether the server may take traffic. The database must answer a `SELECT 1` within 3s.
       responses:
         "200":
           description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "503":
+          description: The database did not answer
           content:
             application/json:
               schema:
@@ -592,6 +598,7 @@ components:
       properties:
         status:
           type: string
+          enum: [ok, unavailable]
       required:
         - status
     Tutor:
