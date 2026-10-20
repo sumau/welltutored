@@ -29,6 +29,13 @@ primary_region = "lhr"
   # them, and an empty set rejects every one, enquiries included.
   TRUSTED_ORIGINS = "https://welltutored.co.uk"
 
+[deploy]
+  # A new machine boots beside the old one and takes traffic only once it
+  # passes the Health Check below; then the old one is destroyed. A version
+  # that can't reach the database never goes live. docs/deploy.md has what a
+  # failed deploy looks like and how to roll back.
+  strategy = "bluegreen"
+
 [http_service]
   internal_port = 8080
   force_https = true
