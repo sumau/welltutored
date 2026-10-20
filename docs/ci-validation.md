@@ -1,7 +1,7 @@
 # CI and deploy validation
 
-The project uses separate checks for deterministic code quality, the running
-development stack, and the live Deployment.
+The project uses separate checks for deterministic code quality, the
+production image, the running development stack, and the live Deployment.
 
 ## Deterministic CI validation
 
@@ -67,6 +67,32 @@ scripts they name, so a renamed script cannot reach a deploy job that calls it.
 
 No Clerk credentials are configured for the workflow, for the reasons below.
 
+## The Image Smoke
+
+The `image-smoke` job runs alongside `verify`, on every pull request and on
+`main`. It checks that the production image starts and serves the site, which
+`verify` cannot: it builds the repository, not `docker/Dockerfile`. Without it,
+a broken Dockerfile or a startup failure would first show up in `flyctl deploy`
+on `main`.
+
+1. Pushes the schema to a `postgres:16` service container.
+2. Seeds it by starting the API once with `NODE_ENV=development`, the condition
+   `ensureSeedContent()` is gated on, until it logs that it is listening.
+3. Builds `docker/Dockerfile` with an empty `VITE_CLERK_PUBLISHABLE_KEY`, like
+   the compose `prod` service, with layers cached between runs.
+4. Runs the image on `http://localhost:8080`, with `TRUSTED_ORIGINS` set to
+   that origin and the `.env.example` placeholder `CLERK_SECRET_KEY`.
+5. Runs `pnpm smoke:dev` against it. A failure stops the deploy.
+6. Runs `pnpm smoke:enquiry` against it, with the runner's Google Chrome. This
+   step does not block yet (`continue-on-error`): it moves through the form by
+   tab order, so a harmless markup change can fail it. Once it has proven
+   stable, it should block too.
+
+The image it checks is not the one that ships. Fly builds the same Dockerfile
+again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
+against keeping the Clerk instances separate. So this checks the image's
+recipe, not the exact image.
+
 ## Credentials
 
 `pnpm run verify:ci` needs no Clerk credentials. The suite passes with
@@ -92,8 +118,8 @@ deterministic gate has.
 ## The deploy job
 
 The `deploy` job in the same workflow runs only on a push to `main`, and only
-once `verify` has passed — `needs: verify` is what makes a failed verification
-stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
+once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
+is what makes a failure in either stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
 runs the launch smoke against the live site.
 
 It has its own `concurrency` group, without `cancel-in-progress`. The
@@ -125,7 +151,8 @@ together.
 The browser check (`pnpm smoke:enquiry`) validates the enquiry flow with
 keyboard navigation, validation recovery, retry behavior, and an announced
 success receipt. Its requests are intercepted so it does not create a real
-Enquiry. It needs `SMOKE_CHROMIUM_PATH`, which is why it is not in CI.
+Enquiry. It needs `SMOKE_CHROMIUM_PATH`. CI runs both checks against the
+production image, in the Image Smoke.
 
 ## Post-deploy validation
 
@@ -150,9 +177,9 @@ failure**: an unhealthy site, a redirect to another origin, a broken public
 page, or published content that has gone missing. It is not something to wave
 through.
 
-## Why three separate gates
+## Why separate gates
 
-`verify:ci`, the development smoke and the launch smoke stay separate. The
-development smoke needs a running stack, and the launch smoke validates the
-Deployment visitors actually reach. The order to run them in before merging is
+`verify:ci`, the Image Smoke and the launch smoke stay separate. The Image
+Smoke needs a built image and a running container, and the launch smoke
+validates the Deployment visitors actually reach. The order to run them in before merging is
 in [CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).

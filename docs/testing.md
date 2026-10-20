@@ -17,7 +17,10 @@ helper tests do not target that database.
 - `test:smoke` is a code-level test suite for target selection, waivers,
   redirects, timeouts, and response handling. It runs inside `verify:ci`; it
   does not contact a live site.
-- `smoke:dev` and `smoke:enquiry` run manually against the local stack.
+- `smoke:dev` and `smoke:enquiry` run manually against the local stack, and in
+  CI against the production image, in the Image Smoke
+  ([ci-validation.md](ci-validation.md#the-image-smoke)). `smoke:enquiry` does
+  not block a deploy yet.
 - `smoke:launch` runs automatically in the deploy job, against the
   Deployment. Run it by hand with the command under [Launch and browser smoke
   checks](#launch-and-browser-smoke-checks) to check the live site.

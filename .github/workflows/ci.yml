@@ -1,11 +1,9 @@
 # Deterministic repository verification, as defined by `pnpm run verify:ci`,
-# and then the deploy. docs/ci-validation.md is the description of what the
-# verification gate covers and why; this file only supplies the environment it
-# needs.
+# the Image Smoke against the production image, and then the deploy.
+# docs/ci-validation.md is the description of what each gate covers and why;
+# this file only supplies the environment they need.
 #
-# Deliberately absent: the development smoke check, which needs a running local
-# stack to point at, and the Playwright enquiry smoke, which needs a browser
-# this runner does not carry. No Clerk credentials for `verify` either: the
+# No Clerk credentials for `verify`: the
 # suite is expected to pass with CLERK_SECRET_KEY,
 # CLERK_PUBLISHABLE_KEY, and VITE_CLERK_PUBLISHABLE_KEY all absent, so giving
 # CI secrets would weaken that guarantee rather than test it.
@@ -92,11 +90,120 @@ jobs:
       - name: Verify
         run: pnpm run verify:ci
 
+  # The Image Smoke: does the production image start and serve the site? It
+  # builds docker/Dockerfile itself, so it checks the image's recipe, not the
+  # exact image Fly builds and ships (that one carries the pk_live_ key).
+  image-smoke:
+    name: Image Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: welltutored
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d welltutored"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 30
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/welltutored
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply the schema
+        run: pnpm --filter @workspace/db run push
+
+      # The API seeds sample content when it starts with NODE_ENV=development
+      # on an empty database (docs/deploy.md). Start it once, wait until it
+      # listens, and stop it: the database then has Tutors to smoke.
+      - name: Seed sample content
+        run: |
+          pnpm --filter @workspace/api-server run build
+          NODE_ENV=development PORT=8090 \
+            node artifacts/api-server/dist/index.mjs > seed.log 2>&1 &
+          pid=$!
+          timeout 120 bash -c \
+            "until grep -q 'Server listening' seed.log; do kill -0 $pid || exit 1; sleep 1; done" \
+            || { cat seed.log; exit 1; }
+          kill "$pid"
+
+      - uses: docker/setup-buildx-action@v4
+
+      # An empty publishable key, like the compose `prod` service: the public
+      # site works, sign-in does not. The GHA cache keeps the base image and
+      # pnpm layers between runs.
+      - name: Build the production image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile
+          build-args: VITE_CLERK_PUBLISHABLE_KEY=
+          tags: welltutored:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Host networking, so the container reaches the postgres service on
+      # localhost and serves on http://localhost:8080. TRUSTED_ORIGINS is that
+      # origin, or the enquiry POST is rejected. CLERK_SECRET_KEY is the
+      # .env.example placeholder: without one, every /api request returns 500
+      # (docs/local-docker.md, "Clerk").
+      - name: Start the image
+        run: |
+          docker run -d --name welltutored --network host \
+            -e PORT=8080 \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e TRUSTED_ORIGINS=http://localhost:8080 \
+            -e CLERK_SECRET_KEY=sk_test_00000000000000000000000000000000 \
+            welltutored:ci
+          curl -fsS --retry 30 --retry-delay 1 --retry-all-errors \
+            http://localhost:8080/api/healthz
+
+      - name: Development smoke
+        env:
+          SMOKE_BASE_URL: http://localhost:8080
+        run: pnpm run smoke:dev
+
+      # Not blocking yet: it moves through the form by tab order, so a harmless
+      # markup change can fail it. It intercepts /api/enquiries, so it covers
+      # the built form in a real browser; the development smoke covers the
+      # server's handling of an invalid enquiry. The runner image carries
+      # Google Chrome.
+      - name: Enquiry browser smoke
+        continue-on-error: true
+        env:
+          SMOKE_BASE_URL: http://localhost:8080
+        run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:enquiry
+
+      - name: Image logs
+        if: failure()
+        run: docker logs welltutored
+
   # Merging to main ships. Nothing else does: a pull request run stops at
-  # `verify`, and `needs` keeps a failed verification from deploying.
+  # `verify` and the Image Smoke, and `needs` keeps a failure in either from
+  # deploying.
   deploy:
     name: deploy
-    needs: verify
+    needs: [verify, image-smoke]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
