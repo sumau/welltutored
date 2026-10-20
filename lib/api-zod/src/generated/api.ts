@@ -9,11 +9,11 @@ import * as zod from 'zod';
 
 
 /**
- * Returns server health status
- * @summary Health check
+ * Whether the server may take traffic. The database must answer a `SELECT 1` within 3s.
+ * @summary Health Check
  */
 export const HealthCheckResponse = zod.object({
-  "status": zod.string()
+  "status": zod.enum(['ok', 'unavailable'])
 })
 
 
