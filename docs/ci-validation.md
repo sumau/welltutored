@@ -1,7 +1,69 @@
 # CI and deploy validation
 
-The project uses separate checks for deterministic code quality, the
-production image, the running development stack, and the live Deployment.
+What checks a change, when, and what blocks, from pull request to live site:
+
+```mermaid
+flowchart TB
+  %% From pull request to live site.
+  subgraph pipeline[" "]
+    direction LR
+    pr["Pull request"] --> verify["verify"]
+    pr --> image["Image Smoke"]
+    image -.-> signIn["Sign-in Smoke"]
+    verify --> merge["Merge to main"]
+    image --> merge
+    merge --> deploy["Deploy<br/>blue-green"]
+    deploy --> health["Health Check<br/>on the new machine"]
+    health --> live["New version<br/>takes traffic"]
+    live --> launch["Launch Smoke"]
+    launch -.-> manual["Manual sign-in<br/>after auth changes"]
+  end
+
+  %% The legend. Links written ~~~ are invisible and only position things.
+  subgraph legend[" "]
+    direction TB
+    subgraph legendArrows[" "]
+      direction LR
+      keyA[" "] -->|"next step waits for this to pass"| keyB[" "]
+      keyC[" "] -.->|"runs, but nothing waits for it"| keyD[" "]
+    end
+
+    subgraph legendBoxes[" "]
+      direction LR
+      keyEvent["Step from pull request to live site"]
+      keySoft["Check that doesn't block yet"]
+      keyGate["Check that blocks"]
+      keyEvent ~~~ keySoft ~~~ keyGate
+    end
+
+    legendArrows ~~~ legendBoxes
+  end
+
+  pipeline ~~~ legend
+
+  classDef gate fill:#e8eefc,stroke:#4666a8,color:#172554
+  classDef soft fill:#fff7df,stroke:#b7791f,color:#713f12
+  classDef event fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
+  classDef blank fill:none,stroke:#888,color:#888
+  class verify,image,health,launch,keyGate gate
+  class signIn,manual,keySoft soft
+  class pr,merge,deploy,live,keyEvent event
+  class keyA,keyB,keyC,keyD blank
+
+  style pipeline fill:none,stroke:none
+  style legend fill:none,stroke:#888,stroke-dasharray:4
+  style legendArrows fill:none,stroke:none
+  style legendBoxes fill:none,stroke:none
+```
+
+| Check | Runs against | When | Covers | By hand |
+|---|---|---|---|---|
+| `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs | `docker compose run --rm test` |
+| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | `docker compose up --build prod`, then `smoke:dev` and `smoke:enquiry` with `SMOKE_BASE_URL=http://localhost:8081` |
+| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#launch-and-browser-smoke-checks)) |
+| Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | `smoke:launch` with `SMOKE_BASE_URL=https://welltutored.co.uk` |
+| Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
 
@@ -223,8 +285,21 @@ through.
 
 ## Why separate gates
 
-`verify:ci`, the Image Smoke and the launch smoke stay separate. The Image
-Smoke needs a built image, a running container and the only Clerk secrets
-in CI, and the launch smoke
-validates the Deployment visitors actually reach. The order to run them in before merging is
-in [CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).
+Each check runs where it is the cheapest one that can see a kind of failure:
+
+- `verify` needs no image and no secrets, so it is fast and runs everything
+  that only needs the code.
+- The Image Smoke needs a built image and a running container, and the Sign-in
+  Smoke in it needs the only Clerk secrets in CI. Kept out of `verify`, those
+  stay in one job.
+- The Health Check is the only check that runs on the machine that is about to
+  take traffic, so it is the one the switch waits for. It checks only that the
+  process is up and the database answers, because Fly runs it every 15 seconds.
+- The Launch Smoke validates the Deployment visitors actually reach: real
+  data, hostnames, certificates and the production Clerk instance. It runs
+  after the switch, so it reports a broken page rather than preventing one.
+  [ADR-0003](adr/0003-no-staging-environment.md) is why nothing stands between
+  the two.
+
+The order to run them in before merging is in
+[CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).

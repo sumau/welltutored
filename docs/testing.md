@@ -14,6 +14,9 @@ live smoke checks that target either the local development stack or the
 Deployment. The CI integration tests use a temporary database, but the smoke
 helper tests do not target that database.
 
+[ci-validation.md](ci-validation.md) has a diagram and table of every check,
+from pull request to live site, and which of them block.
+
 - `test:smoke` is a code-level test suite for target selection, waivers,
   redirects, timeouts, and response handling. It runs inside `verify:ci`; it
   does not contact a live site.
