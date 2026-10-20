@@ -8,6 +8,8 @@ what the project is and how to run it; this file covers how to change it.
 CI deploys to Fly on every push to `main` and then runs the launch smoke
 against the live site. There is no separate release step, so a merged pull
 request is a shipped one. Everything below follows from that.
+[docs/ci-validation.md](docs/ci-validation.md) shows every check between a pull
+request and the live site, and which of them block.
 
 ## Plans and issues
 
