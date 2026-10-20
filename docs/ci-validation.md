@@ -65,7 +65,7 @@ one place.
 `docs:check` also reads this workflow's `run:` steps and validates the `pnpm`
 scripts they name, so a renamed script cannot reach a deploy job that calls it.
 
-No Clerk credentials are configured for the workflow, for the reasons below.
+Only the Image Smoke job has Clerk credentials, for the reasons below.
 
 ## The Image Smoke
 
@@ -87,6 +87,16 @@ on `main`.
    step does not block yet (`continue-on-error`): it moves through the form by
    tab order, so a harmless markup change can fail it. Once it has proven
    stable, it should block too.
+7. Runs the Sign-in Smoke, `pnpm smoke:sign-in`, also with Chrome and also not
+   blocking yet. It signs in through the real Clerk form as a `+clerk_test`
+   user, which Clerk signs in with the code `424242` and never emails. The
+   first sign-in creates a pending account, so it promotes that account to
+   owner in the job's database (the guarded update from
+   [workspace-owner-bootstrap.md](workspace-owner-bootstrap.md)) and links it
+   to a seeded Tutor. Then it signs in again, saves a profile edit, publishes
+   a Resource, and checks that the Resource's public page is Not Found while
+   Resources are hidden. Once it has run reliably for a couple of weeks, it
+   should block too.
 
 The image it checks is not the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
@@ -97,7 +107,7 @@ recipe, not the exact image.
 
 `pnpm run verify:ci` needs no Clerk credentials. The suite passes with
 `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, and `VITE_CLERK_PUBLISHABLE_KEY`
-all absent, so CI should not be given Clerk secrets, and the interactive
+all absent, so the `verify` job is not given Clerk secrets, and the interactive
 `clerk auth login` flow has no place in it: that command authenticates a person
 through a browser, which CI does not have.
 
@@ -114,6 +124,27 @@ local stack runs on a development instance with no `clerk.` CNAME to check.
 
 The dedicated test database is therefore the only external dependency the
 deterministic gate has.
+
+The Image Smoke job is the exception, for the Sign-in Smoke. It reads three
+repository secrets from the Clerk **development** instance:
+
+| Secret | Used for |
+| --- | --- |
+| `CLERK_TEST_PUBLISHABLE_KEY` | The image's `VITE_CLERK_PUBLISHABLE_KEY` build argument, and its `CLERK_PUBLISHABLE_KEY` |
+| `CLERK_TEST_SECRET_KEY` | The image's `CLERK_SECRET_KEY` |
+| `CLERK_TEST_EMAIL` | The `+clerk_test` user the Sign-in Smoke signs in as. A secret only because the repository is public. |
+
+The job refuses keys that are not `pk_test_` and `sk_test_`. Without the
+secrets, as on a pull request from a fork or Dependabot, the image builds with
+an empty publishable key and runs with the `.env.example` placeholder secret
+key. The development smoke then still passes and the Sign-in Smoke fails
+without blocking.
+
+What the Sign-in Smoke cannot cover is the production Clerk instance itself:
+its first-party cookies on `clerk.welltutored.co.uk` and the dashboard
+settings that can differ between the two instances. That is a manual sign-in
+after merging an auth or Clerk change
+([CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request)).
 
 ## The deploy job
 
@@ -180,6 +211,7 @@ through.
 ## Why separate gates
 
 `verify:ci`, the Image Smoke and the launch smoke stay separate. The Image
-Smoke needs a built image and a running container, and the launch smoke
+Smoke needs a built image, a running container and the only Clerk secrets
+in CI, and the launch smoke
 validates the Deployment visitors actually reach. The order to run them in before merging is
 in [CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).

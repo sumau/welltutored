@@ -146,17 +146,29 @@ jobs:
             || { cat seed.log; exit 1; }
           kill "$pid"
 
+      # The Sign-in Smoke uses the Clerk development instance's keys, here and
+      # nowhere else: `verify` stays free of Clerk secrets. A production key
+      # would sign CI in to the Deployment's instance, so refuse one.
+      - name: Check the Clerk keys are development keys
+        env:
+          CLERK_TEST_PUBLISHABLE_KEY: ${{ secrets.CLERK_TEST_PUBLISHABLE_KEY }}
+          CLERK_TEST_SECRET_KEY: ${{ secrets.CLERK_TEST_SECRET_KEY }}
+        run: |
+          case "$CLERK_TEST_PUBLISHABLE_KEY" in ""|pk_test_*) ;; *) echo "CLERK_TEST_PUBLISHABLE_KEY is not a pk_test_ key." >&2; exit 1 ;; esac
+          case "$CLERK_TEST_SECRET_KEY" in ""|sk_test_*) ;; *) echo "CLERK_TEST_SECRET_KEY is not an sk_test_ key." >&2; exit 1 ;; esac
+
       - uses: docker/setup-buildx-action@v4
 
-      # An empty publishable key, like the compose `prod` service: the public
-      # site works, sign-in does not. The GHA cache keeps the base image and
-      # pnpm layers between runs.
+      # The development instance's publishable key, so sign-in works. Without
+      # the secret (a pull request from a fork or Dependabot) it is empty, like
+      # the compose `prod` service: the public site works, sign-in does not.
+      # The GHA cache keeps the base image and pnpm layers between runs.
       - name: Build the production image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/Dockerfile
-          build-args: VITE_CLERK_PUBLISHABLE_KEY=
+          build-args: VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_TEST_PUBLISHABLE_KEY }}
           tags: welltutored:ci
           load: true
           cache-from: type=gha
@@ -164,16 +176,20 @@ jobs:
 
       # Host networking, so the container reaches the postgres service on
       # localhost and serves on http://localhost:8080. TRUSTED_ORIGINS is that
-      # origin, or the enquiry POST is rejected. CLERK_SECRET_KEY is the
-      # .env.example placeholder: without one, every /api request returns 500
-      # (docs/local-docker.md, "Clerk").
+      # origin, or the enquiry POST is rejected. Without the secret,
+      # CLERK_SECRET_KEY falls back to the .env.example placeholder: without
+      # any key, every /api request returns 500 (docs/local-docker.md, "Clerk").
       - name: Start the image
+        env:
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_TEST_SECRET_KEY || 'sk_test_00000000000000000000000000000000' }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_TEST_PUBLISHABLE_KEY }}
         run: |
           docker run -d --name welltutored --network host \
             -e PORT=8080 \
             -e DATABASE_URL="$DATABASE_URL" \
             -e TRUSTED_ORIGINS=http://localhost:8080 \
-            -e CLERK_SECRET_KEY=sk_test_00000000000000000000000000000000 \
+            -e CLERK_SECRET_KEY \
+            -e CLERK_PUBLISHABLE_KEY \
             welltutored:ci
           curl -fsS --retry 30 --retry-delay 1 --retry-all-errors \
             http://localhost:8080/api/healthz
@@ -193,6 +209,18 @@ jobs:
         env:
           SMOKE_BASE_URL: http://localhost:8080
         run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:enquiry
+
+      # The Sign-in Smoke. Not blocking yet, until it has proven reliable. It
+      # signs in as a +clerk_test user (a secret, since this repository is
+      # public), promotes it to owner in this job's database, and uses the
+      # Workspace. It runs last because it writes to that database.
+      - name: Sign-in smoke
+        continue-on-error: true
+        env:
+          SMOKE_BASE_URL: http://localhost:8080
+          SMOKE_SIGN_IN_EMAIL: ${{ secrets.CLERK_TEST_EMAIL }}
+          SMOKE_DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:sign-in
 
       - name: Image logs
         if: failure()

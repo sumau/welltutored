@@ -11,15 +11,18 @@
     "smoke": "tsx ./src/smoke-check.ts",
     "smoke:dev": "tsx ./src/smoke-check.ts --dev",
     "smoke:enquiry": "tsx ./src/enquiry-browser-smoke.ts",
+    "smoke:sign-in": "tsx ./src/sign-in-browser-smoke.ts",
     "test:smoke": "tsx --test ./src/smoke-check.test.ts",
     "test:docs": "tsx --test ./src/docs-check.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pg": "^8.23.1",
     "tsx": "catalog:"
   },
   "dependencies": {
+    "pg": "^8.23.0",
     "playwright-core": "^1.63.0"
   }
 }

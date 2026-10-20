@@ -15,6 +15,7 @@
     "smoke:launch": "pnpm --filter @workspace/scripts run smoke",
     "smoke:dev": "pnpm --filter @workspace/scripts run smoke:dev",
     "smoke:enquiry": "pnpm --filter @workspace/scripts run smoke:enquiry",
+    "smoke:sign-in": "pnpm --filter @workspace/scripts run smoke:sign-in",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
