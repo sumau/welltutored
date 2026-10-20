@@ -103,3 +103,9 @@ visitors, a usable Deployment needs no published Resource. A
 successful Deploy does not imply a passing Launch Smoke; they assert different
 things.
 _Avoid_: Health check, published smoke
+
+**Image Smoke**:
+The check, before merge, that the production image starts and serves the site
+against a throwaway database seeded with sample content. It checks the image's
+recipe, not the exact image that ships.
+_Avoid_: Docker test, build check

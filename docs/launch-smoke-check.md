@@ -124,4 +124,5 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 
 `SMOKE_CHROMIUM_PATH` is required: `playwright-core` bundles no browser and
 none of this project's images carry one, so this check runs from wherever a
-Chromium already exists. It is deliberately not in CI for the same reason.
+Chromium already exists. In CI that is the runner's Google Chrome, in the Image
+Smoke ([ci-validation.md](ci-validation.md#the-image-smoke)).
