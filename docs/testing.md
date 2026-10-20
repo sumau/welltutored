@@ -21,6 +21,8 @@ helper tests do not target that database.
   CI against the production image, in the Image Smoke
   ([ci-validation.md](ci-validation.md#the-image-smoke)). `smoke:enquiry` does
   not block a deploy yet.
+- `smoke:sign-in` is the Sign-in Smoke. It runs in the Image Smoke with the
+  Clerk development instance's keys, and does not block a deploy yet.
 - `smoke:launch` runs automatically in the deploy job, against the
   Deployment. Run it by hand with the command under [Launch and browser smoke
   checks](#launch-and-browser-smoke-checks) to check the live site.
@@ -193,6 +195,23 @@ create real Enquiries:
 SMOKE_BASE_URL=http://localhost:5173 \
   SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:enquiry
 ```
+
+The Sign-in Smoke signs in through the real Clerk form, so its target must be
+built and run with Clerk **development** keys, and its database must be a
+fresh, seeded one with no owner: the check promotes its user to owner there. It
+refuses a database that is not local. `SMOKE_SIGN_IN_EMAIL` must be a
+`+clerk_test` user of that instance, and `SMOKE_FAILURE_SCREENSHOT` optionally
+names a file for a screenshot of the page when it fails:
+
+```sh
+SMOKE_BASE_URL=http://localhost:8080 \
+  SMOKE_SIGN_IN_EMAIL=someone+clerk_test@example.com \
+  SMOKE_DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
+  SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:sign-in
+```
+
+[ci-validation.md](ci-validation.md#the-image-smoke) has the steps CI uses to
+prepare that target.
 
 Per-request and overall smoke timeouts can be adjusted with `SMOKE_TIMEOUT_MS`
 and `SMOKE_TOTAL_TIMEOUT_MS`. The waiver flags, and the conditions that end

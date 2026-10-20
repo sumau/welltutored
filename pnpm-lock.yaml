@@ -357,6 +357,9 @@ importers:
 
   scripts:
     dependencies:
+      pg:
+        specifier: ^8.23.0
+        version: 8.23.0
       playwright-core:
         specifier: ^1.63.0
         version: 1.63.0
@@ -364,6 +367,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.0
+      '@types/pg':
+        specifier: ^8.23.1
+        version: 8.23.1
       tsx:
         specifier: 'catalog:'
         version: 4.23.15

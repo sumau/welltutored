@@ -109,3 +109,9 @@ The check, before merge, that the production image starts and serves the site
 against a throwaway database seeded with sample content. It checks the image's
 recipe, not the exact image that ships.
 _Avoid_: Docker test, build check
+
+**Sign-in Smoke**:
+The check, before merge, that a person can sign in through the real Clerk form,
+using the development instance, and use the Workspace. Differences between the
+development and production Clerk instances are outside it.
+_Avoid_: Auth test, login check
