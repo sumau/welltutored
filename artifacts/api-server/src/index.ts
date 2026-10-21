@@ -1,6 +1,10 @@
+import { pool } from "@workspace/db";
 import app from "./app";
 import { logger } from "./lib/logger";
+import { logPoolErrors } from "./lib/pool-errors";
 import { ensureSeedContent } from "./lib/seed-content";
+
+logPoolErrors(pool);
 
 const rawPort = process.env["PORT"];
 
