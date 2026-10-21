@@ -45,11 +45,16 @@ pnpm --filter @workspace/api-server test
 ```
 
 This is the complete API suite used by CI. It runs the in-memory unit checks
-and the database-backed workspace lifecycle integration tests. The lifecycle
-tests cover:
+and the database-backed integration tests, which cover:
 
 - Workspace tutor, resource, article, account, and permission lifecycles,
   including owner-only behavior and Clerk identity reuse.
+- Enquiries: a valid enquiry is saved and its delivery status recorded,
+  invalid ones are rejected, the workspace lists each tutor only their own,
+  and a failed one can be retried. Delivery failures are simulated by failing
+  the database update that records delivery.
+- The public resource list and resource pages: only published resources by
+  published tutors, search, the subject filter, and paging.
 
 Running this package test command directly does not provision a database. Use
 `pnpm run verify:ci` for the CI path that creates an isolated temporary local
@@ -94,7 +99,10 @@ runs do not reuse or delete one another's records.
 
 The test database holds the schema and no seed data, so a lifecycle test must
 create every row it asserts against, such as a second tutor, and clean up only
-its own namespace. To stub Clerk, replace the method on the shared users API
+its own namespace. The test files run in parallel against that one database,
+so a published tutor that one file creates shows up in another file's public
+tutor list: give it everything the public API requires, such as a teaching
+point, or that list fails with a 500. To stub Clerk, replace the method on the shared users API
 prototype: `clerkClient.users` can return a fresh object on each access, so a
 stub assigned through it is silently discarded and the route reaches Clerk.
 

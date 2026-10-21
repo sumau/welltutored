@@ -9,7 +9,7 @@
     "start": "node --enable-source-maps ./dist/index.mjs",
     "test": "pnpm run test:unit && pnpm run test:integration",
     "test:unit": "tsx --test src/lib/resource-types.test.ts src/lib/web-client.test.ts src/lib/health-check.test.ts src/domain/workspace-validation.test.ts src/middlewares/request-origin.test.ts src/middlewares/public-origin.test.ts",
-    "test:integration": "NODE_ENV=test tsx --test src/lib/pool-errors.test.ts src/routes/workspace.lifecycle.test.ts",
+    "test:integration": "NODE_ENV=test tsx --test src/lib/pool-errors.test.ts src/routes/workspace.lifecycle.test.ts src/routes/enquiries.test.ts src/routes/resources.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
