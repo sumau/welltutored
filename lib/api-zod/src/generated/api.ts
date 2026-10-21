@@ -235,56 +235,6 @@ export const GetResourceResponse = zod.object({
 
 
 /**
- * @summary List resources saved by the current account
- */
-export const ListSavedResourcesResponseItem = zod.object({
-  "id": zod.int(),
-  "slug": zod.string(),
-  "title": zod.string(),
-  "tutorSlug": zod.string(),
-  "tutorName": zod.string(),
-  "tutorTint": zod.string(),
-  "subject": zod.string(),
-  "level": zod.string(),
-  "type": zod.enum(['Study note', 'Guide', 'Essay', 'Revision notes']),
-  "readMinutes": zod.int(),
-  "excerpt": zod.string(),
-  "publishedAt": zod.coerce.date(),
-  "tint": zod.string()
-})
-export const ListSavedResourcesResponse = zod.array(ListSavedResourcesResponseItem)
-
-
-/**
- * @summary Save a published resource for the current account
- */
-
-
-
-export const SaveResourceParams = zod.object({
-  "id": zod.coerce.number().int().min(1)
-})
-
-export const SaveResourceResponse = zod.object({
-  "resourceId": zod.int(),
-  "saved": zod.boolean()
-})
-
-
-/**
- * @summary Remove a resource from the current account's saved list
- */
-
-
-
-export const UnsaveResourceParams = zod.object({
-  "id": zod.coerce.number().int().min(1)
-})
-
-export const UnsaveResourceResponse = zod.void()
-
-
-/**
  * @summary Submit a named-tutor enquiry
  */
 export const createEnquiryBodyNameMin = 2;

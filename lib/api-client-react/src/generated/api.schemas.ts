@@ -160,11 +160,6 @@ export type ResourceDetail = Resource & {
   related: Resource[];
 };
 
-export interface SavedResourceState {
-  resourceId: number;
-  saved: boolean;
-}
-
 export type WorkspaceSessionRole = typeof WorkspaceSessionRole[keyof typeof WorkspaceSessionRole];
 
 

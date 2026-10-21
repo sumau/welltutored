@@ -20,7 +20,6 @@ export * from './resourceDetail';
 export * from './resourcePage';
 export * from './resourceSection';
 export * from './resourceType';
-export * from './savedResourceState';
 export * from './teachingPoint';
 export * from './tutor';
 export * from './tutorIntake';
