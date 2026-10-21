@@ -155,6 +155,13 @@ Here the order flips: merge first and push after, so the running Deployment
 never queries a table that has gone. That works whenever the merged code no
 longer reads the table.
 
+**Both prompts appear only when there is data to lose.** `push` counts the rows
+first and asks only when the count is above zero. An empty table, or a column
+no row holds a value in, is dropped with no prompt, and the push just reports
+`Changes applied`. Production's `saved_resources` was empty, so its push showed
+no prompt. To confirm the drop, run the `\conninfo` and `\dt` check at the end
+of this section, then push again: it should print `No changes detected`.
+
 **Renames are the exception, and they prompt on any database, empty or not.**
 `push` diffs states, so it cannot tell a renamed type or constraint from a
 dropped one and a new one — it asks. The highlighted default is `create`, which
