@@ -58,7 +58,7 @@ flowchart TB
 
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
-| `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs | `docker compose run --rm test` |
+| `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
 | [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | `docker compose up --build prod`, then `smoke:dev` and `smoke:enquiry` with `SMOKE_BASE_URL=http://localhost:8081` |
 | Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#launch-and-browser-smoke-checks)) |
 | Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
@@ -84,6 +84,8 @@ This command runs, in order:
 6. Smoke-check tests.
 7. `pnpm run build`, which checks documented commands, type-checks libraries
    and workspace packages, and builds the packages that define a build script.
+8. The CSS budget, which fails when the built primary stylesheet outgrows the
+   limits in `artifacts/welltutored/scripts/verify-css-build.mjs`.
 
 The command stops at the first failure and returns a non-zero exit code. It is
 the deterministic quality gate and does not depend on a running dev stack or a

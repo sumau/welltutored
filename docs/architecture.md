@@ -173,10 +173,12 @@ private draft alongside a live published version.
 
 The Well Tutored Vite build enables Tailwind's production Lightning CSS
 optimization. `artifacts/welltutored/scripts/verify-css-build.mjs` holds a size
-budget for the primary stylesheet; run
+budget for the primary stylesheet, set about 7% above its size in October 2026
+so that growth is a decision rather than drift. `pnpm run verify:ci` checks it
+after the build. To check it alone, run
 `pnpm --filter @workspace/welltutored run build` followed by
-`pnpm --filter @workspace/welltutored run verify:css` to check it, and the
-script prints the current size.
+`pnpm --filter @workspace/welltutored run verify:css`; the script prints the
+current size.
 
 The remaining global CSS is intentional: Tailwind preflight, theme variables,
 utilities used by both public and authenticated routes, motion states, and
