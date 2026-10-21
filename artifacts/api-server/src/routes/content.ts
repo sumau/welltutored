@@ -5,20 +5,11 @@ import {
   GetResourceResponse,
   GetTutorParams,
   GetTutorResponse,
-  ListSavedResourcesResponse,
   ListResourcesQueryParams,
   ListResourcesResponse,
   ListTutorsResponse,
-  SaveResourceParams,
-  SaveResourceResponse,
-  UnsaveResourceParams,
 } from "@workspace/api-zod";
-import {
-  db,
-  resourcesTable,
-  savedResourcesTable,
-  tutorsTable,
-} from "@workspace/db";
+import { db, resourcesTable, tutorsTable } from "@workspace/db";
 import { estimateReadMinutes, truncateAtWordBoundary } from "../lib/text";
 import { tutorNameFields } from "../lib/tutor-names";
 import { publicTutorSlug } from "../lib/tutor-slugs";
@@ -28,7 +19,6 @@ import {
   findPublishedTutor,
   setPublicTutorCacheHeaders,
 } from "../lib/public-tutors";
-import { requireWorkspaceAccount } from "../auth/workspace-access";
 
 const router: IRouter = Router();
 
@@ -284,93 +274,5 @@ router.get("/resources/:slug", async (req, res): Promise<void> => {
     }),
   );
 });
-
-router.get("/workspace/saved-resources", async (req, res): Promise<void> => {
-  const account = await requireWorkspaceAccount(req, res);
-  if (!account) return;
-
-  const rows = await db
-    .select({
-      resource: resourcesTable,
-      tutor: {
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(savedResourcesTable)
-    .innerJoin(
-      resourcesTable,
-      eq(savedResourcesTable.resourceId, resourcesTable.id),
-    )
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(savedResourcesTable.accountId, account.id),
-        eq(resourcesTable.status, "published"),
-        eq(tutorsTable.profileStatus, "published"),
-      ),
-    )
-    .orderBy(asc(savedResourcesTable.createdAt));
-
-  res.json(ListSavedResourcesResponse.parse(rows.map(toResource)));
-});
-
-router.put("/workspace/saved-resources/:id", async (req, res): Promise<void> => {
-  const account = await requireWorkspaceAccount(req, res);
-  if (!account) return;
-  const params = SaveResourceParams.safeParse(req.params);
-  if (!params.success) {
-    res.status(400).json({ error: "Invalid resource." });
-    return;
-  }
-
-  const [resource] = await db
-    .select({ id: resourcesTable.id })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(resourcesTable.id, params.data.id),
-        eq(resourcesTable.status, "published"),
-        eq(tutorsTable.profileStatus, "published"),
-      ),
-    )
-    .limit(1);
-  if (!resource) {
-    res.status(404).json({ error: "Resource not found" });
-    return;
-  }
-
-  await db
-    .insert(savedResourcesTable)
-    .values({ accountId: account.id, resourceId: resource.id })
-    .onConflictDoNothing();
-  res.json(
-    SaveResourceResponse.parse({ resourceId: resource.id, saved: true }),
-  );
-});
-
-router.delete(
-  "/workspace/saved-resources/:id",
-  async (req, res): Promise<void> => {
-    const account = await requireWorkspaceAccount(req, res);
-    if (!account) return;
-    const params = UnsaveResourceParams.safeParse(req.params);
-    if (!params.success) {
-      res.status(400).json({ error: "Invalid resource." });
-      return;
-    }
-
-    await db
-      .delete(savedResourcesTable)
-      .where(
-        and(
-          eq(savedResourcesTable.accountId, account.id),
-          eq(savedResourcesTable.resourceId, params.data.id),
-        ),
-      );
-    res.sendStatus(204);
-  },
-);
 
 export default router;

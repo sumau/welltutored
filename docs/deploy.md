@@ -137,6 +137,24 @@ Answer yes only when every listed column is one the schema diff removes on
 purpose. The live code still reads a dropped column until the merge deploys, so
 merge straight after the push.
 
+Dropping a table prompts the same way, with a count of its rows. Removing saved
+resources (issue #69) looked like this against local data:
+
+```
+ Warning  Found data-loss statements:
+· You're about to delete saved_resources table with 2 items
+
+THIS ACTION WILL CAUSE DATA LOSS AND CANNOT BE REVERTED
+
+Do you still want to push changes?
+❯ No, abort
+  Yes, I want to remove 1 table,
+```
+
+Here the order flips: merge first and push after, so the running Deployment
+never queries a table that has gone. That works whenever the merged code no
+longer reads the table.
+
 **Renames are the exception, and they prompt on any database, empty or not.**
 `push` diffs states, so it cannot tell a renamed type or constraint from a
 dropped one and a new one — it asks. The highlighted default is `create`, which
@@ -301,11 +319,6 @@ moment you create it, made in seconds, with its own connection strings.
 The branch is a disposable copy. Nothing you do to it reaches the Deployment,
 so a push that goes wrong there is the result you were looking for: fix the
 schema change, delete the branch, and branch again.
-
-Every push against Neon re-emits a drop and re-add of the `saved_resources`
-primary key and reports changes applied, on a branch as on the Deployment. That
-is a known `drizzle-kit` introspection quirk and harmless (issue #10). Any
-*other* statement in the output is the change you are rehearsing.
 
 ## Clerk keys
 

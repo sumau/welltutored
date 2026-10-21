@@ -76,10 +76,6 @@ The single Workspace Account with the `owner` role, who promotes other
 accounts. There is exactly one.
 _Avoid_: Admin, superuser, root
 
-**Saved Resource**:
-A Resource bookmarked by a Workspace Account.
-_Avoid_: Favourite, bookmark, pin
-
 ### Delivery
 
 **Deployment**:

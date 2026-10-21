@@ -118,51 +118,6 @@ paths:
                 $ref: "#/components/schemas/ResourceDetail"
         "404":
           $ref: "#/components/responses/NotFound"
-  /workspace/saved-resources:
-    get:
-      operationId: listSavedResources
-      tags: [workspace]
-      summary: List resources saved by the current account
-      responses:
-        "200":
-          description: Saved resources
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Resource"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-  /workspace/saved-resources/{id}:
-    put:
-      operationId: saveResource
-      tags: [workspace]
-      summary: Save a published resource for the current account
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200":
-          description: Resource saved
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SavedResourceState"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-    delete:
-      operationId: unsaveResource
-      tags: [workspace]
-      summary: Remove a resource from the current account's saved list
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "204":
-          description: Resource removed from saved list
-        "401":
-          $ref: "#/components/responses/Unauthorized"
   /enquiries:
     post:
       operationId: createEnquiry
@@ -712,12 +667,6 @@ components:
     ResourceType:
       type: string
       enum: [Study note, Guide, Essay, Revision notes]
-    SavedResourceState:
-      type: object
-      required: [resourceId, saved]
-      properties:
-        resourceId: { type: integer }
-        saved: { type: boolean }
     WorkspaceSession:
       type: object
       required: [id, role, email, displayName, availableTutorAccents]

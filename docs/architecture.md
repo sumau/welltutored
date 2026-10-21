@@ -70,8 +70,7 @@ Workspace.
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
 the public visual language. Public API handlers live in
 `artifacts/api-server/src/routes/content.ts` and
-`artifacts/api-server/src/routes/enquiries.ts`. `content.ts` also holds the
-saved-resources endpoints, which no page uses yet (#69).
+`artifacts/api-server/src/routes/enquiries.ts`.
 
 ## Authentication
 
