@@ -42,40 +42,15 @@ Run the API tests with:
 pnpm --filter @workspace/api-server test
 ```
 
-This is the complete API suite used by CI. It runs the in-memory unit checks
-and the database-backed integration tests, which cover:
-
-- [Workspace](../GLOSSARY.md#the-private-area) tutor, resource, article,
-  account, and permission lifecycles, including owner-only behavior and Clerk
-  identity reuse.
-- [Enquiries](../GLOSSARY.md#the-public-site): a valid enquiry is saved and its
-  delivery status recorded, invalid ones are rejected, the workspace lists each
-  tutor only their own, and a failed one can be retried. Delivery failures are
-  simulated by failing the database update that records delivery.
-- The public resource list and resource pages: only published resources by
-  published tutors, search, the subject filter, and paging.
-
-Running this package test command directly does not provision a database.
-`pnpm run verify:ci` does: it uses `TEST_DATABASE_URL` when supplied, and
-otherwise creates a temporary local PostgreSQL cluster, applies the current
-schema, runs the integration tests, and removes the cluster afterward. The
-temporary cluster needs `initdb`, which the containers lack, so locally the
-`test` service supplies the database instead.
+This is the complete API suite used by CI: the in-memory unit checks and the
+database-backed integration tests. Running it directly does not provision a
+database; `pnpm run verify:ci` does, as above.
 
 Run only the non-mutating API checks with:
 
 ```sh
 pnpm --filter @workspace/api-server run test:unit
 ```
-
-These checks cover:
-
-- Publishability rules for tutor profiles and resources.
-- Supported and legacy resource type normalization.
-- Request-origin normalization and protection against cross-site workspace
-  mutations.
-- Resolution of the web client root the API serves, which is nothing unless
-  one is configured.
 
 The lifecycle tests exercise the Express routes and database-backed behavior
 end to end within the test process. They create, update, publish, and delete
@@ -114,19 +89,6 @@ Run the Well Tutored web tests with:
 pnpm --filter @workspace/welltutored test
 ```
 
-The suite checks:
-
-- Public and workspace route resolution, metadata, redirects, and Clerk
-  callback routes.
-- Homepage loading, successful tutor rendering, and retry behavior.
-- [Tutor](../GLOSSARY.md#the-public-site) profile behavior, including tutors
-  whose intake is full.
-- Enquiry form validation, keyboard navigation, focus management, disabled
-  submit behavior, announced errors, retry behavior, and successful receipts.
-- Public tutor-query caching, expiry, and mutation invalidation.
-- Workspace authentication loading, approved, pending, error, and retry
-  states.
-
 React components are rendered either into JSDOM or to static markup. Network
 and query behavior is supplied by test doubles rather than making real
 production requests.
@@ -161,30 +123,30 @@ The smoke-check tests validate the logic of the scripts in
 [smoke-checks.md](smoke-checks.md), without a running site: target selection,
 the waiver flags in both directions, redirect protection, timeout handling, and
 healthy responses against a local fixture. The documentation tests cover
-`docs:check`, which reads `README.md`, `CONTRIBUTING.md`, `GLOSSARY.md`,
-everything under `docs/` and the workflows' `run:` steps. They ensure that
-`pnpm` commands refer to real package scripts, that local links resolve, and
-that each guide's title is followed by a line of prose saying who it is for:
-not a heading, list, table, quote, image or code. The database-config tests ensure that
+[the Docs Check](#the-docs-check). The database-config tests ensure that
 integration tests require a dedicated `TEST_DATABASE_URL` distinct from
 `DATABASE_URL`.
 
-## Static verification
+## The Docs Check
 
-Run the repository-wide type checks with:
+The [Docs Check](../GLOSSARY.md#delivery), `pnpm run docs:check`, runs as part
+of `pnpm run build`, so a broken doc breaks the deployment build. It parses
+`README.md`, `CONTRIBUTING.md`, `GLOSSARY.md`, everything under `docs/`, and
+the `run:` steps of `.github/workflows/*.yml`, and fails when:
 
-```sh
-pnpm run typecheck
-```
+- a `pnpm` command names a script that does not exist;
+- a local link, or its `#anchor`, does not resolve;
+- a file named in backticks is not in the repository. A short path such as
+  `routes/workspace.ts` counts when some file's path ends with it;
+- a doc does not open with a line of prose saying who it is for: not a
+  heading, list, table, quote, image or code.
 
-Run the normal build verification with:
+It also reads the code, skipping tests and generated code, and fails when:
 
-```sh
-pnpm run build
-```
-
-The build first checks documented commands, then type-checks libraries and
-workspace packages, and finally builds the packages that define a build script.
+- the code reads an environment variable by name that
+  [configuration.md](configuration.md) does not name;
+- a code, config or workflow comment names a doc, or a doc's heading, that
+  does not exist.
 
 ## Before a pull request
 

@@ -70,30 +70,12 @@ flowchart TB
 
 ## Deterministic CI validation
 
-Run the complete repository verification with:
-
-```sh
-pnpm run verify:ci
-```
-
-This command runs, in order:
-
-1. The test-database configuration guard tests.
-2. The required test-database environment check.
-3. Schema preparation against the dedicated `TEST_DATABASE_URL` connection.
-4. The complete API server test suite, including database-backed workspace
-   lifecycle integration tests.
-5. Well Tutored web tests.
-6. Smoke-check tests.
-7. `pnpm run build`, which runs the docs check
-   ([code-checks.md](code-checks.md#repository-scripts)), type-checks libraries
-   and workspace packages, and builds the packages that define a build script.
-8. The CSS budget, which fails when the built primary stylesheet outgrows the
-   limits in `artifacts/welltutored/scripts/verify-css-build.mjs`.
-
-The command stops at the first failure and returns a non-zero exit code. It is
-the deterministic quality gate and does not depend on a running dev stack or a
-deployed URL.
+`pnpm run verify:ci` is the deterministic quality gate: the test suites,
+`pnpm run build` (which runs the [Docs Check](code-checks.md#the-docs-check)
+and the typecheck) and the CSS budget, stopping at the first failure. It does
+not depend on a running dev stack or a deployed URL. The steps and their order
+are `verify:ci:checks` in the root `package.json`, and
+[code-checks.md](code-checks.md) explains each.
 
 It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
 `DATABASE_URL`, and makes a temporary local cluster when none is supplied;
@@ -134,28 +116,19 @@ The `image-smoke` job runs alongside `verify`, on every pull request and on
 a broken Dockerfile or a startup failure would first show up in `flyctl deploy`
 on `main`.
 
-1. Pushes the schema to a `postgres:16` service container.
-2. Seeds it by starting the API once with `NODE_ENV=development`, the condition
-   `ensureSeedContent()` is gated on, until it logs that it is listening.
-3. Builds `docker/Dockerfile` with an empty `VITE_CLERK_PUBLISHABLE_KEY`, like
-   the compose `prod` service, with layers cached between runs.
-4. Runs the image on `http://localhost:8080`, with `TRUSTED_ORIGINS` set to
-   that origin and the `.env.example` placeholder `CLERK_SECRET_KEY`.
-5. Runs `pnpm smoke:dev` against it. A failure stops the deploy.
-6. Runs `pnpm smoke:enquiry` against it, with the runner's Google Chrome. This
-   step does not block yet (`continue-on-error`): it moves through the form by
-   tab order, so a harmless markup change can fail it. Once it has proven
-   stable, it should block too.
-7. Runs the Sign-in Smoke, `pnpm smoke:sign-in`, also with Chrome and also not
-   blocking yet. It signs in through the real Clerk form as a `+clerk_test`
-   user, which Clerk signs in with the code `424242` and never emails. The
-   first sign-in creates a pending account, so it promotes that account to
-   owner in the job's database (the guarded update from
-   [first-deploy.md](first-deploy.md#owner)) and links it
-   to a seeded Tutor. Then it signs in again, saves a profile edit, publishes
-   a Resource, and checks that the Resource's public page is Not Found while
-   Resources are hidden. Once it has run reliably for a couple of weeks, it
-   should block too.
+It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with an
+empty `VITE_CLERK_PUBLISHABLE_KEY`, runs the image and runs `pnpm smoke:dev`
+against it. A failure there stops the deploy. Two browser checks follow, with
+the runner's Google Chrome, and neither blocks yet (`continue-on-error`):
+
+- `pnpm smoke:enquiry` moves through the form by tab order, so a harmless
+  markup change can fail it. Once it has proven stable, it should block.
+- The [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) signs in as a
+  `+clerk_test` user, which it promotes to owner in the job's database with the
+  guarded update from [first-deploy.md](first-deploy.md#owner). Once it has run
+  reliably for a couple of weeks, it should block.
+
+The `image-smoke` job in `.github/workflows/ci.yml` has each step.
 
 The image it checks is not the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
@@ -171,17 +144,11 @@ all absent, so the `verify` job is not given Clerk secrets, and the interactive
 `clerk auth login` flow has no place in it: that command authenticates a person
 through a browser, which CI does not have.
 
-Nothing in the suite reaches Clerk over the network. The workspace lifecycle
-tests replace `clerkClient.users.getUser` on its prototype and supply
-authentication through the `@clerk/express.auth` symbol, the web tests render
-under JSDOM, and `test:smoke` exercises the smoke scripts' own logic rather
-than launching them against a running host.
-
 The one check that depends on a live Clerk instance is the launch smoke
 check's request to the production instance's `/v1/environment`, which goes to
 Clerk directly and needs no keys at all.
 
-The dedicated test database is therefore the only external dependency the
+The dedicated test database is the only external dependency the
 deterministic gate has.
 
 The Image Smoke job is the exception, for the Sign-in Smoke. It reads three

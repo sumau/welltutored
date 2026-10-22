@@ -119,9 +119,6 @@ development and production Clerk instances are outside it.
 _Avoid_: Auth test, login check
 
 **Docs Check**:
-The check, before merge, that the docs' mechanical claims hold: commands they
-name exist, links and their anchors resolve, and files they name are in the
-repo. It also checks that every environment variable the code reads is
-documented, and that the docs and headings code comments point to exist. It
-blocks the build.
+The check, before merge, that the docs' mechanical claims hold: the ones a
+parser can verify against the repository. It blocks the build.
 _Avoid_: Docs lint, link check

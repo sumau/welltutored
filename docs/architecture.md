@@ -53,20 +53,16 @@ are runtime requests. Dotted arrows are code generated from
 contract. Serving everything from one origin is
 [ADR-0001](adr/0001-single-origin-deployment.md).
 
-Every route below is defined in `artifacts/welltutored/src/app/route-map.ts`,
-which is the source of truth if this list and the code disagree.
+Every route is defined in `artifacts/welltutored/src/app/route-map.ts`.
 
 ## Public website
 
-The React app serves the public experience:
+The React app serves the public experience: the
+[Directory](../GLOSSARY.md#the-public-site) on `/`, published tutor profiles,
+the resource library and the enquiry form.
 
-- `/` — tutor discovery homepage
-- `/tutors/:slug` — published tutor profile
-- `/resources` — published resource library
-- `/resources/:slug` — published resource detail
-- `/enquire` — enquiry form
-
-The two resource routes, and every link to them, exist only while
+The resource routes (`/resources` and `/resources/:slug`), and every link to
+them, exist only while
 `PUBLIC_RESOURCES_ENABLED` in `src/lib/features.ts` is on. It is off for now,
 so visitors see no resources; tutors still write and publish them in the
 Workspace.
@@ -94,15 +90,10 @@ wiring is reserved for mobile clients.
 
 ## Private Workspace
 
-Workspace routes are protected by Clerk and the workspace account boundary:
-
-- `/workspace` — dashboard
-- `/workspace/enquiries` — workspace enquiry list and retry actions
-- `/workspace/profile` — tutor profile drafts and publishing
-- `/workspace/resources/new` — create a resource
-- `/workspace/resources/:id` — edit a resource
-- `/workspace/tutors` — owner-only tutor profile management
-- `/workspace/accounts` — owner-only account approval and tutor assignment
+Workspace routes, all under `/workspace`, are protected by Clerk and the
+workspace account boundary. A Tutor edits their own profile and resources and
+sees their enquiries; the [Owner](../GLOSSARY.md#the-private-area) also manages
+every tutor profile and approves accounts.
 
 `/workspace/articles/new` and `/workspace/articles/:id` remain compatibility
 aliases and redirect to the canonical resource URLs. Workspace accounts are
@@ -117,29 +108,15 @@ one as pending, so the pending flag alone lets a duplicate through.
 
 ## API boundaries
 
-Workspace code is split by responsibility:
+Workspace code in `artifacts/api-server/src` is split by responsibility, one
+directory each:
 
-- `auth/workspace-access.ts` — authenticated account lookup and role checks
-- `services/workspace-account-service.ts` — Clerk-to-workspace account
-  provisioning, tutor assignment initialization, slug allocation, and accent
-  availability
-- `domain/workspace-validation.ts` — publishability rules for resources and
-  tutor profiles
-- `presenters/resource-presenter.ts` — resource response mapping and joined
-  resource lookup
-- `presenters/tutor-presenter.ts` — tutor response mapping and draft overlay
-- `routes/workspace.ts` — composition point that mounts the workspace subrouters;
-  it does not contain all workspace validation or database mutations
-- `routes/workspace-session.ts` — workspace session and current-account
-  endpoints
-- `routes/workspace-resources.ts` — resource request validation and resource
-  mutations
-- `routes/workspace-profile.ts` — tutor profile request validation and profile
-  mutations
-- `routes/workspace-tutors.ts` — owner-only tutor management
-- `routes/workspace-accounts.ts` — owner-only workspace account management
-- `routes/enquiries.ts` — public enquiry creation and workspace enquiry list and
-  retry handlers
+- `auth` — authenticated account lookup and role checks
+- `services` — Clerk-to-workspace account provisioning and tutor assignment
+- `domain` — publishability rules for resources and tutor profiles
+- `presenters` — response mapping
+- `routes` — request validation and mutations, one subrouter per area, which
+  `routes/workspace.ts` mounts
 
 The intended direction for future workspace changes is to keep route handlers
 thin: authenticate, validate the request, call a domain/service function, and
