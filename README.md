@@ -4,9 +4,8 @@ Well Tutored helps families discover women tutors, read tutor-written
 resources, and send named-tutor enquiries. Tutors maintain their profiles and
 resources in a private workspace.
 
-The public site presents women tutors educated at Russell Group universities,
-their expertise and availability, and a library of tutor-written learning
-resources. Visitors can open a tutor profile and submit a named-tutor enquiry.
+The public site presents women tutors, their expertise and availability, and a
+library of tutor-written learning resources. Visitors can open a tutor profile and submit a named-tutor enquiry.
 Approved workspace users manage tutor profiles, resources, and workspace
 accounts.
 
