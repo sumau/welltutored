@@ -33,6 +33,12 @@ export type DocumentationPath = {
   path: string;
 };
 
+export type EnvironmentVariableRead = {
+  filePath: string;
+  lineNumber: number;
+  name: string;
+};
+
 export type PackageManifest = {
   name?: string;
   scripts?: Record<string, string>;
@@ -47,6 +53,7 @@ export type DocumentationCheckResult = {
   commands: DocumentationCommand[];
   links: DocumentationLink[];
   paths: DocumentationPath[];
+  environmentVariables: EnvironmentVariableRead[];
   errors: string[];
 };
 
@@ -319,6 +326,75 @@ export function validateDocumentedPaths(
     );
 }
 
+const SOURCE_EXTENSIONS = new Set(["cjs", "cts", "js", "jsx", "mjs", "mts", "ts", "tsx"]);
+
+// The code the Docs Check reads for its references to the docs. Generated code
+// is skipped, and so are tests: a test sets variables to exercise the code, and
+// its fixtures are not references.
+function isSourceFile(relativePath: string): boolean {
+  return (
+    SOURCE_EXTENSIONS.has(extensionOf(relativePath) ?? "") &&
+    !relativePath.split("/").includes("generated") &&
+    !/\.test\.[^/]+$/.test(relativePath)
+  );
+}
+
+function lineNumberAt(content: string, index: number): number {
+  return content.slice(0, index).split("\n").length;
+}
+
+/**
+ * Pull the environment variables a source file reads by name from
+ * `process.env`: a dotted or quoted key, or a destructured property. A computed
+ * key names no variable here, and an assignment is not a read. (Written in
+ * words, since this file is itself checked.)
+ */
+export function extractEnvironmentVariables(
+  source: string,
+  filePath: string,
+): EnvironmentVariableRead[] {
+  const reads: EnvironmentVariableRead[] = [];
+  const push = (index: number, name: string) =>
+    reads.push({ filePath, lineNumber: lineNumberAt(source, index), name });
+
+  for (const match of source.matchAll(
+    /process\.env(?:\.([A-Za-z_$][\w$]*)|\[\s*(["'`])([^"'`]+)\2\s*\])(?![\w$]|\s*=[^=])/g,
+  )) {
+    push(match.index, match[1] ?? match[3]);
+  }
+
+  for (const match of source.matchAll(/\{([^{}]*)\}\s*=\s*process\.env\b/g)) {
+    for (const property of match[1].split(",")) {
+      const name = property.trim().split(/\s*[:=]/, 1)[0];
+      if (/^[A-Za-z_$][\w$]*$/.test(name)) push(match.index, name);
+    }
+  }
+
+  return reads.sort((a, b) => a.lineNumber - b.lineNumber);
+}
+
+function inlineCode(markdown: string): Set<string> {
+  return new Set([...markdown.matchAll(/`([^`]+)`/g)].map((match) => match[1]));
+}
+
+/**
+ * Every variable the code reads is named, in inline code, in
+ * docs/configuration.md: in its table, or in the paragraph that points to the
+ * doc covering a tool's variables.
+ */
+export function validateEnvironmentVariables(
+  reads: EnvironmentVariableRead[],
+  configurationMarkdown: string,
+): string[] {
+  const named = inlineCode(configurationMarkdown);
+  return reads
+    .filter(({ name }) => !named.has(name))
+    .map(
+      ({ filePath, lineNumber, name }) =>
+        `${filePath}:${lineNumber}: the code reads "${name}", but docs/configuration.md does not name it. Add it to the table, or to the paragraph on variables only the tooling reads.`,
+    );
+}
+
 function readPackageManifests(rootDir: string): PackageManifestRecord[] {
   const packagePaths = new Set<string>([
     join(rootDir, "package.json"),
@@ -572,6 +648,20 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
   const paths = files.flatMap(({ relativePath, markdown }) =>
     extractDocumentedPaths(markdown, relativePath, extensions),
   );
+  // One read of the code, which every rule about its references to the docs
+  // shares.
+  const sourceFiles = repositoryFiles.filter(isSourceFile).sort().map((relativePath) => ({
+    relativePath,
+    source: readFileSync(join(rootDir, relativePath), "utf8"),
+  }));
+  const environmentVariables = sourceFiles.flatMap(({ relativePath, source }) =>
+    extractEnvironmentVariables(source, relativePath),
+  );
+  const configurationPath = join(rootDir, "docs", "configuration.md");
+  const environmentErrors = validateEnvironmentVariables(
+    environmentVariables,
+    existsSync(configurationPath) ? readFileSync(configurationPath, "utf8") : "",
+  );
   const manifests = readPackageManifests(rootDir);
   // The workflows call pnpm scripts too, and a deploy that names a script that
   // no longer exists fails after it has already shipped the image.
@@ -591,12 +681,14 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
     commands,
     links,
     paths,
+    environmentVariables,
     errors: [
       ...validateDocumentedCommands(commands, manifests),
       ...validateLocalLinks(links, rootDir),
       ...validateDocumentedPaths(paths, repositoryFiles),
       ...workflowErrors,
       ...openingErrors,
+      ...environmentErrors,
     ],
   };
 }
@@ -613,7 +705,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     process.exitCode = 1;
   } else {
     console.log(
-      `Documentation check passed (${result.commands.length} commands, ${result.links.length} local links and ${result.paths.length} file paths checked).`,
+      `Documentation check passed (${result.commands.length} commands, ${result.links.length} local links, ${result.paths.length} file paths and ${result.environmentVariables.length} environment variable reads checked).`,
     );
   }
 }

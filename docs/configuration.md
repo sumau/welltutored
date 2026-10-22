@@ -16,6 +16,7 @@ set.
 | `CLERK_PUBLISHABLE_KEY` | runtime | `fly secrets`; `.env` locally | Used by the Clerk middleware. |
 | `VITE_CLERK_PUBLISHABLE_KEY` | **build** | a build argument in `fly.toml`'s `[build.args]`; `.env` locally | Compiled into the browser bundle. Setting it at runtime, as a Fly secret for instance, has no effect ([first-deploy.md](first-deploy.md#flyio)). |
 | `LOG_LEVEL` | runtime, optional | not set | The server's log level; `info` when unset. |
+| `BASE_PATH` | **build**, optional | not set | The path the frontend is served under, read by `artifacts/welltutored/vite.config.ts`; `/` when unset. |
 
 Changing the domain means changing `TRUSTED_ORIGINS` and `PUBLIC_ORIGIN`
 together, after the new hostname has a certificate;
@@ -24,7 +25,9 @@ together, after the new hostname has a certificate;
 Variables that only the tooling reads are documented where it is used:
 `API_PROXY_TARGET` in [local-docker.md](local-docker.md#how-requests-are-routed),
 `TEST_DATABASE_URL` in [code-checks.md](code-checks.md#api-server), and the `SMOKE_*`
-variables in [smoke-checks.md](smoke-checks.md).
+variables, such as `SMOKE_TIMEOUT_MS` and `SMOKE_TOTAL_TIMEOUT_MS`, in
+[smoke-checks.md](smoke-checks.md). The [Docs Check](../GLOSSARY.md#delivery)
+fails when the code reads a variable by name that this page does not name.
 
 ## `TRUSTED_ORIGINS`
 

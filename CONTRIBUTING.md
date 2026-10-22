@@ -66,7 +66,9 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   does not exist, a local link does not resolve, a file named in backticks is
   not in the repository, or a doc does not open with a line saying who it is
   for. A short path such as `routes/workspace.ts` counts when some file's path
-  ends with it. It runs as part of `pnpm run build`, so a broken doc breaks the
+  ends with it. It also reads the code, skipping tests and generated code, and
+  fails when the code reads an environment variable by name that
+  [docs/configuration.md](docs/configuration.md) does not name. It runs as part of `pnpm run build`, so a broken doc breaks the
   deployment build.
 
 ## Schema changes
