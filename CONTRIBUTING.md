@@ -74,8 +74,9 @@ CI does not apply the schema. It is a deliberate `push` run by hand
   before ticking its box or starting the next schema change.
 - Rehearse a push that touches existing rows (a rename, a dropped column, a new
   constraint) on the local database, then on a Neon branch of the Deployment
-  ([docs/deploy.md](docs/deploy.md#rehearsing-a-push-on-a-neon-branch)). Write
-  what the push prompted, and what you answered, into `docs/deploy.md`.
+  ([docs/schema-push.md](docs/schema-push.md#rehearsing-a-push-on-a-neon-branch)).
+  Write what the push prompted, and what you answered, into
+  `docs/schema-push.md`.
 
 ## Secrets in instructions
 

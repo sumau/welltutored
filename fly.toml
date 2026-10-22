@@ -1,7 +1,7 @@
 # Fly.io deployment for Well Tutored. One machine serving the frontend and the
 # API from a single origin. The database is external and reached through the
-# DATABASE_URL secret. See docs/deploy.md for the full walkthrough, including
-# the secrets this file deliberately omits.
+# DATABASE_URL secret. See docs/first-deploy.md for setting it up, including
+# the secrets this file deliberately omits, and docs/deploy.md for running it.
 #
 # Create the app with `fly apps create`, which only reserves the name; `fly
 # launch` rewrites this file from its own guesses. `app` is the Fly app's name,

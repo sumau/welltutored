@@ -133,7 +133,7 @@ jobs:
         run: pnpm --filter @workspace/db run push
 
       # The API seeds sample content when it starts with NODE_ENV=development
-      # on an empty database (docs/deploy.md). Start it once, wait until it
+      # on an empty database (docs/first-deploy.md). Start it once, wait until it
       # listens, and stop it: the database then has Tutors to smoke.
       - name: Seed sample content
         run: |

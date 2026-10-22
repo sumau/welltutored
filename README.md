@@ -42,6 +42,9 @@ docker compose run --rm test
 - [docs/deploy.md](docs/deploy.md): deployment. **Merging to `main` ships to
   production**, and schema changes are applied by hand beforehand
   ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)).
+  [docs/schema-push.md](docs/schema-push.md) records what a push prompts, and
+  [docs/first-deploy.md](docs/first-deploy.md) stands a Deployment up from
+  nothing.
 - [docs/testing.md](docs/testing.md): the test layers and smoke checks.
 - [docs/adr/](docs/adr/): architecture decision records.
 
