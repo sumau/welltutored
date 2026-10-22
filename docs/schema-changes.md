@@ -51,9 +51,9 @@ of `lib/db/src/schema/` first — nothing downstream asks.
 [What push prompts](#what-push-prompts) has what each kind of change prompts and
 how past pushes were answered.
 
-Prefer an additive change, such as a new nullable column or table. Rolling a
-deploy back past a push is only safe if the push was additive
-([pipeline.md](pipeline.md#rolling-back)).
+Prefer an additive change, such as a new nullable column or table: only then
+can a deploy be rolled back past the push
+([pipeline.md](pipeline.md#rolling-back) has why).
 
 ### Checking where it landed
 

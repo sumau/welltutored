@@ -160,9 +160,12 @@ pnpm run test:database-config
 The smoke-check tests validate the logic of the scripts in
 [smoke-checks.md](smoke-checks.md), without a running site: target selection,
 the waiver flags in both directions, redirect protection, timeout handling, and
-healthy responses against a local fixture. The documentation tests ensure that `pnpm` commands —
-in the docs and in the workflows' `run:` steps — refer to real package scripts,
-and that local links resolve. The database-config tests ensure that
+healthy responses against a local fixture. The documentation tests cover
+`docs:check`, which reads `README.md`, `CONTRIBUTING.md`, `GLOSSARY.md`,
+everything under `docs/` and the workflows' `run:` steps. They ensure that
+`pnpm` commands refer to real package scripts, that local links resolve, and
+that each guide's title is followed by a line of prose saying who it is for:
+not a heading, list, table, quote, image or code. The database-config tests ensure that
 integration tests require a dedicated `TEST_DATABASE_URL` distinct from
 `DATABASE_URL`.
 

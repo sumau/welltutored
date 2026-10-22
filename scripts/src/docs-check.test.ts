@@ -241,7 +241,20 @@ test("rejects a guide without a title or an opening line", () => {
     'docs/untitled.md:1: a guide starts with a "# " title.',
   ]);
 
-  for (const opening of ["## Usage", "- a list", "1. a step", "| a | table |", "> a quote", "```sh"]) {
+  for (const opening of [
+    "## Usage",
+    "- a list",
+    "1. a step",
+    "1) a step",
+    "| a | table |",
+    "> a quote",
+    "```sh",
+    "~~~sh",
+    "    pnpm run build",
+    "---",
+    "![a diagram](diagram.svg)",
+    "<details>",
+  ]) {
     assert.deepEqual(
       validateOpeningLine(["# Guide", "", opening].join("\n"), "docs/guide.md"),
       [
@@ -254,6 +267,19 @@ test("rejects a guide without a title or an opening line", () => {
   assert.deepEqual(validateOpeningLine("# Guide\n", "docs/guide.md"), [
     "docs/guide.md:1: the title is followed by a line of prose saying who the guide is for and when they would need it.",
   ]);
+
+  assert.deepEqual(validateOpeningLine(" \n", "docs/empty.md"), [
+    'docs/empty.md:1: a guide starts with a "# " title.',
+  ]);
+});
+
+test("accepts prose that starts with inline HTML or follows a comment", () => {
+  for (const lines of [
+    ["# Guide", "", "<abbr>CI</abbr> runs for whoever opens a pull request."],
+    ["# Guide", "<!-- generated -->", "", "For whoever runs a smoke check."],
+  ]) {
+    assert.deepEqual(validateOpeningLine(lines.join("\n"), "docs/guide.md"), [], lines.join("|"));
+  }
 });
 
 test("all currently documented pnpm commands match the repository scripts", () => {

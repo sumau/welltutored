@@ -153,7 +153,9 @@ RETURNING id, email, role;"
 
 The guards make this safe to repeat: once an owner exists it changes nothing.
 No rows returned means the address matched no pending account. Every later
-account is approved by the owner through the workspace UI instead.
+account is approved by the owner through the workspace UI instead. The
+production procedure, and the rules any automation of it must keep, are in
+[first-deploy.md](first-deploy.md#owner).
 
 ### What survives what
 

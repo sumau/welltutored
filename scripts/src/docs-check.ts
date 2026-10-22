@@ -71,20 +71,15 @@ function documentationFiles(rootDir: string): string[] {
     .sort();
 }
 
-// The guides a person reads by task. docs/adr/ and docs/agents/ follow their
-// own templates, and GLOSSARY.md the domain-modeling skill's.
-function guideFiles(rootDir: string): string[] {
-  const docsDir = join(rootDir, "docs");
-  return [
-    ...["README.md", "CONTRIBUTING.md"].map((fileName) => join(rootDir, fileName)),
-    ...(existsSync(docsDir)
-      ? readdirSync(docsDir, { withFileTypes: true })
-          .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-          .map((entry) => join(docsDir, entry.name))
-      : []),
-  ]
-    .filter((filePath) => existsSync(filePath))
-    .sort();
+// The guides a person reads by task: README, CONTRIBUTING and the top level of
+// docs/. docs/adr/ and docs/agents/ follow their own templates, and GLOSSARY.md
+// the domain-modeling skill's.
+function isGuide(relativePath: string): boolean {
+  return (
+    relativePath === "README.md" ||
+    relativePath === "CONTRIBUTING.md" ||
+    /^docs\/[^/]+\.md$/.test(relativePath)
+  );
 }
 
 /**
@@ -97,14 +92,26 @@ export function validateOpeningLine(markdown: string, filePath: string): string[
   const lines = markdown.split(/\r?\n/);
   const titleIndex = lines.findIndex((line) => line.trim() !== "");
   if (titleIndex < 0 || !lines[titleIndex].startsWith("# ")) {
-    return [`${filePath}:${titleIndex + 1}: a guide starts with a "# " title.`];
+    return [`${filePath}:${Math.max(titleIndex, 0) + 1}: a guide starts with a "# " title.`];
   }
 
+  // A comment is invisible to the reader, so the opening is the first line after
+  // the title that is neither blank nor a whole-line HTML comment.
   const openingIndex = lines.findIndex(
-    (line, index) => index > titleIndex && line.trim() !== "",
+    (line, index) =>
+      index > titleIndex && line.trim() !== "" && !/^\s*<!--.*-->\s*$/.test(line),
   );
-  const opening = openingIndex < 0 ? "" : lines[openingIndex].trimStart();
-  if (!opening || /^(#|[-*+] |\d+\. |\||>|```|<)/.test(opening)) {
+  const opening = openingIndex < 0 ? "" : lines[openingIndex];
+  // Indented code is four spaces or a tab, so it is tested before trimming.
+  const isIndentedCode = /^( {4}|\t)/.test(opening);
+  const trimmed = opening.trimStart();
+  // A line that is only an HTML tag is a block (<details>, <img>); a tag that
+  // starts a sentence, such as <abbr>, is prose.
+  const isNotProse =
+    /^(#|[-*+] |\d+[.)] |\||>|```|~~~|!\[)/.test(trimmed) ||
+    /^([-*_])( *\1){2,} *$/.test(trimmed) ||
+    /^<[^>]+>$/.test(trimmed.trimEnd());
+  if (!trimmed || isIndentedCode || isNotProse) {
     return [
       `${filePath}:${openingIndex < 0 ? titleIndex + 1 : openingIndex + 1}: ` +
         "the title is followed by a line of prose saying who the guide is for and when they would need it.",
@@ -450,18 +457,16 @@ function workflowFiles(rootDir: string): string[] {
 }
 
 export function checkDocumentation(rootDir: string): DocumentationCheckResult {
-  const files = documentationFiles(rootDir);
-  const commands = files.flatMap((filePath) => {
-    const relativePath = relative(rootDir, filePath);
-    return extractDocumentedCommands(
-      readFileSync(filePath, "utf8"),
-      relativePath,
-    );
-  });
-  const links = files.flatMap((filePath) => {
-    const relativePath = relative(rootDir, filePath);
-    return extractLocalLinks(readFileSync(filePath, "utf8"), relativePath);
-  });
+  const files = documentationFiles(rootDir).map((filePath) => ({
+    relativePath: relative(rootDir, filePath),
+    markdown: readFileSync(filePath, "utf8"),
+  }));
+  const commands = files.flatMap(({ relativePath, markdown }) =>
+    extractDocumentedCommands(markdown, relativePath),
+  );
+  const links = files.flatMap(({ relativePath, markdown }) =>
+    extractLocalLinks(markdown, relativePath),
+  );
   const manifests = readPackageManifests(rootDir);
   // The workflows call pnpm scripts too, and a deploy that names a script that
   // no longer exists fails after it has already shipped the image.
@@ -473,9 +478,9 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
     ),
   );
 
-  const openingErrors = guideFiles(rootDir).flatMap((filePath) =>
-    validateOpeningLine(readFileSync(filePath, "utf8"), relative(rootDir, filePath)),
-  );
+  const openingErrors = files
+    .filter(({ relativePath }) => isGuide(relativePath))
+    .flatMap(({ relativePath, markdown }) => validateOpeningLine(markdown, relativePath));
 
   return {
     commands,

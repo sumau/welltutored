@@ -129,11 +129,8 @@ whole numbers of milliseconds, fail before requests are made.
 
 ### When it fails
 
-The deploy job runs the Launch Smoke after the new version has taken traffic,
-so a red one after a merge means visitors are already seeing the fault, and it
-is not something to wave through
-([pipeline.md](pipeline.md#post-deploy-validation)). Roll back
-([pipeline.md](pipeline.md#rolling-back)), or fix it on `main`.
+A red Launch Smoke after a merge means visitors are already seeing the fault.
+What to do is in [pipeline.md](pipeline.md#post-deploy-validation).
 
 ## Against the local stack
 

@@ -1,7 +1,8 @@
 # Pipeline
 
-What happens between a pull request and the live site: every check, where it
-runs and what blocks, and how a deploy switches over, fails or is rolled back.
+For whoever wants to know what happens between a pull request and the live
+site, or why a check went red: every check, where it runs and what blocks, and
+how a deploy switches over, fails or is rolled back.
 Each check, from pull request to live site:
 
 ```mermaid
@@ -62,9 +63,9 @@ flowchart TB
 |---|---|---|---|---|
 | `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
 | [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
-| [Sign-in Smoke](../GLOSSARY.md#delivery) (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
-| [Health Check](../GLOSSARY.md#delivery) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a [Deploy](../GLOSSARY.md#delivery) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
+| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -84,7 +85,8 @@ This command runs, in order:
    lifecycle integration tests.
 5. Well Tutored web tests.
 6. Smoke-check tests.
-7. `pnpm run build`, which checks documented commands, type-checks libraries
+7. `pnpm run build`, which runs the docs check
+   ([code-checks.md](code-checks.md#repository-scripts)), type-checks libraries
    and workspace packages, and builds the packages that define a build script.
 8. The CSS budget, which fails when the built primary stylesheet outgrows the
    limits in `artifacts/welltutored/scripts/verify-css-build.mjs`.
@@ -213,8 +215,9 @@ after merging an auth or Clerk change
 
 The `deploy` job in the same workflow runs only on a push to `main`, and only
 once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
-is what makes a failure in either stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
-runs the launch smoke against the live site.
+is what makes a failure in either stop a deploy. It checks out, installs
+`flyctl`, runs `flyctl deploy`, and then runs the launch smoke against the live
+site.
 
 The deploy is [blue-green](#blue-green-deploys), switching only once the new
 machine passes the Health Check.
