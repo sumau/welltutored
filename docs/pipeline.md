@@ -179,8 +179,7 @@ than launching them against a running host.
 
 The one check that depends on a live Clerk instance is the launch smoke
 check's request to the production instance's `/v1/environment`, which goes to
-Clerk directly and needs no keys at all. Development smoke skips it, because a
-local stack runs on a development instance with no `clerk.` CNAME to check.
+Clerk directly and needs no keys at all.
 
 The dedicated test database is therefore the only external dependency the
 deterministic gate has.
@@ -235,20 +234,15 @@ It does **not** apply the schema. That is
 
 ## Post-deploy validation
 
-The deploy job finishes by running the launch smoke against the live site
-([smoke-checks.md](smoke-checks.md#the-launch-smoke) has the command). CI also
-sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
-checks that each redirects to the [Public Origin](../GLOSSARY.md#delivery).
+The deploy job finishes by running the
+[Launch Smoke](smoke-checks.md#the-launch-smoke) against the live site, without
+waivers and with `SMOKE_REDIRECT_FROM` set to the Deployment's other
+hostnames. A successful Deploy does not mean a usable Deployment, which is why
+it runs at all.
 
-A successful Deploy does not mean a usable Deployment, which is why this runs
-at all. The check fails if the site is unhealthy or redirects to another
-origin.
-
-It runs without waivers, so it also asserts a published Tutor and that
-Tutor's profile page. **A red Launch smoke on a merge to `main` is a real
-failure**: an unhealthy site, a redirect to another origin, a broken public
-page, or published content that has gone missing. It is not something to wave
-through: [roll back](#rolling-back), or fix it on `main`.
+**A red Launch smoke on a merge to `main` is a real failure**, and visitors are
+already seeing it. It is not something to wave through:
+[roll back](#rolling-back), or fix it on `main`.
 
 ## Blue-green deploys
 
@@ -261,7 +255,8 @@ so nothing may depend on one.
 `fly.toml` points Fly's health check at `/api/healthz`, the Health Check. It
 answers `200` only when the database answers a `SELECT 1` within 3 seconds, and
 `503` otherwise, so a wrong `DATABASE_URL` or an unreachable Neon takes the
-machine out of rotation. Fly then serves its own proxy error rather than the
+machine out of rotation. It checks nothing more because Fly runs it every 15
+seconds. Fly then serves its own proxy error rather than the
 app's. That is accepted, since every page needs the database anyway. The 3
 seconds sit above Neon's wake-from-suspend time and below the check's 5-second
 `timeout`.
@@ -298,24 +293,3 @@ so the previous image runs against the new schema. A new nullable column or
 table is fine. A renamed or dropped column breaks the old code too, and the
 rollback then means pushing the old schema back by hand
 ([schema-changes.md](schema-changes.md)).
-
-## Why separate gates
-
-Each check runs where it is the cheapest one that can see a kind of failure:
-
-- `verify` needs no image and no secrets, so it is fast and runs everything
-  that only needs the code.
-- The Image Smoke needs a built image and a running container, and the Sign-in
-  Smoke in it needs the only Clerk secrets in CI. Kept out of `verify`, those
-  stay in one job.
-- The Health Check is the only check that runs on the machine that is about to
-  take traffic, so it is the one the switch waits for. It checks only that the
-  process is up and the database answers, because Fly runs it every 15 seconds.
-- The Launch Smoke validates the Deployment visitors actually reach: real
-  data, hostnames, certificates and the production Clerk instance. It runs
-  after the switch, so it reports a broken page rather than preventing one.
-  [ADR-0003](adr/0003-no-staging-environment.md) is why nothing stands between
-  the two.
-
-The order to run them in before merging is in
-[CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).

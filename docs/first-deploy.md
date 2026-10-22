@@ -30,18 +30,16 @@ The image can be checked first without deploying: see the
 
 ## Database
 
-[Neon](https://neon.tech) hosts the PostgreSQL. It has a free tier, takes real
-backups, and — the part that matters operationally — is reachable over the
+[Neon](https://neon.tech) hosts the PostgreSQL. It is reachable over the
 public internet, so every step that runs from this checkout (the schema push,
 copying data in) needs no tunnel.
 
 Create the project in **AWS Europe West 2 (London)**, the region nearest
-`primary_region = "lhr"` in `fly.toml`. Neon cannot move a project afterwards,
-and distance costs more than it looks: every query is a round trip, and `pg`
-drops a connection after 10 seconds idle, so on a quiet site most visitors pay
-for a fresh TCP, TLS and Postgres handshake too. With the database in Ohio
-that came to about 0.7s a request, against 0.15s on a warm connection (issue
-#65). If `primary_region` ever changes, move the database with it.
+`primary_region = "lhr"` in `fly.toml`, and if `primary_region` ever changes,
+move the database with it. Neon cannot move a project afterwards, and distance
+costs more than it looks: every query is a round trip, and `pg` drops a
+connection after 10 seconds idle, so on a quiet site most visitors also pay for
+a fresh TCP, TLS and Postgres handshake (#65 has the measurements).
 
 Then take **two** connection strings from its dashboard. Neon
 marks the pooled one with `-pooler` in the hostname, and they are not
@@ -56,13 +54,10 @@ Both need `?sslmode=require` appended: `lib/db/src/index.ts` builds a bare `pg`
 pool from `DATABASE_URL` and sets no SSL options of its own, so without it the
 connection is refused.
 
-Nothing in the application is Neon-specific — it is a `DATABASE_URL` and
-nothing more — so any hosted PostgreSQL substitutes, with the pooled/direct
-distinction being whatever that provider's equivalent is. Fly's own Postgres
-offerings were deliberately not chosen: the managed one is private-network
-only, so every command run from a checkout would need a proxy in front of it,
-and the unmanaged one is something Fly's documentation says they cannot
-support.
+Any hosted PostgreSQL that a checkout can reach substitutes: the application
+needs a `DATABASE_URL` and nothing more, plus that provider's equivalent of the
+pooled and direct strings. Fly's managed Postgres is private-network only, so
+every command run from a checkout would need a proxy in front of it.
 
 ## Clerk keys
 
@@ -89,9 +84,6 @@ So stand the Deployment up on development keys, and move to a production
 instance when you attach a real domain. `TRUSTED_ORIGINS` and `PUBLIC_ORIGIN`
 change with the domain; `app` in `fly.toml` does not, because it is the Fly
 app's name rather than a hostname, and changing it means creating a new app.
-Development instances show a notice in the sign-in UI, share Clerk's OAuth
-credentials, and carry lower limits, so they are for getting the Deployment
-working rather than for live traffic.
 
 The live Deployment runs on a production instance for `welltutored.co.uk`,
 reached at `clerk.welltutored.co.uk`. There is no Frontend API proxy: the
@@ -101,13 +93,9 @@ browser talks to that CNAME directly.
 
 `fly.toml` is committed and points at `docker/Dockerfile`.
 
-Fly runs the container; Neon holds the database. By this point the Neon
-project exists, the schema is pushed, and you have Clerk development keys — all
-three are prerequisites, not steps you can take afterwards.
-
-Pass the secrets in from shell variables rather than typing them into the
-command. `read -rs` takes each value without echoing it or writing it to shell
-history; paste it and press Enter:
+Before this step the Neon project exists, the schema is pushed, and you have
+Clerk development keys. Read each secret into a shell variable (paste it, then
+press Enter), then set them:
 
 ```
 read -rsp 'Pooled DATABASE_URL: ' POOLED_DATABASE_URL; echo
@@ -121,16 +109,12 @@ fly secrets set \
   CLERK_PUBLISHABLE_KEY="$CLERK_PUBLISHABLE_KEY"
 ```
 
-The connection string is read as `POOLED_DATABASE_URL`, not `DATABASE_URL`, so
-it cannot be confused with the `DIRECT_DATABASE_URL` you read for
-[schema work](schema-changes.md#pushing). They are different strings: this
-one is the **pooled** endpoint the application runs against, the other is the
-**direct** endpoint for DDL. Passing the direct one here works and then quietly
-costs you connection pooling in production.
+This is the **pooled** string, not the `DIRECT_DATABASE_URL` used for
+[schema work](schema-changes.md#pushing). The direct one works here too, and
+quietly costs you connection pooling in production.
 
-`fly launch --no-deploy` also works, but it rewrites the committed `fly.toml`
-from its own guesses; `git diff fly.toml` afterwards and revert what it changed.
-`fly apps create` only reserves the name, which is all this repository needs.
+Use `fly apps create`, which only reserves the name, rather than `fly launch`,
+which rewrites the committed `fly.toml` from its own guesses.
 
 CI needs a token of its own. This is the one step nothing else can do for you:
 
@@ -154,13 +138,11 @@ repository, which is correct for both:
 ```
 
 **The publishable key has to be here and not in `fly secrets`.** Vite compiles
-it into the browser bundle while the image is being built, and a Fly secret only
-exists once the container is running — too late. Set it with `fly secrets set`
-and the build silently uses the empty string in `fly.toml`, the bundle ships
-without a Clerk key, and sign-in never initialises. Committing it is expected
-rather than a leak: a publishable key is public by design and is served to every
-visitor in the JavaScript. The three secrets above are the opposite case and
-must never appear in this file.
+it into the bundle while the image is built, and a Fly secret only exists once
+the container runs. Set as a secret, the build silently uses the empty string
+and sign-in never initialises. A publishable key is public by design, so
+committing it is not a leak; the three secrets above must never appear in this
+file.
 
 **`TRUSTED_ORIGINS` must match the deployed hostname exactly** — see the
 [configuration reference](configuration.md).
@@ -172,8 +154,8 @@ and is how you would ship a first image before any of this is merged.
 
 The Deployment starts on the `*.fly.dev` hostname `fly apps create` gives it.
 Moving it onto a domain of its own takes DNS, a certificate per hostname, and
-two lines of `fly.toml`, in that order. This is how `welltutored.co.uk` was
-attached, with `www.welltutored.co.uk`, `welltutored.com` and
+two lines of `fly.toml`, in that order. The live Deployment is on
+`welltutored.co.uk`, with `www.welltutored.co.uk`, `welltutored.com` and
 `www.welltutored.com` redirecting to it.
 
 1. **DNS.** For every hostname, an `A` record for the app's IPv4 address and an
@@ -234,18 +216,10 @@ Two things behave differently until there is a published
 
 - The directory renders its empty state, and `/api/tutors` returns an empty
   list.
-- `pnpm run smoke:launch` **fails**, because it asserts a published Tutor and
-  that Tutor's profile page, and so does the deploy job's Launch smoke step,
-  which runs it. `--allow-empty` waives exactly those assertions; everything
-  that does not depend on content still runs
-  ([smoke-checks.md](smoke-checks.md#waivers)). Run it by hand
-  while the Deployment is empty, and drop it once there is a published Tutor:
-
-  ```
-  SMOKE_BASE_URL=https://welltutored.co.uk \
-    SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
-    pnpm run smoke:launch --allow-empty
-  ```
+- `pnpm run smoke:launch` **fails**, and so does the deploy job's Launch smoke
+  step, because it asserts a published Tutor. Run it by hand with
+  `--allow-empty` until there is one
+  ([smoke-checks.md](smoke-checks.md#waivers)).
 
 ## Owner
 
