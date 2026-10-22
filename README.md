@@ -35,7 +35,7 @@ docker compose run --rm test
 
 - [CONTRIBUTING.md](CONTRIBUTING.md): how changes are made, checked, merged
   and shipped. Read it before opening a pull request.
-- [CONTEXT.md](CONTEXT.md): the domain vocabulary shared by every package.
+- [GLOSSARY.md](GLOSSARY.md): the domain vocabulary shared by every package.
 - [docs/architecture.md](docs/architecture.md): routes, API boundaries and
   publishing rules.
 - [docs/local-docker.md](docs/local-docker.md): the container workflow in full.
