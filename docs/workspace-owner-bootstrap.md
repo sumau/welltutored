@@ -4,11 +4,6 @@ Workspace ownership is stored in the database. The API currently requires a
 verified primary Clerk email address, then creates a `pending` Workspace
 account for any verified email that does not already have an account.
 
-`WORKSPACE_ALLOWED_EMAILS` is documented here as a possible allowlist, but the
-current runtime does not read or enforce that variable. It must not be treated
-as an access-control mechanism unless the account-provisioning service is
-updated to enforce it.
-
 ## When this is needed
 
 Use this process only when a database has no owner account, such as after the
@@ -61,8 +56,8 @@ string from a checkout, with the same preconditions: the owner has signed in
 once at the Public Origin, and no owner exists yet.
 
 ```
-read -rsp 'Direct DATABASE_URL: ' DATABASE_URL; echo
-docker compose run --rm -T -e DATABASE_URL="$DATABASE_URL" --entrypoint bash migrate \
+read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
+docker compose run --rm -T -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
   -lc 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v email=you@example.com' <<'SQL'
 \conninfo
 UPDATE workspace_accounts
@@ -87,7 +82,6 @@ see the owner's Workspace.
   handling.
 - Do not run the update if an owner already exists.
 - Do not change an existing owner through this bootstrap step.
-- Keep owner role state separate from any future email-allowlist policy.
 
 ## Database recovery
 

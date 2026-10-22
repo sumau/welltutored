@@ -248,8 +248,8 @@ SMOKE_BASE_URL=http://localhost:5173 pnpm smoke:dev
 ```
 
 The development launch check validates health, catalogue data, public routes,
-and invalid-enquiry recovery. It intentionally skips the Clerk Frontend API
-proxy assertion because the API server only enables that proxy in production.
+and invalid-enquiry recovery. It skips the Clerk check, because a local stack
+runs on a development instance with no `clerk.` CNAME to check.
 
 `SMOKE_BASE_URL` is required and has no default, in every mode — see
 [launch-smoke-check.md](launch-smoke-check.md). Target the dev server rather

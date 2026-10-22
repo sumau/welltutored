@@ -44,7 +44,7 @@ locally](#verifying-the-image-locally).
 [Neon](https://neon.tech) hosts the PostgreSQL. It has a free tier, takes real
 backups, and — the part that matters operationally — is reachable over the
 public internet, so every step that runs from this checkout (the schema push
-below, seeding, copying data in) needs no tunnel.
+below, copying data in) needs no tunnel.
 
 Create the project in **AWS Europe West 2 (London)**, the region nearest
 `primary_region = "lhr"` in `fly.toml`. Neon cannot move a project afterwards,
@@ -284,9 +284,6 @@ There are two ways to be somewhere you did not intend:
   hostname to get the direct endpoint. `push` against the pooled endpoint can
   report success without converging, so a `push` that keeps finding the same
   changes run after run is the symptom to watch for.
-
-On the Deployment `workspace_accounts` is empty until the owner bootstrap runs,
-so a non-zero count is itself a sign you are on the wrong database.
 
 ## Rehearsing a push on a Neon branch
 
@@ -577,7 +574,7 @@ nothing else.
 
 The public site does not need *working* Clerk keys, but it does need
 `CLERK_SECRET_KEY` to be present — see the table. With a placeholder, the
-directory, resources and enquiry flow all work and `/workspace` simply cannot be
+directory and enquiry flow both work and `/workspace` simply cannot be
 signed into. Pages themselves keep rendering either way, because the Clerk
 middleware is mounted under `/api` only.
 
@@ -585,17 +582,12 @@ middleware is mounted under `/api` only.
 
 `ensureSeedContent()` only runs when `NODE_ENV=development`
 (`artifacts/api-server/src/index.ts`), so a fresh Deployment database has no
-tutors or resources and the public directory renders empty. Two ways on from
-there: deploy empty and create content through `/workspace`, or seed the
-illustrative content.
+tutors or resources and the public directory renders empty. Deploy empty and
+create content through `/workspace`. Two things behave differently until there
+is a published Tutor, and neither is a fault:
 
-### Deploying against an empty database
-
-Perfectly workable, and the shortest path to a Deployment you can log into. Two
-things behave differently and neither is a fault:
-
-- The directory and resource library render their empty states, and `/api/tutors`
-  returns an empty list.
+- The directory renders its empty state, and `/api/tutors` returns an empty
+  list.
 - `pnpm run smoke:launch` **fails**, because it asserts a published Tutor and
   that Tutor's profile page, and so does the deploy job's Launch smoke step,
   which runs it. `--allow-empty` waives exactly those assertions; everything
@@ -608,13 +600,6 @@ things behave differently and neither is a fault:
     SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
     pnpm run smoke:launch --allow-empty
   ```
-
-To get the illustrative tutors and resources without copying a database, point
-the development API at the Deployment database: its `dev` script sets
-`NODE_ENV=development`, which is the condition the seeding is gated on. With a
-tunnel to that database open, override `DATABASE_URL` on the `api` service and
-interrupt it once it logs that it is listening. Seeding is idempotent, so a
-repeat run changes nothing.
 
 ## Workspace sign-in
 

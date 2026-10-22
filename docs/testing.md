@@ -184,8 +184,8 @@ workspace packages, and finally builds the packages that define a build script.
 ## Launch and browser smoke checks
 
 The non-mutating launch smoke check verifies a running target's API health,
-Clerk production instance, published tutor and resource catalogue data, public
-pages, invalid-enquiry validation, and recovery health check:
+Clerk production instance, published tutor catalogue data, public pages,
+invalid-enquiry validation, and recovery health check:
 
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \
