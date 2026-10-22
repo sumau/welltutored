@@ -142,9 +142,8 @@ the web application and `/api` are checked together:
 docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:dev'
 ```
 
-It checks health, catalogue data, public routes and invalid-enquiry recovery,
-and skips the Clerk check, because a local stack runs on a development instance
-with no `clerk.` CNAME to check.
+It runs the Launch Smoke's checks except the Clerk one
+([waivers](#waivers)).
 
 ## The Image Smoke by hand
 
