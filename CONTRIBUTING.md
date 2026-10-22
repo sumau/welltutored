@@ -48,7 +48,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   (`docker compose up api web`).
 - For a change to routing, public API responses, deployment configuration or
   the enquiry journey, also run the development smoke against the local stack
-  ([docs/testing.md](docs/testing.md)).
+  ([docs/testing.md](docs/testing.md#against-the-local-stack)).
 - After merging a change that touches auth, Clerk or the `@clerk/*` versions,
   sign in on `https://welltutored.co.uk` and open the Workspace. The Sign-in
   Smoke uses the Clerk development instance, so this is the part CI can't
@@ -74,8 +74,9 @@ CI does not apply the schema. It is a deliberate `push` run by hand
   before ticking its box or starting the next schema change.
 - Rehearse a push that touches existing rows (a rename, a dropped column, a new
   constraint) on the local database, then on a Neon branch of the Deployment
-  ([docs/deploy.md](docs/deploy.md#rehearsing-a-push-on-a-neon-branch)). Write
-  what the push prompted, and what you answered, into `docs/deploy.md`.
+  ([docs/schema-push.md](docs/schema-push.md#rehearsing-a-push-on-a-neon-branch)).
+  Write what the push prompted, and what you answered, into
+  `docs/schema-push.md`.
 
 ## Secrets in instructions
 

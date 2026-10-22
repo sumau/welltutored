@@ -4,11 +4,10 @@ Well Tutored helps families discover women tutors, read tutor-written
 resources, and send named-tutor enquiries. Tutors maintain their profiles and
 resources in a private workspace.
 
-The public site presents women tutors educated at Russell Group universities,
-their expertise and availability, and a library of tutor-written learning
-resources. Visitors can open a tutor profile and submit a named-tutor enquiry.
-Approved workspace users manage tutor profiles, resources, and workspace
-accounts.
+The public site presents women tutors, their expertise and availability, and a
+library of tutor-written learning resources. Visitors can open a tutor profile
+and submit a named-tutor enquiry. Approved workspace users manage tutor
+profiles, resources, and workspace accounts.
 
 ## Quick start
 
@@ -43,6 +42,9 @@ docker compose run --rm test
 - [docs/deploy.md](docs/deploy.md): deployment. **Merging to `main` ships to
   production**, and schema changes are applied by hand beforehand
   ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)).
+  [docs/schema-push.md](docs/schema-push.md) records what a push prompts, and
+  [docs/first-deploy.md](docs/first-deploy.md) stands a Deployment up from
+  nothing.
 - [docs/testing.md](docs/testing.md): the test layers and smoke checks.
 - [docs/adr/](docs/adr/): architecture decision records.
 
@@ -99,8 +101,9 @@ images override them.
 
 **Merging to `main` ships.** CI deploys the container to Fly and then runs the
 launch smoke against it; nothing else deploys. `docker/Dockerfile` and
-`fly.toml` are the whole configuration, and
-[docs/deploy.md](docs/deploy.md) is the walkthrough.
+`fly.toml` are the whole configuration.
+[docs/deploy.md](docs/deploy.md) covers running the Deployment, and
+[docs/first-deploy.md](docs/first-deploy.md) standing one up from nothing.
 
 Schema changes are not part of that. Apply them yourself, before merging
 anything that expects them — [ADR-0002](docs/adr/0002-schema-by-deliberate-push.md).

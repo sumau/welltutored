@@ -59,10 +59,10 @@ flowchart TB
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | `docker compose up --build prod`, then `smoke:dev` and `smoke:enquiry` with `SMOKE_BASE_URL=http://localhost:8081` |
-| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#launch-and-browser-smoke-checks)) |
+| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](#by-hand) |
+| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#sign-in-smoke)) |
 | Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | `smoke:launch` with `SMOKE_BASE_URL=https://welltutored.co.uk` |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | [launch-smoke-check.md](launch-smoke-check.md) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -91,19 +91,9 @@ The command stops at the first failure and returns a non-zero exit code. It is
 the deterministic quality gate and does not depend on a running dev stack or a
 deployed URL.
 
-The command uses an externally supplied `TEST_DATABASE_URL` when one is available.
-Otherwise, it provisions a temporary local PostgreSQL cluster for the run,
-exports its separate connection as `TEST_DATABASE_URL`, and removes the
-cluster when validation finishes. It never falls back to `DATABASE_URL`.
-
-CI is the only automated validation path that runs the database-backed API
-integration suite. Those tests create, update, publish, and delete test
-records, so they must use an isolated test database rather than a live
-environment. The gate rejects a value equal to `DATABASE_URL` and
-applies the current schema to the test connection before the API suite starts.
-If an external test URL is provided but is missing or the schema cannot be
-applied, validation stops with an actionable test-database error instead of
-falling back to the application database.
+It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
+`DATABASE_URL`, and makes a temporary local cluster when none is supplied;
+[testing.md](testing.md#api-server) has the rules.
 
 ## GitHub Actions
 
@@ -167,6 +157,30 @@ again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
 against keeping the Clerk instances separate. So this checks the image's
 recipe, not the exact image.
 
+### By hand
+
+The `prod` compose service runs the production image against the local
+development database, which has seed content:
+
+```
+docker compose up --build prod      # http://localhost:8081
+```
+
+That covers the two things most likely to be wrong — whether the frontend is
+actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
+deploying anything. Run the development smoke against it over the compose
+network:
+
+```
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
+```
+
+It requests every public page with `Accept: text/html`, which is what caught the
+Clerk handshake redirect in
+[ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
+and `smoke:sign-in` need a Chromium these images do not carry
+([launch-smoke-check.md](launch-smoke-check.md#the-enquiry-browser-check)).
+
 ## Credentials
 
 `pnpm run verify:ci` needs no Clerk credentials. The suite passes with
@@ -222,13 +236,10 @@ once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
 is what makes a failure in either stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
 runs the launch smoke against the live site.
 
-The deploy is blue-green: the new machine takes traffic only once it passes the
-Health Check, `/api/healthz`, which needs the database to answer. So a version
-that won't start or can't reach the database fails the `Deploy to Fly` step and
-never goes live. Anything else surfaces in the launch smoke, after the switch.
-[deploy.md](deploy.md#blue-green-deploys) covers failures and rollback, and
-[ADR-0003](adr/0003-no-staging-environment.md) why there is no staging
-environment in front of this.
+The deploy is blue-green, switching only once the new machine passes the Health
+Check; [deploy.md](deploy.md#blue-green-deploys) covers what that catches,
+failures and rollback, and [ADR-0003](adr/0003-no-staging-environment.md) why
+there is no staging environment in front of this.
 
 It has its own `concurrency` group, without `cancel-in-progress`. The
 workflow-level group cancels superseded pull-request runs, which is right for
@@ -238,42 +249,12 @@ wherever `flyctl` had got to. Deploys queue instead.
 It does **not** apply the schema. That is
 [ADR-0002](adr/0002-schema-by-deliberate-push.md), and it is the point.
 
-## Development smoke validation
-
-With the local stack running, validate it through the Vite dev server, which
-proxies `/api` to the API service:
-
-```sh
-SMOKE_BASE_URL=http://localhost:5173 pnpm smoke:dev
-```
-
-The development launch check validates health, catalogue data, public routes,
-and invalid-enquiry recovery. It intentionally skips the Clerk Frontend API
-proxy assertion because the API server only enables that proxy in production.
-
-`SMOKE_BASE_URL` is required and has no default, in every mode — see
-[launch-smoke-check.md](launch-smoke-check.md). Target the dev server rather
-than the API port directly, so the web application and `/api` are checked
-together.
-
-The browser check (`pnpm smoke:enquiry`) validates the enquiry flow with
-keyboard navigation, validation recovery, retry behavior, and an announced
-success receipt. Its requests are intercepted so it does not create a real
-Enquiry. It needs `SMOKE_CHROMIUM_PATH`. CI runs both checks against the
-production image, in the Image Smoke.
-
 ## Post-deploy validation
 
-The deploy job finishes by running the launch smoke against the live site:
-
-```sh
-SMOKE_BASE_URL=https://welltutored.co.uk \
-  SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
-  pnpm run smoke:launch
-```
-
-CI also sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the
-same run checks that each redirects to the Public Origin.
+The deploy job finishes by running the launch smoke against the live site
+([launch-smoke-check.md](launch-smoke-check.md) has the command). CI also sets
+`SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
+checks that each redirects to the Public Origin.
 
 A successful Deploy does not mean a usable Deployment, which is why this runs
 at all. The check fails if the site is unhealthy or redirects to another

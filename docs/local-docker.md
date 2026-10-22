@@ -59,12 +59,8 @@ docker compose run --rm test
 Runs the whole CI suite — database-backed API integration tests, frontend
 component tests, smoke checks, documentation checks, typecheck, and build —
 against a second database, `welltutored_test`, on the same PostgreSQL
-service. The service creates that database on first use.
-
-Integration tests never touch `welltutored`. `lib/db/src/index.ts` reads
-`TEST_DATABASE_URL` instead of `DATABASE_URL` whenever `NODE_ENV=test`, and
-refuses to start if the two are equal, so a misconfigured run fails rather
-than mutating application data.
+service. The service creates that database on first use. What the suite
+covers, and how it keeps off `welltutored`, is in [testing.md](testing.md).
 
 Running `pnpm run verify:ci` directly inside `api` or `web` does not work.
 Without `TEST_DATABASE_URL` it tries to build a throwaway cluster with
@@ -79,13 +75,9 @@ The `test` service supplies the connection, which takes the other branch of
 `scripts/with-test-database.sh`. CI takes the same branch, with the dedicated
 connection coming from its `postgres:16` service container instead.
 
-The suite needs no Clerk credentials and passes without them, so the keys in
-`.env` are irrelevant here even though Compose loads them. See
-[CI and deploy validation](ci-validation.md) for why, and for what does
-depend on a live Clerk instance.
-
-Browser smoke checks are excluded; they need a Chromium these images do not
-carry, named by `SMOKE_CHROMIUM_PATH`.
+The suite needs no Clerk keys ([ci-validation.md](ci-validation.md#credentials)),
+and leaves out the browser smoke checks, which need a Chromium these images do
+not carry.
 
 ## How requests are routed
 
@@ -149,7 +141,7 @@ Three Clerk instances can be in play, and each has its own users:
 | --- | --- | --- |
 | An accountless development application, if `.env` came from `--accountless` | `.env` | Whoever signed up at `localhost`. Not visible in the dashboard. |
 | The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([ci-validation.md](ci-validation.md#credentials)) | The Sign-in Smoke's `+clerk_test` user, created in the dashboard |
-| The production instance of the same application | `fly.toml` and Fly secrets ([deploy.md](deploy.md)) | Tutors on `welltutored.co.uk` |
+| The production instance of the same application | `fly.toml` and Fly secrets ([first-deploy.md](first-deploy.md#flyio)) | Tutors on `welltutored.co.uk` |
 
 A user exists only in the instance it was created in. "Couldn't find your
 account" for an address you know you created usually means the keys name a

@@ -2,76 +2,17 @@
 
 Merging to `main` deploys. `.github/workflows/ci.yml` builds the image, runs
 `flyctl deploy`, and then runs the launch smoke against the result. This
-document covers the parts that are not automatic: the database, the schema, the
-Clerk keys, and standing a Deployment up for the first time.
+document covers running the live Deployment: the schema, which is not
+automatic, and what to do when a deploy goes wrong. Standing a new Deployment up
+from nothing is [first-deploy.md](first-deploy.md).
 
 ## What runs
 
-One container. `docker/Dockerfile` builds the frontend, bundles the API, and
-ships a runtime stage that serves both on a single port:
-
-- `/api/*` — the Express API
-- everything else — the Vite build from `artifacts/welltutored/dist/public`,
-  with client-side routes falling back to `index.html`
-
-One origin serves both, and splitting them is not a configuration this codebase
-supports — [ADR-0001](adr/0001-single-origin-deployment.md) has the two
-mechanisms that depend on it.
-
-Plus a PostgreSQL database, hosted separately from the container — see
-**Database** below.
-
-## Standing one up, in order
-
-Each step has its own section below; this is the order they have to happen in.
-
-1. **[Database](#database)** — create the Neon project in London, take the pooled and
-   direct connection strings.
-2. **[Apply the schema](#applying-the-schema)** — from this checkout, using the
-   direct string. Nothing does this for you.
-3. **[Clerk keys](#clerk-keys)** — a development instance, because you do not
-   control DNS for `*.fly.dev`.
-4. **[Deploy](#flyio)** — create the app, set the secrets, put the publishable
-   key in `fly.toml`, `fly deploy`.
-5. **Expect an empty site.** A fresh database has no tutors or resources — see
-   [Content](#content).
-
-Everything can be rehearsed first without deploying: see [Verifying the image
-locally](#verifying-the-image-locally).
-
-## Database
-
-[Neon](https://neon.tech) hosts the PostgreSQL. It has a free tier, takes real
-backups, and — the part that matters operationally — is reachable over the
-public internet, so every step that runs from this checkout (the schema push
-below, seeding, copying data in) needs no tunnel.
-
-Create the project in **AWS Europe West 2 (London)**, the region nearest
-`primary_region = "lhr"` in `fly.toml`. Neon cannot move a project afterwards,
-and distance costs more than it looks: every query is a round trip, and `pg`
-drops a connection after 10 seconds idle, so on a quiet site most visitors pay
-for a fresh TCP, TLS and Postgres handshake too. With the database in Ohio
-that came to about 0.7s a request, against 0.15s on a warm connection (issue
-#65). If `primary_region` ever changes, move the database with it.
-
-Then take **two** connection strings from its dashboard. Neon
-marks the pooled one with `-pooler` in the hostname, and they are not
-interchangeable:
-
-- The **pooled** string is the application's. Set it as the `DATABASE_URL`
-  secret on the Deployment.
-- The **direct** string is for schema work. Use it for the push below.
-
-Both need `?sslmode=require` appended: `lib/db/src/index.ts` builds a bare `pg`
-pool from `DATABASE_URL` and sets no SSL options of its own, so without it the
-connection is refused.
-
-Nothing in the application is Neon-specific — it is a `DATABASE_URL` and
-nothing more — so any hosted PostgreSQL substitutes, with the pooled/direct
-distinction being whatever that provider's equivalent is. Fly's own Postgres
-offerings are deliberately not covered here: the managed one is private-network
-only, so every command below would need a proxy in front of it, and the
-unmanaged one is something Fly's documentation now says they cannot support.
+One container serves the API under `/api/*` and the frontend build everywhere
+else, with client-side routes falling back to `index.html`. Splitting them is
+not a configuration this codebase supports
+([ADR-0001](adr/0001-single-origin-deployment.md)). The PostgreSQL database is
+on Neon, outside the container.
 
 ## Applying the schema
 
@@ -83,7 +24,8 @@ database from a checkout.
 Read the **direct** connection string into a shell variable once per terminal.
 `read -rs` takes it without echoing it or writing it to shell history; paste it,
 `?sslmode=require` included, and press Enter. Every database command in this
-document then uses it as-is, so keep that terminal open for the session:
+document and in [schema-push.md](schema-push.md) then uses it as-is, so keep
+that terminal open for the session:
 
 ```
 read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
@@ -107,160 +49,16 @@ Three things about that command:
   your shell substitutes the value before Docker sees it, and an unset variable
   passes an empty string, which fails loudly with `DATABASE_URL, ensure the
   database is provisioned` instead of silently choosing the wrong database.
-- **`?sslmode=require`** belongs on the connection string, for the reason given
-  under [Database](#database) above.
+- **`?sslmode=require`** belongs on the connection string, for the reason in
+  the [configuration reference](#configuration-reference).
 - **Use Neon's direct connection string here**, not the pooled one — the
   `-pooler` hostname is the application's. Pooled connections are a poor fit for
   DDL.
 
 `push` prompts before anything destructive. Read the prompt, and review the diff
-of `lib/db/src/schema/` first — nothing downstream asks. Against an empty
-database there is nothing to drop, so a *truncate* prompt there means the
-connection string is not pointing where you think it is. When you are unsure
-what a push will do to existing rows, run it on a copy first — see
-[Rehearsing a push on a Neon branch](#rehearsing-a-push-on-a-neon-branch).
-
-Dropping a column prompts with a count of the rows that hold a value. Removing
-the tutor `style` field (issue #53) looked like this against seeded data:
-
-```
- Warning  Found data-loss statements:
-· You're about to delete style column in tutors table with 5 items
-· You're about to delete style column in tutor_profile_drafts table with 1 items
-
-THIS ACTION WILL CAUSE DATA LOSS AND CANNOT BE REVERTED
-
-Do you still want to push changes?
-```
-
-Answer yes only when every listed column is one the schema diff removes on
-purpose. The live code still reads a dropped column until the merge deploys, so
-merge straight after the push.
-
-Dropping a table prompts the same way, with a count of its rows. Removing saved
-resources (issue #69) looked like this against local data:
-
-```
- Warning  Found data-loss statements:
-· You're about to delete saved_resources table with 2 items
-
-THIS ACTION WILL CAUSE DATA LOSS AND CANNOT BE REVERTED
-
-Do you still want to push changes?
-❯ No, abort
-  Yes, I want to remove 1 table,
-```
-
-Here the order flips: merge first and push after, so the running Deployment
-never queries a table that has gone. That works whenever the merged code no
-longer reads the table.
-
-**Both prompts appear only when there is data to lose.** `push` counts the rows
-first and asks only when the count is above zero. An empty table, or a column
-no row holds a value in, is dropped with no prompt, and the push just reports
-`Changes applied`. Production's `saved_resources` was empty, so its push showed
-no prompt. To confirm the drop, run the `\conninfo` and `\dt` check at the end
-of this section, then push again: it should print `No changes detected`.
-
-**Renames are the exception, and they prompt on any database, empty or not.**
-`push` diffs states, so it cannot tell a renamed type or constraint from a
-dropped one and a new one — it asks. The highlighted default is `create`, which
-is the drop-and-recreate; the rename is the line below it:
-
-```
-Is workspace_account_role enum created or renamed from another enum?
-❯ + workspace_account_role                       create enum
-  ~ studio_account_role › workspace_account_role rename enum
-```
-
-Answered as a rename it emits `ALTER TYPE ... RENAME TO ...` and touches no
-rows. Answered with the default it creates the new type, casts the column across
-with `USING role::text::<new type>`, restores the default and drops the old
-type — which, for a pure rename where the label set is unchanged, lands on the
-same state. Verified against a populated table: rows survive intact, and a
-second `push` reports no changes.
-
-Pick the rename line anyway — it is the honest description of the change.
-
-**Neither answer copes with a changed label.** `push` has no way to rename an
-enum value: whichever line you pick, a label set that differs from the
-database's makes it cast the column to `text`, drop the type, create it with
-the new labels and cast back. Any row still holding a label the new type lacks
-fails the cast back, and `push` stops there, partway through and outside a
-transaction, leaving the column as plain `text`. Renaming the Intake value
-`unavailable` to `full` (issue #55) did exactly that in rehearsal:
-
-```
-ALTER TABLE "tutors" ALTER COLUMN "intake" SET DATA TYPE text;
-...
-DROP TYPE "public"."tutor_intake";
-CREATE TYPE "public"."tutor_intake" AS ENUM('accepting', 'limited', 'full');
-...
-error: invalid input value for enum tutor_intake: "unavailable"
-```
-
-So rename the label yourself first, in place, which rewrites every row holding
-it at once:
-
-```
-docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
-  -lc "psql \"\$DATABASE_URL\" -c \"ALTER TYPE tutor_availability RENAME VALUE 'unavailable' TO 'full'\""
-```
-
-The labels then match, and `push` asks only about names. For #55, answer
-`rename` to all three prompts:
-
-```
-Is tutor_intake enum created or renamed from another enum?
-  ~ tutor_availability › tutor_intake rename enum
-Is intake column in tutors table created or renamed from another column?
-  ~ availability › intake rename column
-Is intake column in tutor_profile_drafts table created or renamed from another column?
-  ~ availability › intake rename column
-```
-
-and it emits renames and nothing else:
-
-```
-ALTER TYPE "public"."tutor_availability" RENAME TO "tutor_intake";
-ALTER TABLE "tutors" RENAME COLUMN "availability" TO "intake";
-ALTER TABLE "tutor_profile_drafts" RENAME COLUMN "availability" TO "intake";
-```
-
-The column prompts list every column of that table the schema no longer has,
-so read the names, not the position: `rename` is not always the line directly
-below `create`. Between the `ALTER TYPE` and the merge, the live code still
-writes the old label, so saving a profile as `unavailable` fails until the
-deploy lands. Push and merge back to back.
-
-**If a push has already stopped partway**, do not run it again as it is. A
-rerun generates statements from whatever state was left, and it fails at the
-same row. When #56 was merged without the `ALTER TYPE` above, the first push
-renamed the type and the columns, then left `intake` as plain `text` with two
-rows still holding `unavailable`. The live site kept working, since a `text`
-column holds the same values.
-
-To recover, fix the rows by hand first. A `text` column takes the new label
-directly, and the `::text` comparison works whatever the column's type is:
-
-```
-docker compose run --rm -T -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
-  -lc 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -1' <<'SQL'
-update tutors set intake = 'full' where intake::text = 'unavailable';
-update tutor_profile_drafts set intake = 'full' where intake::text = 'unavailable';
-SQL
-```
-
-Then `push` again. The names already match, so it asks nothing; it casts the
-column back with `SET DATA TYPE ... USING intake::tutor_intake`, restores the
-default, and applies anything else pending. Push a second time to confirm it
-reports `No changes detected`. Before touching the Deployment, rebuild the
-half-applied state in a local scratch database (`create database ... template
-welltutored`, then undo the parts that did not land) and rehearse both steps
-there.
-
-Renaming a constraint additionally asks whether to truncate the table before
-adding the new one — answer no; the default is already no.
+of `lib/db/src/schema/` first — nothing downstream asks.
+[schema-push.md](schema-push.md) has what each kind of change prompts, how past
+pushes were answered, and how to rehearse a push on a Neon branch first.
 
 Check what landed, and check *where* it landed at the same time:
 
@@ -285,209 +83,7 @@ There are two ways to be somewhere you did not intend:
   report success without converging, so a `push` that keeps finding the same
   changes run after run is the symptom to watch for.
 
-On the Deployment `workspace_accounts` is empty until the owner bootstrap runs,
-so a non-zero count is itself a sign you are on the wrong database.
-
-## Rehearsing a push on a Neon branch
-
-A push you are unsure of — a rename, a dropped column, a new constraint on a
-table that already has rows — can be run against a copy of the Deployment
-database first. The local development database has seed content, not the
-Deployment's rows, so it cannot tell you whether a constraint holds against
-real data. A Neon branch can: it is a copy-on-write clone of the database at the
-moment you create it, made in seconds, with its own connection strings.
-
-1. **Create the branch.** In the Neon dashboard, open the project, go to
-   **Branches**, and create one from the branch the Deployment's
-   `DATABASE_URL` points at. Name it for what it is, e.g. `push-rehearsal`.
-2. **Take its direct connection string**, not the pooled one, and append
-   `?sslmode=require`, for the reasons under
-   [Applying the schema](#applying-the-schema).
-3. **Push to it** with the same command as a real push, and answer the prompts
-   as you intend to answer them for real:
-
-   ```
-   read -rsp 'Rehearsal branch DATABASE_URL: ' REHEARSAL_DATABASE_URL; echo
-
-   docker compose run --rm -e DATABASE_URL="$REHEARSAL_DATABASE_URL" --entrypoint bash migrate \
-     -lc 'pnpm --filter @workspace/db run push'
-   ```
-
-   It is read as `REHEARSAL_DATABASE_URL` so that it cannot be confused with
-   the `DIRECT_DATABASE_URL` you read for the real push.
-4. **Check the result** with the `\conninfo` and `\dt` command above, passing
-   `"$REHEARSAL_DATABASE_URL"`. The host in `\conninfo` should be the branch's
-   endpoint, which differs from the Deployment's. Query the tables the change
-   touches to confirm the rows came through as you expected.
-5. **Delete the branch** from the same **Branches** page. It shares storage
-   with its parent until either one diverges, so leaving it costs little at
-   first, but it counts towards the project's branch limit and goes stale.
-
-The branch is a disposable copy. Nothing you do to it reaches the Deployment,
-so a push that goes wrong there is the result you were looking for: fix the
-schema change, delete the branch, and branch again.
-
-## Clerk keys
-
-Which keys work depends on the hostname, and getting this wrong is the most
-common way a first Deployment fails.
-
-`publishableKeyFromHost` decides this, and the SPA
-(`artifacts/welltutored/src/app/config.ts`) and the API (`app.ts`) both call it:
-
-```js
-if (fallbackKey && isDevelopmentFromPublishableKey(fallbackKey)) return fallbackKey;
-return buildPublishableKey(`clerk.${hostname}`);
-```
-
-- A **development** key (`pk_test_…`) is used exactly as given, so Clerk is
-  reached at `<slug>.clerk.accounts.dev` whatever the hostname. This is the only
-  configuration that works on a hostname whose DNS you do not control, such as
-  `*.fly.dev`, and it needs no records.
-- A **production** key (`pk_live_…`), or no key at all, is discarded: both sides
-  derive a key for `clerk.<hostname>` instead. That expects the CNAME a Clerk
-  production instance asks you to add, so it requires a domain of your own.
-
-So stand the Deployment up on development keys, and move to a production
-instance when you attach a real domain. `TRUSTED_ORIGINS` and `PUBLIC_ORIGIN`
-change with the domain; `app` in `fly.toml` does not, because it is the Fly
-app's name rather than a hostname, and changing it means creating a new app.
-Development instances show a notice in the sign-in UI, share Clerk's OAuth
-credentials, and carry lower limits, so they are for getting the Deployment
-working rather than for live traffic.
-
-The live Deployment runs on a production instance for `welltutored.co.uk`,
-reached at `clerk.welltutored.co.uk`. There is no Frontend API proxy: the
-browser talks to that CNAME directly.
-
-### Moving to a production instance
-
-In this order, so the server's keys and the bundle's key change in one deploy:
-
-1. In the Clerk dashboard, create a production instance for the Public Origin's
-   domain, cloning the development instance's settings.
-2. Add the DNS records it lists (`clerk.`, `accounts.`, `clkmail.` and two
-   DKIM records) in Cloudflare as **DNS only**, and wait until Clerk shows the
-   domain verified and its certificates issued.
-3. Social sign-in needs credentials of your own; a production instance does not
-   share Clerk's. For Google: create a Web OAuth client in Google Cloud with
-   the redirect URI Clerk shows, set the consent screen to **In production**
-   (in Testing, only listed test users can sign in), and paste the client ID
-   and secret into Clerk.
-4. Stage the two secrets without restarting anything, so they take effect with
-   the next deploy rather than alongside a bundle built for the old instance:
-
-   ```
-   read -rsp 'CLERK_SECRET_KEY: ' CLERK_SECRET_KEY; echo
-   read -rsp 'CLERK_PUBLISHABLE_KEY: ' CLERK_PUBLISHABLE_KEY; echo
-   fly secrets set --stage \
-     CLERK_SECRET_KEY="$CLERK_SECRET_KEY" \
-     CLERK_PUBLISHABLE_KEY="$CLERK_PUBLISHABLE_KEY"
-   ```
-
-5. Put the `pk_live_…` key in `fly.toml` under `[build.args]` and merge. The
-   deploy picks up the staged secrets, and the launch smoke checks
-   `https://clerk.<domain>/v1/environment` for a production instance.
-
-Tutors, resources, drafts and enquiries are untouched — none of them reference
-Clerk. Rows in `workspace_accounts` still carry the old instance's user IDs,
-since a Clerk user ID belongs to its instance. They keep working: a sign-in
-whose user ID matches no row falls back to the verified email, and reuses that
-row, role and tutor included, without rewriting its `clerk_user_id`. So nothing
-has to be done before the switch.
-
-Afterwards, look at what is there:
-
-```
-docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
-  -lc 'psql "$DATABASE_URL" -c "SELECT id, clerk_user_id, email, role, tutor_id, created_at FROM workspace_accounts ORDER BY id"'
-```
-
-A `pending` row from the old instance can be deleted; the next sign-in writes
-a fresh one with the new user ID. Do not delete an `owner` or `tutor` row, which
-would lose the role and the tutor link: set its `clerk_user_id` to the new ID,
-from Users in the Clerk dashboard, instead.
-
-## Fly.io
-
-`fly.toml` is committed and points at `docker/Dockerfile`.
-
-Fly runs the container; Neon holds the database. By this point the Neon
-project exists, the schema is pushed, and you have Clerk development keys — all
-three are prerequisites, not steps you can take afterwards.
-
-Pass the secrets in from shell variables rather than typing them into the
-command. `read -rs` takes each value without echoing it or writing it to shell
-history; paste it and press Enter:
-
-```
-read -rsp 'Pooled DATABASE_URL: ' POOLED_DATABASE_URL; echo
-read -rsp 'CLERK_SECRET_KEY: ' CLERK_SECRET_KEY; echo
-read -rsp 'CLERK_PUBLISHABLE_KEY: ' CLERK_PUBLISHABLE_KEY; echo
-
-fly apps create welltutored
-fly secrets set \
-  DATABASE_URL="$POOLED_DATABASE_URL" \
-  CLERK_SECRET_KEY="$CLERK_SECRET_KEY" \
-  CLERK_PUBLISHABLE_KEY="$CLERK_PUBLISHABLE_KEY"
-```
-
-The connection string is read as `POOLED_DATABASE_URL`, not `DATABASE_URL`, so
-it cannot be confused with the `DIRECT_DATABASE_URL` you read for
-[schema work](#applying-the-schema). They are different strings: this one is
-the **pooled** endpoint the application runs against, the other is the
-**direct** endpoint for DDL. Passing the direct one here works and then quietly
-costs you connection pooling in production.
-
-`fly launch --no-deploy` also works, but it rewrites the committed `fly.toml`
-from its own guesses; `git diff fly.toml` afterwards and revert what it changed.
-`fly apps create` only reserves the name, which is all this repository needs.
-
-CI needs a token of its own. This is the one step nothing else can do for you:
-
-```
-fly tokens create deploy
-gh secret set FLY_API_TOKEN
-```
-
-Then edit two values in `fly.toml` itself. They are committed to the
-repository, which is correct for both:
-
-```toml
-[build.args]
-  # Your Clerk publishable key, pasted in full.
-  VITE_CLERK_PUBLISHABLE_KEY = "pk_test_..."
-
-[env]
-  # The hostname `fly apps create` gave you, with the scheme and no trailing
-  # slash.
-  TRUSTED_ORIGINS = "https://welltutored.fly.dev"
-```
-
-**The publishable key has to be here and not in `fly secrets`.** Vite compiles
-it into the browser bundle while the image is being built, and a Fly secret only
-exists once the container is running — too late. Set it with `fly secrets set`
-and the build silently uses the empty string in `fly.toml`, the bundle ships
-without a Clerk key, and sign-in never initialises. Committing it is expected
-rather than a leak: a publishable key is public by design and is served to every
-visitor in the JavaScript. The three secrets above are the opposite case and
-must never appear in this file.
-
-**`TRUSTED_ORIGINS` must match the deployed hostname exactly** — see the
-[configuration reference](#configuration-reference).
-
-The health check is already pointed at `/api/healthz`, the Health Check. It
-answers `200` only when the database answers a `SELECT 1` within 3 seconds, and
-`503` otherwise, so a wrong `DATABASE_URL` or an unreachable Neon takes the
-machine out of rotation. Fly then serves its own proxy error rather than the
-app's. That is accepted, since every page needs the database anyway. The 3
-seconds sit above Neon's wake-from-suspend time and below the check's 5-second
-`timeout`.
-
-After that, merging to `main` deploys. `fly deploy` from a checkout still works
-and is how you would ship a first image before any of this is merged.
-
-### Blue-green deploys
+## Blue-green deploys
 
 `fly.toml` sets `strategy = "bluegreen"`. A deploy boots a new machine beside
 the current one, waits for it to pass the Health Check, moves traffic to it, and
@@ -495,8 +91,16 @@ then destroys the old one. So a version that doesn't start, or can't reach the
 database, never takes traffic. The machine also gets a new ID on every deploy,
 so nothing may depend on one.
 
-What it does **not** catch: broken pages, a missing Tutor, or code that doesn't
-match the live schema, which still answers `SELECT 1`. Those surface in the
+`fly.toml` points Fly's health check at `/api/healthz`, the Health Check. It
+answers `200` only when the database answers a `SELECT 1` within 3 seconds, and
+`503` otherwise, so a wrong `DATABASE_URL` or an unreachable Neon takes the
+machine out of rotation. Fly then serves its own proxy error rather than the
+app's. That is accepted, since every page needs the database anyway. The 3
+seconds sit above Neon's wake-from-suspend time and below the check's 5-second
+`timeout`.
+
+What blue-green does **not** catch: broken pages, a missing Tutor, or code that
+doesn't match the live schema, which still answers `SELECT 1`. Those surface in the
 Launch Smoke, which runs after the switch, against the version visitors already
 see.
 
@@ -526,31 +130,6 @@ rollback then means pushing the old schema back by hand.
 Deploying this way was chosen instead of a staging environment
 ([ADR-0003](adr/0003-no-staging-environment.md)).
 
-## Attaching a custom domain
-
-The Deployment starts on the `*.fly.dev` hostname `fly apps create` gives it.
-Moving it onto a domain of its own takes DNS, a certificate per hostname, and
-two lines of `fly.toml`, in that order. This is how `welltutored.co.uk` was
-attached, with `www.welltutored.co.uk`, `welltutored.com` and
-`www.welltutored.com` redirecting to it.
-
-1. **DNS.** For every hostname, an `A` record for the app's IPv4 address and an
-   `AAAA` record for its IPv6 address; `fly ips list` shows both. Where DNS is
-   on Cloudflare, set each record to **DNS only**: with Cloudflare's proxy in
-   front, Fly cannot issue its certificates without further setup.
-2. **Certificates.** `fly certs add <hostname>` for each one, then wait until
-   `fly certs list` shows every one `Issued`. Fly validates against the DNS
-   from step 1, so this cannot usefully come first.
-3. **`fly.toml`.** Set `PUBLIC_ORIGIN` to the domain visitors should end up on,
-   and `TRUSTED_ORIGINS` to the same value. Every other hostname, the
-   `*.fly.dev` one included, then answers with a `301` to the same path there.
-   Only after step 2: a redirect to a hostname without a certificate sends
-   every visitor to a browser warning.
-4. **Launch Smoke.** Point the deploy job's `SMOKE_BASE_URL` at the new origin
-   and list the other hostnames in `SMOKE_REDIRECT_FROM`.
-
-`app` in `fly.toml` stays as it is throughout.
-
 ## Configuration reference
 
 | Variable | When | Notes |
@@ -577,82 +156,6 @@ nothing else.
 
 The public site does not need *working* Clerk keys, but it does need
 `CLERK_SECRET_KEY` to be present — see the table. With a placeholder, the
-directory, resources and enquiry flow all work and `/workspace` simply cannot be
+directory and enquiry flow both work and `/workspace` simply cannot be
 signed into. Pages themselves keep rendering either way, because the Clerk
 middleware is mounted under `/api` only.
-
-## Content
-
-`ensureSeedContent()` only runs when `NODE_ENV=development`
-(`artifacts/api-server/src/index.ts`), so a fresh Deployment database has no
-tutors or resources and the public directory renders empty. Two ways on from
-there: deploy empty and create content through `/workspace`, or seed the
-illustrative content.
-
-### Deploying against an empty database
-
-Perfectly workable, and the shortest path to a Deployment you can log into. Two
-things behave differently and neither is a fault:
-
-- The directory and resource library render their empty states, and `/api/tutors`
-  returns an empty list.
-- `pnpm run smoke:launch` **fails**, because it asserts a published Tutor and
-  that Tutor's profile page, and so does the deploy job's Launch smoke step,
-  which runs it. `--allow-empty` waives exactly those assertions; everything
-  that does not depend on content still runs
-  ([launch-smoke-check.md](launch-smoke-check.md#waivers)). Run it by hand
-  while the Deployment is empty, and drop it once there is a published Tutor:
-
-  ```
-  SMOKE_BASE_URL=https://welltutored.co.uk \
-    SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
-    pnpm run smoke:launch --allow-empty
-  ```
-
-To get the illustrative tutors and resources without copying a database, point
-the development API at the Deployment database: its `dev` script sets
-`NODE_ENV=development`, which is the condition the seeding is gated on. With a
-tunnel to that database open, override `DATABASE_URL` on the `api` service and
-interrupt it once it logs that it is listening. Seeding is idempotent, so a
-repeat run changes nothing.
-
-## Workspace sign-in
-
-`clerkMiddleware` is mounted under `/api`, not globally
-([ADR-0001](adr/0001-single-origin-deployment.md) says why). The SPA
-authenticates client-side through `@clerk/react`.
-
-## Verifying the image locally
-
-The `prod` compose service runs the Deployment image against the local
-development database, which has seed content:
-
-```
-docker compose up --build prod      # http://localhost:8081
-```
-
-That covers the two things most likely to be wrong — whether the frontend is
-actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
-deploying anything. The launch smoke check runs against it over the compose
-network, and is the regression test for both:
-
-```
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
-```
-
-It requests every public page with `Accept: text/html`, which is what caught the
-Clerk handshake redirect described above. The rest of the suite is unchanged:
-`docker compose run --rm test`, described in [local-docker.md](local-docker.md).
-
-## Render, Railway, Cloud Run, or anything else
-
-The same image works anywhere that runs a container and injects environment
-variables. Build from the repository root — the Dockerfile copies the workspace,
-so `docker/` is the wrong build context:
-
-```
-docker build -f docker/Dockerfile --build-arg VITE_CLERK_PUBLISHABLE_KEY=pk_live_... -t welltutored .
-```
-
-Point the platform's health check at `/api/healthz` and let it supply `PORT` if
-it insists on its own.
