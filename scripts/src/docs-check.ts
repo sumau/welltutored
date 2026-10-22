@@ -33,6 +33,12 @@ export type DocumentationPath = {
   path: string;
 };
 
+export type CommentReference = {
+  filePath: string;
+  lineNumber: number;
+  reference: string;
+};
+
 export type EnvironmentVariableRead = {
   filePath: string;
   lineNumber: number;
@@ -54,6 +60,7 @@ export type DocumentationCheckResult = {
   links: DocumentationLink[];
   paths: DocumentationPath[];
   environmentVariables: EnvironmentVariableRead[];
+  commentReferences: CommentReference[];
   errors: string[];
 };
 
@@ -190,7 +197,6 @@ export function extractLocalLinks(
       const target = match[1];
       if (
         !target ||
-        target.startsWith("#") ||
         target.startsWith("//") ||
         /^[a-z][a-z\d+.-]*:/i.test(target)
       ) {
@@ -208,18 +214,75 @@ export function extractLocalLinks(
   return links;
 }
 
+/**
+ * The anchors GitHub gives a doc's headings: the heading's text, lowercased,
+ * with punctuation other than `-` and `_` dropped and each space made a `-`. A
+ * repeated heading gets `-1`, `-2` and so on. Headings in fences are code, and
+ * an explicit `<a id>` or `<a name>` counts as well.
+ */
+export function headingAnchors(markdown: string): Set<string> {
+  const anchors = new Set<string>();
+  const seen = new Map<string, number>();
+  let inCodeFence = false;
+
+  for (const line of markdown.split(/\r?\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inCodeFence = !inCodeFence;
+      continue;
+    }
+    if (inCodeFence) continue;
+
+    for (const match of line.matchAll(/<a\s[^>]*\b(?:id|name)=["']([^"']+)["']/g)) {
+      anchors.add(match[1]);
+    }
+
+    const heading = line.match(/^ {0,3}#{1,6}\s+(.*?)(?:\s+#+)?\s*$/);
+    if (!heading) continue;
+    const slug = heading[1]
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/<[^>]+>/g, "")
+      .toLowerCase()
+      .replace(/[^\p{L}\p{M}\p{N} _-]/gu, "")
+      .replace(/ /g, "-");
+    const count = seen.get(slug) ?? 0;
+    seen.set(slug, count + 1);
+    anchors.add(count === 0 ? slug : `${slug}-${count}`);
+  }
+
+  return anchors;
+}
+
+// Read each target doc's anchors once, however many links point into it.
+function anchorChecker(): (filePath: string, anchor: string) => boolean {
+  const cache = new Map<string, Set<string>>();
+  return (filePath, anchor) => {
+    if (!cache.has(filePath)) {
+      cache.set(filePath, headingAnchors(readFileSync(filePath, "utf8")));
+    }
+    let decoded = anchor;
+    try {
+      decoded = decodeURIComponent(anchor);
+    } catch {
+      // A malformed escape is checked as written.
+    }
+    return cache.get(filePath)!.has(decoded);
+  };
+}
+
 export function validateLocalLinks(
   links: DocumentationLink[],
   rootDir: string,
 ): string[] {
   const errors: string[] = [];
+  const hasAnchor = anchorChecker();
 
   for (const link of links) {
-    const targetPath = link.target.split(/[?#]/, 1)[0];
-    if (!targetPath) continue;
+    const [withoutQuery, anchor] = link.target.split("#", 2);
+    const targetPath = withoutQuery.split("?", 1)[0];
 
+    // A bare `#anchor` points into the doc it is in.
     const sourcePath = join(rootDir, link.filePath);
-    const resolvedTarget = resolve(dirname(sourcePath), targetPath);
+    const resolvedTarget = targetPath ? resolve(dirname(sourcePath), targetPath) : sourcePath;
     const relativeTarget = relative(rootDir, resolvedTarget);
     const location = `${link.filePath}:${link.lineNumber}`;
 
@@ -233,6 +296,13 @@ export function validateLocalLinks(
     if (!existsSync(resolvedTarget)) {
       errors.push(
         `${location}: local link "${link.target}" resolves to "${relativeTarget}", but that path was not found.`,
+      );
+      continue;
+    }
+
+    if (anchor && resolvedTarget.endsWith(".md") && !hasAnchor(resolvedTarget, anchor)) {
+      errors.push(
+        `${location}: local link "${link.target}" points to "#${anchor}", but no heading in "${relativeTarget}" has that anchor.`,
       );
     }
   }
@@ -337,6 +407,94 @@ function isSourceFile(relativePath: string): boolean {
     !relativePath.split("/").includes("generated") &&
     !/\.test\.[^/]+$/.test(relativePath)
   );
+}
+
+// Config and workflow files, whose comments start with a hash.
+function hasHashComments(relativePath: string): boolean {
+  const name = relativePath.split("/").pop() ?? "";
+  return (
+    name.startsWith("Dockerfile") ||
+    ["sh", "toml", "yaml", "yml"].includes(extensionOf(name) ?? "")
+  );
+}
+
+function commentText(source: string, hashComments: boolean): Array<[number, string]> {
+  const comments: Array<[number, string]> = [];
+  let inBlockComment = false;
+
+  for (const [index, line] of source.split(/\r?\n/).entries()) {
+    if (hashComments) {
+      // At the start of the line or after a space, so a URL's fragment is not
+      // a comment.
+      const match = line.match(/(?:^|\s)#(.*)$/);
+      if (match) comments.push([index + 1, match[1]]);
+      continue;
+    }
+
+    let rest = line;
+    let text = "";
+    while (rest) {
+      if (inBlockComment) {
+        const end = rest.indexOf("*/");
+        text += ` ${end < 0 ? rest : rest.slice(0, end)}`;
+        if (end < 0) break;
+        inBlockComment = false;
+        rest = rest.slice(end + 2);
+        continue;
+      }
+      // After a space or at the start, so `https://` is not a comment.
+      const lineComment = rest.match(/(?:^|\s)\/\/(.*)$/);
+      const blockStart = rest.search(/(?:^|\s)\/\*/);
+      if (lineComment && (blockStart < 0 || (lineComment.index ?? 0) <= blockStart)) {
+        text += ` ${lineComment[1]}`;
+        break;
+      }
+      if (blockStart < 0) break;
+      inBlockComment = true;
+      rest = rest.slice(rest.indexOf("/*", blockStart) + 2);
+    }
+    if (text.trim()) comments.push([index + 1, text]);
+  }
+
+  return comments;
+}
+
+/**
+ * Pull the docs a code, config or workflow comment points to: a path under
+ * docs/ or a bare name at the root, ending in the Markdown extension and
+ * optionally an anchor. A renamed doc or heading leaves these behind silently,
+ * since nothing renders them.
+ */
+export function extractCommentReferences(
+  source: string,
+  filePath: string,
+  hashComments = hasHashComments(filePath),
+): CommentReference[] {
+  return commentText(source, hashComments).flatMap(([lineNumber, text]) =>
+    [...text.matchAll(/(?<![\w./-])((?:docs\/[\w./-]*?)?[\w-]+\.md(?:#[\w-]+)?)(?![\w/-])/g)].map(
+      (match) => ({ filePath, lineNumber, reference: match[1] }),
+    ),
+  );
+}
+
+export function validateCommentReferences(
+  references: CommentReference[],
+  rootDir: string,
+): string[] {
+  const hasAnchor = anchorChecker();
+  return references.flatMap(({ filePath, lineNumber, reference }) => {
+    const [path, anchor] = reference.split("#", 2);
+    const location = `${filePath}:${lineNumber}`;
+    if (!existsSync(join(rootDir, path))) {
+      return [`${location}: the comment names "${path}", but that file was not found.`];
+    }
+    if (anchor && !hasAnchor(join(rootDir, path), anchor)) {
+      return [
+        `${location}: the comment names "${reference}", but no heading in "${path}" has that anchor.`,
+      ];
+    }
+    return [];
+  });
 }
 
 function lineNumberAt(content: string, index: number): number {
@@ -648,14 +806,20 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
   const paths = files.flatMap(({ relativePath, markdown }) =>
     extractDocumentedPaths(markdown, relativePath, extensions),
   );
-  // One read of the code, which every rule about its references to the docs
-  // shares.
-  const sourceFiles = repositoryFiles.filter(isSourceFile).sort().map((relativePath) => ({
-    relativePath,
-    source: readFileSync(join(rootDir, relativePath), "utf8"),
-  }));
-  const environmentVariables = sourceFiles.flatMap(({ relativePath, source }) =>
-    extractEnvironmentVariables(source, relativePath),
+  // One read of the code and config, which every rule about their references
+  // to the docs shares.
+  const codeFiles = repositoryFiles
+    .filter((relativePath) => isSourceFile(relativePath) || hasHashComments(relativePath))
+    .sort()
+    .map((relativePath) => ({
+      relativePath,
+      source: readFileSync(join(rootDir, relativePath), "utf8"),
+    }));
+  const environmentVariables = codeFiles
+    .filter(({ relativePath }) => isSourceFile(relativePath))
+    .flatMap(({ relativePath, source }) => extractEnvironmentVariables(source, relativePath));
+  const commentReferences = codeFiles.flatMap(({ relativePath, source }) =>
+    extractCommentReferences(source, relativePath),
   );
   const configurationPath = join(rootDir, "docs", "configuration.md");
   const environmentErrors = validateEnvironmentVariables(
@@ -682,6 +846,7 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
     links,
     paths,
     environmentVariables,
+    commentReferences,
     errors: [
       ...validateDocumentedCommands(commands, manifests),
       ...validateLocalLinks(links, rootDir),
@@ -689,6 +854,7 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
       ...workflowErrors,
       ...openingErrors,
       ...environmentErrors,
+      ...validateCommentReferences(commentReferences, rootDir),
     ],
   };
 }
@@ -705,7 +871,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     process.exitCode = 1;
   } else {
     console.log(
-      `Documentation check passed (${result.commands.length} commands, ${result.links.length} local links, ${result.paths.length} file paths and ${result.environmentVariables.length} environment variable reads checked).`,
+      `Documentation check passed (${result.commands.length} commands, ${result.links.length} local links, ${result.paths.length} file paths, ${result.environmentVariables.length} environment variable reads and ${result.commentReferences.length} doc references in comments checked).`,
     );
   }
 }

@@ -4,11 +4,14 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
   checkDocumentation,
+  extractCommentReferences,
   extractDocumentedCommands,
   extractDocumentedPaths,
   extractEnvironmentVariables,
   extractLocalLinks,
   extractWorkflowCommands,
+  headingAnchors,
+  validateCommentReferences,
   validateDocumentedCommands,
   validateDocumentedPaths,
   validateEnvironmentVariables,
@@ -105,7 +108,7 @@ test("reports missing packages and scripts with documentation locations", () => 
   ]);
 });
 
-test("extracts local Markdown links while ignoring anchors and external URLs", () => {
+test("extracts local Markdown links, including same-doc anchors, but not external URLs", () => {
   const links = extractLocalLinks(
     [
       "[code checks](code-checks.md)",
@@ -133,6 +136,11 @@ test("extracts local Markdown links while ignoring anchors and external URLs", (
       filePath: "docs/pipeline.md",
       lineNumber: 3,
       target: "../CONTRIBUTING.md",
+    },
+    {
+      filePath: "docs/pipeline.md",
+      lineNumber: 4,
+      target: "#overview",
     },
   ]);
 });
@@ -164,6 +172,113 @@ test("validates local link existence and repository boundaries", () => {
     'docs/pipeline.md:11: local link "missing.md#section" resolves to "docs/missing.md", but that path was not found.',
     'docs/pipeline.md:12: local link "../../outside.md" resolves outside the repository.',
   ]);
+});
+
+test("gives headings GitHub's anchors", () => {
+  const anchors = headingAnchors(
+    [
+      "# Smoke checks",
+      "## Fly.io",
+      "## `TRUSTED_ORIGINS`",
+      "## Rehearsing a push on a Neon branch",
+      "### Step 1: [the owner](owner.md) & co.",
+      "## Fly.io",
+      "```md",
+      "## Not a heading",
+      "```",
+      '<a id="custom-anchor"></a>',
+      "## Closed heading ##",
+    ].join("\n"),
+  );
+
+  assert.deepEqual(
+    [...anchors],
+    [
+      "smoke-checks",
+      "flyio",
+      "trusted_origins",
+      "rehearsing-a-push-on-a-neon-branch",
+      "step-1-the-owner--co",
+      "flyio-1",
+      "custom-anchor",
+      "closed-heading",
+    ],
+  );
+});
+
+test("reports a link whose anchor matches no heading in its target", () => {
+  const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+  const errors = validateLocalLinks(
+    [
+      { filePath: "docs/pipeline.md", lineNumber: 1, target: "first-deploy.md#owner" },
+      { filePath: "docs/pipeline.md", lineNumber: 2, target: "first-deploy.md#no-such-heading" },
+      { filePath: "docs/pipeline.md", lineNumber: 3, target: "#no-such-heading" },
+      { filePath: "docs/pipeline.md", lineNumber: 4, target: "missing.md#section" },
+    ],
+    rootDir,
+  );
+
+  // A missing file is reported once, for the file.
+  assert.deepEqual(errors, [
+    'docs/pipeline.md:2: local link "first-deploy.md#no-such-heading" points to "#no-such-heading", but no heading in "docs/first-deploy.md" has that anchor.',
+    'docs/pipeline.md:3: local link "#no-such-heading" points to "#no-such-heading", but no heading in "docs/pipeline.md" has that anchor.',
+    'docs/pipeline.md:4: local link "missing.md#section" resolves to "docs/missing.md", but that path was not found.',
+  ]);
+});
+
+test("extracts doc references from code and config comments only", () => {
+  assert.deepEqual(
+    extractCommentReferences(
+      [
+        "// The guarded update from docs/first-deploy.md#owner, then a link.",
+        'const path = "docs/strings-are-not-comments.md";',
+        "fetch(\"https://example.test/README.md\"); // see GLOSSARY.md.",
+        "/* A block comment naming",
+        " * docs/pipeline.md across lines. */",
+        "const glob = `*.md`;",
+      ].join("\n"),
+      "lib/example.ts",
+    ),
+    [
+      { filePath: "lib/example.ts", lineNumber: 1, reference: "docs/first-deploy.md#owner" },
+      { filePath: "lib/example.ts", lineNumber: 3, reference: "GLOSSARY.md" },
+      { filePath: "lib/example.ts", lineNumber: 5, reference: "docs/pipeline.md" },
+    ],
+  );
+
+  assert.deepEqual(
+    extractCommentReferences(
+      [
+        "# See docs/first-deploy.md for the secrets.",
+        'url = "https://example.test/#docs/fragment.md"',
+        "  strategy = \"bluegreen\" # docs/pipeline.md",
+      ].join("\n"),
+      "fly.toml",
+    ),
+    [
+      { filePath: "fly.toml", lineNumber: 1, reference: "docs/first-deploy.md" },
+      { filePath: "fly.toml", lineNumber: 3, reference: "docs/pipeline.md" },
+    ],
+  );
+});
+
+test("reports comment references to missing docs and anchors", () => {
+  const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+  assert.deepEqual(
+    validateCommentReferences(
+      [
+        { filePath: "fly.toml", lineNumber: 1, reference: "docs/pipeline.md" },
+        { filePath: "fly.toml", lineNumber: 2, reference: "docs/first-deploy.md#owner" },
+        { filePath: "fly.toml", lineNumber: 3, reference: "docs/deploying.md" },
+        { filePath: "fly.toml", lineNumber: 4, reference: "docs/first-deploy.md#the-owner" },
+      ],
+      rootDir,
+    ),
+    [
+      'fly.toml:3: the comment names "docs/deploying.md", but that file was not found.',
+      'fly.toml:4: the comment names "docs/first-deploy.md#the-owner", but no heading in "docs/first-deploy.md" has that anchor.',
+    ],
+  );
 });
 
 test("extracts pnpm commands from inline and block run steps", () => {
@@ -388,4 +503,5 @@ test("all currently documented pnpm commands match the repository scripts", () =
   assert.ok(result.commands.length > 0);
   assert.ok(result.paths.length > 0);
   assert.ok(result.environmentVariables.length > 0);
+  assert.ok(result.commentReferences.length > 0);
 });
