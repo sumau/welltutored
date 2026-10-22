@@ -4,6 +4,10 @@ The project uses several complementary test layers. Most automated tests use
 Node's built-in `node:test` runner and are executed with `tsx`; the web tests
 also use JSDOM where browser APIs are needed.
 
+The commands below run inside the containers: prefix them with
+`docker compose exec api` against a running stack. The full suite is
+`docker compose run --rm test` ([local-docker.md](local-docker.md#tests)).
+
 ## Test suites
 
 ### API server
@@ -26,11 +30,12 @@ and the database-backed integration tests, which cover:
 - The public resource list and resource pages: only published resources by
   published tutors, search, the subject filter, and paging.
 
-Running this package test command directly does not provision a database. Use
-`pnpm run verify:ci` for the CI path that creates an isolated temporary local
-PostgreSQL database when `TEST_DATABASE_URL` is not supplied, applies the
-current schema, runs the integration tests, and removes the temporary database
-afterward.
+Running this package test command directly does not provision a database.
+`pnpm run verify:ci` does: it uses `TEST_DATABASE_URL` when supplied, and
+otherwise creates a temporary local PostgreSQL cluster, applies the current
+schema, runs the integration tests, and removes the cluster afterward. The
+temporary cluster needs `initdb`, which the containers lack, so locally the
+`test` service supplies the database instead.
 
 Run only the non-mutating API checks with:
 
