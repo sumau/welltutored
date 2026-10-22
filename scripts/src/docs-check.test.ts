@@ -284,7 +284,7 @@ test("accepts prose that starts with inline HTML or follows a comment", () => {
   }
 });
 
-test("extracts file paths from inline code, skipping routes, identifiers and fences", () => {
+test("extracts file paths from inline code, skipping routes, identifiers, hostnames and fences", () => {
   const paths = extractDocumentedPaths(
     [
       "The router is `routes/workspace.ts`, served at `/workspace`.",
@@ -293,6 +293,7 @@ test("extracts file paths from inline code, skipping routes, identifiers and fen
       "cat `missing.ts`",
       "```",
       "Build with `docker/Dockerfile.dev`.",
+      "Deploy to `welltutored.fly.dev`, configured in `vite.config.ts`.",
     ].join("\n"),
     "docs/architecture.md",
     new Set(["ts", "dev", "yml"]),
@@ -301,6 +302,7 @@ test("extracts file paths from inline code, skipping routes, identifiers and fen
   assert.deepEqual(paths, [
     { filePath: "docs/architecture.md", lineNumber: 1, path: "routes/workspace.ts" },
     { filePath: "docs/architecture.md", lineNumber: 6, path: "docker/Dockerfile.dev" },
+    { filePath: "docs/architecture.md", lineNumber: 7, path: "vite.config.ts" },
   ]);
 });
 
@@ -318,7 +320,7 @@ test("validates file paths by their end, on whole segments, with an allowlist", 
   );
 
   assert.deepEqual(errors, [
-    'docs/architecture.md:3: "routes/missing.ts" names a file, but no file in the repository ends with that path.',
+    'docs/architecture.md:3: "routes/missing.ts" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.',
   ]);
 
   assert.deepEqual(
@@ -327,7 +329,7 @@ test("validates file paths by their end, on whole segments, with an allowlist", 
       ["artifacts/api-server/src/routes/my-workspace.ts"],
       new Set(),
     ),
-    ['docs/architecture.md:1: "workspace.ts" names a file, but no file in the repository ends with that path.'],
+    ['docs/architecture.md:1: "workspace.ts" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.'],
   );
 });
 

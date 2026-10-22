@@ -237,20 +237,30 @@ export function validateLocalLinks(
 const UNTRACKED_PATHS = new Set<string>([
   // docs/agents/domain.md says there is no glossary map.
   "GLOSSARY-MAP.md",
-  // A Clerk Frontend API host, whose last label matches `Dockerfile.dev`.
-  "example-name-12.clerk.accounts.dev",
 ]);
+
+// Top-level domains that are also the extension of some repository file
+// (`Dockerfile.dev`), or plausibly will be.
+const TOP_LEVEL_DOMAINS = new Set(["app", "com", "dev", "io", "net", "org", "uk"]);
 
 function extensionOf(name: string): string | undefined {
   return name.match(/[^/]\.([a-z][a-z\d]*)$/i)?.[1].toLowerCase();
+}
+
+// `welltutored.fly.dev`, but not `Dockerfile.dev` or `vite.config.ts`.
+function isHostname(token: string): boolean {
+  return (
+    /^[a-z\d-]+(\.[a-z\d-]+)+$/.test(token) &&
+    TOP_LEVEL_DOMAINS.has(extensionOf(token) ?? "")
+  );
 }
 
 /**
  * Pull the file paths a doc names in inline code. A path is a token of path
  * characters that doesn't start with `/` and ends in an extension some file in
  * the repository has. So URL routes (`/workspace`), identifiers with no
- * extension (`zod/v4`), globs (`*.yml`), hostnames (`welltutored.co.uk`) and
- * member accesses (`clerkClient.users`) are skipped. Fenced blocks are skipped
+ * extension (`zod/v4`), globs (`*.yml`), hostnames (`welltutored.fly.dev`)
+ * and member accesses (`clerkClient.users`) are skipped. Fenced blocks are skipped
  * too: they hold commands and output, not references.
  */
 export function extractDocumentedPaths(
@@ -274,6 +284,7 @@ export function extractDocumentedPaths(
       if (
         !/^[\w.@/-]+$/.test(token) ||
         token.startsWith("/") ||
+        isHostname(token) ||
         !extension ||
         !extensions.has(extension)
       ) {
@@ -304,7 +315,7 @@ export function validateDocumentedPaths(
     )
     .map(
       ({ filePath, lineNumber, path }) =>
-        `${filePath}:${lineNumber}: "${path}" names a file, but no file in the repository ends with that path.`,
+        `${filePath}:${lineNumber}: "${path}" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.`,
     );
 }
 
