@@ -57,7 +57,7 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 ```
 
 The Deployment sends these redirects itself once `PUBLIC_ORIGIN` is set; see
-the configuration reference in [deploy.md](deploy.md#configuration-reference).
+[configuration.md](configuration.md).
 
 ## Waivers
 
@@ -126,4 +126,4 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 `SMOKE_CHROMIUM_PATH` is required: `playwright-core` bundles no browser and
 none of this project's images carry one, so this check runs from wherever a
 Chromium already exists. In CI that is the runner's Google Chrome, in the Image
-Smoke ([ci-validation.md](ci-validation.md#the-image-smoke)).
+Smoke ([pipeline.md](pipeline.md#the-image-smoke)).

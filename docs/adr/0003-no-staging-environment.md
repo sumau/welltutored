@@ -10,7 +10,7 @@ way there:
   the Health Check, which needs the database to answer.
 - The Launch Smoke against the live site once it has switched.
 
-[ci-validation.md](../ci-validation.md) describes each check.
+[pipeline.md](../pipeline.md) describes each check.
 
 ## Why
 
@@ -54,7 +54,7 @@ was pushed before merge.
 ## Consequences
 
 - A broken page, a missing Tutor or a schema mismatch is live until someone
-  rolls back. [deploy.md](../deploy.md#blue-green-deploys) has how.
+  rolls back. [pipeline.md](../pipeline.md#rolling-back) has how.
 - Keep schema pushes additive where possible, so a rollback stays safe.
 - Revisit this when any of these happen: the site goes public, traffic grows
   beyond a handful of tutors, or a bug that staging would have caught gets

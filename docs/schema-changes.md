@@ -1,14 +1,88 @@
-# Schema pushes
+# Schema changes
 
-What `push` prompts for each kind of schema change, how past pushes were
-answered, and how to rehearse one first. The push command, and the check of
-where it landed, are in [deploy.md](deploy.md#applying-the-schema); every
-command here uses the `DIRECT_DATABASE_URL` read there.
+For whoever applies a schema change to the Deployment: the push, checking where
+it landed, what each kind of change prompts, recovering from a push that
+stopped partway, and rehearsing on a Neon branch. When to push, relative to the
+merge, is in [CONTRIBUTING.md](../CONTRIBUTING.md#schema-changes).
+
+## Pushing
+
+Nothing applies the schema for you, and the Deploy job deliberately does not —
+[ADR-0002](adr/0002-schema-by-deliberate-push.md) is why. Drizzle's `push` is
+the only mechanism this project has; run it deliberately against the Deployment
+database from a checkout.
+
+Read the **direct** connection string into a shell variable once per terminal.
+`read -rs` takes it without echoing it or writing it to shell history; paste it,
+`?sslmode=require` included, and press Enter. Every database command in this
+document then uses it as-is, so keep that terminal open for the session:
+
+```
+read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
+
+docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
+  -lc 'pnpm --filter @workspace/db run push'
+```
+
+This runs from your machine to the database. Secrets set on Fly play no part in
+it, so the connection string has to be supplied here.
+
+Three things about that command:
+
+- **Pass `-e DATABASE_URL="$DIRECT_DATABASE_URL"`, expanded, not bare `-e
+  DATABASE_URL`.** `docker-compose.yml` sets `DATABASE_URL` on the `migrate`
+  service to the local development database, and an explicit `environment:`
+  entry beats anything from `.env`. The bare form asks Compose to forward the
+  variable from your shell, and when that forwarding does not happen the service
+  default applies — so you push to your local container instead of the
+  Deployment, successfully and quietly. The expanded form cannot fail that way:
+  your shell substitutes the value before Docker sees it, and an unset variable
+  passes an empty string, which fails loudly with `DATABASE_URL, ensure the
+  database is provisioned` instead of silently choosing the wrong database.
+- **`?sslmode=require`** belongs on the connection string, for the reason in
+  [configuration.md](configuration.md).
+- **Use Neon's direct connection string here**, not the pooled one — the
+  `-pooler` hostname is the application's. Pooled connections are a poor fit for
+  DDL.
+
+`push` prompts before anything destructive. Read the prompt, and review the diff
+of `lib/db/src/schema/` first — nothing downstream asks.
+[What push prompts](#what-push-prompts) has what each kind of change prompts and
+how past pushes were answered.
+
+Prefer an additive change, such as a new nullable column or table. Rolling a
+deploy back past a push is only safe if the push was additive
+([pipeline.md](pipeline.md#rolling-back)).
+
+### Checking where it landed
+
+Check what landed, and check *where* it landed at the same time:
+
+```
+docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
+  -lc 'psql "$DATABASE_URL" -c "\conninfo" -c "\dt"'
+```
+
+`tutors`, `resources`, `enquiries` and `workspace_accounts` should all be
+listed.
+
+Read the `\conninfo` line first, and read it twice. It names the host you
+actually reached, and it is the only output here that distinguishes the
+Deployment from your local container — the table list looks the same either way.
+There are two ways to be somewhere you did not intend:
+
+- **Host `db` at port `5432`** — the environment variable did not reach the
+  container and you are inspecting, or pushing to, the local database.
+- **A hostname containing `-pooler`** — you are on the pooled endpoint, which is
+  the application's, not the one for schema work. Drop `-pooler` from the
+  hostname to get the direct endpoint. `push` against the pooled endpoint can
+  report success without converging, so a `push` that keeps finding the same
+  changes run after run is the symptom to watch for.
+
+## What push prompts
 
 Record each new kind of prompt here, with what you answered
 ([CONTRIBUTING.md](../CONTRIBUTING.md#schema-changes)).
-
-## What push prompts
 
 Against an empty database there is nothing to drop, so a *truncate* prompt there
 means the connection string is not pointing where you think it is. When you are
@@ -54,8 +128,8 @@ longer reads the table.
 first and asks only when the count is above zero. An empty table, or a column
 no row holds a value in, is dropped with no prompt, and the push just reports
 `Changes applied`. Production's `saved_resources` was empty, so its push showed
-no prompt. To confirm the drop, run the `\conninfo` and `\dt` check in
-[deploy.md](deploy.md#applying-the-schema), then push again: it should print
+no prompt. To confirm the drop, run the
+[`\conninfo` and `\dt` check](#checking-where-it-landed), then push again: it should print
 `No changes detected`.
 
 **Renames are the exception, and they prompt on any database, empty or not.**
@@ -129,12 +203,17 @@ below `create`. Between the `ALTER TYPE` and the merge, the live code still
 writes the old label, so saving a profile as `unavailable` fails until the
 deploy lands. Push and merge back to back.
 
-**If a push has already stopped partway**, do not run it again as it is. A
-rerun generates statements from whatever state was left, and it fails at the
-same row. When #56 was merged without the `ALTER TYPE` above, the first push
-renamed the type and the columns, then left `intake` as plain `text` with two
-rows still holding `unavailable`. The live site kept working, since a `text`
-column holds the same values.
+Renaming a constraint additionally asks whether to truncate the table before
+adding the new one — answer no; the default is already no.
+
+## Recovering from a push that stopped partway
+
+Do not run a push that stopped partway again as it is. A rerun generates
+statements from whatever state was left, and it fails at the same row. When #56
+was merged without the `ALTER TYPE` above, the first push renamed the type and
+the columns, then left `intake` as plain `text` with two rows still holding
+`unavailable`. The live site kept working, since a `text` column holds the same
+values.
 
 To recover, fix the rows by hand first. A `text` column takes the new label
 directly, and the `::text` comparison works whatever the column's type is:
@@ -155,9 +234,6 @@ half-applied state in a local scratch database (`create database ... template
 welltutored`, then undo the parts that did not land) and rehearse both steps
 there.
 
-Renaming a constraint additionally asks whether to truncate the table before
-adding the new one — answer no; the default is already no.
-
 ## Rehearsing a push on a Neon branch
 
 A push you are unsure of — a rename, a dropped column, a new constraint on a
@@ -172,7 +248,7 @@ moment you create it, made in seconds, with its own connection strings.
    `DATABASE_URL` points at. Name it for what it is, e.g. `push-rehearsal`.
 2. **Take its direct connection string**, not the pooled one, and append
    `?sslmode=require`, for the reasons under
-   [Applying the schema](deploy.md#applying-the-schema).
+   [Pushing](#pushing).
 3. **Push to it** with the same command as a real push, and answer the prompts
    as you intend to answer them for real:
 
@@ -185,8 +261,8 @@ moment you create it, made in seconds, with its own connection strings.
 
    It is read as `REHEARSAL_DATABASE_URL` so that it cannot be confused with
    the `DIRECT_DATABASE_URL` you read for the real push.
-4. **Check the result** with the `\conninfo` and `\dt` command in
-   [deploy.md](deploy.md#applying-the-schema), passing
+4. **Check the result** with the
+   [`\conninfo` and `\dt` command](#checking-where-it-landed), passing
    `"$REHEARSAL_DATABASE_URL"`. The host in `\conninfo` should be the branch's
    endpoint, which differs from the Deployment's. Query the tables the change
    touches to confirm the rows came through as you expected.

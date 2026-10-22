@@ -8,7 +8,7 @@ what the project is and how to run it; this file covers how to change it.
 CI deploys to Fly on every push to `main` and then runs the launch smoke
 against the live site. There is no separate release step, so a merged pull
 request is a shipped one. Everything below follows from that.
-[docs/ci-validation.md](docs/ci-validation.md) shows every check between a pull
+[docs/pipeline.md](docs/pipeline.md) shows every check between a pull
 request and the live site, and which of them block.
 
 ## Plans and issues
@@ -47,7 +47,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 ## Before opening a pull request
 
 - `docker compose run --rm test` is green. It runs the same suite as CI
-  ([docs/ci-validation.md](docs/ci-validation.md)).
+  ([docs/pipeline.md](docs/pipeline.md)).
 - For a UI or build change, click through the running app as well
   (`docker compose up api web`).
 - For a change to routing, public API responses, deployment configuration or
@@ -71,16 +71,16 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 
 CI does not apply the schema. It is a deliberate `push` run by hand
 ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)), and
-[docs/deploy.md](docs/deploy.md#applying-the-schema) has the command.
+[docs/schema-changes.md](docs/schema-changes.md#pushing) has the command.
 
 - Push to production **before** merging anything that expects the new schema.
 - A merged pull request does not mean its push happened. Confirm the push
   before ticking its box or starting the next schema change.
 - Rehearse a push that touches existing rows (a rename, a dropped column, a new
   constraint) on the local database, then on a Neon branch of the Deployment
-  ([docs/schema-push.md](docs/schema-push.md#rehearsing-a-push-on-a-neon-branch)).
+  ([docs/schema-changes.md](docs/schema-changes.md#rehearsing-a-push-on-a-neon-branch)).
   Write what the push prompted, and what you answered, into
-  `docs/schema-push.md`.
+  `docs/schema-changes.md`.
 
 ## Secrets in instructions
 

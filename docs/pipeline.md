@@ -1,6 +1,8 @@
-# CI and deploy validation
+# Pipeline
 
-What checks a change, when, and what blocks, from pull request to live site:
+What happens between a pull request and the live site: every check, where it
+runs and what blocks, and how a deploy switches over, fails or is rolled back.
+Each check, from pull request to live site:
 
 ```mermaid
 flowchart TB
@@ -236,10 +238,10 @@ once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
 is what makes a failure in either stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
 runs the launch smoke against the live site.
 
-The deploy is blue-green, switching only once the new machine passes the Health
-Check; [deploy.md](deploy.md#blue-green-deploys) covers what that catches,
-failures and rollback, and [ADR-0003](adr/0003-no-staging-environment.md) why
-there is no staging environment in front of this.
+The deploy is [blue-green](#blue-green-deploys), switching only once the new
+machine passes the Health Check.
+[ADR-0003](adr/0003-no-staging-environment.md) is why there is no staging
+environment in front of this.
 
 It has its own `concurrency` group, without `cancel-in-progress`. The
 workflow-level group cancels superseded pull-request runs, which is right for
@@ -264,7 +266,56 @@ It runs without waivers, so it also asserts a published Tutor and that
 Tutor's profile page. **A red Launch smoke on a merge to `main` is a real
 failure**: an unhealthy site, a redirect to another origin, a broken public
 page, or published content that has gone missing. It is not something to wave
-through.
+through: [roll back](#rolling-back), or fix it on `main`.
+
+## Blue-green deploys
+
+`fly.toml` sets `strategy = "bluegreen"`. A deploy boots a new machine beside
+the current one, waits for it to pass the Health Check, moves traffic to it, and
+then destroys the old one. So a version that doesn't start, or can't reach the
+database, never takes traffic. The machine also gets a new ID on every deploy,
+so nothing may depend on one.
+
+`fly.toml` points Fly's health check at `/api/healthz`, the Health Check. It
+answers `200` only when the database answers a `SELECT 1` within 3 seconds, and
+`503` otherwise, so a wrong `DATABASE_URL` or an unreachable Neon takes the
+machine out of rotation. Fly then serves its own proxy error rather than the
+app's. That is accepted, since every page needs the database anyway. The 3
+seconds sit above Neon's wake-from-suspend time and below the check's 5-second
+`timeout`.
+
+What blue-green does **not** catch: broken pages, a missing Tutor, or code that
+doesn't match the live schema, which still answers `SELECT 1`. Those surface in the
+Launch Smoke, which runs after the switch, against the version visitors already
+see.
+
+## A failed deploy
+
+A failed deploy is a red `Deploy to Fly` step. `flyctl` reports the new
+machine failing its checks, and the old machine keeps serving the previous
+version. Run `fly machines list` afterwards: if a machine from the failed
+attempt is still there, destroy it with `fly machines destroy <id> --force`.
+
+## Rolling back
+
+A deploy that passes but breaks the site is a red Launch smoke after a green
+`Deploy to Fly`. The new version is live, and nothing rolls it back by itself.
+To go back to the previous image:
+
+```
+fly releases --image          # the image reference of each release
+fly deploy --image <previous image reference>
+```
+
+Run it from a checkout of `main`, since it still reads `fly.toml` from there.
+Then revert the change on `main`, or the next merge ships it again.
+
+**Rolling back past a schema push is only safe if the push was additive.** The
+schema is pushed before merge ([ADR-0002](adr/0002-schema-by-deliberate-push.md)),
+so the previous image runs against the new schema. A new nullable column or
+table is fine. A renamed or dropped column breaks the old code too, and the
+rollback then means pushing the old schema back by hand
+([schema-changes.md](schema-changes.md)).
 
 ## Why separate gates
 

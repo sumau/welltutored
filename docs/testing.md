@@ -162,7 +162,7 @@ workspace packages, and finally builds the packages that define a build script.
 
 The smoke scripts check a running site rather than the code.
 [launch-smoke-check.md](launch-smoke-check.md) covers what each one checks and
-how to run it, and [ci-validation.md](ci-validation.md) where each one runs and
+how to run it, and [pipeline.md](pipeline.md) where each one runs and
 which of them block. Their own logic is tested by `test:smoke`, under
 [Repository scripts](#repository-scripts).
 
@@ -198,7 +198,7 @@ SMOKE_BASE_URL=http://localhost:8080 \
   SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:sign-in
 ```
 
-[ci-validation.md](ci-validation.md#the-image-smoke) has the steps CI uses to
+[pipeline.md](pipeline.md#the-image-smoke) has the steps CI uses to
 prepare that target.
 
 ## Before a pull request

@@ -75,7 +75,7 @@ The `test` service supplies the connection, which takes the other branch of
 `scripts/with-test-database.sh`. CI takes the same branch, with the dedicated
 connection coming from its `postgres:16` service container instead.
 
-The suite needs no Clerk keys ([ci-validation.md](ci-validation.md#credentials)),
+The suite needs no Clerk keys ([pipeline.md](pipeline.md#credentials)),
 and leaves out the browser smoke checks, which need a Chromium these images do
 not carry.
 
@@ -140,7 +140,7 @@ Three Clerk instances can be in play, and each has its own users:
 | Instance | Where its keys live | Who it signs in |
 | --- | --- | --- |
 | An accountless development application, if `.env` came from `--accountless` | `.env` | Whoever signed up at `localhost`. Not visible in the dashboard. |
-| The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([ci-validation.md](ci-validation.md#credentials)) | The Sign-in Smoke's `+clerk_test` user, created in the dashboard |
+| The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([pipeline.md](pipeline.md#credentials)) | The Sign-in Smoke's `+clerk_test` user, created in the dashboard |
 | The production instance of the same application | `fly.toml` and Fly secrets ([first-deploy.md](first-deploy.md#flyio)) | Tutors on `welltutored.co.uk` |
 
 A user exists only in the instance it was created in. "Couldn't find your

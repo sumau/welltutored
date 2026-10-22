@@ -2,8 +2,9 @@
 
 How to stand a Deployment up from nothing: a new database, Fly app, domain and
 Clerk instance. The live Deployment already exists, so this is for rebuilding
-it or starting another. Running the live one — schema pushes, deploys and
-rollback — is [deploy.md](deploy.md).
+it or starting another. Running the live one is
+[schema-changes.md](schema-changes.md) for schema pushes and
+[pipeline.md](pipeline.md) for deploys and rollback.
 
 ## In order
 
@@ -11,7 +12,7 @@ Each step has its own section below; this is the order they have to happen in.
 
 1. **[Database](#database)** — create the Neon project in London, take the
    pooled and direct connection strings.
-2. **[Apply the schema](deploy.md#applying-the-schema)** — from this checkout,
+2. **[Apply the schema](schema-changes.md#pushing)** — from this checkout,
    using the direct string. Nothing does this for you.
 3. **[Clerk keys](#clerk-keys)** — a development instance, because you do not
    control DNS for `*.fly.dev`.
@@ -24,7 +25,7 @@ Each step has its own section below; this is the order they have to happen in.
    [owner bootstrap](workspace-owner-bootstrap.md#production-procedure).
 
 The image can be checked first without deploying: see the Image Smoke
-[by hand](ci-validation.md#by-hand).
+[by hand](pipeline.md#by-hand).
 
 ## Database
 
@@ -48,7 +49,7 @@ interchangeable:
 - The **pooled** string is the application's. Set it as the `DATABASE_URL`
   secret on the Deployment.
 - The **direct** string is for schema work. Use it for the
-  [schema push](deploy.md#applying-the-schema).
+  [schema push](schema-changes.md#pushing).
 
 Both need `?sslmode=require` appended: `lib/db/src/index.ts` builds a bare `pg`
 pool from `DATABASE_URL` and sets no SSL options of its own, so without it the
@@ -121,7 +122,7 @@ fly secrets set \
 
 The connection string is read as `POOLED_DATABASE_URL`, not `DATABASE_URL`, so
 it cannot be confused with the `DIRECT_DATABASE_URL` you read for
-[schema work](deploy.md#applying-the-schema). They are different strings: this
+[schema work](schema-changes.md#pushing). They are different strings: this
 one is the **pooled** endpoint the application runs against, the other is the
 **direct** endpoint for DDL. Passing the direct one here works and then quietly
 costs you connection pooling in production.
@@ -161,7 +162,7 @@ visitor in the JavaScript. The three secrets above are the opposite case and
 must never appear in this file.
 
 **`TRUSTED_ORIGINS` must match the deployed hostname exactly** — see the
-[configuration reference](deploy.md#configuration-reference).
+[configuration reference](configuration.md).
 
 After that, merging to `main` deploys. `fly deploy` from a checkout still works
 and is how you would ship a first image before any of this is merged.

@@ -1,7 +1,7 @@
 # Fly.io deployment for Well Tutored. One machine serving the frontend and the
 # API from a single origin. The database is external and reached through the
 # DATABASE_URL secret. See docs/first-deploy.md for setting it up, including
-# the secrets this file deliberately omits, and docs/deploy.md for running it.
+# the secrets this file deliberately omits, and docs/pipeline.md for deploys.
 #
 # Create the app with `fly apps create`, which only reserves the name; `fly
 # launch` rewrites this file from its own guesses. `app` is the Fly app's name,
@@ -32,7 +32,7 @@ primary_region = "lhr"
 [deploy]
   # A new machine boots beside the old one and takes traffic only once it
   # passes the Health Check below; then the old one is destroyed. A version
-  # that can't reach the database never goes live. docs/deploy.md has what a
+  # that can't reach the database never goes live. docs/pipeline.md has what a
   # failed deploy looks like and how to roll back.
   strategy = "bluegreen"
 

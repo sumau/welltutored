@@ -39,10 +39,10 @@ docker compose run --rm test
 - [docs/architecture.md](docs/architecture.md): routes, API boundaries and
   publishing rules.
 - [docs/local-docker.md](docs/local-docker.md): the container workflow in full.
-- [docs/deploy.md](docs/deploy.md): deployment. **Merging to `main` ships to
-  production**, and schema changes are applied by hand beforehand
+- [docs/pipeline.md](docs/pipeline.md): from pull request to live site,
+  including rollback. **Merging to `main` ships to production**, and schema changes are applied by hand beforehand
   ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)).
-  [docs/schema-push.md](docs/schema-push.md) records what a push prompts, and
+  [docs/schema-changes.md](docs/schema-changes.md) records what a push prompts, and
   [docs/first-deploy.md](docs/first-deploy.md) stands a Deployment up from
   nothing.
 - [docs/testing.md](docs/testing.md): the test layers and smoke checks.
@@ -102,7 +102,7 @@ images override them.
 **Merging to `main` ships.** CI deploys the container to Fly and then runs the
 launch smoke against it; nothing else deploys. `docker/Dockerfile` and
 `fly.toml` are the whole configuration.
-[docs/deploy.md](docs/deploy.md) covers running the Deployment, and
+[docs/pipeline.md](docs/pipeline.md) covers deploys and rollback, and
 [docs/first-deploy.md](docs/first-deploy.md) standing one up from nothing.
 
 Schema changes are not part of that. Apply them yourself, before merging
@@ -115,7 +115,7 @@ says so.
 
 The trap worth knowing: `TRUSTED_ORIGINS` must name the public origin exactly,
 or every credentialed request fails, the public enquiry included
-([docs/deploy.md](docs/deploy.md#configuration-reference)).
+([docs/configuration.md](docs/configuration.md)).
 
 ## Architecture
 

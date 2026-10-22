@@ -127,7 +127,7 @@ services:
 
   # The deployment image, for checking it locally before pushing it anywhere.
   # Unlike the services above it has no bind mount and no pnpm: it runs the
-  # built bundle exactly as a container host would. See docs/ci-validation.md.
+  # built bundle exactly as a container host would. See docs/pipeline.md.
   #
   #   docker compose up --build prod   # http://localhost:8081
   #
