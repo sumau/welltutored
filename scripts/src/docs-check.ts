@@ -27,6 +27,12 @@ export type DocumentationLink = {
   target: string;
 };
 
+export type DocumentationPath = {
+  filePath: string;
+  lineNumber: number;
+  path: string;
+};
+
 export type PackageManifest = {
   name?: string;
   scripts?: Record<string, string>;
@@ -40,6 +46,7 @@ export type PackageManifestRecord = {
 export type DocumentationCheckResult = {
   commands: DocumentationCommand[];
   links: DocumentationLink[];
+  paths: DocumentationPath[];
   errors: string[];
 };
 
@@ -224,6 +231,92 @@ export function validateLocalLinks(
   }
 
   return errors;
+}
+
+// Names that look like files but that the repository never holds.
+const UNTRACKED_PATHS = new Set<string>([
+  // docs/agents/domain.md says there is no glossary map.
+  "GLOSSARY-MAP.md",
+]);
+
+// Top-level domains that are also the extension of some repository file
+// (`Dockerfile.dev`), or plausibly will be.
+const TOP_LEVEL_DOMAINS = new Set(["app", "com", "dev", "io", "net", "org", "uk"]);
+
+function extensionOf(name: string): string | undefined {
+  return name.match(/[^/]\.([a-z][a-z\d]*)$/i)?.[1].toLowerCase();
+}
+
+// `welltutored.fly.dev`, but not `Dockerfile.dev` or `vite.config.ts`.
+function isHostname(token: string): boolean {
+  return (
+    /^[a-z\d-]+(\.[a-z\d-]+)+$/.test(token) &&
+    TOP_LEVEL_DOMAINS.has(extensionOf(token) ?? "")
+  );
+}
+
+/**
+ * Pull the file paths a doc names in inline code. A path is a token of path
+ * characters that doesn't start with `/` and ends in an extension some file in
+ * the repository has. So URL routes (`/workspace`), identifiers with no
+ * extension (`zod/v4`), globs (`*.yml`), hostnames (`welltutored.fly.dev`)
+ * and member accesses (`clerkClient.users`) are skipped. Fenced blocks are skipped
+ * too: they hold commands and output, not references.
+ */
+export function extractDocumentedPaths(
+  markdown: string,
+  filePath: string,
+  extensions: ReadonlySet<string>,
+): DocumentationPath[] {
+  const paths: DocumentationPath[] = [];
+  let inCodeFence = false;
+
+  for (const [index, line] of markdown.split(/\r?\n/).entries()) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inCodeFence = !inCodeFence;
+      continue;
+    }
+    if (inCodeFence) continue;
+
+    for (const match of line.matchAll(/`([^`]+)`/g)) {
+      const token = match[1];
+      const extension = extensionOf(token);
+      if (
+        !/^[\w.@/-]+$/.test(token) ||
+        token.startsWith("/") ||
+        isHostname(token) ||
+        !extension ||
+        !extensions.has(extension)
+      ) {
+        continue;
+      }
+      paths.push({ filePath, lineNumber: index + 1, path: token });
+    }
+  }
+
+  return paths;
+}
+
+/**
+ * A named path must be the end of some file's path in the repository, so the
+ * short names a doc uses in context (`routes/workspace.ts`) count. The match is
+ * on whole segments: `workspace.ts` does not match `my-workspace.ts`.
+ */
+export function validateDocumentedPaths(
+  paths: DocumentationPath[],
+  repositoryFiles: string[],
+  untrackedPaths: ReadonlySet<string> = UNTRACKED_PATHS,
+): string[] {
+  return paths
+    .filter(
+      ({ path }) =>
+        !untrackedPaths.has(path) &&
+        !repositoryFiles.some((file) => file === path || file.endsWith(`/${path}`)),
+    )
+    .map(
+      ({ filePath, lineNumber, path }) =>
+        `${filePath}:${lineNumber}: "${path}" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.`,
+    );
 }
 
 function readPackageManifests(rootDir: string): PackageManifestRecord[] {
@@ -467,6 +560,18 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
   const links = files.flatMap(({ relativePath, markdown }) =>
     extractLocalLinks(markdown, relativePath),
   );
+  // A walk rather than `git ls-files`: the dev image has no git. Ignored
+  // directories are skipped, but a local untracked file such as `.env` still
+  // counts here, so CI is the stricter run.
+  const repositoryFiles = walkFiles(rootDir).map((filePath) => relative(rootDir, filePath));
+  const extensions = new Set(
+    repositoryFiles
+      .map(extensionOf)
+      .filter((extension): extension is string => Boolean(extension)),
+  );
+  const paths = files.flatMap(({ relativePath, markdown }) =>
+    extractDocumentedPaths(markdown, relativePath, extensions),
+  );
   const manifests = readPackageManifests(rootDir);
   // The workflows call pnpm scripts too, and a deploy that names a script that
   // no longer exists fails after it has already shipped the image.
@@ -485,9 +590,11 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
   return {
     commands,
     links,
+    paths,
     errors: [
       ...validateDocumentedCommands(commands, manifests),
       ...validateLocalLinks(links, rootDir),
+      ...validateDocumentedPaths(paths, repositoryFiles),
       ...workflowErrors,
       ...openingErrors,
     ],
@@ -506,7 +613,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     process.exitCode = 1;
   } else {
     console.log(
-      `Documentation check passed (${result.commands.length} commands and ${result.links.length} local links checked).`,
+      `Documentation check passed (${result.commands.length} commands, ${result.links.length} local links and ${result.paths.length} file paths checked).`,
     );
   }
 }
