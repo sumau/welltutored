@@ -2,8 +2,8 @@
 
 ## Read this first
 
-[README.md](README.md) covers the project: stack, commands, layout, deployment
-and architecture decisions. [CONTRIBUTING.md](CONTRIBUTING.md) covers how a
+[README.md](README.md) covers the project: stack, commands, layout, and which
+doc to read for each task. [CONTRIBUTING.md](CONTRIBUTING.md) covers how a
 change is made, checked, merged and shipped, and it applies to Claude as much
 as to anyone. Read both before making changes.
 
@@ -33,8 +33,8 @@ merges. Open the pull request, and when it is ready, say so.
 
 ## This file is not validated
 
-`pnpm run docs:check` checks `README.md`, `CONTRIBUTING.md` and `docs/`, but
-not this file. Claims here are unverified, so keep them few.
+`pnpm run docs:check` checks `README.md`, `CONTRIBUTING.md`, `GLOSSARY.md` and
+`docs/`, but not this file. Claims here are unverified, so keep them few.
 
 ## Agent skills
 

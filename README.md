@@ -1,8 +1,8 @@
 # Well Tutored
 
-Well Tutored helps families discover women tutors, read tutor-written
-resources, and send named-tutor enquiries. Tutors maintain their profiles and
-resources in a private workspace.
+Well Tutored helps families discover women tutors, read tutor-written resources,
+and send named-tutor enquiries. [Tutors](GLOSSARY.md#the-public-site) maintain
+their profiles and resources in a private workspace.
 
 The public site presents women tutors, their expertise and availability, and a
 library of tutor-written learning resources. Visitors can open a tutor profile
@@ -31,24 +31,23 @@ Run the full CI suite with:
 docker compose run --rm test
 ```
 
-## Where to read next
+## I want to…
 
-- [CONTRIBUTING.md](CONTRIBUTING.md): how changes are made, checked, merged
-  and shipped. Read it before opening a pull request.
-- [GLOSSARY.md](GLOSSARY.md): the domain vocabulary shared by every package.
-- [docs/architecture.md](docs/architecture.md): routes, API boundaries and
-  publishing rules.
-- [docs/local-docker.md](docs/local-docker.md): the container workflow in full.
-- [docs/pipeline.md](docs/pipeline.md): from pull request to live site,
-  including rollback. **Merging to `main` ships to production**, and schema changes are applied by hand beforehand
-  ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)).
-  [docs/schema-changes.md](docs/schema-changes.md) records what a push prompts, and
-  [docs/first-deploy.md](docs/first-deploy.md) stands a Deployment up from
-  nothing.
-- [docs/code-checks.md](docs/code-checks.md) and
-  [docs/smoke-checks.md](docs/smoke-checks.md): checks on the code and on a
-  running site.
-- [docs/adr/](docs/adr/): architecture decision records.
+**Merging to `main` deploys to production**, so read CONTRIBUTING before
+opening a pull request.
+
+| I want to… | Read |
+| --- | --- |
+| Run it locally | [docs/local-docker.md](docs/local-docker.md) |
+| Make and ship a change | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Write or fix a test | [docs/code-checks.md](docs/code-checks.md) |
+| Understand a red check | [docs/pipeline.md](docs/pipeline.md) says which check it is; [docs/code-checks.md](docs/code-checks.md) or [docs/smoke-checks.md](docs/smoke-checks.md) explains it |
+| Change the schema | [CONTRIBUTING.md](CONTRIBUTING.md#schema-changes)'s Schema changes, then [docs/schema-changes.md](docs/schema-changes.md) |
+| Undo a bad deploy | [docs/pipeline.md](docs/pipeline.md#rolling-back)'s Rolling back |
+| Change a setting or the domain | [docs/configuration.md](docs/configuration.md) |
+| Understand how it fits together | [docs/architecture.md](docs/architecture.md), then [docs/adr/](docs/adr/) for why |
+| Rebuild production from nothing | [docs/first-deploy.md](docs/first-deploy.md) |
+| Look up a term | [GLOSSARY.md](GLOSSARY.md) |
 
 ## Stack
 
@@ -87,37 +86,6 @@ against a running service, or see
 
 The Vite configs default each artifact's `PORT` and `BASE_PATH`; compose and the
 images override them.
-
-### Environment
-
-- `DATABASE_URL` for PostgreSQL access; `VITE_CLERK_PUBLISHABLE_KEY` for the
-  frontend; `CLERK_PUBLISHABLE_KEY` for the API's Clerk middleware.
-- `CLERK_SECRET_KEY` is required by the API's Clerk middleware even for the
-  public site; a placeholder serves it, and a real key enables workspace
-  sign-in. The Deployment runs on a Clerk production instance at
-  `clerk.welltutored.co.uk`, with no Frontend API proxy.
-- Integration tests need a separate `TEST_DATABASE_URL`, never the same as
-  `DATABASE_URL` — see [docs/code-checks.md](docs/code-checks.md).
-
-## Deploying
-
-**Merging to `main` ships.** CI deploys the container to Fly and then runs the
-launch smoke against it; nothing else deploys. `docker/Dockerfile` and
-`fly.toml` are the whole configuration.
-[docs/pipeline.md](docs/pipeline.md) covers deploys and rollback, and
-[docs/first-deploy.md](docs/first-deploy.md) standing one up from nothing.
-
-Schema changes are not part of that. Apply them yourself, before merging
-anything that expects them — [ADR-0002](docs/adr/0002-schema-by-deliberate-push.md).
-
-The Deployment is served at `https://welltutored.co.uk`, its Public Origin.
-`www.welltutored.co.uk`, `welltutored.com`, `www.welltutored.com` and
-`welltutored.fly.dev` all redirect there, because `PUBLIC_ORIGIN` in `fly.toml`
-says so.
-
-The trap worth knowing: `TRUSTED_ORIGINS` must name the public origin exactly,
-or every credentialed request fails, the public enquiry included
-([docs/configuration.md](docs/configuration.md)).
 
 ## Architecture
 

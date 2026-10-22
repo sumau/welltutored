@@ -2,9 +2,9 @@
 
 For whoever runs a smoke check or reads a failed one: the checks that a running
 site works, whether that is the local stack, the image in CI, or the live
-Deployment. What each asserts, how to run it, and how to read a failure. Where
-each runs in CI, and which of them block, is in [pipeline.md](pipeline.md).
-Their own logic is tested by `test:smoke`
+[Deployment](../GLOSSARY.md#delivery). What each asserts, how to run it, and how
+to read a failure. Where each runs in CI, and which of them block, is in
+[pipeline.md](pipeline.md). Their own logic is tested by `test:smoke`
 ([code-checks.md](code-checks.md#repository-scripts)).
 
 | Script | Check | Runs against |
@@ -16,8 +16,9 @@ Their own logic is tested by `test:smoke`
 
 ## The Launch Smoke
 
-The Launch Smoke asserts that a Deployment is *usable*, which a successful
-Deploy does not imply. It needs no workspace credentials and writes nothing.
+The [Launch Smoke](../GLOSSARY.md#delivery) asserts that a Deployment is
+*usable*, which a successful [Deploy](../GLOSSARY.md#delivery) does not imply.
+It needs no workspace credentials and writes nothing.
 
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \
@@ -45,10 +46,10 @@ domain. It must be a bare origin, and is validated before any request.
 - invalid enquiry recovery by sending `{}` to `POST /api/enquiries`, expecting
   a `400` validation response, and checking health again afterward.
 
-Resources are hidden from visitors for now (`PUBLIC_RESOURCES_ENABLED` in
-`artifacts/welltutored/src/lib/features.ts`), so the check needs no published
-Resource and does not request the resource pages. Restore both when that
-switch turns on.
+[Resources](../GLOSSARY.md#the-public-site) are hidden from visitors for now
+(`PUBLIC_RESOURCES_ENABLED` in `artifacts/welltutored/src/lib/features.ts`), so
+the check needs no published Resource and does not request the resource pages.
+Restore both when that switch turns on.
 
 Every request must also finish on the origin it was sent to. A target that
 redirects elsewhere fails the check and reports both origins, so an old
@@ -85,7 +86,7 @@ reported as skipped rather than silently dropped.
 | Flag | Waives | Ends when |
 | --- | --- | --- |
 | `--dev` | the Clerk check, since a local stack runs on a development instance with no `clerk.` CNAME to check | never; development is a permanent mode |
-| `--allow-empty` | the non-empty assertion on `/api/tutors` and the page that addresses a Tutor by slug | the Deployment has a published Tutor |
+| `--allow-empty` | the non-empty assertion on `/api/tutors` and the page that addresses a [Tutor](../GLOSSARY.md#the-public-site) by slug | the Deployment has a published Tutor |
 
 `smoke:dev` wraps `--dev`:
 
@@ -178,7 +179,7 @@ The enquiry form also has a real-browser keyboard smoke check. It traverses the
 form with native Tab and Enter actions, and checks validation recovery,
 disabled-submit behavior, announced network errors, retry, the success receipt,
 and a tutor preselected from their profile. It intercepts the final response,
-so the check never creates a real Enquiry.
+so the check never creates a real [Enquiry](../GLOSSARY.md#the-public-site).
 
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \
@@ -192,14 +193,15 @@ Smoke ([pipeline.md](pipeline.md#the-image-smoke)).
 
 ## The Sign-in Smoke
 
-The Sign-in Smoke signs in through the real Clerk form, so its target must be
-built and run with Clerk **development** keys, and its database must be a
-fresh, seeded one with no owner: the check promotes its user to owner there. It
-refuses a database that is not local. `SMOKE_SIGN_IN_EMAIL` must be a
-`+clerk_test` user of the instance those keys belong to, which may not be the
-one CI uses ([local-docker.md](local-docker.md#which-clerk-instance-is-which)),
-and `SMOKE_FAILURE_SCREENSHOT` optionally names a file for a screenshot of the
-page when it fails:
+The [Sign-in Smoke](../GLOSSARY.md#delivery) signs in through the real Clerk
+form, so its target must be built and run with Clerk **development** keys, and
+its database must be a fresh, seeded one with no owner: the check promotes its
+user to owner there. It refuses a database that is not local.
+`SMOKE_SIGN_IN_EMAIL` must be a `+clerk_test` user of the instance those keys
+belong to, which may not be the one CI uses
+([local-docker.md](local-docker.md#which-clerk-instance-is-which)), and
+`SMOKE_FAILURE_SCREENSHOT` optionally names a file for a screenshot of the page
+when it fails:
 
 ```sh
 SMOKE_BASE_URL=http://localhost:8080 \

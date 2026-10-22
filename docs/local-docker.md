@@ -1,9 +1,10 @@
 # Local Docker development
 
 For anyone running or working on the stack locally: the first run, everyday
-commands, Clerk development keys, and signing in to the Workspace. The full
-stack — PostgreSQL, the API server, and the Vite frontend — runs in containers,
-so no Node, pnpm, or PostgreSQL install is needed on the host.
+commands, Clerk development keys, and signing in to the
+[Workspace](../GLOSSARY.md#the-private-area). The full stack — PostgreSQL, the
+API server, and the Vite frontend — runs in containers, so no Node, pnpm, or
+PostgreSQL install is needed on the host.
 
 ## Prerequisites
 
@@ -58,11 +59,11 @@ Schema changes are applied the same way as the initial push, with
 
 ## How requests are routed
 
-The Deployment serves the frontend and the API from one origin, so the frontend
-calls `/api` with relative paths. Locally the two run on separate ports, so the
-Vite dev server proxies `/api` to the API service. The target is set by
-`API_PROXY_TARGET` (`http://api:8080` in Compose, defaulting to
-`http://localhost:8080` for a host-native run).
+The [Deployment](../GLOSSARY.md#delivery) serves the frontend and the API from
+one origin, so the frontend calls `/api` with relative paths. Locally the two
+run on separate ports, so the Vite dev server proxies `/api` to the API service.
+The target is set by `API_PROXY_TARGET` (`http://api:8080` in Compose,
+defaulting to `http://localhost:8080` for a host-native run).
 
 The proxy deliberately does not rewrite the `Origin` header: the API only
 trusts the frontend's own origin, which Compose states explicitly through
@@ -115,8 +116,8 @@ Three Clerk instances can be in play, and each has its own users:
 | Instance | Where its keys live | Who it signs in |
 | --- | --- | --- |
 | An accountless development application, if `.env` came from `--accountless` | `.env` | Whoever signed up at `localhost`. Not visible in the dashboard. |
-| The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([pipeline.md](pipeline.md#credentials)) | The Sign-in Smoke's `+clerk_test` user, created in the dashboard |
-| The production instance of the same application | `fly.toml` and Fly secrets ([first-deploy.md](first-deploy.md#flyio)) | Tutors on `welltutored.co.uk` |
+| The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([pipeline.md](pipeline.md#credentials)) | The [Sign-in Smoke](../GLOSSARY.md#delivery)'s `+clerk_test` user, created in the dashboard |
+| The production instance of the same application | `fly.toml` and Fly secrets ([first-deploy.md](first-deploy.md#flyio)) | [Tutors](../GLOSSARY.md#the-public-site) on `welltutored.co.uk` |
 
 A user exists only in the instance it was created in. "Couldn't find your
 account" for an address you know you created usually means the keys name a

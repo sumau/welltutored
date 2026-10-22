@@ -1,16 +1,17 @@
 # Schema changes
 
-For whoever applies a schema change to the Deployment: the push, checking where
-it landed, what each kind of change prompts, recovering from a push that
-stopped partway, and rehearsing on a Neon branch. When to push, relative to the
-merge, is in [CONTRIBUTING.md](../CONTRIBUTING.md#schema-changes).
+For whoever applies a schema change to the
+[Deployment](../GLOSSARY.md#delivery): the push, checking where it landed, what
+each kind of change prompts, recovering from a push that stopped partway, and
+rehearsing on a Neon branch. When to push, relative to the merge, is in
+[CONTRIBUTING.md](../CONTRIBUTING.md#schema-changes).
 
 ## Pushing
 
-Nothing applies the schema for you, and the Deploy job deliberately does not —
-[ADR-0002](adr/0002-schema-by-deliberate-push.md) is why. Drizzle's `push` is
-the only mechanism this project has; run it deliberately against the Deployment
-database from a checkout.
+Nothing applies the schema for you, and the [Deploy](../GLOSSARY.md#delivery)
+job deliberately does not — [ADR-0002](adr/0002-schema-by-deliberate-push.md) is
+why. Drizzle's `push` is the only mechanism this project has; run it
+deliberately against the Deployment database from a checkout.
 
 Read the **direct** connection string into a shell variable once per terminal.
 `read -rs` takes it without echoing it or writing it to shell history; paste it,
@@ -154,11 +155,12 @@ Pick the rename line anyway — it is the honest description of the change.
 
 **Neither answer copes with a changed label.** `push` has no way to rename an
 enum value: whichever line you pick, a label set that differs from the
-database's makes it cast the column to `text`, drop the type, create it with
-the new labels and cast back. Any row still holding a label the new type lacks
-fails the cast back, and `push` stops there, partway through and outside a
-transaction, leaving the column as plain `text`. Renaming the Intake value
-`unavailable` to `full` (issue #55) did exactly that in rehearsal:
+database's makes it cast the column to `text`, drop the type, create it with the
+new labels and cast back. Any row still holding a label the new type lacks fails
+the cast back, and `push` stops there, partway through and outside a
+transaction, leaving the column as plain `text`. Renaming the
+[Intake](../GLOSSARY.md#the-public-site) value `unavailable` to `full` (issue
+#55) did exactly that in rehearsal:
 
 ```
 ALTER TABLE "tutors" ALTER COLUMN "intake" SET DATA TYPE text;

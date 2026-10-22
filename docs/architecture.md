@@ -1,11 +1,15 @@
 # Well Tutored architecture
 
+For whoever needs to know how the code fits together: routes, authentication,
+API boundaries and publishing rules. Why the less obvious decisions were made is
+in [adr/](adr/).
+
 One container serves both the React frontend and the Express API from the same
 origin (scheme, host and port), so the browser treats them as one site. Only
 the API talks to the PostgreSQL database, through Drizzle, and a client
 generated from the OpenAPI spec keeps the two sides in step. The application
 is organized around two user-facing surfaces: the public website and the
-private Workspace.
+private [Workspace](../GLOSSARY.md#the-private-area).
 
 ```mermaid
 flowchart LR
@@ -156,17 +160,17 @@ should not be edited manually.
 
 ### Tutor profiles versus resources
 
-Tutor profiles keep the published profile in `tutors` and store workspace edits
-in `tutor_profile_drafts`. This means the public site continues to show the
-last published profile while a new version is being edited, and the draft can
-be published or discarded as a whole.
+[Tutor](../GLOSSARY.md#the-public-site) profiles keep the published profile in
+`tutors` and store workspace edits in `tutor_profile_drafts`. This means the
+public site continues to show the last published profile while a new version is
+being edited, and the draft can be published or discarded as a whole.
 
-Resources use a single `resources` row with a `draft` or `published` status.
-New or explicitly draft resources do not appear publicly until published.
-Editing an already-published resource while keeping its status as `published`
-updates the public resource in place; changing it to `draft` removes it from
-public results while it is being revised. Resources do not currently keep a
-private draft alongside a live published version.
+[Resources](../GLOSSARY.md#the-public-site) use a single `resources` row with a
+`draft` or `published` status. New or explicitly draft resources do not appear
+publicly until published. Editing an already-published resource while keeping
+its status as `published` updates the public resource in place; changing it to
+`draft` removes it from public results while it is being revised. Resources do
+not currently keep a private draft alongside a live published version.
 
 ## Styling payload
 

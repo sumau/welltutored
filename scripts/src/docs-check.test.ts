@@ -9,6 +9,7 @@ import {
   extractWorkflowCommands,
   validateDocumentedCommands,
   validateLocalLinks,
+  validateOpeningLine,
   validateWorkflowCommands,
   type PackageManifestRecord,
 } from "./docs-check.js";
@@ -222,6 +223,36 @@ test("validates the pnpm scripts a workflow runs", () => {
 
   assert.deepEqual(errors, [
     '.github/workflows/ci.yml:5: "pnpm run missing" references script "missing" in "package.json", but that script was not found.',
+  ]);
+});
+
+test("accepts a guide that opens with prose after its title", () => {
+  assert.deepEqual(
+    validateOpeningLine(
+      ["# Smoke checks", "", "For whoever runs a smoke check.", "", "## The Launch Smoke"].join("\n"),
+      "docs/smoke-checks.md",
+    ),
+    [],
+  );
+});
+
+test("rejects a guide without a title or an opening line", () => {
+  assert.deepEqual(validateOpeningLine("Some prose.\n", "docs/untitled.md"), [
+    'docs/untitled.md:1: a guide starts with a "# " title.',
+  ]);
+
+  for (const opening of ["## Usage", "- a list", "1. a step", "| a | table |", "> a quote", "```sh"]) {
+    assert.deepEqual(
+      validateOpeningLine(["# Guide", "", opening].join("\n"), "docs/guide.md"),
+      [
+        "docs/guide.md:3: the title is followed by a line of prose saying who the guide is for and when they would need it.",
+      ],
+      opening,
+    );
+  }
+
+  assert.deepEqual(validateOpeningLine("# Guide\n", "docs/guide.md"), [
+    "docs/guide.md:1: the title is followed by a line of prose saying who the guide is for and when they would need it.",
   ]);
 });
 

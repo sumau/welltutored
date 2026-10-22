@@ -62,13 +62,55 @@ function walkFiles(directory: string, fileName?: string): string[] {
 
 function documentationFiles(rootDir: string): string[] {
   return [
-    ...["README.md", "CONTRIBUTING.md"]
+    ...["README.md", "CONTRIBUTING.md", "GLOSSARY.md"]
       .map((fileName) => join(rootDir, fileName))
       .filter((filePath) => existsSync(filePath)),
     ...walkFiles(join(rootDir, "docs")),
   ]
     .filter((filePath) => filePath.endsWith(".md"))
     .sort();
+}
+
+// The guides a person reads by task. docs/adr/ and docs/agents/ follow their
+// own templates, and GLOSSARY.md the domain-modeling skill's.
+function guideFiles(rootDir: string): string[] {
+  const docsDir = join(rootDir, "docs");
+  return [
+    ...["README.md", "CONTRIBUTING.md"].map((fileName) => join(rootDir, fileName)),
+    ...(existsSync(docsDir)
+      ? readdirSync(docsDir, { withFileTypes: true })
+          .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+          .map((entry) => join(docsDir, entry.name))
+      : []),
+  ]
+    .filter((filePath) => existsSync(filePath))
+    .sort();
+}
+
+/**
+ * A guide opens with its title and then a line of prose saying who it is for
+ * and when they would need it, so a reader can tell from the top whether they
+ * are in the right place. Only the shape is checkable: the paragraph after the
+ * title has to be prose, not a heading, list, table, quote or code.
+ */
+export function validateOpeningLine(markdown: string, filePath: string): string[] {
+  const lines = markdown.split(/\r?\n/);
+  const titleIndex = lines.findIndex((line) => line.trim() !== "");
+  if (titleIndex < 0 || !lines[titleIndex].startsWith("# ")) {
+    return [`${filePath}:${titleIndex + 1}: a guide starts with a "# " title.`];
+  }
+
+  const openingIndex = lines.findIndex(
+    (line, index) => index > titleIndex && line.trim() !== "",
+  );
+  const opening = openingIndex < 0 ? "" : lines[openingIndex].trimStart();
+  if (!opening || /^(#|[-*+] |\d+\. |\||>|```|<)/.test(opening)) {
+    return [
+      `${filePath}:${openingIndex < 0 ? titleIndex + 1 : openingIndex + 1}: ` +
+        "the title is followed by a line of prose saying who the guide is for and when they would need it.",
+    ];
+  }
+  return [];
 }
 
 function extractCommandFromLine(line: string, inCodeFence: boolean): string | undefined {
@@ -431,6 +473,10 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
     ),
   );
 
+  const openingErrors = guideFiles(rootDir).flatMap((filePath) =>
+    validateOpeningLine(readFileSync(filePath, "utf8"), relative(rootDir, filePath)),
+  );
+
   return {
     commands,
     links,
@@ -438,6 +484,7 @@ export function checkDocumentation(rootDir: string): DocumentationCheckResult {
       ...validateDocumentedCommands(commands, manifests),
       ...validateLocalLinks(links, rootDir),
       ...workflowErrors,
+      ...openingErrors,
     ],
   };
 }

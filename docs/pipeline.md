@@ -62,9 +62,9 @@ flowchart TB
 |---|---|---|---|---|
 | `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
 | [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
-| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
-| Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
+| [Sign-in Smoke](../GLOSSARY.md#delivery) (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| [Health Check](../GLOSSARY.md#delivery) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a [Deploy](../GLOSSARY.md#delivery) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -121,7 +121,8 @@ one place.
 `docs:check` also reads this workflow's `run:` steps and validates the `pnpm`
 scripts they name, so a renamed script cannot reach a deploy job that calls it.
 
-Only the Image Smoke job has Clerk credentials, for the reasons below.
+Only the [Image Smoke](../GLOSSARY.md#delivery) job has Clerk credentials, for
+the reasons below.
 
 ## The Image Smoke
 
@@ -222,8 +223,9 @@ environment in front of this.
 
 It has its own `concurrency` group, without `cancel-in-progress`. The
 workflow-level group cancels superseded pull-request runs, which is right for
-verification and wrong for a deploy: a cancelled one leaves the Deployment
-wherever `flyctl` had got to. Deploys queue instead.
+verification and wrong for a deploy: a cancelled one leaves the
+[Deployment](../GLOSSARY.md#delivery) wherever `flyctl` had got to. Deploys
+queue instead.
 
 It does **not** apply the schema. That is
 [ADR-0002](adr/0002-schema-by-deliberate-push.md), and it is the point.
@@ -233,7 +235,7 @@ It does **not** apply the schema. That is
 The deploy job finishes by running the launch smoke against the live site
 ([smoke-checks.md](smoke-checks.md#the-launch-smoke) has the command). CI also
 sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
-checks that each redirects to the Public Origin.
+checks that each redirects to the [Public Origin](../GLOSSARY.md#delivery).
 
 A successful Deploy does not mean a usable Deployment, which is why this runs
 at all. The check fails if the site is unhealthy or redirects to another
@@ -262,9 +264,9 @@ seconds sit above Neon's wake-from-suspend time and below the check's 5-second
 `timeout`.
 
 What blue-green does **not** catch: broken pages, a missing Tutor, or code that
-doesn't match the live schema, which still answers `SELECT 1`. Those surface in the
-Launch Smoke, which runs after the switch, against the version visitors already
-see.
+doesn't match the live schema, which still answers `SELECT 1`. Those surface in
+the [Launch Smoke](../GLOSSARY.md#delivery), which runs after the switch,
+against the version visitors already see.
 
 ## A failed deploy
 

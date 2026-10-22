@@ -1,8 +1,9 @@
 # Standing up a Deployment
 
-For whoever stands a Deployment up from nothing: a new database, Fly app,
-domain, Clerk instance, content and first Owner. The live Deployment already exists, so this is for rebuilding
-it or starting another. Running the live one is
+For whoever stands a [Deployment](../GLOSSARY.md#delivery) up from nothing: a
+new database, Fly app, domain, Clerk instance, content and first
+[Owner](../GLOSSARY.md#the-private-area). The live Deployment already exists, so
+this is for rebuilding it or starting another. Running the live one is
 [schema-changes.md](schema-changes.md) for schema pushes and
 [pipeline.md](pipeline.md) for deploys and rollback.
 
@@ -23,7 +24,8 @@ Each step has its own section below; this is the order they have to happen in.
 6. **Expect an empty site.** A fresh database has no tutors or resources — see
    [Content](#content) — and no Owner: [promote the first one](#owner).
 
-The image can be checked first without deploying: see the Image Smoke
+The image can be checked first without deploying: see the
+[Image Smoke](../GLOSSARY.md#delivery)
 [by hand](smoke-checks.md#the-image-smoke-by-hand).
 
 ## Database
@@ -195,8 +197,9 @@ attached, with `www.welltutored.co.uk`, `welltutored.com` and
 
 In this order, so the server's keys and the bundle's key change in one deploy:
 
-1. In the Clerk dashboard, create a production instance for the Public Origin's
-   domain, cloning the development instance's settings.
+1. In the Clerk dashboard, create a production instance for the
+   [Public Origin](../GLOSSARY.md#delivery)'s domain, cloning the development
+   instance's settings.
 2. Add the DNS records it lists (`clerk.`, `accounts.`, `clkmail.` and two
    DKIM records) in Cloudflare as **DNS only**, and wait until Clerk shows the
    domain verified and its certificates issued.
@@ -224,9 +227,10 @@ In this order, so the server's keys and the bundle's key change in one deploy:
 
 `ensureSeedContent()` only runs when `NODE_ENV=development`
 (`artifacts/api-server/src/index.ts`), so a fresh Deployment database has no
-tutors or resources and the public directory renders empty. Deploy empty and
-create content through `/workspace`. Two things behave differently until there
-is a published Tutor, and neither is a fault:
+tutors or resources and the public directory renders empty.
+[Deploy](../GLOSSARY.md#delivery) empty and create content through `/workspace`.
+Two things behave differently until there is a published
+[Tutor](../GLOSSARY.md#the-public-site), and neither is a fault:
 
 - The directory renders its empty state, and `/api/tutors` returns an empty
   list.
@@ -246,11 +250,11 @@ is a published Tutor, and neither is a fault:
 ## Owner
 
 A new database has no Owner, and nothing creates one. The API creates a
-`pending` Workspace Account the first time someone signs in with a verified
-primary email address, and only an Owner can approve it, so the first one is
-promoted by hand. This applies whenever a production database has no Owner: a
-first deploy, or a rebuild from empty. A local database is promoted the same
-way with a simpler command, in
+`pending` [Workspace Account](../GLOSSARY.md#the-private-area) the first time
+someone signs in with a verified primary email address, and only an Owner can
+approve it, so the first one is promoted by hand. This applies whenever a
+production database has no Owner: a first deploy, or a rebuild from empty. A
+local database is promoted the same way with a simpler command, in
 [local-docker.md](local-docker.md#signing-in-to-the-workspace).
 
 Approved on 2026-09-27 for the Deployment's first Owner, until an automated
@@ -276,7 +280,8 @@ SQL
 Read the `\conninfo` line: it must name the Neon host. `UPDATE 1` with the
 Owner's row means it worked. `UPDATE 0` means a guard held: no pending row for
 that email (sign in first), or an Owner already exists. Sign out and back in to
-see the Owner's Workspace, where they approve everyone else.
+see the Owner's [Workspace](../GLOSSARY.md#the-private-area), where they approve
+everyone else.
 
 ### Safety rules
 

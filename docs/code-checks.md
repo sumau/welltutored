@@ -45,12 +45,13 @@ pnpm --filter @workspace/api-server test
 This is the complete API suite used by CI. It runs the in-memory unit checks
 and the database-backed integration tests, which cover:
 
-- Workspace tutor, resource, article, account, and permission lifecycles,
-  including owner-only behavior and Clerk identity reuse.
-- Enquiries: a valid enquiry is saved and its delivery status recorded,
-  invalid ones are rejected, the workspace lists each tutor only their own,
-  and a failed one can be retried. Delivery failures are simulated by failing
-  the database update that records delivery.
+- [Workspace](../GLOSSARY.md#the-private-area) tutor, resource, article,
+  account, and permission lifecycles, including owner-only behavior and Clerk
+  identity reuse.
+- [Enquiries](../GLOSSARY.md#the-public-site): a valid enquiry is saved and its
+  delivery status recorded, invalid ones are rejected, the workspace lists each
+  tutor only their own, and a failed one can be retried. Delivery failures are
+  simulated by failing the database update that records delivery.
 - The public resource list and resource pages: only published resources by
   published tutors, search, the subject filter, and paging.
 
@@ -118,7 +119,8 @@ The suite checks:
 - Public and workspace route resolution, metadata, redirects, and Clerk
   callback routes.
 - Homepage loading, successful tutor rendering, and retry behavior.
-- Tutor profile behavior, including tutors whose intake is full.
+- [Tutor](../GLOSSARY.md#the-public-site) profile behavior, including tutors
+  whose intake is full.
 - Enquiry form validation, keyboard navigation, focus management, disabled
   submit behavior, announced errors, retry behavior, and successful receipts.
 - Public tutor-query caching, expiry, and mutation invalidation.
