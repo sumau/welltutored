@@ -113,9 +113,10 @@ whole numbers of milliseconds, fail before requests are made.
 ## The enquiry browser check
 
 The enquiry form also has a real-browser keyboard smoke check. It traverses the
-form with native Tab and Enter actions, verifies validation recovery and
-disabled-submit behavior, and intercepts the final response so the check never
-creates a real Enquiry.
+form with native Tab and Enter actions, and checks validation recovery,
+disabled-submit behavior, announced network errors, retry, the success receipt,
+and a tutor preselected from their profile. It intercepts the final response,
+so the check never creates a real Enquiry.
 
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \

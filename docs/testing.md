@@ -4,36 +4,6 @@ The project uses several complementary test layers. Most automated tests use
 Node's built-in `node:test` runner and are executed with `tsx`; the web tests
 also use JSDOM where browser APIs are needed.
 
-For the complete validation setup, including the deploy job, see [CI and deploy
-validation](ci-validation.md).
-
-## Smoke testing at a glance
-
-The project has smoke **helper tests** that run against local fixtures, plus
-live smoke checks that target either the local development stack or the
-Deployment. The CI integration tests use a temporary database, but the smoke
-helper tests do not target that database.
-
-[ci-validation.md](ci-validation.md) has a diagram and table of every check,
-from pull request to live site, and which of them block.
-
-- `test:smoke` is a code-level test suite for target selection, waivers,
-  redirects, timeouts, and response handling. It runs inside `verify:ci`; it
-  does not contact a live site.
-- `smoke:dev` and `smoke:enquiry` run manually against the local stack, and in
-  CI against the production image, in the Image Smoke
-  ([ci-validation.md](ci-validation.md#the-image-smoke)). `smoke:enquiry` does
-  not block a deploy yet.
-- `smoke:sign-in` is the Sign-in Smoke. It runs in the Image Smoke with the
-  Clerk development instance's keys, and does not block a deploy yet.
-- `smoke:launch` runs automatically in the deploy job, against the
-  Deployment. Run it by hand with the command under [Launch and browser smoke
-  checks](#launch-and-browser-smoke-checks) to check the live site.
-- Every mode requires `SMOKE_BASE_URL`; nothing has a default target.
-- The browser enquiry checks intercept the submission response, so they do not
-  create a real enquiry. The launch checks send an intentionally invalid
-  enquiry payload and expect validation to reject it before insertion.
-
 ## Test suites
 
 ### API server
@@ -181,31 +151,29 @@ pnpm run build
 The build first checks documented commands, then type-checks libraries and
 workspace packages, and finally builds the packages that define a build script.
 
-## Launch and browser smoke checks
+## Smoke checks
 
-The non-mutating launch smoke check verifies a running target's API health,
-Clerk production instance, published tutor catalogue data, public pages,
-invalid-enquiry validation, and recovery health check:
+The smoke scripts check a running site rather than the code.
+[launch-smoke-check.md](launch-smoke-check.md) covers what each one checks and
+how to run it, and [ci-validation.md](ci-validation.md) where each one runs and
+which of them block. Their own logic is tested by `test:smoke`, under
+[Repository scripts](#repository-scripts).
 
-```sh
-SMOKE_BASE_URL=https://welltutored.co.uk \
-  SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk pnpm smoke:launch
-```
+### Against the local stack
 
-`SMOKE_BASE_URL` is required in every mode and has no default. It does not
-require workspace credentials, and it rejects a target that redirects to
-another origin.
-
-The Playwright-based enquiry smoke check runs the real form in Chromium. It
-checks native Tab and Enter interaction, validation recovery, disabled-submit
-behavior, announced network errors, retry behavior, successful receipts, and
-preselected tutor profiles. Requests are intercepted so the check does not
-create real Enquiries:
+With the local stack running (`docker compose up api web`), run the development
+smoke through the Vite dev server, which proxies `/api` to the API service, so
+the web application and `/api` are checked together:
 
 ```sh
-SMOKE_BASE_URL=http://localhost:5173 \
-  SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:enquiry
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:dev'
 ```
+
+It checks health, catalogue data, public routes and invalid-enquiry recovery,
+and skips the Clerk check, because a local stack runs on a development instance
+with no `clerk.` CNAME to check.
+
+### Sign-in Smoke
 
 The Sign-in Smoke signs in through the real Clerk form, so its target must be
 built and run with Clerk **development** keys, and its database must be a
@@ -226,25 +194,9 @@ SMOKE_BASE_URL=http://localhost:8080 \
 [ci-validation.md](ci-validation.md#the-image-smoke) has the steps CI uses to
 prepare that target.
 
-Per-request and overall smoke timeouts can be adjusted with `SMOKE_TIMEOUT_MS`
-and `SMOKE_TOTAL_TIMEOUT_MS`. The waiver flags, and the conditions that end
-them, are in [launch-smoke-check.md](launch-smoke-check.md).
+## Before a pull request
 
-For the deploy job and the release sequence, see [CI and deploy
-validation](ci-validation.md).
-
-## Recommended verification sequence
-
-For a normal change, run the affected package test suite first, then:
-
-```sh
-pnpm run typecheck
-pnpm run build
-```
-
-Run the launch or enquiry smoke checks when the change affects routing, public
-API responses, deployment configuration, or the enquiry journey.
-
-`pnpm run verify:ci` is the complete check, the same gate CI runs. What has to
-pass before a pull request is in
-[CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request).
+[CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request) has what
+has to pass: `docker compose run --rm test`, which runs `pnpm run verify:ci`, the
+same gate CI runs. While working, run the affected package's suite first; it is
+faster.

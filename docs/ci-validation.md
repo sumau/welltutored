@@ -60,9 +60,9 @@ flowchart TB
 |---|---|---|---|---|
 | `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
 | [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](#by-hand) |
-| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#launch-and-browser-smoke-checks)) |
+| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#sign-in-smoke)) |
 | Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | `smoke:launch` with `SMOKE_BASE_URL=https://welltutored.co.uk` |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | [launch-smoke-check.md](launch-smoke-check.md) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -91,19 +91,9 @@ The command stops at the first failure and returns a non-zero exit code. It is
 the deterministic quality gate and does not depend on a running dev stack or a
 deployed URL.
 
-The command uses an externally supplied `TEST_DATABASE_URL` when one is available.
-Otherwise, it provisions a temporary local PostgreSQL cluster for the run,
-exports its separate connection as `TEST_DATABASE_URL`, and removes the
-cluster when validation finishes. It never falls back to `DATABASE_URL`.
-
-CI is the only automated validation path that runs the database-backed API
-integration suite. Those tests create, update, publish, and delete test
-records, so they must use an isolated test database rather than a live
-environment. The gate rejects a value equal to `DATABASE_URL` and
-applies the current schema to the test connection before the API suite starts.
-If an external test URL is provided but is missing or the schema cannot be
-applied, validation stops with an actionable test-database error instead of
-falling back to the application database.
+It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
+`DATABASE_URL`, and makes a temporary local cluster when none is supplied;
+[testing.md](testing.md#api-server) has the rules.
 
 ## GitHub Actions
 
@@ -189,7 +179,7 @@ It requests every public page with `Accept: text/html`, which is what caught the
 Clerk handshake redirect in
 [ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
 and `smoke:sign-in` need a Chromium these images do not carry
-([testing.md](testing.md#launch-and-browser-smoke-checks)).
+([launch-smoke-check.md](launch-smoke-check.md#the-enquiry-browser-check)).
 
 ## Credentials
 
@@ -259,41 +249,10 @@ wherever `flyctl` had got to. Deploys queue instead.
 It does **not** apply the schema. That is
 [ADR-0002](adr/0002-schema-by-deliberate-push.md), and it is the point.
 
-## Development smoke validation
-
-With the local stack running, validate it through the Vite dev server, which
-proxies `/api` to the API service:
-
-```sh
-SMOKE_BASE_URL=http://localhost:5173 pnpm smoke:dev
-```
-
-The development launch check validates health, catalogue data, public routes,
-and invalid-enquiry recovery. It skips the Clerk check, because a local stack
-runs on a development instance with no `clerk.` CNAME to check.
-
-`SMOKE_BASE_URL` is required and has no default, in every mode — see
-[launch-smoke-check.md](launch-smoke-check.md). Target the dev server rather
-than the API port directly, so the web application and `/api` are checked
-together.
-
-The browser check (`pnpm smoke:enquiry`) validates the enquiry flow with
-keyboard navigation, validation recovery, retry behavior, and an announced
-success receipt. Its requests are intercepted so it does not create a real
-Enquiry. It needs `SMOKE_CHROMIUM_PATH`. CI runs both checks against the
-production image, in the Image Smoke.
-
 ## Post-deploy validation
 
-The deploy job finishes by running the launch smoke against the live site:
-
-```sh
-SMOKE_BASE_URL=https://welltutored.co.uk \
-  SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
-  pnpm run smoke:launch
-```
-
-CI also sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the
+The deploy job finishes by running the launch smoke against the live site
+([launch-smoke-check.md](launch-smoke-check.md) has the command). CI also sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the
 same run checks that each redirects to the Public Origin.
 
 A successful Deploy does not mean a usable Deployment, which is why this runs
