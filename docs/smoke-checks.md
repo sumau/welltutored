@@ -1,4 +1,20 @@
-# Launch smoke check
+# Smoke checks
+
+For whoever runs a smoke check or reads a failed one: the checks that a running
+site works, whether that is the local stack, the image in CI, or the live
+Deployment. What each asserts, how to run it, and how to read a failure. Where
+each runs in CI, and which of them block, is in [pipeline.md](pipeline.md).
+Their own logic is tested by `test:smoke`
+([code-checks.md](code-checks.md#repository-scripts)).
+
+| Script | Check | Runs against |
+| --- | --- | --- |
+| `smoke:launch` | The [Launch Smoke](#the-launch-smoke) | The live Deployment |
+| `smoke:dev` | The same check with `--dev`, so without the Clerk check | [The local stack](#against-the-local-stack), and the image in [the Image Smoke](#the-image-smoke-by-hand) |
+| `smoke:enquiry` | [The enquiry form in a real browser](#the-enquiry-browser-check) | Any of them, from a machine with Chromium |
+| `smoke:sign-in` | [The Sign-in Smoke](#the-sign-in-smoke) | A local image built with Clerk development keys |
+
+## The Launch Smoke
 
 The Launch Smoke asserts that a Deployment is *usable*, which a successful
 Deploy does not imply. It needs no workspace credentials and writes nothing.
@@ -16,7 +32,7 @@ target is one that can report on a site nobody asked about.
 origin of the Clerk production instance, the `clerk.` CNAME on the Deployment's
 domain. It must be a bare origin, and is validated before any request.
 
-## What it checks
+### What it checks
 
 - the API health response at `/api/healthz`;
 - Clerk's `/v1/environment` at `SMOKE_CLERK_FRONTEND_API`, requested directly
@@ -41,7 +57,7 @@ treated as healthy.
 
 The command exits non-zero on any failed check.
 
-## Redirecting hostnames
+### Redirecting hostnames
 
 `SMOKE_REDIRECT_FROM` optionally lists the other origins the Deployment answers
 on, separated by commas or spaces. Each one must answer
@@ -59,7 +75,7 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 The Deployment sends these redirects itself once `PUBLIC_ORIGIN` is set; see
 [configuration.md](configuration.md).
 
-## Waivers
+### Waivers
 
 Two flags waive an assertion the target genuinely cannot meet. Each is named
 for the condition under which passing it is correct, not for what it skips, so
@@ -88,7 +104,7 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
   SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk pnpm smoke:launch --allow-empty
 ```
 
-## Timeout controls
+### Timeout controls
 
 The smoke check applies a timeout to each request and an overall deadline to
 the complete check:
@@ -110,6 +126,52 @@ These controls do not disable the checks or allow requests to continue past the
 overall deadline. Values outside the supported ranges, or values that are not
 whole numbers of milliseconds, fail before requests are made.
 
+### When it fails
+
+The deploy job runs the Launch Smoke after the new version has taken traffic,
+so a red one after a merge means visitors are already seeing the fault, and it
+is not something to wave through
+([pipeline.md](pipeline.md#post-deploy-validation)). Roll back
+([pipeline.md](pipeline.md#rolling-back)), or fix it on `main`.
+
+## Against the local stack
+
+With the local stack running (`docker compose up api web`), run the development
+smoke through the Vite dev server, which proxies `/api` to the API service, so
+the web application and `/api` are checked together:
+
+```sh
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:dev'
+```
+
+It checks health, catalogue data, public routes and invalid-enquiry recovery,
+and skips the Clerk check, because a local stack runs on a development instance
+with no `clerk.` CNAME to check.
+
+## The Image Smoke by hand
+
+The `prod` compose service runs the production image against the local
+development database, which has seed content:
+
+```
+docker compose up --build prod      # http://localhost:8081
+```
+
+That covers the two things most likely to be wrong — whether the frontend is
+actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
+deploying anything. Run the development smoke against it over the compose
+network:
+
+```
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
+```
+
+It requests every public page with `Accept: text/html`, which is what caught the
+Clerk handshake redirect in
+[ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
+and `smoke:sign-in` need a Chromium these images do not carry, so they run from
+the host. [pipeline.md](pipeline.md#the-image-smoke) has the steps CI takes.
+
 ## The enquiry browser check
 
 The enquiry form also has a real-browser keyboard smoke check. It traverses the
@@ -127,3 +189,24 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 none of this project's images carry one, so this check runs from wherever a
 Chromium already exists. In CI that is the runner's Google Chrome, in the Image
 Smoke ([pipeline.md](pipeline.md#the-image-smoke)).
+
+## The Sign-in Smoke
+
+The Sign-in Smoke signs in through the real Clerk form, so its target must be
+built and run with Clerk **development** keys, and its database must be a
+fresh, seeded one with no owner: the check promotes its user to owner there. It
+refuses a database that is not local. `SMOKE_SIGN_IN_EMAIL` must be a
+`+clerk_test` user of the instance those keys belong to, which may not be the
+one CI uses ([local-docker.md](local-docker.md#which-clerk-instance-is-which)),
+and `SMOKE_FAILURE_SCREENSHOT` optionally names a file for a screenshot of the
+page when it fails:
+
+```sh
+SMOKE_BASE_URL=http://localhost:8080 \
+  SMOKE_SIGN_IN_EMAIL=someone+clerk_test@example.com \
+  SMOKE_DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
+  SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:sign-in
+```
+
+[pipeline.md](pipeline.md#the-image-smoke) has the steps CI uses to prepare
+that target.

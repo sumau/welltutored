@@ -103,29 +103,29 @@ test("reports missing packages and scripts with documentation locations", () => 
 test("extracts local Markdown links while ignoring anchors and external URLs", () => {
   const links = extractLocalLinks(
     [
-      "[testing guide](testing.md)",
-      "[specific section](testing.md#smoke-checks)",
+      "[code checks](code-checks.md)",
+      "[specific section](code-checks.md#api-server)",
       "[outside](../CONTRIBUTING.md)",
       "[anchor only](#overview)",
       "[website](https://example.test/docs)",
       "[protocol-relative](//example.test/docs)",
     ].join("\n"),
-    "docs/ci-validation.md",
+    "docs/pipeline.md",
   );
 
   assert.deepEqual(links, [
     {
-      filePath: "docs/ci-validation.md",
+      filePath: "docs/pipeline.md",
       lineNumber: 1,
-      target: "testing.md",
+      target: "code-checks.md",
     },
     {
-      filePath: "docs/ci-validation.md",
+      filePath: "docs/pipeline.md",
       lineNumber: 2,
-      target: "testing.md#smoke-checks",
+      target: "code-checks.md#api-server",
     },
     {
-      filePath: "docs/ci-validation.md",
+      filePath: "docs/pipeline.md",
       lineNumber: 3,
       target: "../CONTRIBUTING.md",
     },
@@ -137,17 +137,17 @@ test("validates local link existence and repository boundaries", () => {
   const errors = validateLocalLinks(
     [
       {
-        filePath: "docs/ci-validation.md",
+        filePath: "docs/pipeline.md",
         lineNumber: 10,
-        target: "testing.md",
+        target: "code-checks.md",
       },
       {
-        filePath: "docs/ci-validation.md",
+        filePath: "docs/pipeline.md",
         lineNumber: 11,
         target: "missing.md#section",
       },
       {
-        filePath: "docs/ci-validation.md",
+        filePath: "docs/pipeline.md",
         lineNumber: 12,
         target: "../../outside.md",
       },
@@ -156,8 +156,8 @@ test("validates local link existence and repository boundaries", () => {
   );
 
   assert.deepEqual(errors, [
-    'docs/ci-validation.md:11: local link "missing.md#section" resolves to "docs/missing.md", but that path was not found.',
-    'docs/ci-validation.md:12: local link "../../outside.md" resolves outside the repository.',
+    'docs/pipeline.md:11: local link "missing.md#section" resolves to "docs/missing.md", but that path was not found.',
+    'docs/pipeline.md:12: local link "../../outside.md" resolves outside the repository.',
   ]);
 });
 

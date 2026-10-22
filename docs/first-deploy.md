@@ -1,7 +1,7 @@
 # Standing up a Deployment
 
-How to stand a Deployment up from nothing: a new database, Fly app, domain and
-Clerk instance. The live Deployment already exists, so this is for rebuilding
+For whoever stands a Deployment up from nothing: a new database, Fly app,
+domain, Clerk instance, content and first Owner. The live Deployment already exists, so this is for rebuilding
 it or starting another. Running the live one is
 [schema-changes.md](schema-changes.md) for schema pushes and
 [pipeline.md](pipeline.md) for deploys and rollback.
@@ -21,11 +21,10 @@ Each step has its own section below; this is the order they have to happen in.
 5. **[Attach a domain](#attaching-a-custom-domain)**, then
    **[move to a production Clerk instance](#moving-to-a-production-clerk-instance)**.
 6. **Expect an empty site.** A fresh database has no tutors or resources — see
-   [Content](#content) — and no owner: run the
-   [owner bootstrap](workspace-owner-bootstrap.md#production-procedure).
+   [Content](#content) — and no Owner: [promote the first one](#owner).
 
 The image can be checked first without deploying: see the Image Smoke
-[by hand](pipeline.md#by-hand).
+[by hand](smoke-checks.md#the-image-smoke-by-hand).
 
 ## Database
 
@@ -235,7 +234,7 @@ is a published Tutor, and neither is a fault:
   that Tutor's profile page, and so does the deploy job's Launch smoke step,
   which runs it. `--allow-empty` waives exactly those assertions; everything
   that does not depend on content still runs
-  ([launch-smoke-check.md](launch-smoke-check.md#waivers)). Run it by hand
+  ([smoke-checks.md](smoke-checks.md#waivers)). Run it by hand
   while the Deployment is empty, and drop it once there is a published Tutor:
 
   ```
@@ -243,3 +242,57 @@ is a published Tutor, and neither is a fault:
     SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
     pnpm run smoke:launch --allow-empty
   ```
+
+## Owner
+
+A new database has no Owner, and nothing creates one. The API creates a
+`pending` Workspace Account the first time someone signs in with a verified
+primary email address, and only an Owner can approve it, so the first one is
+promoted by hand. This applies whenever a production database has no Owner: a
+first deploy, or a rebuild from empty. A local database is promoted the same
+way with a simpler command, in
+[local-docker.md](local-docker.md#signing-in-to-the-workspace).
+
+Approved on 2026-09-27 for the Deployment's first Owner, until an automated
+bootstrap replaces it ([#48](https://github.com/sumau/welltutored/issues/48)).
+It is a guarded update, run against the **direct** Neon connection string from
+a checkout. The person to promote must first sign in once at the Public Origin,
+because the pending record is written on first sign-in and not before.
+
+```
+read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
+docker compose run --rm -T -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
+  -lc 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v email=you@example.com' <<'SQL'
+\conninfo
+UPDATE workspace_accounts
+SET role = 'owner', updated_at = NOW()
+WHERE lower(email) = lower(:'email')
+  AND role = 'pending'
+  AND NOT EXISTS (SELECT 1 FROM workspace_accounts WHERE role = 'owner')
+RETURNING id, email, role;
+SQL
+```
+
+Read the `\conninfo` line: it must name the Neon host. `UPDATE 1` with the
+Owner's row means it worked. `UPDATE 0` means a guard held: no pending row for
+that email (sign in first), or an Owner already exists. Sign out and back in to
+see the Owner's Workspace, where they approve everyone else.
+
+### Safety rules
+
+For whoever automates this ([#48](https://github.com/sumau/welltutored/issues/48)):
+
+- Run this against a local database, or against production under the
+  procedure above; no other production use is approved.
+- Do not add automatic owner elevation to server startup or normal login
+  handling.
+- Do not run the update if an Owner already exists.
+- Do not change an existing Owner through this bootstrap step.
+
+### Database recovery
+
+Recreating a database removes all account roles, tutor assignments, content,
+and enquiries. Clerk users remain separate from the database, but their
+Workspace Account records must be recreated. After the schema and deployment
+configuration are restored, repeat the procedure above for the intended Owner,
+then use the normal Workspace approval flow.

@@ -1,7 +1,9 @@
 # Local Docker development
 
-Runs the full stack — PostgreSQL, the API server, and the Vite frontend — in
-containers, so no Node, pnpm, or PostgreSQL install is needed on the host.
+For anyone running or working on the stack locally: the first run, everyday
+commands, Clerk development keys, and signing in to the Workspace. The full
+stack — PostgreSQL, the API server, and the Vite frontend — runs in containers,
+so no Node, pnpm, or PostgreSQL install is needed on the host.
 
 ## Prerequisites
 
@@ -30,7 +32,11 @@ docker compose up api web           # start
 docker compose logs -f api          # follow logs
 docker compose down                 # stop, keeping the database
 docker compose down -v              # stop and discard the database
+docker compose run --rm test        # the full CI suite
 ```
+
+What the suite runs, and why it needs the `test` service, is in
+[code-checks.md](code-checks.md).
 
 The repository is bind-mounted, so edits on the host apply inside the
 containers. Vite hot-reloads. The API server builds with esbuild and does not
@@ -49,35 +55,6 @@ docker compose exec api pnpm --filter @workspace/api-spec run codegen
 
 Schema changes are applied the same way as the initial push, with
 `pnpm --filter @workspace/db run push` via `docker compose run --rm migrate`.
-
-## Tests
-
-```
-docker compose run --rm test
-```
-
-Runs the whole CI suite — database-backed API integration tests, frontend
-component tests, smoke checks, documentation checks, typecheck, and build —
-against a second database, `welltutored_test`, on the same PostgreSQL
-service. The service creates that database on first use. What the suite
-covers, and how it keeps off `welltutored`, is in [testing.md](testing.md).
-
-Running `pnpm run verify:ci` directly inside `api` or `web` does not work.
-Without `TEST_DATABASE_URL` it tries to build a throwaway cluster with
-`initdb` and `pg_ctl`, and the image carries only the PostgreSQL client
-binaries:
-
-```
-Test database unavailable: required command 'initdb' was not found.
-```
-
-The `test` service supplies the connection, which takes the other branch of
-`scripts/with-test-database.sh`. CI takes the same branch, with the dedicated
-connection coming from its `postgres:16` service container instead.
-
-The suite needs no Clerk keys ([pipeline.md](pipeline.md#credentials)),
-and leaves out the browser smoke checks, which need a Chromium these images do
-not carry.
 
 ## How requests are routed
 
@@ -99,12 +76,10 @@ The placeholder in `.env.example` is enough to browse the public experience;
 signing in to `/workspace` needs real Clerk keys.
 
 They must be **development** keys (`pk_test_` / `sk_test_`), not production
-keys. Both the frontend and the API resolve their
-key through `publishableKeyFromHost`, which returns the configured key as-is
-only when it is a development key; a `pk_live_` key is discarded and a key is
-derived from the hostname instead, producing `clerk.localhost`, which does not
-resolve. Clerk development instances accept any host, so localhost needs no
-domain configuration.
+keys: a `pk_live_` key is discarded in favour of one for `clerk.localhost`,
+which does not resolve ([first-deploy.md](first-deploy.md#clerk-keys) explains
+`publishableKeyFromHost`, which decides this). Clerk development instances
+accept any host, so localhost needs no domain configuration.
 
 Get a set of keys in one of these ways:
 
@@ -177,9 +152,7 @@ RETURNING id, email, role;"
 
 The guards make this safe to repeat: once an owner exists it changes nothing.
 No rows returned means the address matched no pending account. Every later
-account is approved by the owner through the workspace UI instead. See
-[Workspace owner bootstrap](workspace-owner-bootstrap.md) for the full
-procedure and its safety rules.
+account is approved by the owner through the workspace UI instead.
 
 ### What survives what
 

@@ -47,12 +47,12 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 ## Before opening a pull request
 
 - `docker compose run --rm test` is green. It runs the same suite as CI
-  ([docs/pipeline.md](docs/pipeline.md)).
+  ([docs/code-checks.md](docs/code-checks.md)).
 - For a UI or build change, click through the running app as well
   (`docker compose up api web`).
 - For a change to routing, public API responses, deployment configuration or
   the enquiry journey, also run the development smoke against the local stack
-  ([docs/testing.md](docs/testing.md#against-the-local-stack)).
+  ([docs/smoke-checks.md](docs/smoke-checks.md#against-the-local-stack)).
 - After merging a change that touches auth, Clerk or the `@clerk/*` versions,
   sign in on `https://welltutored.co.uk` and open the Workspace. The Sign-in
   Smoke uses the Clerk development instance, so this is the part CI can't

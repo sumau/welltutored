@@ -23,8 +23,8 @@ together, after the new hostname has a certificate;
 
 Variables that only the tooling reads are documented where it is used:
 `API_PROXY_TARGET` in [local-docker.md](local-docker.md#how-requests-are-routed),
-`TEST_DATABASE_URL` in [testing.md](testing.md#api-server), and the `SMOKE_*`
-variables in [launch-smoke-check.md](launch-smoke-check.md).
+`TEST_DATABASE_URL` in [code-checks.md](code-checks.md#api-server), and the `SMOKE_*`
+variables in [smoke-checks.md](smoke-checks.md).
 
 ## `TRUSTED_ORIGINS`
 

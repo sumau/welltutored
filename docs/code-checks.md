@@ -1,14 +1,36 @@
-# Testing
+# Code checks
 
-The project uses several complementary test layers. Most automated tests use
-Node's built-in `node:test` runner and are executed with `tsx`; the web tests
-also use JSDOM where browser APIs are needed.
+For whoever writes a test or reads a red `verify`: the checks that run against
+the repository before a merge — the test suites, typecheck, build and docs
+check that `pnpm run verify:ci` runs — and how to write a test. Checks against
+a running site are in [smoke-checks.md](smoke-checks.md).
+
+Most automated tests use Node's built-in `node:test` runner and are executed
+with `tsx`; the web tests also use JSDOM where browser APIs are needed.
 
 The commands below run inside the containers: prefix them with
-`docker compose exec api` against a running stack. The exception is the
-[Sign-in Smoke](#sign-in-smoke), which needs a Chromium the images do not
-carry. The full suite is `docker compose run --rm test`
-([local-docker.md](local-docker.md#tests)).
+`docker compose exec api` against a running stack. The full suite is:
+
+```
+docker compose run --rm test
+```
+
+It runs `verify:ci` against a second database, `welltutored_test`, on the same
+PostgreSQL service as the development database, and creates that database on
+first use. Running `pnpm run verify:ci` directly inside `api` or `web` does not
+work. Without `TEST_DATABASE_URL` it tries to build a throwaway cluster with
+`initdb` and `pg_ctl`, and the image carries only the PostgreSQL client
+binaries:
+
+```
+Test database unavailable: required command 'initdb' was not found.
+```
+
+The `test` service supplies the connection, which takes the other branch of
+`scripts/with-test-database.sh`. CI takes the same branch, with the dedicated
+connection coming from its `postgres:16` service container instead
+([pipeline.md](pipeline.md#github-actions)). The suite needs no Clerk keys
+([pipeline.md](pipeline.md#credentials)).
 
 ## Test suites
 
@@ -133,9 +155,10 @@ pnpm --filter @workspace/scripts run test:docs
 pnpm run test:database-config
 ```
 
-The smoke-check tests validate target selection, the waiver flags in both
-directions, redirect protection, timeout handling, and healthy responses
-against a local fixture. The documentation tests ensure that `pnpm` commands —
+The smoke-check tests validate the logic of the scripts in
+[smoke-checks.md](smoke-checks.md), without a running site: target selection,
+the waiver flags in both directions, redirect protection, timeout handling, and
+healthy responses against a local fixture. The documentation tests ensure that `pnpm` commands —
 in the docs and in the workflows' `run:` steps — refer to real package scripts,
 and that local links resolve. The database-config tests ensure that
 integration tests require a dedicated `TEST_DATABASE_URL` distinct from
@@ -157,49 +180,6 @@ pnpm run build
 
 The build first checks documented commands, then type-checks libraries and
 workspace packages, and finally builds the packages that define a build script.
-
-## Smoke checks
-
-The smoke scripts check a running site rather than the code.
-[launch-smoke-check.md](launch-smoke-check.md) covers what each one checks and
-how to run it, and [pipeline.md](pipeline.md) where each one runs and
-which of them block. Their own logic is tested by `test:smoke`, under
-[Repository scripts](#repository-scripts).
-
-### Against the local stack
-
-With the local stack running (`docker compose up api web`), run the development
-smoke through the Vite dev server, which proxies `/api` to the API service, so
-the web application and `/api` are checked together:
-
-```sh
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:dev'
-```
-
-It checks health, catalogue data, public routes and invalid-enquiry recovery,
-and skips the Clerk check, because a local stack runs on a development instance
-with no `clerk.` CNAME to check.
-
-### Sign-in Smoke
-
-The Sign-in Smoke signs in through the real Clerk form, so its target must be
-built and run with Clerk **development** keys, and its database must be a
-fresh, seeded one with no owner: the check promotes its user to owner there. It
-refuses a database that is not local. `SMOKE_SIGN_IN_EMAIL` must be a
-`+clerk_test` user of the instance those keys belong to, which may not be the
-one CI uses ([local-docker.md](local-docker.md#which-clerk-instance-is-which)),
-and `SMOKE_FAILURE_SCREENSHOT` optionally
-names a file for a screenshot of the page when it fails:
-
-```sh
-SMOKE_BASE_URL=http://localhost:8080 \
-  SMOKE_SIGN_IN_EMAIL=someone+clerk_test@example.com \
-  SMOKE_DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
-  SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:sign-in
-```
-
-[pipeline.md](pipeline.md#the-image-smoke) has the steps CI uses to
-prepare that target.
 
 ## Before a pull request
 

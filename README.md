@@ -45,7 +45,9 @@ docker compose run --rm test
   [docs/schema-changes.md](docs/schema-changes.md) records what a push prompts, and
   [docs/first-deploy.md](docs/first-deploy.md) stands a Deployment up from
   nothing.
-- [docs/testing.md](docs/testing.md): the test layers and smoke checks.
+- [docs/code-checks.md](docs/code-checks.md) and
+  [docs/smoke-checks.md](docs/smoke-checks.md): checks on the code and on a
+  running site.
 - [docs/adr/](docs/adr/): architecture decision records.
 
 ## Stack
@@ -95,7 +97,7 @@ images override them.
   sign-in. The Deployment runs on a Clerk production instance at
   `clerk.welltutored.co.uk`, with no Frontend API proxy.
 - Integration tests need a separate `TEST_DATABASE_URL`, never the same as
-  `DATABASE_URL` — see [docs/testing.md](docs/testing.md).
+  `DATABASE_URL` — see [docs/code-checks.md](docs/code-checks.md).
 
 ## Deploying
 

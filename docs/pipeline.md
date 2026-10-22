@@ -61,10 +61,10 @@ flowchart TB
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](#by-hand) |
-| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#sign-in-smoke)) |
+| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
+| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | [launch-smoke-check.md](launch-smoke-check.md) |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -95,7 +95,7 @@ deployed URL.
 
 It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
 `DATABASE_URL`, and makes a temporary local cluster when none is supplied;
-[testing.md](testing.md#api-server) has the rules.
+[code-checks.md](code-checks.md#api-server) has the rules.
 
 ## GitHub Actions
 
@@ -148,7 +148,7 @@ on `main`.
    user, which Clerk signs in with the code `424242` and never emails. The
    first sign-in creates a pending account, so it promotes that account to
    owner in the job's database (the guarded update from
-   [workspace-owner-bootstrap.md](workspace-owner-bootstrap.md)) and links it
+   [first-deploy.md](first-deploy.md#owner)) and links it
    to a seeded Tutor. Then it signs in again, saves a profile edit, publishes
    a Resource, and checks that the Resource's public page is Not Found while
    Resources are hidden. Once it has run reliably for a couple of weeks, it
@@ -157,31 +157,8 @@ on `main`.
 The image it checks is not the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
 against keeping the Clerk instances separate. So this checks the image's
-recipe, not the exact image.
-
-### By hand
-
-The `prod` compose service runs the production image against the local
-development database, which has seed content:
-
-```
-docker compose up --build prod      # http://localhost:8081
-```
-
-That covers the two things most likely to be wrong — whether the frontend is
-actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
-deploying anything. Run the development smoke against it over the compose
-network:
-
-```
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
-```
-
-It requests every public page with `Accept: text/html`, which is what caught the
-Clerk handshake redirect in
-[ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
-and `smoke:sign-in` need a Chromium these images do not carry
-([launch-smoke-check.md](launch-smoke-check.md#the-enquiry-browser-check)).
+recipe, not the exact image. To run it by hand, see
+[smoke-checks.md](smoke-checks.md#the-image-smoke-by-hand).
 
 ## Credentials
 
@@ -254,8 +231,8 @@ It does **not** apply the schema. That is
 ## Post-deploy validation
 
 The deploy job finishes by running the launch smoke against the live site
-([launch-smoke-check.md](launch-smoke-check.md) has the command). CI also sets
-`SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
+([smoke-checks.md](smoke-checks.md#the-launch-smoke) has the command). CI also
+sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
 checks that each redirects to the Public Origin.
 
 A successful Deploy does not mean a usable Deployment, which is why this runs
