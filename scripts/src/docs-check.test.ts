@@ -5,9 +5,11 @@ import { test } from "node:test";
 import {
   checkDocumentation,
   extractDocumentedCommands,
+  extractDocumentedPaths,
   extractLocalLinks,
   extractWorkflowCommands,
   validateDocumentedCommands,
+  validateDocumentedPaths,
   validateLocalLinks,
   validateOpeningLine,
   validateWorkflowCommands,
@@ -282,6 +284,53 @@ test("accepts prose that starts with inline HTML or follows a comment", () => {
   }
 });
 
+test("extracts file paths from inline code, skipping routes, identifiers and fences", () => {
+  const paths = extractDocumentedPaths(
+    [
+      "The router is `routes/workspace.ts`, served at `/workspace`.",
+      "Import from `zod/v4`; the host is `welltutored.co.uk`; see `*.yml`.",
+      "```sh",
+      "cat `missing.ts`",
+      "```",
+      "Build with `docker/Dockerfile.dev`.",
+    ].join("\n"),
+    "docs/architecture.md",
+    new Set(["ts", "dev", "yml"]),
+  );
+
+  assert.deepEqual(paths, [
+    { filePath: "docs/architecture.md", lineNumber: 1, path: "routes/workspace.ts" },
+    { filePath: "docs/architecture.md", lineNumber: 6, path: "docker/Dockerfile.dev" },
+  ]);
+});
+
+test("validates file paths by their end, on whole segments, with an allowlist", () => {
+  const errors = validateDocumentedPaths(
+    [
+      { filePath: "docs/architecture.md", lineNumber: 1, path: "routes/workspace.ts" },
+      { filePath: "docs/architecture.md", lineNumber: 2, path: "README.md" },
+      { filePath: "docs/architecture.md", lineNumber: 3, path: "routes/missing.ts" },
+      { filePath: "docs/architecture.md", lineNumber: 4, path: "workspace.ts" },
+      { filePath: "docs/local-docker.md", lineNumber: 5, path: ".env.local" },
+    ],
+    ["README.md", "artifacts/api-server/src/routes/my-workspace.ts", "artifacts/api-server/src/routes/workspace.ts"],
+    new Set([".env.local"]),
+  );
+
+  assert.deepEqual(errors, [
+    'docs/architecture.md:3: "routes/missing.ts" names a file, but no file in the repository ends with that path.',
+  ]);
+
+  assert.deepEqual(
+    validateDocumentedPaths(
+      [{ filePath: "docs/architecture.md", lineNumber: 1, path: "workspace.ts" }],
+      ["artifacts/api-server/src/routes/my-workspace.ts"],
+      new Set(),
+    ),
+    ['docs/architecture.md:1: "workspace.ts" names a file, but no file in the repository ends with that path.'],
+  );
+});
+
 test("all currently documented pnpm commands match the repository scripts", () => {
   const repositoryRoot = resolve(
     dirname(fileURLToPath(import.meta.url)),
@@ -290,4 +339,5 @@ test("all currently documented pnpm commands match the repository scripts", () =
   const result = checkDocumentation(repositoryRoot);
   assert.deepEqual(result.errors, []);
   assert.ok(result.commands.length > 0);
+  assert.ok(result.paths.length > 0);
 });

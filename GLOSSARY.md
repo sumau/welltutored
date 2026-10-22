@@ -117,3 +117,9 @@ The check, before merge, that a person can sign in through the real Clerk form,
 using the development instance, and use the Workspace. Differences between the
 development and production Clerk instances are outside it.
 _Avoid_: Auth test, login check
+
+**Docs Check**:
+The check, before merge, that the docs' mechanical claims hold: commands they
+name exist, links resolve, and files they name are in the repo. It blocks the
+build.
+_Avoid_: Docs lint, link check
