@@ -64,8 +64,7 @@ The command exits non-zero on any failed check.
 on, separated by commas or spaces. Each one must answer
 `/enquire?smoke=redirect` with a `301` whose `Location` is the same path and
 query on `SMOKE_BASE_URL`. A `302`, a page served in place, or a redirect that
-drops the path fails the check. Its entries are validated before any request,
-like the target: each must be a bare origin, and none may be the target itself.
+drops the path fails the check.
 
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \
@@ -107,25 +106,10 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 
 ### Timeout controls
 
-The smoke check applies a timeout to each request and an overall deadline to
-the complete check:
-
-- `SMOKE_TIMEOUT_MS` — per-request timeout. Defaults to `15000` ms and accepts
-  integer values from `100` through `60000` ms.
-- `SMOKE_TOTAL_TIMEOUT_MS` — overall launch-check timeout. Defaults to `60000`
-  ms and accepts integer values from `1000` through `300000` ms.
-
-When a target is intentionally slower, override the relevant values for that
-run. Increase the overall timeout as well if the complete sequence needs more
-time:
-
-```sh
-SMOKE_TIMEOUT_MS=30000 SMOKE_TOTAL_TIMEOUT_MS=120000 pnpm smoke:launch
-```
-
-These controls do not disable the checks or allow requests to continue past the
-overall deadline. Values outside the supported ranges, or values that are not
-whole numbers of milliseconds, fail before requests are made.
+`SMOKE_TIMEOUT_MS` limits each request and `SMOKE_TOTAL_TIMEOUT_MS` the whole
+check, in milliseconds. Raise them for a target that is slow on purpose. The
+defaults and accepted ranges are in `scripts/src/smoke-check.ts`, which rejects
+a value outside them before making any request.
 
 ### When it fails
 
@@ -167,15 +151,14 @@ It requests every public page with `Accept: text/html`, which is what caught the
 Clerk handshake redirect in
 [ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
 and `smoke:sign-in` need a Chromium these images do not carry, so they run from
-the host. [pipeline.md](pipeline.md#the-image-smoke) has the steps CI takes.
+the host. The `image-smoke` job in `.github/workflows/ci.yml` has the steps CI
+takes.
 
 ## The enquiry browser check
 
-The enquiry form also has a real-browser keyboard smoke check. It traverses the
-form with native Tab and Enter actions, and checks validation recovery,
-disabled-submit behavior, announced network errors, retry, the success receipt,
-and a tutor preselected from their profile. It intercepts the final response,
-so the check never creates a real [Enquiry](../GLOSSARY.md#the-public-site).
+The enquiry form also has a real-browser check that goes through it by
+keyboard alone. It intercepts the final response, so the check never creates a
+real [Enquiry](../GLOSSARY.md#the-public-site).
 
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \
@@ -206,5 +189,5 @@ SMOKE_BASE_URL=http://localhost:8080 \
   SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:sign-in
 ```
 
-[pipeline.md](pipeline.md#the-image-smoke) has the steps CI uses to prepare
-that target.
+The `image-smoke` job in `.github/workflows/ci.yml` prepares that target the
+same way.

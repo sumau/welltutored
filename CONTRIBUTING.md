@@ -62,18 +62,9 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   with `--frozen-lockfile`. `package.json` pins `packageManager`, and
   `docker/Dockerfile.dev` pins the matching pnpm; change them together or the
   deploy fails on a lockfile it did not expect.
-- **Documentation is validated.** `pnpm run docs:check` parses `README.md`,
-  this file, `GLOSSARY.md`, everything under `docs/`, and the `run:` steps of
-  `.github/workflows/*.yml`. It fails when a `pnpm` command names a script that
-  does not exist, a local link or its `#anchor` does not resolve, a file named
-  in backticks is not in the repository, or a doc does not open with a line
-  saying who it is for. A short path such as `routes/workspace.ts` counts when some file's path
-  ends with it. It also reads the code, skipping tests and generated code, and
-  fails when the code reads an environment variable by name that
-  [docs/configuration.md](docs/configuration.md) does not name, or when a code,
-  config or workflow comment names a doc, or a doc's heading, that does not
-  exist. It runs as part of `pnpm run build`, so a broken doc breaks the
-  deployment build.
+- **Documentation is validated.** The
+  [Docs Check](docs/code-checks.md#the-docs-check) runs as part of
+  `pnpm run build`, so a broken doc breaks the deployment build.
 
 ## Schema changes
 
