@@ -24,9 +24,11 @@ Done when you hold the list of doc paths, the commit, and what the gate verifies
 
 ### 2. Check each doc
 
-Dispatch one subagent per doc in scope, all in parallel. Give each the doc's path, the glossary's path, what the gate verifies, and **The per-doc brief** and **Repository settings** below, pasted in full: the subagent has no other access to them.
+Dispatch the checking to subagents, all in one message so they run in parallel, each with `model: sonnet`. The slowest subagent sets how long the review takes, so keep each one's share small: a doc over about 800 words is split at its `## ` headings into parts of roughly that size, and each part gets its own subagent; shorter docs get one each.
 
-Done when every doc in scope has returned its list.
+Give each subagent the doc's path, the line range it checks (it reads the whole doc for context), the glossary's path, what the gate verifies, and **The per-doc brief** and **Repository settings** below, pasted in full: the subagent has no other access to them.
+
+Done when every part of every doc in scope has returned its list.
 
 ### 3. Expand from each false claim
 
@@ -48,7 +50,7 @@ Write the report in the session, in the format under **The report**, then stop. 
 
 ## The per-doc brief
 
-> Read `<doc>` line by line and extract every **claim**: a statement about what the code, the configuration, the repository's settings or the running system does or is. Table rows, list items, a command with its stated effect, and each node and arrow of a Mermaid diagram are claims. A hedged claim ("for now", "not blocking yet", "usually") is still a claim: "hidden for now" is false once the thing is shown.
+> Read `<doc>`, lines `<range>`, line by line, and extract every **claim**: a statement about what the code, the configuration, the repository's settings or the running system does or is. Table rows, list items, a command with its stated effect, and each node and arrow of a Mermaid diagram are claims. A hedged claim ("for now", "not blocking yet", "usually") is still a claim: "hidden for now" is false once the thing is shown.
 >
 > Skip **historical** statements, which record what happened ("#55 did exactly that in rehearsal", a captured prompt with what was answered). They stay true when the code moves on. A sentence that uses the past to explain a current rule still states that rule, and the rule is a claim.
 >
