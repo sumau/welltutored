@@ -54,6 +54,14 @@ Both need `?sslmode=require` appended: `lib/db/src/index.ts` builds a bare `pg`
 pool from `DATABASE_URL` and sets no SSL options of its own, so without it the
 connection is refused.
 
+Nothing in the application is Neon-specific — it is a `DATABASE_URL` and
+nothing more — so any hosted PostgreSQL substitutes, with the pooled/direct
+distinction being whatever that provider's equivalent is. Fly's own Postgres
+offerings were deliberately not chosen: the managed one is private-network
+only, so every command run from a checkout would need a proxy in front of it,
+and the unmanaged one is something Fly's documentation says they cannot
+support.
+
 ## Clerk keys
 
 Which keys work depends on the hostname, and getting this wrong is the most
@@ -113,8 +121,8 @@ fly secrets set \
 
 The connection string is read as `POOLED_DATABASE_URL`, not `DATABASE_URL`, so
 it cannot be confused with the `DIRECT_DATABASE_URL` you read for
-[schema work](deploy.md#applying-the-schema). They are different strings: this one is
-the **pooled** endpoint the application runs against, the other is the
+[schema work](deploy.md#applying-the-schema). They are different strings: this
+one is the **pooled** endpoint the application runs against, the other is the
 **direct** endpoint for DDL. Passing the direct one here works and then quietly
 costs you connection pooling in production.
 

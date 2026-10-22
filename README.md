@@ -5,9 +5,9 @@ resources, and send named-tutor enquiries. Tutors maintain their profiles and
 resources in a private workspace.
 
 The public site presents women tutors, their expertise and availability, and a
-library of tutor-written learning resources. Visitors can open a tutor profile and submit a named-tutor enquiry.
-Approved workspace users manage tutor profiles, resources, and workspace
-accounts.
+library of tutor-written learning resources. Visitors can open a tutor profile
+and submit a named-tutor enquiry. Approved workspace users manage tutor
+profiles, resources, and workspace accounts.
 
 ## Quick start
 
@@ -101,8 +101,9 @@ images override them.
 
 **Merging to `main` ships.** CI deploys the container to Fly and then runs the
 launch smoke against it; nothing else deploys. `docker/Dockerfile` and
-`fly.toml` are the whole configuration, and
-[docs/deploy.md](docs/deploy.md) is the walkthrough.
+`fly.toml` are the whole configuration.
+[docs/deploy.md](docs/deploy.md) covers running the Deployment, and
+[docs/first-deploy.md](docs/first-deploy.md) standing one up from nothing.
 
 Schema changes are not part of that. Apply them yourself, before merging
 anything that expects them — [ADR-0002](docs/adr/0002-schema-by-deliberate-push.md).

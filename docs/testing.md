@@ -5,8 +5,10 @@ Node's built-in `node:test` runner and are executed with `tsx`; the web tests
 also use JSDOM where browser APIs are needed.
 
 The commands below run inside the containers: prefix them with
-`docker compose exec api` against a running stack. The full suite is
-`docker compose run --rm test` ([local-docker.md](local-docker.md#tests)).
+`docker compose exec api` against a running stack. The exception is the
+[Sign-in Smoke](#sign-in-smoke), which needs a Chromium the images do not
+carry. The full suite is `docker compose run --rm test`
+([local-docker.md](local-docker.md#tests)).
 
 ## Test suites
 

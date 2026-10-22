@@ -252,8 +252,9 @@ It does **not** apply the schema. That is
 ## Post-deploy validation
 
 The deploy job finishes by running the launch smoke against the live site
-([launch-smoke-check.md](launch-smoke-check.md) has the command). CI also sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the
-same run checks that each redirects to the Public Origin.
+([launch-smoke-check.md](launch-smoke-check.md) has the command). CI also sets
+`SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
+checks that each redirects to the Public Origin.
 
 A successful Deploy does not mean a usable Deployment, which is why this runs
 at all. The check fails if the site is unhealthy or redirects to another
