@@ -1,6 +1,6 @@
 # Deterministic repository verification, as defined by `pnpm run verify:ci`,
 # the Image Smoke against the production image, and then the deploy.
-# docs/ci-validation.md is the description of what each gate covers and why;
+# docs/pipeline.md is the description of what each gate covers and why;
 # this file only supplies the environment they need.
 #
 # No Clerk credentials for `verify`: the

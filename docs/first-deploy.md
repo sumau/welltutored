@@ -1,9 +1,11 @@
 # Standing up a Deployment
 
-How to stand a Deployment up from nothing: a new database, Fly app, domain and
-Clerk instance. The live Deployment already exists, so this is for rebuilding
-it or starting another. Running the live one — schema pushes, deploys and
-rollback — is [deploy.md](deploy.md).
+For whoever stands a [Deployment](../GLOSSARY.md#delivery) up from nothing: a
+new database, Fly app, domain, Clerk instance, content and first
+[Owner](../GLOSSARY.md#the-private-area). The live Deployment already exists, so
+this is for rebuilding it or starting another. Running the live one is
+[schema-changes.md](schema-changes.md) for schema pushes and
+[pipeline.md](pipeline.md) for deploys and rollback.
 
 ## In order
 
@@ -11,7 +13,7 @@ Each step has its own section below; this is the order they have to happen in.
 
 1. **[Database](#database)** — create the Neon project in London, take the
    pooled and direct connection strings.
-2. **[Apply the schema](deploy.md#applying-the-schema)** — from this checkout,
+2. **[Apply the schema](schema-changes.md#pushing)** — from this checkout,
    using the direct string. Nothing does this for you.
 3. **[Clerk keys](#clerk-keys)** — a development instance, because you do not
    control DNS for `*.fly.dev`.
@@ -20,11 +22,11 @@ Each step has its own section below; this is the order they have to happen in.
 5. **[Attach a domain](#attaching-a-custom-domain)**, then
    **[move to a production Clerk instance](#moving-to-a-production-clerk-instance)**.
 6. **Expect an empty site.** A fresh database has no tutors or resources — see
-   [Content](#content) — and no owner: run the
-   [owner bootstrap](workspace-owner-bootstrap.md#production-procedure).
+   [Content](#content) — and no Owner: [promote the first one](#owner).
 
-The image can be checked first without deploying: see the Image Smoke
-[by hand](ci-validation.md#by-hand).
+The image can be checked first without deploying: see the
+[Image Smoke](../GLOSSARY.md#delivery)
+[by hand](smoke-checks.md#the-image-smoke-by-hand).
 
 ## Database
 
@@ -48,7 +50,7 @@ interchangeable:
 - The **pooled** string is the application's. Set it as the `DATABASE_URL`
   secret on the Deployment.
 - The **direct** string is for schema work. Use it for the
-  [schema push](deploy.md#applying-the-schema).
+  [schema push](schema-changes.md#pushing).
 
 Both need `?sslmode=require` appended: `lib/db/src/index.ts` builds a bare `pg`
 pool from `DATABASE_URL` and sets no SSL options of its own, so without it the
@@ -121,7 +123,7 @@ fly secrets set \
 
 The connection string is read as `POOLED_DATABASE_URL`, not `DATABASE_URL`, so
 it cannot be confused with the `DIRECT_DATABASE_URL` you read for
-[schema work](deploy.md#applying-the-schema). They are different strings: this
+[schema work](schema-changes.md#pushing). They are different strings: this
 one is the **pooled** endpoint the application runs against, the other is the
 **direct** endpoint for DDL. Passing the direct one here works and then quietly
 costs you connection pooling in production.
@@ -161,7 +163,7 @@ visitor in the JavaScript. The three secrets above are the opposite case and
 must never appear in this file.
 
 **`TRUSTED_ORIGINS` must match the deployed hostname exactly** — see the
-[configuration reference](deploy.md#configuration-reference).
+[configuration reference](configuration.md).
 
 After that, merging to `main` deploys. `fly deploy` from a checkout still works
 and is how you would ship a first image before any of this is merged.
@@ -195,8 +197,9 @@ attached, with `www.welltutored.co.uk`, `welltutored.com` and
 
 In this order, so the server's keys and the bundle's key change in one deploy:
 
-1. In the Clerk dashboard, create a production instance for the Public Origin's
-   domain, cloning the development instance's settings.
+1. In the Clerk dashboard, create a production instance for the
+   [Public Origin](../GLOSSARY.md#delivery)'s domain, cloning the development
+   instance's settings.
 2. Add the DNS records it lists (`clerk.`, `accounts.`, `clkmail.` and two
    DKIM records) in Cloudflare as **DNS only**, and wait until Clerk shows the
    domain verified and its certificates issued.
@@ -224,9 +227,10 @@ In this order, so the server's keys and the bundle's key change in one deploy:
 
 `ensureSeedContent()` only runs when `NODE_ENV=development`
 (`artifacts/api-server/src/index.ts`), so a fresh Deployment database has no
-tutors or resources and the public directory renders empty. Deploy empty and
-create content through `/workspace`. Two things behave differently until there
-is a published Tutor, and neither is a fault:
+tutors or resources and the public directory renders empty.
+[Deploy](../GLOSSARY.md#delivery) empty and create content through `/workspace`.
+Two things behave differently until there is a published
+[Tutor](../GLOSSARY.md#the-public-site), and neither is a fault:
 
 - The directory renders its empty state, and `/api/tutors` returns an empty
   list.
@@ -234,7 +238,7 @@ is a published Tutor, and neither is a fault:
   that Tutor's profile page, and so does the deploy job's Launch smoke step,
   which runs it. `--allow-empty` waives exactly those assertions; everything
   that does not depend on content still runs
-  ([launch-smoke-check.md](launch-smoke-check.md#waivers)). Run it by hand
+  ([smoke-checks.md](smoke-checks.md#waivers)). Run it by hand
   while the Deployment is empty, and drop it once there is a published Tutor:
 
   ```
@@ -242,3 +246,58 @@ is a published Tutor, and neither is a fault:
     SMOKE_CLERK_FRONTEND_API=https://clerk.welltutored.co.uk \
     pnpm run smoke:launch --allow-empty
   ```
+
+## Owner
+
+A new database has no Owner, and nothing creates one. The API creates a
+`pending` [Workspace Account](../GLOSSARY.md#the-private-area) the first time
+someone signs in with a verified primary email address, and only an Owner can
+approve it, so the first one is promoted by hand. This applies whenever a
+production database has no Owner: a first deploy, or a rebuild from empty. A
+local database is promoted the same way with a simpler command, in
+[local-docker.md](local-docker.md#signing-in-to-the-workspace).
+
+Approved on 2026-09-27 for the Deployment's first Owner, until an automated
+bootstrap replaces it ([#48](https://github.com/sumau/welltutored/issues/48)).
+It is a guarded update, run against the **direct** Neon connection string from
+a checkout. The person to promote must first sign in once at the Public Origin,
+because the pending record is written on first sign-in and not before.
+
+```
+read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
+docker compose run --rm -T -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
+  -lc 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v email=you@example.com' <<'SQL'
+\conninfo
+UPDATE workspace_accounts
+SET role = 'owner', updated_at = NOW()
+WHERE lower(email) = lower(:'email')
+  AND role = 'pending'
+  AND NOT EXISTS (SELECT 1 FROM workspace_accounts WHERE role = 'owner')
+RETURNING id, email, role;
+SQL
+```
+
+Read the `\conninfo` line: it must name the Neon host. `UPDATE 1` with the
+Owner's row means it worked. `UPDATE 0` means a guard held: no pending row for
+that email (sign in first), or an Owner already exists. Sign out and back in to
+see the Owner's [Workspace](../GLOSSARY.md#the-private-area), where they approve
+everyone else.
+
+### Safety rules
+
+For whoever automates this ([#48](https://github.com/sumau/welltutored/issues/48)):
+
+- Run this against a local database, or against production under the
+  procedure above; no other production use is approved.
+- Do not add automatic owner elevation to server startup or normal login
+  handling.
+- Do not run the update if an Owner already exists.
+- Do not change an existing Owner through this bootstrap step.
+
+### Database recovery
+
+Recreating a database removes all account roles, tutor assignments, content,
+and enquiries. Clerk users remain separate from the database, but their
+Workspace Account records must be recreated. After the schema and deployment
+configuration are restored, repeat the procedure above for the intended Owner,
+then use the normal Workspace approval flow.

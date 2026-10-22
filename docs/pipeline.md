@@ -1,6 +1,9 @@
-# CI and deploy validation
+# Pipeline
 
-What checks a change, when, and what blocks, from pull request to live site:
+For whoever wants to know what happens between a pull request and the live
+site, or why a check went red: every check, where it runs and what blocks, and
+how a deploy switches over, fails or is rolled back.
+Each check, from pull request to live site:
 
 ```mermaid
 flowchart TB
@@ -59,10 +62,10 @@ flowchart TB
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](#by-hand) |
-| Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#sign-in-smoke)) |
-| Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | [launch-smoke-check.md](launch-smoke-check.md) |
+| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
+| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -82,7 +85,8 @@ This command runs, in order:
    lifecycle integration tests.
 5. Well Tutored web tests.
 6. Smoke-check tests.
-7. `pnpm run build`, which checks documented commands, type-checks libraries
+7. `pnpm run build`, which runs the docs check
+   ([code-checks.md](code-checks.md#repository-scripts)), type-checks libraries
    and workspace packages, and builds the packages that define a build script.
 8. The CSS budget, which fails when the built primary stylesheet outgrows the
    limits in `artifacts/welltutored/scripts/verify-css-build.mjs`.
@@ -93,7 +97,7 @@ deployed URL.
 
 It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
 `DATABASE_URL`, and makes a temporary local cluster when none is supplied;
-[testing.md](testing.md#api-server) has the rules.
+[code-checks.md](code-checks.md#api-server) has the rules.
 
 ## GitHub Actions
 
@@ -119,7 +123,8 @@ one place.
 `docs:check` also reads this workflow's `run:` steps and validates the `pnpm`
 scripts they name, so a renamed script cannot reach a deploy job that calls it.
 
-Only the Image Smoke job has Clerk credentials, for the reasons below.
+Only the [Image Smoke](../GLOSSARY.md#delivery) job has Clerk credentials, for
+the reasons below.
 
 ## The Image Smoke
 
@@ -146,7 +151,7 @@ on `main`.
    user, which Clerk signs in with the code `424242` and never emails. The
    first sign-in creates a pending account, so it promotes that account to
    owner in the job's database (the guarded update from
-   [workspace-owner-bootstrap.md](workspace-owner-bootstrap.md)) and links it
+   [first-deploy.md](first-deploy.md#owner)) and links it
    to a seeded Tutor. Then it signs in again, saves a profile edit, publishes
    a Resource, and checks that the Resource's public page is Not Found while
    Resources are hidden. Once it has run reliably for a couple of weeks, it
@@ -155,31 +160,8 @@ on `main`.
 The image it checks is not the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
 against keeping the Clerk instances separate. So this checks the image's
-recipe, not the exact image.
-
-### By hand
-
-The `prod` compose service runs the production image against the local
-development database, which has seed content:
-
-```
-docker compose up --build prod      # http://localhost:8081
-```
-
-That covers the two things most likely to be wrong — whether the frontend is
-actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
-deploying anything. Run the development smoke against it over the compose
-network:
-
-```
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
-```
-
-It requests every public page with `Accept: text/html`, which is what caught the
-Clerk handshake redirect in
-[ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
-and `smoke:sign-in` need a Chromium these images do not carry
-([launch-smoke-check.md](launch-smoke-check.md#the-enquiry-browser-check)).
+recipe, not the exact image. To run it by hand, see
+[smoke-checks.md](smoke-checks.md#the-image-smoke-by-hand).
 
 ## Credentials
 
@@ -233,18 +215,20 @@ after merging an auth or Clerk change
 
 The `deploy` job in the same workflow runs only on a push to `main`, and only
 once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
-is what makes a failure in either stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
-runs the launch smoke against the live site.
+is what makes a failure in either stop a deploy. It checks out, installs
+`flyctl`, runs `flyctl deploy`, and then runs the launch smoke against the live
+site.
 
-The deploy is blue-green, switching only once the new machine passes the Health
-Check; [deploy.md](deploy.md#blue-green-deploys) covers what that catches,
-failures and rollback, and [ADR-0003](adr/0003-no-staging-environment.md) why
-there is no staging environment in front of this.
+The deploy is [blue-green](#blue-green-deploys), switching only once the new
+machine passes the Health Check.
+[ADR-0003](adr/0003-no-staging-environment.md) is why there is no staging
+environment in front of this.
 
 It has its own `concurrency` group, without `cancel-in-progress`. The
 workflow-level group cancels superseded pull-request runs, which is right for
-verification and wrong for a deploy: a cancelled one leaves the Deployment
-wherever `flyctl` had got to. Deploys queue instead.
+verification and wrong for a deploy: a cancelled one leaves the
+[Deployment](../GLOSSARY.md#delivery) wherever `flyctl` had got to. Deploys
+queue instead.
 
 It does **not** apply the schema. That is
 [ADR-0002](adr/0002-schema-by-deliberate-push.md), and it is the point.
@@ -252,9 +236,9 @@ It does **not** apply the schema. That is
 ## Post-deploy validation
 
 The deploy job finishes by running the launch smoke against the live site
-([launch-smoke-check.md](launch-smoke-check.md) has the command). CI also sets
-`SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
-checks that each redirects to the Public Origin.
+([smoke-checks.md](smoke-checks.md#the-launch-smoke) has the command). CI also
+sets `SMOKE_REDIRECT_FROM` to the Deployment's other hostnames, so the same run
+checks that each redirects to the [Public Origin](../GLOSSARY.md#delivery).
 
 A successful Deploy does not mean a usable Deployment, which is why this runs
 at all. The check fails if the site is unhealthy or redirects to another
@@ -264,7 +248,56 @@ It runs without waivers, so it also asserts a published Tutor and that
 Tutor's profile page. **A red Launch smoke on a merge to `main` is a real
 failure**: an unhealthy site, a redirect to another origin, a broken public
 page, or published content that has gone missing. It is not something to wave
-through.
+through: [roll back](#rolling-back), or fix it on `main`.
+
+## Blue-green deploys
+
+`fly.toml` sets `strategy = "bluegreen"`. A deploy boots a new machine beside
+the current one, waits for it to pass the Health Check, moves traffic to it, and
+then destroys the old one. So a version that doesn't start, or can't reach the
+database, never takes traffic. The machine also gets a new ID on every deploy,
+so nothing may depend on one.
+
+`fly.toml` points Fly's health check at `/api/healthz`, the Health Check. It
+answers `200` only when the database answers a `SELECT 1` within 3 seconds, and
+`503` otherwise, so a wrong `DATABASE_URL` or an unreachable Neon takes the
+machine out of rotation. Fly then serves its own proxy error rather than the
+app's. That is accepted, since every page needs the database anyway. The 3
+seconds sit above Neon's wake-from-suspend time and below the check's 5-second
+`timeout`.
+
+What blue-green does **not** catch: broken pages, a missing Tutor, or code that
+doesn't match the live schema, which still answers `SELECT 1`. Those surface in
+the [Launch Smoke](../GLOSSARY.md#delivery), which runs after the switch,
+against the version visitors already see.
+
+## A failed deploy
+
+A failed deploy is a red `Deploy to Fly` step. `flyctl` reports the new
+machine failing its checks, and the old machine keeps serving the previous
+version. Run `fly machines list` afterwards: if a machine from the failed
+attempt is still there, destroy it with `fly machines destroy <id> --force`.
+
+## Rolling back
+
+A deploy that passes but breaks the site is a red Launch smoke after a green
+`Deploy to Fly`. The new version is live, and nothing rolls it back by itself.
+To go back to the previous image:
+
+```
+fly releases --image          # the image reference of each release
+fly deploy --image <previous image reference>
+```
+
+Run it from a checkout of `main`, since it still reads `fly.toml` from there.
+Then revert the change on `main`, or the next merge ships it again.
+
+**Rolling back past a schema push is only safe if the push was additive.** The
+schema is pushed before merge ([ADR-0002](adr/0002-schema-by-deliberate-push.md)),
+so the previous image runs against the new schema. A new nullable column or
+table is fine. A renamed or dropped column breaks the old code too, and the
+rollback then means pushing the old schema back by hand
+([schema-changes.md](schema-changes.md)).
 
 ## Why separate gates
 

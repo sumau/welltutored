@@ -1,6 +1,5 @@
 # Production image: one container serving the built frontend and the API on a
-# single origin. See
-# docs/deploy.md.
+# single origin. See docs/pipeline.md for how it is checked and deployed.
 #
 # Build from the repository root, not from docker/:
 #   docker build -f docker/Dockerfile --build-arg VITE_CLERK_PUBLISHABLE_KEY=pk_... -t welltutored .

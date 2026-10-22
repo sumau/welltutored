@@ -96,7 +96,7 @@ async function signOut(page: Page, timeoutMs: number) {
   });
 }
 
-// The guarded update from docs/workspace-owner-bootstrap.md, then a link to an
+// The guarded update from docs/first-deploy.md#owner, then a link to an
 // unassigned published Tutor: a profile to edit, and a Resource needs one.
 async function promoteToOwner(databaseUrl: string, email: string) {
   const client = new pg.Client({ connectionString: databaseUrl });

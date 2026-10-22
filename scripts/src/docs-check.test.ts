@@ -9,6 +9,7 @@ import {
   extractWorkflowCommands,
   validateDocumentedCommands,
   validateLocalLinks,
+  validateOpeningLine,
   validateWorkflowCommands,
   type PackageManifestRecord,
 } from "./docs-check.js";
@@ -103,29 +104,29 @@ test("reports missing packages and scripts with documentation locations", () => 
 test("extracts local Markdown links while ignoring anchors and external URLs", () => {
   const links = extractLocalLinks(
     [
-      "[testing guide](testing.md)",
-      "[specific section](testing.md#smoke-checks)",
+      "[code checks](code-checks.md)",
+      "[specific section](code-checks.md#api-server)",
       "[outside](../CONTRIBUTING.md)",
       "[anchor only](#overview)",
       "[website](https://example.test/docs)",
       "[protocol-relative](//example.test/docs)",
     ].join("\n"),
-    "docs/ci-validation.md",
+    "docs/pipeline.md",
   );
 
   assert.deepEqual(links, [
     {
-      filePath: "docs/ci-validation.md",
+      filePath: "docs/pipeline.md",
       lineNumber: 1,
-      target: "testing.md",
+      target: "code-checks.md",
     },
     {
-      filePath: "docs/ci-validation.md",
+      filePath: "docs/pipeline.md",
       lineNumber: 2,
-      target: "testing.md#smoke-checks",
+      target: "code-checks.md#api-server",
     },
     {
-      filePath: "docs/ci-validation.md",
+      filePath: "docs/pipeline.md",
       lineNumber: 3,
       target: "../CONTRIBUTING.md",
     },
@@ -137,17 +138,17 @@ test("validates local link existence and repository boundaries", () => {
   const errors = validateLocalLinks(
     [
       {
-        filePath: "docs/ci-validation.md",
+        filePath: "docs/pipeline.md",
         lineNumber: 10,
-        target: "testing.md",
+        target: "code-checks.md",
       },
       {
-        filePath: "docs/ci-validation.md",
+        filePath: "docs/pipeline.md",
         lineNumber: 11,
         target: "missing.md#section",
       },
       {
-        filePath: "docs/ci-validation.md",
+        filePath: "docs/pipeline.md",
         lineNumber: 12,
         target: "../../outside.md",
       },
@@ -156,8 +157,8 @@ test("validates local link existence and repository boundaries", () => {
   );
 
   assert.deepEqual(errors, [
-    'docs/ci-validation.md:11: local link "missing.md#section" resolves to "docs/missing.md", but that path was not found.',
-    'docs/ci-validation.md:12: local link "../../outside.md" resolves outside the repository.',
+    'docs/pipeline.md:11: local link "missing.md#section" resolves to "docs/missing.md", but that path was not found.',
+    'docs/pipeline.md:12: local link "../../outside.md" resolves outside the repository.',
   ]);
 });
 
@@ -223,6 +224,62 @@ test("validates the pnpm scripts a workflow runs", () => {
   assert.deepEqual(errors, [
     '.github/workflows/ci.yml:5: "pnpm run missing" references script "missing" in "package.json", but that script was not found.',
   ]);
+});
+
+test("accepts a guide that opens with prose after its title", () => {
+  assert.deepEqual(
+    validateOpeningLine(
+      ["# Smoke checks", "", "For whoever runs a smoke check.", "", "## The Launch Smoke"].join("\n"),
+      "docs/smoke-checks.md",
+    ),
+    [],
+  );
+});
+
+test("rejects a guide without a title or an opening line", () => {
+  assert.deepEqual(validateOpeningLine("Some prose.\n", "docs/untitled.md"), [
+    'docs/untitled.md:1: a guide starts with a "# " title.',
+  ]);
+
+  for (const opening of [
+    "## Usage",
+    "- a list",
+    "1. a step",
+    "1) a step",
+    "| a | table |",
+    "> a quote",
+    "```sh",
+    "~~~sh",
+    "    pnpm run build",
+    "---",
+    "![a diagram](diagram.svg)",
+    "<details>",
+  ]) {
+    assert.deepEqual(
+      validateOpeningLine(["# Guide", "", opening].join("\n"), "docs/guide.md"),
+      [
+        "docs/guide.md:3: the title is followed by a line of prose saying who the guide is for and when they would need it.",
+      ],
+      opening,
+    );
+  }
+
+  assert.deepEqual(validateOpeningLine("# Guide\n", "docs/guide.md"), [
+    "docs/guide.md:1: the title is followed by a line of prose saying who the guide is for and when they would need it.",
+  ]);
+
+  assert.deepEqual(validateOpeningLine(" \n", "docs/empty.md"), [
+    'docs/empty.md:1: a guide starts with a "# " title.',
+  ]);
+});
+
+test("accepts prose that starts with inline HTML or follows a comment", () => {
+  for (const lines of [
+    ["# Guide", "", "<abbr>CI</abbr> runs for whoever opens a pull request."],
+    ["# Guide", "<!-- generated -->", "", "For whoever runs a smoke check."],
+  ]) {
+    assert.deepEqual(validateOpeningLine(lines.join("\n"), "docs/guide.md"), [], lines.join("|"));
+  }
 });
 
 test("all currently documented pnpm commands match the repository scripts", () => {

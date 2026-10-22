@@ -8,7 +8,7 @@ what the project is and how to run it; this file covers how to change it.
 CI deploys to Fly on every push to `main` and then runs the launch smoke
 against the live site. There is no separate release step, so a merged pull
 request is a shipped one. Everything below follows from that.
-[docs/ci-validation.md](docs/ci-validation.md) shows every check between a pull
+[docs/pipeline.md](docs/pipeline.md) shows every check between a pull
 request and the live site, and which of them block.
 
 ## Plans and issues
@@ -25,8 +25,7 @@ Issues live in `sumau/welltutored` on GitHub.
   terms it settles in [GLOSSARY.md](GLOSSARY.md) and its decisions as ADRs.
   Its config is in [docs/agents/](docs/agents/).
 - Triage uses the labels `needs-triage`, `needs-info`, `ready-for-agent`,
-  `ready-for-human` and `wontfix`
-  ([docs/agents/triage-labels.md](docs/agents/triage-labels.md)).
+  `ready-for-human` and `wontfix`.
 
 ## Making a change
 
@@ -47,40 +46,42 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 ## Before opening a pull request
 
 - `docker compose run --rm test` is green. It runs the same suite as CI
-  ([docs/ci-validation.md](docs/ci-validation.md)).
+  ([docs/code-checks.md](docs/code-checks.md)).
 - For a UI or build change, click through the running app as well
   (`docker compose up api web`).
 - For a change to routing, public API responses, deployment configuration or
   the enquiry journey, also run the development smoke against the local stack
-  ([docs/testing.md](docs/testing.md#against-the-local-stack)).
+  ([docs/smoke-checks.md](docs/smoke-checks.md#against-the-local-stack)).
 - After merging a change that touches auth, Clerk or the `@clerk/*` versions,
-  sign in on `https://welltutored.co.uk` and open the Workspace. The Sign-in
-  Smoke uses the Clerk development instance, so this is the part CI can't
-  cover.
+  sign in on `https://welltutored.co.uk` and open the
+  [Workspace](GLOSSARY.md#the-private-area). The Sign-in Smoke uses the Clerk
+  development instance, so this is the part CI can't cover.
 - **The lockfile must stay stable.** CI and the deployment build both install
   with `--frozen-lockfile`. `package.json` pins `packageManager`, and
   `docker/Dockerfile.dev` pins the matching pnpm; change them together or the
   deploy fails on a lockfile it did not expect.
 - **Documentation is validated.** `pnpm run docs:check` parses `README.md`,
-  this file, everything under `docs/`, and the `run:` steps of
+  this file, `GLOSSARY.md`, everything under `docs/`, and the `run:` steps of
   `.github/workflows/*.yml`. It fails when a `pnpm` command names a script that
-  does not exist or a local link does not resolve. It runs as part of
-  `pnpm run build`, so a broken doc breaks the deployment build.
+  does not exist, a local link does not resolve, or a doc does not open with a
+  line saying who it is for. It runs as part of `pnpm run build`, so a broken
+  doc breaks the deployment build.
 
 ## Schema changes
 
 CI does not apply the schema. It is a deliberate `push` run by hand
 ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)), and
-[docs/deploy.md](docs/deploy.md#applying-the-schema) has the command.
+[docs/schema-changes.md](docs/schema-changes.md#pushing) has the command.
 
 - Push to production **before** merging anything that expects the new schema.
 - A merged pull request does not mean its push happened. Confirm the push
   before ticking its box or starting the next schema change.
 - Rehearse a push that touches existing rows (a rename, a dropped column, a new
-  constraint) on the local database, then on a Neon branch of the Deployment
-  ([docs/schema-push.md](docs/schema-push.md#rehearsing-a-push-on-a-neon-branch)).
+  constraint) on the local database, then on a Neon branch of the
+  [Deployment](GLOSSARY.md#delivery)
+  ([docs/schema-changes.md](docs/schema-changes.md#rehearsing-a-push-on-a-neon-branch)).
   Write what the push prompted, and what you answered, into
-  `docs/schema-push.md`.
+  `docs/schema-changes.md`.
 
 ## Secrets in instructions
 
