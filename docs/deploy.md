@@ -159,26 +159,3 @@ The public site does not need *working* Clerk keys, but it does need
 directory and enquiry flow both work and `/workspace` simply cannot be
 signed into. Pages themselves keep rendering either way, because the Clerk
 middleware is mounted under `/api` only.
-
-## Verifying the image locally
-
-The `prod` compose service runs the Deployment image against the local
-development database, which has seed content:
-
-```
-docker compose up --build prod      # http://localhost:8081
-```
-
-That covers the two things most likely to be wrong — whether the frontend is
-actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
-deploying anything. The launch smoke check runs against it over the compose
-network, and is the regression test for both:
-
-```
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
-```
-
-It requests every public page with `Accept: text/html`, which is what caught the
-Clerk handshake redirect in
-[ADR-0001](adr/0001-single-origin-deployment.md#consequences). The rest of the suite is unchanged:
-`docker compose run --rm test`, described in [local-docker.md](local-docker.md).

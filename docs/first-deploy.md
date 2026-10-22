@@ -23,8 +23,8 @@ Each step has its own section below; this is the order they have to happen in.
    [Content](#content) — and no owner: run the
    [owner bootstrap](workspace-owner-bootstrap.md#production-procedure).
 
-Everything can be rehearsed first without deploying: see [Verifying the image
-locally](deploy.md#verifying-the-image-locally).
+The image can be checked first without deploying: see the Image Smoke
+[by hand](ci-validation.md#by-hand).
 
 ## Database
 

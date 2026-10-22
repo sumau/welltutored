@@ -59,7 +59,7 @@ flowchart TB
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | `docker compose up --build prod`, then `smoke:dev` and `smoke:enquiry` with `SMOKE_BASE_URL=http://localhost:8081` |
+| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](#by-hand) |
 | Sign-in Smoke (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, Workspace opens, profile edit saves, Resource publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([testing.md](testing.md#launch-and-browser-smoke-checks)) |
 | Health Check (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
 | [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a Deploy | Published Tutor, pages, enquiry recovery, redirects, certificates, Clerk production instance | `smoke:launch` with `SMOKE_BASE_URL=https://welltutored.co.uk` |
@@ -167,6 +167,30 @@ again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
 against keeping the Clerk instances separate. So this checks the image's
 recipe, not the exact image.
 
+### By hand
+
+The `prod` compose service runs the production image against the local
+development database, which has seed content:
+
+```
+docker compose up --build prod      # http://localhost:8081
+```
+
+That covers the two things most likely to be wrong — whether the frontend is
+actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
+deploying anything. Run the development smoke against it over the compose
+network:
+
+```
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
+```
+
+It requests every public page with `Accept: text/html`, which is what caught the
+Clerk handshake redirect in
+[ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
+and `smoke:sign-in` need a Chromium these images do not carry
+([testing.md](testing.md#launch-and-browser-smoke-checks)).
+
 ## Credentials
 
 `pnpm run verify:ci` needs no Clerk credentials. The suite passes with
@@ -222,13 +246,10 @@ once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
 is what makes a failure in either stop a deploy. It checks out, installs `flyctl`, runs `flyctl deploy`, and then
 runs the launch smoke against the live site.
 
-The deploy is blue-green: the new machine takes traffic only once it passes the
-Health Check, `/api/healthz`, which needs the database to answer. So a version
-that won't start or can't reach the database fails the `Deploy to Fly` step and
-never goes live. Anything else surfaces in the launch smoke, after the switch.
-[deploy.md](deploy.md#blue-green-deploys) covers failures and rollback, and
-[ADR-0003](adr/0003-no-staging-environment.md) why there is no staging
-environment in front of this.
+The deploy is blue-green, switching only once the new machine passes the Health
+Check; [deploy.md](deploy.md#blue-green-deploys) covers what that catches,
+failures and rollback, and [ADR-0003](adr/0003-no-staging-environment.md) why
+there is no staging environment in front of this.
 
 It has its own `concurrency` group, without `cancel-in-progress`. The
 workflow-level group cancels superseded pull-request runs, which is right for
