@@ -84,8 +84,8 @@ against a running service, or see
 - `pnpm run prepare:test-database` — validate `TEST_DATABASE_URL` and apply the
   current schema to the dedicated integration-test database
 
-The Vite configs default each artifact's `PORT` and `BASE_PATH`; compose and the
-images override them.
+The Vite config defaults `PORT` and `BASE_PATH`; compose overrides `PORT`
+([docs/configuration.md](docs/configuration.md)).
 
 ## Architecture
 

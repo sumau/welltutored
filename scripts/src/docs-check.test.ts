@@ -6,10 +6,12 @@ import {
   checkDocumentation,
   extractDocumentedCommands,
   extractDocumentedPaths,
+  extractEnvironmentVariables,
   extractLocalLinks,
   extractWorkflowCommands,
   validateDocumentedCommands,
   validateDocumentedPaths,
+  validateEnvironmentVariables,
   validateLocalLinks,
   validateOpeningLine,
   validateWorkflowCommands,
@@ -333,6 +335,49 @@ test("validates file paths by their end, on whole segments, with an allowlist", 
   );
 });
 
+test("extracts the environment variables the code reads by name", () => {
+  const reads = extractEnvironmentVariables(
+    [
+      "const port = process.env.PORT ?? '8080';",
+      'const level = process.env["LOG_LEVEL"];',
+      "const {",
+      "  DATABASE_URL,",
+      "  NODE_ENV: mode = 'development',",
+      "  ...rest",
+      "} = process.env;",
+      "const value = process.env[key];",
+      "process.env.TRUSTED_ORIGINS = 'https://example.test';",
+      "if (process.env.CI === 'true') {}",
+      "const options = { ...process.env };",
+    ].join("\n"),
+    "lib/example.ts",
+  );
+
+  assert.deepEqual(reads, [
+    { filePath: "lib/example.ts", lineNumber: 1, name: "PORT" },
+    { filePath: "lib/example.ts", lineNumber: 2, name: "LOG_LEVEL" },
+    { filePath: "lib/example.ts", lineNumber: 3, name: "DATABASE_URL" },
+    { filePath: "lib/example.ts", lineNumber: 3, name: "NODE_ENV" },
+    { filePath: "lib/example.ts", lineNumber: 10, name: "CI" },
+  ]);
+});
+
+test("reports environment variables docs/configuration.md does not name", () => {
+  const errors = validateEnvironmentVariables(
+    [
+      { filePath: "lib/example.ts", lineNumber: 1, name: "PORT" },
+      { filePath: "lib/example.ts", lineNumber: 2, name: "BASE_PATH" },
+      { filePath: "lib/example.ts", lineNumber: 3, name: "LOG_LEVEL" },
+    ],
+    ["| `PORT` | runtime |", "", "LOG_LEVEL is mentioned, but not as code."].join("\n"),
+  );
+
+  assert.deepEqual(errors, [
+    'lib/example.ts:2: the code reads "BASE_PATH", but docs/configuration.md does not name it. Add it to the table, or to the paragraph on variables only the tooling reads.',
+    'lib/example.ts:3: the code reads "LOG_LEVEL", but docs/configuration.md does not name it. Add it to the table, or to the paragraph on variables only the tooling reads.',
+  ]);
+});
+
 test("all currently documented pnpm commands match the repository scripts", () => {
   const repositoryRoot = resolve(
     dirname(fileURLToPath(import.meta.url)),
@@ -342,4 +387,5 @@ test("all currently documented pnpm commands match the repository scripts", () =
   assert.deepEqual(result.errors, []);
   assert.ok(result.commands.length > 0);
   assert.ok(result.paths.length > 0);
+  assert.ok(result.environmentVariables.length > 0);
 });
