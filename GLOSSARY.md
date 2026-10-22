@@ -122,3 +122,9 @@ _Avoid_: Auth test, login check
 The check, before merge, that the docs' mechanical claims hold: the ones a
 parser can verify against the repository. It blocks the build.
 _Avoid_: Docs lint, link check
+
+**Docs Review**:
+Claude's reading of the docs against the code for statements the code no
+longer supports, run with `/docs-review`. It advises and never blocks; the Docs
+Check is the gate.
+_Avoid_: Docs audit, AI review

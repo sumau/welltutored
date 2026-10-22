@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: finds-planted-drift
+expected_outcome: |
+  Run in a clone of this repo after plant.sh has run at its root. plant.sh
+  plants six kinds of drift and commits them. The report finds each plant,
+  reports the unmentioned ruleset behind docs/pipeline.md's arrows into merge
+  under Unstated, leaves the historical #55 sentence in docs/schema-changes.md
+  alone, and lists no undocumented code that no claim depends on. The CLI
+  can't run this case as is, since it needs the whole repository.

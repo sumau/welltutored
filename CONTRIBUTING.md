@@ -18,7 +18,8 @@ Issues live in `sumau/welltutored` on GitHub.
 - A change that takes more than one pull request gets a tracking issue: the
   decisions, then a `- [ ]` checklist of steps, with steps only a human can do
   marked as such. Tick each box as its step lands on `main`, link the pull
-  requests, and close the issue when the last box is ticked.
+  requests, and close the issue when the last box is ticked. Before closing
+  it, run `/docs-review`, the [Docs Review](GLOSSARY.md#delivery).
 - Plans live in issues, not in `*-PLAN.md` files in the repo.
 - Plan each change with `/grill-with-docs` from the mattpocock-skills plugin,
   which [.claude/settings.json](.claude/settings.json) enables. It records the
@@ -37,6 +38,9 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   request when its base merges, so it can land on a branch instead of `main`.
   Wait for the previous one to merge, then branch from `main` again.
 - Use the terms in [GLOSSARY.md](GLOSSARY.md), and avoid the synonyms it lists.
+- A change keeps the docs true. If it makes a statement in the docs false,
+  update the statement in the same pull request, or add a docs item to the
+  plan's tracking issue.
 - Docs state the current rules and what they are for. History goes in issues
   and ADRs: an issue number is fine as a pointer, not as the story.
   Record a decision a reader will question as an ADR in
