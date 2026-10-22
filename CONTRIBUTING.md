@@ -20,6 +20,10 @@ Issues live in `sumau/welltutored` on GitHub.
   marked as such. Tick each box as its step lands on `main`, link the pull
   requests, and close the issue when the last box is ticked.
 - Plans live in issues, not in `*-PLAN.md` files in the repo.
+- Plan each change with `/grill-with-docs` from the mattpocock-skills plugin,
+  which [.claude/settings.json](.claude/settings.json) enables. It records the
+  terms it settles in [GLOSSARY.md](GLOSSARY.md) and its decisions as ADRs.
+  Its config is in [docs/agents/](docs/agents/).
 - Triage uses the labels `needs-triage`, `needs-info`, `ready-for-agent`,
   `ready-for-human` and `wontfix`
   ([docs/agents/triage-labels.md](docs/agents/triage-labels.md)).
@@ -33,7 +37,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 - Do not stack pull requests. GitHub does not always retarget a stacked pull
   request when its base merges, so it can land on a branch instead of `main`.
   Wait for the previous one to merge, then branch from `main` again.
-- Use the terms in [CONTEXT.md](CONTEXT.md), and avoid the synonyms it lists.
+- Use the terms in [GLOSSARY.md](GLOSSARY.md), and avoid the synonyms it lists.
   Record a decision a reader will question as an ADR in
   [docs/adr/](docs/adr/).
 - After changing `lib/api-spec/openapi.yaml`, run
