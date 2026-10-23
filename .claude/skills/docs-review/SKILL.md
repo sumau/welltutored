@@ -1,12 +1,14 @@
 ---
 name: docs-review
-description: Read the docs against the code and report the statements the code no longer supports. It advises; the Docs Check is the gate.
+description: Read the docs you name against the code and report the statements the code no longer supports. It advises; the Docs Check is the gate.
 disable-model-invocation: true
+model: sonnet
+argument-hint: "<doc>… | all"
 ---
 
 # Docs Review
 
-Read every doc in scope as a list of **claims**, check each one against the code and the repository's settings, and report what is false, what is true only because of something no doc names, and what can't be checked. The review changes no file and blocks nothing.
+Read the docs as a list of **claims**, check each claim against the code, and report what is false and what can't be checked. The review changes no file and blocks nothing.
 
 **Low recall is worse than false positives.** A false statement the review misses stays invisible; one it reports by mistake costs the reader a minute. When unsure whether a claim holds, report it with the evidence on both sides.
 
@@ -16,78 +18,64 @@ The method is borrowed from [2389-research/documentation-audit](https://github.c
 
 ### 1. Pin the inputs
 
-- Read `docs/agents/docs-review.md`: the docs in scope, the glossary, and the gate. If it is missing, stop and say so.
+- Read `docs/agents/docs-review.md`: the docs in scope and the gate. If it is missing, stop and say so.
+- Choose the docs from the argument: the paths named, or every doc in scope for `all`. With no argument, ask which and wait. A named doc outside the scope is still reviewed.
 - Record `git rev-parse --short HEAD`. If `git status --porcelain` prints anything, the review covers that commit plus the uncommitted changes, and the report says so.
-- Read the glossary, and the gate's own description of what it verifies.
+- Read the gate's own description of what it verifies.
 
-Done when you hold the list of doc paths, the commit, and what the gate verifies.
+Done when you hold the doc paths, the commit, and what the gate verifies.
 
-### 2. Check each doc
+### 2. Extract the claims
 
-Dispatch the checking to subagents, all in one message so they run in parallel, each with `model: sonnet`. The slowest subagent sets how long the review takes, so keep each one's share small: a doc over about 800 words is split at its `## ` headings into parts of roughly that size, and each part gets its own subagent; shorter docs get one each.
+Read each doc line by line and list every claim, opening no code. Follow **What is a claim** below. Give each claim:
 
-Give each subagent the doc's path, the line range it checks (it reads the whole doc for context), the glossary's path, what the gate verifies, and **The per-doc brief** and **Repository settings** below, pasted in full: the subagent has no other access to them.
+- the doc's `file:line` and the claim, quoted;
+- the **file** it is about: a path the sentence or its section names in backticks (the Docs Check guarantees these exist), or `none` when it names no file. A claim about several files goes under the one that would prove it.
 
-Done when every part of every doc in scope has returned its list.
+Done when every line of every chosen doc has been read and each claim has its file.
 
-### 3. Expand from each false claim
+### 3. Verify, one subagent per file
 
-A false claim usually has siblings. For each one, name its pattern (a renamed script, a changed default, a flag flipped, a check that now blocks) and `grep` every doc in scope for the same pattern. Verify each hit as the brief says.
+Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way.
 
-Done when every false claim's pattern has been searched across every doc.
+Dispatch every subagent in one message so they run in parallel. Give each the file, its claims, what the gate verifies, and **The verification brief** below, pasted in full: the subagent has no other access to it.
 
-### 4. Find contradictions
+Done when every group has returned its verdicts.
 
-Group the claims from all the lists by subject (a check, a setting, a command, an environment variable, a flow) and read each group side by side. Two docs that disagree are a Finding even when the code can't say which is right.
-
-### 5. Confirm
-
-Open the evidence for each Finding and Unstated item yourself: the cited `file:line` says what the item says it says. Drop an item only when its evidence is plainly wrong. A doubtful one stays, marked as doubtful.
-
-### 6. Report
+### 4. Report
 
 Write the report in the session, in the format under **The report**, then stop. The user chooses what to fix.
 
-## The per-doc brief
+## What is a claim
 
-> Read `<doc>`, lines `<range>`, line by line, and extract every **claim**: a statement about what the code, the configuration, the repository's settings or the running system does or is. Table rows, list items, a command with its stated effect, and each node and arrow of a Mermaid diagram are claims. A hedged claim ("for now", "not blocking yet", "usually") is still a claim: "hidden for now" is false once the thing is shown.
+A statement about what the code, the configuration or the running system does or is. Table rows, list items, a command with its stated effect, and each node and arrow of a Mermaid diagram are claims. A hedged claim ("for now", "not blocking yet", "usually") is still a claim: "hidden for now" is false once the thing is shown.
+
+- **Diagrams.** An arrow means what the diagram's legend says it means; with no legend, only the nodes and labels are claims.
+- **Historical** statements record what happened ("#55 did exactly that in rehearsal", a captured prompt with what was answered). They stay true when the code moves on, so they are not claims. A sentence that uses the past to explain a current rule still states that rule, and the rule is a claim.
+- **The gate** already proves what it verifies (a link resolves, a named file exists, a `pnpm` script exists). What the sentence says the file or script _does_ is still a claim.
+
+## The verification brief
+
+> Verify each claim below. Read the named file first and cite `file:line`; search the codebase only for what the file can't settle, or for a claim with no file. Read the code that does the thing: a matching name is not evidence.
 >
-> Skip **historical** statements, which record what happened ("#55 did exactly that in rehearsal", a captured prompt with what was answered). They stay true when the code moves on. A sentence that uses the past to explain a current rule still states that rule, and the rule is a claim.
->
-> The gate already proves what it verifies (a link resolves, a named file exists, a `pnpm` script exists), so skip that part; what the sentence says the file or script _does_ is still a claim.
->
-> Verify each claim against the source and cite `file:line`. Read the code that does the thing; a matching name is not evidence. Give each claim a verdict:
+> Give each claim a verdict:
 >
 > - **true**: the evidence supports it.
 > - **false**: the evidence contradicts it. Say whether the doc or the code looks wrong, and suggest replacement text.
-> - **unverifiable**: neither the repository nor the repository host's API can settle it. Say why.
+> - **unverifiable**: nothing in the repository settles it. Say why. A claim about how the repository host or another service is set up (which checks a merge waits for, which secrets exist, whether Dependabot runs) is unverifiable unless a file in the repository holds the setting. Make no API calls.
 >
-> **Diagrams.** An arrow means what the diagram's legend says it means. If the legend says a solid arrow means "the next step waits for this", find what makes the next step wait, and a dotted arrow means nothing waits. With no legend, check only the nodes and labels.
+> **Diagrams.** If the legend says a solid arrow means "the next step waits for this", find what makes the next step wait; a dotted arrow means nothing waits.
 >
-> **Repository settings are code.** A claim about how the repository is set up (which checks a merge waits for, which secrets exist, whether Dependabot runs) is checked against the host's API, as **Repository settings** says.
+> **Contradictions.** Two claims in your list that disagree are a finding even when the code can't say which is right. Quote both.
 >
-> **Glossary.** Report a word from a glossary _Avoid_ list used for the concept that entry names, and a glossary term used for something other than its definition. An _Avoid_ word used for a different concept ("message" for a log line) is fine.
->
-> **Unstated.** For each true claim, ask what makes it true. When it holds only because of something no doc in scope names (a setting, a file, a coupling such as a job name the host matches on), report it as Unstated: the claim, what it depends on with evidence, and where a sentence naming it could go. Report a dependency only behind a claim you checked; code and settings that no claim depends on are out of scope.
->
-> Return every false and unverifiable claim and every Unstated item, each with the doc's `file:line` and the claim quoted, plus a count of the true claims. Report truth only: style, structure and length are out of scope.
-
-## Repository settings
-
-Read a setting only because a claim names it or depends on it. Settings are read with `gh api` on GitHub; if `gh auth status` fails, every settings claim is Unverifiable.
-
-- **What a merge waits for.** Read both the rulesets in force, `repos/{owner}/{repo}/rules/branches/<default>`, and classic protection, `repos/{owner}/{repo}/branches/<default>/protection`; a check is required if either requires it. Classic protection answering 404 "Branch not protected" means there is none. A required check matches a workflow job by its `name:`, so compare the names.
-- **Secrets.** `repos/{owner}/{repo}/actions/secrets` lists their names.
-- **Dependabot.** `.github/dependabot.yml` configures version updates. Security updates are settings: `repos/{owner}/{repo}/vulnerability-alerts` (204 means on) and `repos/{owner}/{repo}/automated-security-fixes`.
-
-Any other refused call (403, or a 404 GitHub also gives when the token can't see the setting) makes the claim Unverifiable, never false. Settings held by other services (hosting, database, auth) are Unverifiable unless a file in the repository holds them.
+> Return every false claim, every contradiction and every unverifiable claim, each with the doc's `file:line` and the claim quoted, plus a count of the true claims.
 
 ## The report
 
 ```markdown
 # Docs Review of <short commit>[, with uncommitted changes]
 
-<n> docs, <n> claims checked: <n> findings, <n> unstated, <n> unverifiable.
+<n> docs, <n> claims checked: <n> findings, <n> unverifiable.
 
 ## Findings
 
@@ -102,15 +90,9 @@ Any other refused call (403, or a 404 GitHub also gives when the token can't see
 
 - **<doc>:<line>** says "<…>"; **<doc>:<line>** says "<…>". Evidence, if any.
 
-## Unstated
-
-- **<doc>:<line>**: "<claim, quoted>"
-  - Depends on: <what>, with evidence.
-  - Could go in: <doc, section>.
-
 ## Unverifiable
 
 - **<doc>:<line>**: "<claim, quoted>". Why it can't be checked.
 ```
 
-Findings are grouped by doc, in scope order. A section with nothing in it reads "None."
+Findings are grouped by doc, in the order the docs were chosen. A section with nothing in it reads "None." Report truth only: what no doc mentions, style, structure and length are out of scope.

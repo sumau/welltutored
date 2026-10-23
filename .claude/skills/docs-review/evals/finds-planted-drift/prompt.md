@@ -1,8 +1,1 @@
----
-tags: [skill-creator]
-max_turns: 200
-timeout_seconds: 3600
-allowed_tools: [Read, Glob, Grep, Bash, Agent]
----
-
-/docs-review
+/docs-review docs/pipeline.md CONTRIBUTING.md docs/architecture.md docs/smoke-checks.md docs/schema-changes.md

@@ -9,11 +9,6 @@
 - Every `.md` file under `docs/`, except `docs/agents/` and `docs/adr/`. An ADR
   records a decision when it was made, so it is historical as a whole.
 
-## Glossary
-
-`GLOSSARY.md`. Each term is in bold, followed by its definition and an
-`_Avoid_:` line listing the synonyms not to use.
-
 ## Gate
 
 The [Docs Check](../code-checks.md#the-docs-check), `pnpm run docs:check`,

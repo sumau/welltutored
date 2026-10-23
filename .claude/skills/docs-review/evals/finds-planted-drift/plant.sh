@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Plants known drift in a clone of this repo, at its root, then commits it so
-# the review audits a clean tree. Removes this evals folder from the clone, so
-# the review can't read the answers.
+# Plants known drift in a copy of this repo, at its root, then commits it as
+# the copy's only commit, so the review audits a clean tree and no history
+# shows the plants. Removes this evals folder from the copy, so the review
+# can't read the answers.
 set -eu
 
 plant() { # file, old text, new text
@@ -24,22 +25,14 @@ seconds"
 plant docs/pipeline.md '    image --> merge' '    image --> merge
     signIn --> merge'
 
-# Glossary: "dashboard" is on the Workspace's Avoid list.
-plant docs/architecture.md "publish them in the
-Workspace." "publish them in the
-dashboard."
-
 # Contradiction: docs/pipeline.md says the manual sign-in comes after merging.
 plant CONTRIBUTING.md "- After merging a change that touches auth" "- Before merging a change that touches auth"
 
 # Hedged claims: both "for now" sentences become false.
 plant artifacts/welltutored/src/lib/features.ts "PUBLIC_RESOURCES_ENABLED: boolean = false" "PUBLIC_RESOURCES_ENABLED: boolean = true"
 
-# Unstated: drop the sentence naming fly.toml's check path.
-plant docs/pipeline.md "\`fly.toml\` points Fly's health check at \`/api/healthz\`, the Health Check. It
-answers" "The Health Check
-answers"
-
 rm -rf .claude/skills/docs-review/evals
+rm -rf .git
+git init -q
 git add -A
 git commit -qm "Update docs"
