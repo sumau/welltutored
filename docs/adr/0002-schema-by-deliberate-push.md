@@ -35,8 +35,8 @@ change that has to move data, cannot.
 ## Consequences
 
 - A merge to `main` deploys code that may expect a schema the database does not
-  have. Apply the schema **before** merging anything that changes
-  `lib/db/src/schema/`.
+  have. Apply an added or changed schema **before** merging it. The order for a
+  removal is in [schema-changes.md](../schema-changes.md#push-or-merge-first).
 - Review the diff of `lib/db/src/schema/` before pushing. Nothing downstream
   asks, and `push` against a populated database can drop a column.
 - Use the database provider's direct (non-pooled) connection string for schema

@@ -3,8 +3,20 @@
 For whoever applies a schema change to the
 [Deployment](../GLOSSARY.md#delivery): the push, checking where it landed, what
 each kind of change prompts, recovering from a push that stopped partway, and
-rehearsing on a Neon branch. When to push, relative to the merge, is in
-[CONTRIBUTING.md](../CONTRIBUTING.md#schema-changes).
+rehearsing on a Neon branch. Every other doc links here for the order of push
+and merge.
+
+## Push or merge first
+
+- **Adding or changing schema:** push to production **before** merging. A
+  merge to `main` deploys code that expects the new schema
+  ([ADR-0002](adr/0002-schema-by-deliberate-push.md)).
+- **Removing a column or table: not settled yet**
+  ([#110](https://github.com/sumau/welltutored/issues/110)). Push first, and
+  the live code still reads what was dropped until the merge deploys, so merge
+  straight after the push. Merge first, and the merged code must no longer
+  read what is removed; push straight after. Whichever you choose, rehearse the
+  push first ([Rehearsing a push on a Neon branch](#rehearsing-a-push-on-a-neon-branch)).
 
 ## Pushing
 
@@ -104,8 +116,8 @@ Do you still want to push changes?
 ```
 
 Answer yes only when every listed column is one the schema diff removes on
-purpose. The live code still reads a dropped column until the merge deploys, so
-merge straight after the push.
+purpose. When to push, relative to the merge, is in
+[Push or merge first](#push-or-merge-first).
 
 Dropping a table prompts the same way, with a count of its rows. Removing saved
 resources (issue #69) looked like this against local data:
@@ -121,9 +133,8 @@ Do you still want to push changes?
   Yes, I want to remove 1 table,
 ```
 
-Here the order flips: merge first and push after, so the running Deployment
-never queries a table that has gone. That works whenever the merged code no
-longer reads the table.
+When to push, relative to the merge, is in
+[Push or merge first](#push-or-merge-first).
 
 **Both prompts appear only when there is data to lose.** `push` counts the rows
 first and asks only when the count is above zero. An empty table, or a column
