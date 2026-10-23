@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { requireTestDatabaseUrl } from "./test-database.js";
+import { requireTestDatabaseUrl } from "./check.js";
 
 test("requires a dedicated test database URL", () => {
   assert.throws(

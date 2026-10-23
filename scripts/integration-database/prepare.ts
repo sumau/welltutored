@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { requireTestDatabaseUrl } from "./test-database.js";
+import { requireTestDatabaseUrl } from "./check.js";
 
 function runSchemaPush(testDatabaseUrl: string): Promise<number> {
   const child = spawn(

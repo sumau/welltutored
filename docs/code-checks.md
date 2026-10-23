@@ -27,7 +27,7 @@ Test database unavailable: required command 'initdb' was not found.
 ```
 
 The `test` service supplies the connection, which takes the other branch of
-`scripts/test-database/with-test-database.sh`. CI takes the same branch, with the dedicated
+`scripts/integration-database/with-integration-database.sh`. CI takes the same branch, with the dedicated
 connection coming from its `postgres:16` service container instead
 ([pipeline.md](pipeline.md#github-actions)). The suite needs no Clerk keys
 ([pipeline.md](pipeline.md#credentials)).
@@ -62,8 +62,8 @@ apply the current schema to that database before running the integration
 script. The CI preparation command does both checks explicitly:
 
 ```sh
-pnpm run check:test-database
-pnpm run prepare:test-database
+pnpm run check:integration-database
+pnpm run prepare:integration-database
 ```
 
 The first command fails if `TEST_DATABASE_URL` is missing or points to
@@ -115,15 +115,15 @@ The script package has three test suites, all run by `verify:ci`:
 ```sh
 pnpm --filter @workspace/scripts run test:smoke
 pnpm --filter @workspace/scripts run test:docs
-pnpm run test:database-config
+pnpm run test:database-check
 ```
 
 The smoke-check tests validate the logic of the scripts in
 [smoke-checks.md](smoke-checks.md), without a running site: target selection,
 the waiver flags in both directions, redirect protection, timeout handling, and
 healthy responses against a local fixture. The documentation tests cover
-[the Docs Check](#the-docs-check). The database-config tests ensure that
-integration tests require a dedicated `TEST_DATABASE_URL` distinct from
+[the Docs Check](#the-docs-check). The integration-database check tests ensure
+that integration tests require a dedicated `TEST_DATABASE_URL` distinct from
 `DATABASE_URL`.
 
 ## The Docs Check

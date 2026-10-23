@@ -73,7 +73,7 @@ opening a pull request.
 | `backend/src/models` | Drizzle/PostgreSQL schema |
 | `backend/src/core` | Settings, database pool, logging, health check |
 | `backend/tests` | Backend tests, mirroring `backend/src` |
-| `scripts` | Smoke checks, the Docs Check and test-database tooling, a folder each |
+| `scripts` | Smoke checks, the Docs Check and integration-database tooling, a folder each |
 
 What each backend folder is for is in
 [docs/architecture.md](docs/architecture.md#backend-layout).
@@ -89,7 +89,7 @@ against a running service, or see
 - `pnpm run build` — docs check + typecheck + build all packages
 - `pnpm --filter @workspace/backend run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/backend run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
-- `pnpm run prepare:test-database` — validate `TEST_DATABASE_URL` and apply the
+- `pnpm run prepare:integration-database` — validate `TEST_DATABASE_URL` and apply the
   current schema to the dedicated integration-test database
 
 The Vite config defaults `PORT` and `BASE_PATH`; compose overrides `PORT`

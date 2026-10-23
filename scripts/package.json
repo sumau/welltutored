@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "docs:check": "tsx ./docs-check/docs-check.ts",
-    "check:test-database": "tsx ./test-database/test-database.ts",
-    "prepare:test-database": "tsx ./test-database/prepare.ts",
-    "test:database-config": "tsx --test ./test-database/test-database.test.ts",
+    "check:integration-database": "tsx ./integration-database/check.ts",
+    "prepare:integration-database": "tsx ./integration-database/prepare.ts",
+    "test:database-check": "tsx --test ./integration-database/check.test.ts",
     "smoke": "tsx ./smoke/launch.ts",
     "smoke:dev": "tsx ./smoke/launch.ts --dev",
     "smoke:enquiry": "tsx ./smoke/enquiry-browser.ts",
