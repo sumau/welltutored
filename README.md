@@ -64,11 +64,19 @@ opening a pull request.
 | --- | --- |
 | `frontend` | React + Vite frontend: public directory, tutor and resource pages, enquiry flow, auth screens, and private workspace |
 | `frontend/src/index.css` | Editorial visual system and theme tokens |
-| `backend` | Express 5 API, which also serves the frontend build: routes, Clerk middleware, seed/bootstrap behavior, and server startup |
+| `frontend/src/client` | Generated React Query hooks and the fetch they use |
+| `backend` | Express 5 API, which also serves the frontend build |
+| `backend/openapi.yaml` | API contract, source for the generated hooks and Zod schemas |
+| `backend/src/api` | Routes, request checks, response shapes and generated Zod schemas |
+| `backend/src/crud` | Every database query |
+| `backend/src/domain` | Rules with no database or HTTP in them |
 | `backend/src/models` | Drizzle/PostgreSQL schema |
-| `backend/openapi.yaml` | API contract, source for the generated client and Zod schemas |
-| `frontend/src/client`, `backend/src/api/schemas` | Generated frontend hooks and runtime schemas |
-| `scripts` | Docs check, smoke checks and test-database tooling |
+| `backend/src/core` | Settings, database pool, logging, health check |
+| `backend/tests` | Backend tests, mirroring `backend/src` |
+| `scripts` | Smoke checks, the Docs Check and test-database tooling, a folder each |
+
+What each backend folder is for is in
+[docs/architecture.md](docs/architecture.md#backend-layout).
 
 ## Commands
 
