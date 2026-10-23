@@ -15,7 +15,7 @@ import {
 } from "../../crud/tutors";
 import { listPublishedResourcesByTutor } from "../../crud/resources";
 import { applyTutorDraft } from "../../domain/tutor-drafts";
-import { truncateAtWordBoundary, estimateReadMinutes } from "../../domain/text";
+import { truncateAtWordBoundary } from "../../domain/text";
 import { splitTutorName } from "../../domain/tutor-names";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
 import { normalizeTutorTint } from "../../domain/tutor-accents";
@@ -25,6 +25,7 @@ import {
 } from "../deps";
 import { isUniqueViolation } from "../../crud/workspace-accounts";
 import { toTutorResponse } from "../presenters/tutor-presenter";
+import { toResourceSummary } from "../presenters/resource-presenter";
 import { isPublishableProfile } from "../../domain/workspace-validation";
 
 const router: IRouter = Router();
@@ -167,14 +168,9 @@ router.patch("/workspace/profile", async (req, res): Promise<void> => {
     UpdateWorkspaceProfileResponse.parse({
       ...toTutorResponse(
         tutor,
-        resources.map(({ resource, author }) => ({
-          ...resource,
-          tutorSlug: author.slug,
-          tutorName: author.name,
-          tutorTint: normalizeTutorTint(author.tint),
-          tint: normalizeTutorTint(author.tint),
-          readMinutes: estimateReadMinutes(resource.body, resource.sections),
-        })),
+        resources.map(({ resource, author }) =>
+          toResourceSummary(resource, author, author.slug),
+        ),
         nextProfileStatus === "draft"
           ? publicTutorSlug(existingTutor.name)
           : publicTutorSlug(tutor.name),
@@ -211,14 +207,9 @@ router.delete("/workspace/profile/draft", async (req, res): Promise<void> => {
     DiscardWorkspaceProfileDraftResponse.parse(
       toTutorResponse(
         tutor,
-        resources.map(({ resource, author }) => ({
-          ...resource,
-          tutorSlug: author.slug,
-          tutorName: author.name,
-          tutorTint: normalizeTutorTint(author.tint),
-          tint: normalizeTutorTint(author.tint),
-          readMinutes: estimateReadMinutes(resource.body, resource.sections),
-        })),
+        resources.map(({ resource, author }) =>
+          toResourceSummary(resource, author, author.slug),
+        ),
       ),
     ),
   );

@@ -9,11 +9,10 @@ import {
   ListTutorsResponse,
 } from "../schemas";
 import type { resourcesTable, tutorsTable } from "../../models";
-import { estimateReadMinutes, truncateAtWordBoundary } from "../../domain/text";
+import { truncateAtWordBoundary } from "../../domain/text";
 import { tutorNameFields } from "../../domain/tutor-names";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
 import { normalizeTutorTint } from "../../domain/tutor-accents";
-import { normalizeResourceType } from "../../domain/resource-types";
 import { findPublishedTutor, listPublishedTutors } from "../../crud/tutors";
 import {
   findPublishedResource,
@@ -22,30 +21,15 @@ import {
   searchPublishedResources,
 } from "../../crud/resources";
 import { setPublicTutorCacheHeaders } from "../public-cache";
+import { toResourceSummary } from "../presenters/resource-presenter";
 
 const router: IRouter = Router();
 
-type ResourceJoined = {
+function toResource(row: {
   resource: typeof resourcesTable.$inferSelect;
   tutor: Pick<typeof tutorsTable.$inferSelect, "name" | "tint">;
-};
-
-function toResource(row: ResourceJoined) {
-  return {
-    id: row.resource.id,
-    slug: row.resource.slug,
-    title: row.resource.title,
-    tutorSlug: publicTutorSlug(row.tutor.name),
-    tutorName: row.tutor.name,
-    tutorTint: normalizeTutorTint(row.tutor.tint),
-    subject: row.resource.subject,
-    level: row.resource.level,
-    type: normalizeResourceType(row.resource.type),
-    readMinutes: estimateReadMinutes(row.resource.body, row.resource.sections),
-    excerpt: row.resource.excerpt,
-    publishedAt: row.resource.publishedAt,
-    tint: normalizeTutorTint(row.tutor.tint),
-  };
+}) {
+  return toResourceSummary(row.resource, row.tutor);
 }
 
 router.get("/tutors", async (_req, res): Promise<void> => {
