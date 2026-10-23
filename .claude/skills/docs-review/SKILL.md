@@ -2,7 +2,6 @@
 name: docs-review
 description: Read the docs you name against the code and report the statements the code no longer supports. It advises; the Docs Check is the gate.
 disable-model-invocation: true
-model: sonnet
 argument-hint: "<doc>… | all"
 ---
 
@@ -39,11 +38,20 @@ Done when every line of every chosen doc has been read and each claim has its fi
 
 Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way, but never between two claims with the same subject: claims that could contradict each other must reach the same subagent.
 
-Dispatch every subagent in one message so they run in parallel. Give each the file, its claims, what the gate verifies, and **The verification brief** below, pasted in full: the subagent has no other access to it.
+Dispatch every subagent in one message so they run in parallel, each with `model: sonnet`: verifying is most of the cost, so it runs on Sonnet, while extracting and reporting stay on the session's model. Give each the file, its claims, what the gate verifies, and **The verification brief** below, pasted in full: the subagent has no other access to it.
 
 Done when every group has returned its verdicts.
 
 ### 4. Report
+
+Merge the verdicts into items. One item is one fix: claims that a single edit corrects, or that contradict each other, go in the same item, from whichever docs. Put each item in the first tier that fits:
+
+1. **Leads to a wrong action**: someone following the doc would do the wrong thing, or rely on a check that isn't there.
+2. **Wrong fact**: false, but acting on it does no harm.
+3. **Imprecise**: true in part; an added condition or a narrower word fixes it.
+4. **Needs a decision**: the code may be what's wrong, or the evidence can't say which side is right.
+
+The tier is a judgement to help the reader triage. Never drop an item because of its tier.
 
 Write the report in the format under **The report**. Save it to `.docs-review/<commit>.md` at the repository root (`<commit>-2.md` and so on if that exists), which git ignores, then show it in the session and stop. The user chooses what to fix.
 
@@ -76,24 +84,51 @@ A statement about what the code, the configuration or the running system does or
 ```markdown
 # Docs Review of <short commit>[, with uncommitted changes]
 
-<n> docs, <n> claims checked: <n> findings, <n> unverifiable.
+<n> docs, <n> claims checked: <n> findings (<n> lead to a wrong action, <n> wrong facts, <n> imprecise, <n> need a decision), <n> unverifiable.
 
-## Findings
+## Checklist
 
-### <doc path>
+**1. Leads to a wrong action**
+- [ ] 1.1 <what is wrong, in one line>
+
+**2. Wrong fact**
+- [ ] 2.1 <…>
+
+**3. Imprecise**
+- [ ] 3.1 <…>
+
+**4. Needs a decision**
+- [ ] 4.1 <…>
+
+## 1. Leads to a wrong action
+
+### 1.1 <the same line as in the checklist>
 
 - **<doc>:<line>**: "<claim, quoted>"
-  - Evidence: <code file:line>, and what it shows.
-  - Looks wrong: the doc | the code | unclear.
-  - Suggested: "<replacement text>"
+- **<doc>:<line>**: "<another claim in the same item>"
+- Evidence: <code file:line>, and what it shows.
+- Looks wrong: <which doc> | the code | unclear.
+- Suggested: "<replacement text>"
 
-### Contradictions
+## 2. Wrong fact
 
-- **<doc>:<line>** says "<…>"; **<doc>:<line>** says "<…>". Evidence, if any.
+<as in section 1>
+
+## 3. Imprecise
+
+- **3.1 <doc>:<line>**: "<claim, quoted>". <The evidence, in a sentence.> Suggested: "<replacement text>".
+
+## 4. Needs a decision
+
+### 4.1 <the same line as in the checklist>
+
+<the claims and the evidence, as in section 1>
+- Decide: <the question, and what to change for each answer>.
 
 ## Unverifiable
 
-- **<doc>:<line>**: "<claim, quoted>". Why it can't be checked.
+<reason, such as "GitHub settings" or "needs a test run">:
+- <doc>:<line>: <the claim, in a few words>
 ```
 
-Findings are grouped by doc, in the order the docs were chosen. A section with nothing in it reads "None." Report truth only: what no doc mentions, style, structure and length are out of scope.
+The checklist and the sections share one numbering, restarting in each tier. A tier with nothing in it reads "None." Write nothing outside this format, such as a summary of the biggest items: section 1 does that job. Report truth only: what no doc mentions, style, structure and length are out of scope.
