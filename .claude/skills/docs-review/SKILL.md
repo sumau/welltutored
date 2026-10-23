@@ -106,7 +106,7 @@ A statement about what the code, the configuration or the running system does or
 
 - **<doc>:<line>**: "<claim, quoted>"
 - **<doc>:<line>**: "<another claim in the same item>"
-- Evidence: <code file:line>, and what it shows.
+- Evidence: <code file:line>, or for docs that contradict each other, the other doc's file:line; and what it shows.
 - Looks wrong: <which doc> | the code | unclear.
 - Suggested: "<replacement text>"
 
