@@ -2,7 +2,12 @@ import { and, asc, count, eq, ne } from "drizzle-orm";
 import { db } from "../core/db";
 import { tutorProfileDraftsTable, tutorsTable } from "../models";
 import { applyTutorDraft } from "../domain/tutor-drafts";
-import { publicTutorSlug } from "../domain/tutor-slugs";
+import { splitTutorName, tutorInitials } from "../domain/tutor-names";
+import { publicTutorSlug, tutorSlugBase } from "../domain/tutor-slugs";
+import {
+  APPROVED_TUTOR_ACCENTS,
+  normalizeTutorTint,
+} from "../domain/tutor-accents";
 
 export type Tutor = typeof tutorsTable.$inferSelect;
 export type TutorProfileStatus = Tutor["profileStatus"];
@@ -92,17 +97,92 @@ export async function findTutorSummary(id: number) {
   return tutor;
 }
 
-export async function countTutors(): Promise<number> {
+async function countTutors(): Promise<number> {
   const [{ value }] = await db
     .select({ value: count() })
     .from(tutorsTable);
   return Number(value);
 }
 
+/** The approved accents no other tutor has, keeping this tutor's own. */
+export async function availableTutorAccents(tutorId: number | null) {
+  const tutors = await db
+    .select({ id: tutorsTable.id, tint: tutorsTable.tint })
+    .from(tutorsTable);
+  const currentTint = tutorId == null
+    ? null
+    : tutors.find((tutor) => tutor.id === tutorId)?.tint;
+  const usedByOthers = new Set(
+    tutors
+      .filter((tutor) => tutor.id !== tutorId)
+      .map((tutor) => normalizeTutorTint(tutor.tint)),
+  );
+
+  return APPROVED_TUTOR_ACCENTS.filter(
+    (accent) =>
+      !usedByOthers.has(accent) ||
+      (currentTint != null && normalizeTutorTint(currentTint) === accent),
+  );
+}
+
+async function uniqueTutorSlug(name: string) {
+  const base = tutorSlugBase(name);
+  const tutors = await db
+    .select({ name: tutorsTable.name, slug: tutorsTable.slug })
+    .from(tutorsTable);
+  const usedSlugs = new Set(
+    tutors.flatMap((tutor) => [tutor.slug, tutorSlugBase(tutor.name)]),
+  );
+
+  let candidate = base;
+  let suffix = 2;
+  while (usedSlugs.has(candidate)) {
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  return candidate;
+}
+
+/**
+ * A blank draft profile for a new tutor, with a free accent and a unique
+ * slug, or null when every approved accent is taken.
+ */
+export async function newDraftTutor(
+  name: string,
+): Promise<typeof tutorsTable.$inferInsert | null> {
+  const [tint] = await availableTutorAccents(null);
+  if (!tint) return null;
+
+  const { firstName, lastName } = splitTutorName(name);
+  return {
+    name,
+    firstName,
+    lastName,
+    initials: tutorInitials(name),
+    subject: "",
+    support: "",
+    university: "",
+    qualification: "",
+    bio: "",
+    profileSummary: "",
+    teachingIntro: "",
+    teachingPoints: [],
+    rate: "0",
+    availability: "",
+    intake: "full",
+    tint,
+    profileStatus: "draft",
+    slug: await uniqueTutorSlug(name),
+    sortOrder: await countTutors(),
+  };
+}
+
+/** Insert a tutor, inside a transaction when one is passed. */
 export async function createTutor(
   values: typeof tutorsTable.$inferInsert,
+  executor: Pick<typeof db, "insert"> = db,
 ): Promise<Tutor> {
-  const [tutor] = await db.insert(tutorsTable).values(values).returning();
+  const [tutor] = await executor.insert(tutorsTable).values(values).returning();
   return tutor;
 }
 

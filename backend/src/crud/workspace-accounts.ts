@@ -1,13 +1,9 @@
 import { clerkClient } from "@clerk/express";
-import { and, asc, count, eq, ilike, ne } from "drizzle-orm";
+import { and, asc, eq, ilike, ne } from "drizzle-orm";
 import { db } from "../core/db";
 import { tutorsTable, workspaceAccountsTable } from "../models";
 import { splitTutorName } from "../domain/tutor-names";
-import { tutorSlugBase } from "../domain/tutor-slugs";
-import {
-  APPROVED_TUTOR_ACCENTS,
-  normalizeTutorTint,
-} from "../domain/tutor-accents";
+import { createTutor, newDraftTutor } from "./tutors";
 
 export type WorkspaceAccount = typeof workspaceAccountsTable.$inferSelect;
 
@@ -148,70 +144,16 @@ export async function findOrProvisionFromClerkUser(
   return ensureTutorDraft(created);
 }
 
-export async function availableTutorAccents(tutorId: number | null) {
-  const tutors = await db
-    .select({ id: tutorsTable.id, tint: tutorsTable.tint })
-    .from(tutorsTable);
-  const currentTint = tutorId == null
-    ? null
-    : tutors.find((tutor) => tutor.id === tutorId)?.tint;
-  const usedByOthers = new Set(
-    tutors
-      .filter((tutor) => tutor.id !== tutorId)
-      .map((tutor) => normalizeTutorTint(tutor.tint)),
-  );
-
-  return APPROVED_TUTOR_ACCENTS.filter(
-    (accent) =>
-      !usedByOthers.has(accent) ||
-      (currentTint != null && normalizeTutorTint(currentTint) === accent),
-  );
-}
-
-export async function uniqueTutorSlug(name: string) {
-  const base = tutorSlugBase(name);
-  const tutors = await db
-    .select({ name: tutorsTable.name, slug: tutorsTable.slug })
-    .from(tutorsTable);
-  const usedSlugs = new Set(
-    tutors.flatMap((tutor) => [tutor.slug, tutorSlugBase(tutor.name)]),
-  );
-
-  let candidate = base;
-  let suffix = 2;
-  while (usedSlugs.has(candidate)) {
-    candidate = `${base}-${suffix}`;
-    suffix += 1;
-  }
-  return candidate;
-}
-
-export function tutorInitials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return (parts.length > 1
-    ? parts
-        .slice(0, 2)
-        .map((part) => part[0])
-        .join("")
-    : name.trim().slice(0, 2)
-  ).toUpperCase();
-}
-
 export async function ensureTutorDraft(
   account: WorkspaceAccount,
 ): Promise<WorkspaceAccount> {
   if (account.role !== "tutor" || account.tutorId != null) return account;
 
-  const [defaultTint] = await availableTutorAccents(null);
-  if (!defaultTint) return account;
-
   const displayName = account.displayName.trim() || account.email;
   const { firstName, lastName } = splitTutorName(displayName);
   const name = [firstName, lastName].filter(Boolean).join(" ") || displayName;
-  const tutorSlug = await uniqueTutorSlug(name);
-  const [{ value: tutorCount }] = await db
-    .select({ value: count() })
-    .from(tutorsTable);
+  const draft = await newDraftTutor(name);
+  if (!draft) return account;
 
   return db.transaction(async (tx) => {
     const [current] = await tx
@@ -223,30 +165,7 @@ export async function ensureTutorDraft(
       return current ?? account;
     }
 
-    const [tutor] = await tx
-      .insert(tutorsTable)
-      .values({
-        name,
-        firstName,
-        lastName,
-        initials: tutorInitials(name),
-        subject: "",
-        support: "",
-        university: "",
-        qualification: "",
-        bio: "",
-        profileSummary: "",
-        teachingIntro: "",
-        teachingPoints: [],
-        rate: "0",
-        availability: "",
-        intake: "full",
-        tint: defaultTint,
-        profileStatus: "draft",
-        slug: tutorSlug,
-        sortOrder: Number(tutorCount),
-      })
-      .returning();
+    const tutor = await createTutor(draft, tx);
 
     const [updated] = await tx
       .update(workspaceAccountsTable)

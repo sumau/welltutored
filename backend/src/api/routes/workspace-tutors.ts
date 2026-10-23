@@ -9,22 +9,16 @@ import {
   RestoreWorkspaceTutorParams,
   RestoreWorkspaceTutorResponse,
 } from "../schemas";
-import { splitTutorName } from "../../domain/tutor-names";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
 import {
-  countTutors,
   createTutor,
   deleteTutor,
   findTutor,
   listTutorDrafts,
   listTutors,
+  newDraftTutor,
   setTutorProfileStatus,
 } from "../../crud/tutors";
-import {
-  availableTutorAccents,
-  uniqueTutorSlug,
-  tutorInitials,
-} from "../../crud/workspace-accounts";
 import {
   requireOwner,
   requireWorkspaceAccount as workspaceAccount,
@@ -63,35 +57,14 @@ router.post("/workspace/tutors", async (req, res): Promise<void> => {
     return;
   }
 
-  const tutorCount = await countTutors();
-  const { firstName, lastName } = splitTutorName(body.data.name);
-  const [defaultTint] = await availableTutorAccents(null);
-  if (!defaultTint) {
+  const draft = await newDraftTutor(body.data.name);
+  if (!draft) {
     res.status(409).json({
       error: "All approved profile accents are already assigned.",
     });
     return;
   }
-  const tutor = await createTutor({
-    name: body.data.name,
-    firstName,
-    lastName,
-    initials: tutorInitials(body.data.name),
-    subject: "",
-    university: "",
-    qualification: "",
-    bio: "",
-    profileSummary: "",
-    teachingIntro: "",
-    teachingPoints: [],
-    rate: "0",
-    availability: "",
-    intake: "full",
-    tint: defaultTint,
-    profileStatus: "draft",
-    slug: await uniqueTutorSlug(body.data.name),
-    sortOrder: tutorCount,
-  });
+  const tutor = await createTutor(draft);
 
   res.status(201).json(
     CreateWorkspaceTutorResponse.parse(toTutorResponse(tutor)),

@@ -24,3 +24,14 @@ export function tutorNameFields(tutor: {
     name: [firstName, lastName].filter(Boolean).join(" ") || tutor.name,
   };
 }
+
+export function tutorInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return (parts.length > 1
+    ? parts
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+    : name.trim().slice(0, 2)
+  ).toUpperCase();
+}

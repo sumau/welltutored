@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
 import { GetWorkspaceSessionResponse } from "../schemas";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
+import { requireWorkspaceAccount as workspaceAccount } from "../deps";
 import {
   availableTutorAccents,
-} from "../../crud/workspace-accounts";
-import { requireWorkspaceAccount as workspaceAccount } from "../deps";
-import { findTutor, findWorkspaceTutor } from "../../crud/tutors";
+  findTutor,
+  findWorkspaceTutor,
+} from "../../crud/tutors";
 import { toTutorResponse } from "../presenters/tutor-presenter";
 
 const router: IRouter = Router();
