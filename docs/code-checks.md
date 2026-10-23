@@ -93,11 +93,10 @@ React components are rendered either into JSDOM or to static markup. Network
 and query behavior is supplied by test doubles rather than making real
 production requests.
 
-The command runs `tsx` from the API package, which has neither Vite's aliases
-nor its JSX transform, so when adding a web test:
+The command runs the tests with `tsx`, which has neither Vite's aliases nor
+its JSX transform, so when adding a web test:
 
-- Keep `--tsconfig ../welltutored/tsconfig.json`, which resolves the `@/*`
-  aliases, and import `React` explicitly in test files and the components they
+- Keep `--tsconfig tsconfig.json`, which resolves the `@/*` aliases, and import `React` explicitly in test files and the components they
   render.
 - Put the JSDOM window, its event constructors, `location`, `history`, and the
   window event listener functions on `globalThis` before importing
