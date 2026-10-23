@@ -56,8 +56,8 @@ The lifecycle tests exercise the Express routes and database-backed behavior
 end to end within the test process. They create, update, publish, and delete
 test records and are therefore reserved for CI with an isolated test
 database. Set `TEST_DATABASE_URL` to the dedicated PostgreSQL connection;
-`test:integration` sets `NODE_ENV=test`, and the database package refuses to
-fall back to `DATABASE_URL` or use the same URL as the application. CI must
+`test:integration` sets `NODE_ENV=test`, and `backend/src/core/config.ts` then
+refuses to fall back to `DATABASE_URL` or use the same URL as the application. CI must
 apply the current schema to that database before running the integration
 script. The CI preparation command does both checks explicitly:
 
