@@ -1,5 +1,4 @@
 import { Router, type IRouter, type Request } from "express";
-import { and, asc, eq } from "drizzle-orm";
 import {
   CreateEnquiryBody,
   CreateEnquiryResponse,
@@ -7,8 +6,13 @@ import {
   RetryWorkspaceEnquiryParams,
   RetryWorkspaceEnquiryResponse,
 } from "../schemas";
-import { db } from "../../core/db";
-import { enquiriesTable, tutorsTable } from "../../models";
+import {
+  createEnquiry,
+  findEnquiryFor,
+  listEnquiriesFor,
+  markEnquiryDelivered,
+  markEnquiryFailed,
+} from "../../crud/enquiries";
 import { findPublishedTutor } from "../../crud/tutors";
 import { canReceivePublicEnquiries } from "../../domain/enquiries";
 import {
@@ -51,10 +55,7 @@ function enquiryReceipt(
 
 async function markDeliveryFailed(enquiryId: number, req: Request) {
   try {
-    await db
-      .update(enquiriesTable)
-      .set({ deliveryStatus: "failed" })
-      .where(eq(enquiriesTable.id, enquiryId));
+    await markEnquiryFailed(enquiryId);
     return "failed" as const;
   } catch (error) {
     req.log.error({ err: error, enquiryId }, "Could not persist failed enquiry delivery");
@@ -67,12 +68,9 @@ async function deliverEnquiry(
   req: Request,
 ) {
   try {
-    const [delivered] = await db
-      .update(enquiriesTable)
-      .set({ deliveryStatus: "delivered" })
-      .where(eq(enquiriesTable.id, enquiryId))
-      .returning({ id: enquiriesTable.id });
-    if (!delivered) throw new Error("Enquiry no longer exists");
+    if (!(await markEnquiryDelivered(enquiryId))) {
+      throw new Error("Enquiry no longer exists");
+    }
     return "delivered" as const;
   } catch (error) {
     req.log.error({ err: error, enquiryId }, "Enquiry delivery failed");
@@ -98,22 +96,16 @@ router.post("/enquiries", async (req, res): Promise<void> => {
     return;
   }
 
-  const [enquiry] = await db
-    .insert(enquiriesTable)
-    .values({
-      tutorId: tutor.id,
-      name: parsed.data.name,
-      email: parsed.data.email,
-      studentName: parsed.data.studentName,
-      studentAge: parsed.data.studentAge,
-      subjectLevel: parsed.data.subjectLevel,
-      message: parsed.data.message,
-      deliveryStatus: "pending",
-    })
-    .returning({
-      id: enquiriesTable.id,
-      createdAt: enquiriesTable.createdAt,
-    });
+  const enquiry = await createEnquiry({
+    tutorId: tutor.id,
+    name: parsed.data.name,
+    email: parsed.data.email,
+    studentName: parsed.data.studentName,
+    studentAge: parsed.data.studentAge,
+    subjectLevel: parsed.data.subjectLevel,
+    message: parsed.data.message,
+    deliveryStatus: "pending",
+  });
 
   const deliveryStatus = await deliverEnquiry(enquiry.id, req);
   req.log.info({ enquiryId: enquiry.id, tutorId: tutor.id, deliveryStatus }, "Named tutor enquiry accepted");
@@ -127,21 +119,7 @@ router.get("/workspace/enquiries", async (req, res): Promise<void> => {
   const account = await workspaceAccount(req, res);
   if (!account || !requireApproved(account, res)) return;
 
-  const rows = await db
-    .select({
-      enquiry: enquiriesTable,
-      tutorName: tutorsTable.name,
-    })
-    .from(enquiriesTable)
-    .innerJoin(tutorsTable, eq(enquiriesTable.tutorId, tutorsTable.id))
-    .where(
-      account.role === "owner"
-        ? undefined
-        : account.tutorId
-          ? eq(enquiriesTable.tutorId, account.tutorId)
-          : eq(enquiriesTable.tutorId, -1),
-    )
-    .orderBy(asc(enquiriesTable.createdAt), asc(enquiriesTable.id));
+  const rows = await listEnquiriesFor(account);
 
   res.json(
     ListWorkspaceEnquiriesResponse.parse(
@@ -172,24 +150,7 @@ router.post("/workspace/enquiries/:id/retry", async (req, res): Promise<void> =>
     return;
   }
 
-  const [row] = await db
-    .select({
-      enquiry: enquiriesTable,
-      tutorName: tutorsTable.name,
-    })
-    .from(enquiriesTable)
-    .innerJoin(tutorsTable, eq(enquiriesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(enquiriesTable.id, params.data.id),
-        account.role === "owner"
-          ? undefined
-          : account.tutorId
-            ? eq(enquiriesTable.tutorId, account.tutorId)
-            : eq(enquiriesTable.tutorId, -1),
-      ),
-    )
-    .limit(1);
+  const row = await findEnquiryFor(account, params.data.id);
 
   if (!row) {
     res.status(404).json({ error: "Enquiry not found." });
