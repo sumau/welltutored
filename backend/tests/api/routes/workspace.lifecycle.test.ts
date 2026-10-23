@@ -19,7 +19,7 @@ import {
 } from "../../../src/api/schemas";
 import contentRouter from "../../../src/api/routes/content";
 import workspaceRouter from "../../../src/api/routes/workspace";
-import { PUBLIC_TUTOR_CACHE_CONTROL } from "../../../src/crud/public-tutors";
+import { PUBLIC_TUTOR_CACHE_CONTROL } from "../../../src/api/public-cache";
 
 const runId = randomUUID().replaceAll("-", "").slice(0, 12);
 const ownerUserId = `workspace-lifecycle-owner-${runId}`;

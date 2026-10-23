@@ -1,17 +1,12 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
 import { GetWorkspaceSessionResponse } from "../schemas";
-import { db } from "../../core/db";
-import { tutorsTable } from "../../models";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
 import {
   availableTutorAccents,
 } from "../../crud/workspace-accounts";
 import { requireWorkspaceAccount as workspaceAccount } from "../deps";
-import {
-  findWorkspaceTutor,
-  toTutorResponse,
-} from "../presenters/tutor-presenter";
+import { findTutor, findWorkspaceTutor } from "../../crud/tutors";
+import { toTutorResponse } from "../presenters/tutor-presenter";
 
 const router: IRouter = Router();
 
@@ -19,13 +14,7 @@ router.get("/workspace/me", async (req, res): Promise<void> => {
   const account = await workspaceAccount(req, res);
   if (!account) return;
 
-  const [tutor] = account.tutorId
-    ? await db
-        .select()
-        .from(tutorsTable)
-        .where(eq(tutorsTable.id, account.tutorId))
-        .limit(1)
-    : [];
+  const tutor = account.tutorId ? await findTutor(account.tutorId) : undefined;
   const editableTutor = tutor ? await findWorkspaceTutor(tutor) : undefined;
 
   res.json(

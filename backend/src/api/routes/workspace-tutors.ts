@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import { asc, count, eq } from "drizzle-orm";
 import {
   ArchiveWorkspaceTutorParams,
   ArchiveWorkspaceTutorResponse,
@@ -10,10 +9,17 @@ import {
   RestoreWorkspaceTutorParams,
   RestoreWorkspaceTutorResponse,
 } from "../schemas";
-import { db } from "../../core/db";
-import { tutorProfileDraftsTable, tutorsTable } from "../../models";
 import { splitTutorName } from "../../domain/tutor-names";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
+import {
+  countTutors,
+  createTutor,
+  deleteTutor,
+  findTutor,
+  listTutorDrafts,
+  listTutors,
+  setTutorProfileStatus,
+} from "../../crud/tutors";
 import {
   availableTutorAccents,
   uniqueTutorSlug,
@@ -31,11 +37,8 @@ router.get("/workspace/tutors", async (req, res): Promise<void> => {
   const account = await workspaceAccount(req, res);
   if (!account || !requireOwner(account, res)) return;
 
-  const tutors = await db
-    .select()
-    .from(tutorsTable)
-    .orderBy(asc(tutorsTable.sortOrder));
-  const drafts = await db.select().from(tutorProfileDraftsTable);
+  const tutors = await listTutors();
+  const drafts = await listTutorDrafts();
   const draftsByTutorId = new Map(drafts.map((draft) => [draft.tutorId, draft]));
   res.json(
     ListWorkspaceTutorsResponse.parse(
@@ -60,9 +63,7 @@ router.post("/workspace/tutors", async (req, res): Promise<void> => {
     return;
   }
 
-  const [{ value: tutorCount }] = await db
-    .select({ value: count() })
-    .from(tutorsTable);
+  const tutorCount = await countTutors();
   const { firstName, lastName } = splitTutorName(body.data.name);
   const [defaultTint] = await availableTutorAccents(null);
   if (!defaultTint) {
@@ -71,29 +72,26 @@ router.post("/workspace/tutors", async (req, res): Promise<void> => {
     });
     return;
   }
-  const [tutor] = await db
-    .insert(tutorsTable)
-    .values({
-      name: body.data.name,
-      firstName,
-      lastName,
-      initials: tutorInitials(body.data.name),
-      subject: "",
-      university: "",
-      qualification: "",
-      bio: "",
-      profileSummary: "",
-      teachingIntro: "",
-      teachingPoints: [],
-      rate: "0",
-      availability: "",
-      intake: "full",
-      tint: defaultTint,
-      profileStatus: "draft",
-      slug: await uniqueTutorSlug(body.data.name),
-      sortOrder: Number(tutorCount),
-    })
-    .returning();
+  const tutor = await createTutor({
+    name: body.data.name,
+    firstName,
+    lastName,
+    initials: tutorInitials(body.data.name),
+    subject: "",
+    university: "",
+    qualification: "",
+    bio: "",
+    profileSummary: "",
+    teachingIntro: "",
+    teachingPoints: [],
+    rate: "0",
+    availability: "",
+    intake: "full",
+    tint: defaultTint,
+    profileStatus: "draft",
+    slug: await uniqueTutorSlug(body.data.name),
+    sortOrder: tutorCount,
+  });
 
   res.status(201).json(
     CreateWorkspaceTutorResponse.parse(toTutorResponse(tutor)),
@@ -110,21 +108,13 @@ router.post("/workspace/tutors/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [tutor] = await db
-    .select()
-    .from(tutorsTable)
-    .where(eq(tutorsTable.id, params.data.id))
-    .limit(1);
+  const tutor = await findTutor(params.data.id);
   if (!tutor) {
     res.status(404).json({ error: "Tutor profile not found." });
     return;
   }
 
-  const [archived] = await db
-    .update(tutorsTable)
-    .set({ profileStatus: "archived" })
-    .where(eq(tutorsTable.id, params.data.id))
-    .returning();
+  const archived = await setTutorProfileStatus(params.data.id, "archived");
 
   res.json(ArchiveWorkspaceTutorResponse.parse(toTutorResponse(archived)));
 });
@@ -139,21 +129,13 @@ router.put("/workspace/tutors/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [tutor] = await db
-    .select()
-    .from(tutorsTable)
-    .where(eq(tutorsTable.id, params.data.id))
-    .limit(1);
+  const tutor = await findTutor(params.data.id);
   if (!tutor) {
     res.status(404).json({ error: "Tutor profile not found." });
     return;
   }
 
-  const [restored] = await db
-    .update(tutorsTable)
-    .set({ profileStatus: "draft" })
-    .where(eq(tutorsTable.id, params.data.id))
-    .returning();
+  const restored = await setTutorProfileStatus(params.data.id, "draft");
 
   res.json(RestoreWorkspaceTutorResponse.parse(toTutorResponse(restored)));
 });
@@ -168,11 +150,7 @@ router.delete("/workspace/tutors/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [deleted] = await db
-    .delete(tutorsTable)
-    .where(eq(tutorsTable.id, params.data.id))
-    .returning({ id: tutorsTable.id });
-  if (!deleted) {
+  if (!(await deleteTutor(params.data.id))) {
     res.status(404).json({ error: "Tutor profile not found." });
     return;
   }

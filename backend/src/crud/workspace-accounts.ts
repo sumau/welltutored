@@ -8,7 +8,6 @@ import {
   APPROVED_TUTOR_ACCENTS,
   normalizeTutorTint,
 } from "../domain/tutor-accents";
-import { applyTutorDraft } from "../api/presenters/tutor-presenter";
 
 export type WorkspaceAccount = typeof workspaceAccountsTable.$inferSelect;
 

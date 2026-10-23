@@ -1,16 +1,22 @@
 import { Router, type IRouter } from "express";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   DiscardWorkspaceProfileDraftResponse,
   UpdateWorkspaceProfileBody,
   UpdateWorkspaceProfileResponse,
 } from "../schemas";
 import { db } from "../../core/db";
+import { resourcesTable, tutorsTable } from "../../models";
 import {
-  resourcesTable,
-  tutorProfileDraftsTable,
-  tutorsTable,
-} from "../../models";
+  deleteTutorDraft,
+  findTutor,
+  findTutorDraft,
+  listOtherTutorTints,
+  publishTutorProfile,
+  saveTutorDraft,
+  type Tutor,
+} from "../../crud/tutors";
+import { applyTutorDraft } from "../../domain/tutor-drafts";
 import { truncateAtWordBoundary, estimateReadMinutes } from "../../domain/text";
 import { splitTutorName } from "../../domain/tutor-names";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
@@ -20,10 +26,7 @@ import {
   requireWorkspaceAccount as workspaceAccount,
 } from "../deps";
 import { isUniqueViolation } from "../../crud/workspace-accounts";
-import {
-  applyTutorDraft,
-  toTutorResponse,
-} from "../presenters/tutor-presenter";
+import { toTutorResponse } from "../presenters/tutor-presenter";
 import { isPublishableProfile } from "../../domain/workspace-validation";
 
 const router: IRouter = Router();
@@ -51,11 +54,7 @@ router.patch("/workspace/profile", async (req, res): Promise<void> => {
     });
     return;
   }
-  const [existingTutor] = await db
-    .select()
-    .from(tutorsTable)
-    .where(eq(tutorsTable.id, account.tutorId))
-    .limit(1);
+  const existingTutor = await findTutor(account.tutorId);
   if (!existingTutor) {
     res.status(404).json({ error: "Tutor profile not found." });
     return;
@@ -66,18 +65,11 @@ router.patch("/workspace/profile", async (req, res): Promise<void> => {
     });
     return;
   }
-  const [existingDraft] = await db
-    .select()
-    .from(tutorProfileDraftsTable)
-    .where(eq(tutorProfileDraftsTable.tutorId, existingTutor.id))
-    .limit(1);
+  const existingDraft = await findTutorDraft(existingTutor.id);
   const editableTutor = applyTutorDraft(existingTutor, existingDraft);
 
   if (body.data.tint) {
-    const otherTutors = await db
-      .select({ id: tutorsTable.id, tint: tutorsTable.tint })
-      .from(tutorsTable)
-      .where(ne(tutorsTable.id, existingTutor.id));
+    const otherTutors = await listOtherTutorTints(existingTutor.id);
     if (
       otherTutors.some(
         (tutor) => normalizeTutorTint(tutor.tint) === body.data.tint,
@@ -154,41 +146,14 @@ router.patch("/workspace/profile", async (req, res): Promise<void> => {
     tint: publishableProfile.tint,
   };
 
-  let tutor: typeof tutorsTable.$inferSelect;
+  const profileValues = { ...nextProfile, rate: String(nextProfile.rate) };
+  let tutor: Tutor;
   try {
     if (nextProfileStatus === "draft") {
-      const [draft] = await db
-        .insert(tutorProfileDraftsTable)
-        .values({
-          tutorId: existingTutor.id,
-          ...nextProfile,
-          rate: String(nextProfile.rate),
-        })
-        .onConflictDoUpdate({
-          target: tutorProfileDraftsTable.tutorId,
-          set: {
-            ...nextProfile,
-            rate: String(nextProfile.rate),
-          },
-        })
-        .returning();
+      const draft = await saveTutorDraft(existingTutor.id, profileValues);
       tutor = applyTutorDraft(existingTutor, draft);
     } else {
-      tutor = await db.transaction(async (tx) => {
-        const [published] = await tx
-          .update(tutorsTable)
-          .set({
-            ...nextProfile,
-            rate: String(nextProfile.rate),
-            profileStatus: "published",
-          })
-          .where(eq(tutorsTable.id, existingTutor.id))
-          .returning();
-        await tx
-          .delete(tutorProfileDraftsTable)
-          .where(eq(tutorProfileDraftsTable.tutorId, existingTutor.id));
-        return published;
-      });
+      tutor = await publishTutorProfile(existingTutor.id, profileValues);
     }
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -244,11 +209,7 @@ router.delete("/workspace/profile/draft", async (req, res): Promise<void> => {
     return;
   }
 
-  const [tutor] = await db
-    .select()
-    .from(tutorsTable)
-    .where(eq(tutorsTable.id, account.tutorId))
-    .limit(1);
+  const tutor = await findTutor(account.tutorId);
   if (!tutor) {
     res.status(404).json({ error: "Tutor profile not found." });
     return;
@@ -260,9 +221,7 @@ router.delete("/workspace/profile/draft", async (req, res): Promise<void> => {
     return;
   }
 
-  await db
-    .delete(tutorProfileDraftsTable)
-    .where(eq(tutorProfileDraftsTable.tutorId, tutor.id));
+  await deleteTutorDraft(tutor.id);
 
   const resources = await db
     .select({

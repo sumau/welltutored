@@ -9,10 +9,8 @@ import {
 } from "../schemas";
 import { db } from "../../core/db";
 import { enquiriesTable, tutorsTable } from "../../models";
-import {
-  canReceivePublicEnquiries,
-  findPublishedTutor,
-} from "../../crud/public-tutors";
+import { findPublishedTutor } from "../../crud/tutors";
+import { canReceivePublicEnquiries } from "../../domain/enquiries";
 import {
   requireApproved,
   requireWorkspaceAccount as workspaceAccount,

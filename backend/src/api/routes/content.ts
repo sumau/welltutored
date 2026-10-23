@@ -16,10 +16,8 @@ import { tutorNameFields } from "../../domain/tutor-names";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
 import { normalizeTutorTint } from "../../domain/tutor-accents";
 import { normalizeResourceType } from "../../domain/resource-types";
-import {
-  findPublishedTutor,
-  setPublicTutorCacheHeaders,
-} from "../../crud/public-tutors";
+import { findPublishedTutor, listPublishedTutors } from "../../crud/tutors";
+import { setPublicTutorCacheHeaders } from "../public-cache";
 
 const router: IRouter = Router();
 
@@ -68,11 +66,7 @@ async function listJoinedResources() {
 
 router.get("/tutors", async (_req, res): Promise<void> => {
   const [tutors, resources] = await Promise.all([
-    db
-      .select()
-      .from(tutorsTable)
-       .where(eq(tutorsTable.profileStatus, "published"))
-      .orderBy(asc(tutorsTable.sortOrder)),
+    listPublishedTutors(),
     listJoinedResources(),
   ]);
 
