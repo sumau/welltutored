@@ -1,7 +1,6 @@
 import type { RequestHandler } from "express";
+import { type Environment, publicOrigin } from "../../core/config";
 import { getTrustedOrigins, normalizeOrigin } from "./request-origin";
-
-type Environment = Record<string, string | undefined>;
 
 // Fly's health checks address the machine directly rather than by hostname, so
 // redirecting them would fail every check on a healthy Deployment.
@@ -14,7 +13,7 @@ const EXEMPT_PATHS = new Set(["/api/healthz"]);
  * to an origin whose enquiries are then rejected is worse than not starting.
  */
 export function getPublicOrigin(environment: Environment = process.env): string | undefined {
-  const configured = environment.PUBLIC_ORIGIN?.trim();
+  const configured = publicOrigin(environment);
   if (!configured) return undefined;
 
   const origin = normalizeOrigin(configured);

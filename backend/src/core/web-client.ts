@@ -1,12 +1,11 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import express, { type Express } from "express";
+import { type Environment, isProduction, webClientRoot } from "./config";
 import { logger } from "./logger";
 
 const INDEX_FILE = "index.html";
 const ASSETS_DIRECTORY = "assets";
-
-type Environment = Record<string, string | undefined>;
 
 /**
  * Resolve the directory holding the built frontend, or undefined when this
@@ -23,7 +22,7 @@ type Environment = Record<string, string | undefined>;
 export function resolveWebClientRoot(
   environment: Environment = process.env,
 ): string | undefined {
-  const configured = environment["WEB_CLIENT_ROOT"]?.trim();
+  const configured = webClientRoot(environment);
   if (!configured) return undefined;
 
   return path.resolve(configured);
@@ -42,7 +41,7 @@ export function mountWebClient(
     // Expected in development. Logged in production because there it means
     // every page is about to 404 while /api/healthz keeps answering, which no
     // health check would catch.
-    if (environment["NODE_ENV"] === "production") {
+    if (isProduction(environment)) {
       logger.warn(
         "WEB_CLIENT_ROOT is not set, so this server is not serving the " +
           "frontend build. Correct if something else fronts it, a " +

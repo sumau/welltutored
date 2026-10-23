@@ -504,8 +504,10 @@ function lineNumberAt(content: string, index: number): number {
 /**
  * Pull the environment variables a source file reads by name from
  * `process.env`: a dotted or quoted key, or a destructured property. A computed
- * key names no variable here, and an assignment is not a read. (Written in
- * words, since this file is itself checked.)
+ * key names no variable here, and an assignment is not a read. An upper-case
+ * dotted key read from a parameter named `environment` counts too, since
+ * backend/src/core/config.ts reads its settings through one that defaults to
+ * `process.env`. (Written in words, since this file is itself checked.)
  */
 export function extractEnvironmentVariables(
   source: string,
@@ -519,6 +521,10 @@ export function extractEnvironmentVariables(
     /process\.env(?:\.([A-Za-z_$][\w$]*)|\[\s*(["'`])([^"'`]+)\2\s*\])(?![\w$]|\s*=[^=])/g,
   )) {
     push(match.index, match[1] ?? match[3]);
+  }
+
+  for (const match of source.matchAll(/\benvironment\.([A-Z_][A-Z0-9_]*)(?![\w$]|\s*=[^=])/g)) {
+    push(match.index, match[1]);
   }
 
   for (const match of source.matchAll(/\{([^{}]*)\}\s*=\s*process\.env\b/g)) {

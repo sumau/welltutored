@@ -2,7 +2,7 @@
 
 For whoever needs to change a setting, or the domain: every environment
 variable the application reads, what it does, when it is read, and where it is
-set.
+set. The API reads its settings through `backend/src/core/config.ts`.
 
 | Variable | When | Set in | Notes |
 | --- | --- | --- | --- |
@@ -37,8 +37,8 @@ public enquiry POST, which is the main thing visitors do. Set it to the public
 origin, with no trailing path, and update it when the domain changes.
 
 `configuredValues` in `backend/src/api/middleware/request-origin.ts`
-reads `TRUSTED_ORIGINS` and `CORS_ORIGINS`, treats them as one list, and falls
-back to the localhost defaults only outside production. Setting either one
+takes `TRUSTED_ORIGINS` and `CORS_ORIGINS` from `core/config.ts` as one list,
+and falls back to the localhost defaults only outside production. Setting either one
 **replaces** those defaults, so a Deployment trusts what `fly.toml` names and
 nothing else.
 

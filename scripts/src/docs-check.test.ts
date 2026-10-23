@@ -464,6 +464,7 @@ test("extracts the environment variables the code reads by name", () => {
       "process.env.TRUSTED_ORIGINS = 'https://example.test';",
       "if (process.env.CI === 'true') {}",
       "const options = { ...process.env };",
+      "const origin = environment.PUBLIC_ORIGIN?.trim();",
     ].join("\n"),
     "lib/example.ts",
   );
@@ -474,6 +475,7 @@ test("extracts the environment variables the code reads by name", () => {
     { filePath: "lib/example.ts", lineNumber: 3, name: "DATABASE_URL" },
     { filePath: "lib/example.ts", lineNumber: 3, name: "NODE_ENV" },
     { filePath: "lib/example.ts", lineNumber: 10, name: "CI" },
+    { filePath: "lib/example.ts", lineNumber: 12, name: "PUBLIC_ORIGIN" },
   ]);
 });
 

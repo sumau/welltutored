@@ -1,19 +1,16 @@
 import type { IncomingHttpHeaders } from "node:http";
 import type { Request, RequestHandler } from "express";
-
-type Environment = Record<string, string | undefined>;
+import {
+  configuredPort,
+  type Environment,
+  isProduction,
+  trustedOriginValues,
+} from "../../core/config";
 
 const LOCAL_DEVELOPMENT_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ];
-
-function valuesFromEnvironment(environment: Environment, key: string) {
-  return (environment[key] ?? "")
-    .split(/[,\s]+/)
-    .map((value) => value.trim())
-    .filter(Boolean);
-}
 
 /**
  * Normalise an origin without accepting paths, credentials, or opaque origins.
@@ -46,18 +43,16 @@ export function normalizeOrigin(value: string | undefined): string | undefined {
 }
 
 function configuredValues(environment: Environment) {
-  const explicit = [
-    ...valuesFromEnvironment(environment, "TRUSTED_ORIGINS"),
-    ...valuesFromEnvironment(environment, "CORS_ORIGINS"),
-  ];
+  const explicit = trustedOriginValues(environment);
   if (explicit.length > 0) return explicit;
 
   // Production names its origin explicitly or trusts nothing. Development gets
   // the local defaults, because there is no committed origin to read there.
-  if (environment.NODE_ENV === "production") return [];
+  if (isProduction(environment)) return [];
 
-  const localPort = environment.PORT
-    ? [`http://localhost:${environment.PORT}`, `http://127.0.0.1:${environment.PORT}`]
+  const port = configuredPort(environment);
+  const localPort = port
+    ? [`http://localhost:${port}`, `http://127.0.0.1:${port}`]
     : [];
   return [...LOCAL_DEVELOPMENT_ORIGINS, ...localPort];
 }

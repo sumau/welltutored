@@ -5,6 +5,7 @@ import pinoHttp from "pino-http";
 import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
 import router from "./api/routes";
+import { clerkPublishableKey } from "./core/config";
 import { logger } from "./core/logger";
 import { mountWebClient } from "./core/web-client";
 import {
@@ -92,7 +93,7 @@ app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
       getPublicHost(req) ?? "",
-      process.env.CLERK_PUBLISHABLE_KEY,
+      clerkPublishableKey(),
     ),
   })),
 );

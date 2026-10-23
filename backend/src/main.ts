@@ -1,26 +1,15 @@
 import { logPoolErrors, pool } from "./core/db";
 import app from "./app";
+import { isDevelopment, listenPort } from "./core/config";
 import { logger } from "./core/logger";
 import { ensureSeedContent } from "./seed";
 
 logPoolErrors(pool);
 
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
+const port = listenPort();
 
 try {
-  if (process.env.NODE_ENV === "development") {
+  if (isDevelopment()) {
     await ensureSeedContent();
   }
 } catch (err) {
