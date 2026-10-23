@@ -5,6 +5,14 @@
 # can't read the answers.
 set -eu
 
+# Deletes .git below, so refuse to run in a clone of GitHub, such as the
+# working repo. A local clone of it is fine.
+case "$(git remote get-url origin 2>/dev/null)" in
+  *github.com*)
+    echo "plant.sh: origin is on GitHub; run this in a local clone instead" >&2
+    exit 1 ;;
+esac
+
 plant() { # file, old text, new text
   python3 - "$@" <<'PY'
 import sys

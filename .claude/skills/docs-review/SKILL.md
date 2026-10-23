@@ -30,13 +30,14 @@ Done when you hold the doc paths, the commit, and what the gate verifies.
 Read each doc line by line and list every claim, opening no code. Follow **What is a claim** below. Give each claim:
 
 - the doc's `file:line` and the claim, quoted;
-- the **file** it is about: a path the sentence or its section names in backticks (the Docs Check guarantees these exist), or `none` when it names no file. A claim about several files goes under the one that would prove it.
+- the **file** it is about: a path the sentence or its section names in backticks (the Docs Check guarantees these exist), or `none` when it names no file. A claim about several files goes under the one that would prove it;
+- for a claim with file `none`, its **subject** in two or three words ("manual sign-in"), the same words for every claim about the same thing.
 
 Done when every line of every chosen doc has been read and each claim has its file.
 
 ### 3. Verify, one subagent per file
 
-Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way.
+Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way, but never between two claims with the same subject: claims that could contradict each other must reach the same subagent.
 
 Dispatch every subagent in one message so they run in parallel. Give each the file, its claims, what the gate verifies, and **The verification brief** below, pasted in full: the subagent has no other access to it.
 
@@ -64,7 +65,7 @@ A statement about what the code, the configuration or the running system does or
 > - **false**: the evidence contradicts it. Say whether the doc or the code looks wrong, and suggest replacement text.
 > - **unverifiable**: nothing in the repository settles it. Say why. A claim about how the repository host or another service is set up (which checks a merge waits for, which secrets exist, whether Dependabot runs) is unverifiable unless a file in the repository holds the setting. Make no API calls.
 >
-> **Diagrams.** If the legend says a solid arrow means "the next step waits for this", find what makes the next step wait; a dotted arrow means nothing waits.
+> **Diagrams.** If the legend says a solid arrow means "the next step waits for this", find what makes the next step wait; a dotted arrow means nothing waits. A file showing that a step can't fail (`continue-on-error: true`, say) settles a solid arrow out of that step as false.
 >
 > **Contradictions.** Two claims in your list that disagree are a finding even when the code can't say which is right. Quote both.
 >
