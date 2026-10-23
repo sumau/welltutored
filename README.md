@@ -62,9 +62,9 @@ opening a pull request.
 
 | Path | What it holds |
 | --- | --- |
-| `artifacts/welltutored` | React + Vite frontend: public directory, tutor and resource pages, enquiry flow, auth screens, and private workspace |
-| `artifacts/welltutored/src/index.css` | Editorial visual system and theme tokens |
-| `artifacts/api-server` | Express 5 API, which also serves the frontend build: routes, Clerk middleware, seed/bootstrap behavior, and server startup |
+| `frontend` | React + Vite frontend: public directory, tutor and resource pages, enquiry flow, auth screens, and private workspace |
+| `frontend/src/index.css` | Editorial visual system and theme tokens |
+| `backend` | Express 5 API, which also serves the frontend build: routes, Clerk middleware, seed/bootstrap behavior, and server startup |
 | `lib/db/src/schema` | Drizzle/PostgreSQL schema |
 | `lib/api-spec/openapi.yaml` | API contract, source for the generated client and Zod schemas |
 | `lib/api-client-react`, `lib/api-zod` | Generated frontend hooks and runtime schemas |
@@ -76,7 +76,7 @@ These run inside the containers. Prefix them with `docker compose exec api`
 against a running service, or see
 [docs/local-docker.md](docs/local-docker.md) for one-off runs.
 
-- `PORT=8080 pnpm --filter @workspace/api-server run dev` — run the API server
+- `PORT=8080 pnpm --filter @workspace/backend run dev` — run the API server
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — docs check + typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec

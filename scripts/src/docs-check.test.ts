@@ -24,7 +24,7 @@ import {
 test("extracts inline and fenced pnpm commands with source locations", () => {
   const commands = extractDocumentedCommands(
     [
-      "- `pnpm --filter @workspace/api-server run dev` — start the API",
+      "- `pnpm --filter @workspace/backend run dev` — start the API",
       "",
       "```sh",
       "SMOKE_BASE_URL=https://example.test pnpm smoke:launch",
@@ -39,7 +39,7 @@ test("extracts inline and fenced pnpm commands with source locations", () => {
     {
       filePath: "docs/example.md",
       lineNumber: 1,
-      command: "pnpm --filter @workspace/api-server run dev",
+      command: "pnpm --filter @workspace/backend run dev",
     },
     {
       filePath: "docs/example.md",
@@ -56,9 +56,9 @@ test("validates root and filtered workspace scripts", () => {
       manifest: { scripts: { build: "echo build" } },
     },
     {
-      filePath: "artifacts/api-server/package.json",
+      filePath: "backend/package.json",
       manifest: {
-        name: "@workspace/api-server",
+        name: "@workspace/backend",
         scripts: { dev: "echo dev" },
       },
     },
@@ -71,7 +71,7 @@ test("validates root and filtered workspace scripts", () => {
         {
           filePath: "README.md",
           lineNumber: 2,
-          command: "pnpm --filter @workspace/api-server run dev",
+          command: "pnpm --filter @workspace/backend run dev",
         },
       ],
       manifests,
@@ -432,7 +432,7 @@ test("validates file paths by their end, on whole segments, with an allowlist", 
       { filePath: "docs/architecture.md", lineNumber: 4, path: "workspace.ts" },
       { filePath: "docs/local-docker.md", lineNumber: 5, path: ".env.local" },
     ],
-    ["README.md", "artifacts/api-server/src/routes/my-workspace.ts", "artifacts/api-server/src/routes/workspace.ts"],
+    ["README.md", "backend/src/routes/my-workspace.ts", "backend/src/routes/workspace.ts"],
     new Set([".env.local"]),
   );
 
@@ -443,7 +443,7 @@ test("validates file paths by their end, on whole segments, with an allowlist", 
   assert.deepEqual(
     validateDocumentedPaths(
       [{ filePath: "docs/architecture.md", lineNumber: 1, path: "workspace.ts" }],
-      ["artifacts/api-server/src/routes/my-workspace.ts"],
+      ["backend/src/routes/my-workspace.ts"],
       new Set(),
     ),
     ['docs/architecture.md:1: "workspace.ts" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.'],

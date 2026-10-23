@@ -53,7 +53,7 @@ are runtime requests. Dotted arrows are code generated from
 contract. Serving everything from one origin is
 [ADR-0001](adr/0001-single-origin-deployment.md).
 
-Every route is defined in `artifacts/welltutored/src/app/route-map.ts`.
+Every route is defined in `frontend/src/app/route-map.ts`.
 
 ## Public website
 
@@ -69,8 +69,8 @@ Workspace.
 
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
 the public visual language. Public API handlers live in
-`artifacts/api-server/src/routes/content.ts` and
-`artifacts/api-server/src/routes/enquiries.ts`.
+`backend/src/routes/content.ts` and
+`backend/src/routes/enquiries.ts`.
 
 ## Authentication
 
@@ -108,7 +108,7 @@ one as pending, so the pending flag alone lets a duplicate through.
 
 ## API boundaries
 
-Workspace code in `artifacts/api-server/src` is split by responsibility, one
+Workspace code in `backend/src` is split by responsibility, one
 directory each:
 
 - `auth` — authenticated account lookup and role checks
@@ -152,12 +152,12 @@ not currently keep a private draft alongside a live published version.
 ## Styling payload
 
 The Well Tutored Vite build enables Tailwind's production Lightning CSS
-optimization. `artifacts/welltutored/scripts/verify-css-build.mjs` holds a size
+optimization. `frontend/scripts/verify-css-build.mjs` holds a size
 budget for the primary stylesheet, set about 7% above its size in October 2026
 so that growth is a decision rather than drift. `pnpm run verify:ci` checks it
 after the build. To check it alone, run
-`pnpm --filter @workspace/welltutored run build` followed by
-`pnpm --filter @workspace/welltutored run verify:css`; the script prints the
+`pnpm --filter @workspace/frontend run build` followed by
+`pnpm --filter @workspace/frontend run verify:css`; the script prints the
 current size.
 
 The remaining global CSS is intentional: Tailwind preflight, theme variables,

@@ -1,6 +1,6 @@
 # Local development stack. The Deployment serves the frontend and the API from
 # one origin; here the Vite dev server proxies /api to the API service instead
-# (see artifacts/welltutored/vite.config.ts).
+# (see frontend/vite.config.ts).
 name: welltutored
 
 x-node: &node
@@ -59,7 +59,7 @@ services:
       # Browser requests reach the API through the Vite proxy, so the origin
       # the API sees is the web service's. Stated explicitly here because
       # TRUSTED_ORIGINS replaces the built-in defaults rather than adding to
-      # them (artifacts/api-server/src/middlewares/request-origin.ts).
+      # them (backend/src/middlewares/request-origin.ts).
       TRUSTED_ORIGINS: http://localhost:5173
     ports:
       - "8080:8080"
@@ -68,7 +68,7 @@ services:
         condition: service_completed_successfully
       db:
         condition: service_healthy
-    command: pnpm --filter @workspace/api-server run dev
+    command: pnpm --filter @workspace/backend run dev
 
   web:
     <<: *node
@@ -81,7 +81,7 @@ services:
     depends_on:
       deps:
         condition: service_completed_successfully
-    command: pnpm --filter @workspace/welltutored run dev
+    command: pnpm --filter @workspace/frontend run dev
 
   # Schema push. Kept out of the default startup because drizzle-kit can
   # prompt; run it with `docker compose run --rm migrate` so it gets a TTY.

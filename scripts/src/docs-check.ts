@@ -556,7 +556,8 @@ export function validateEnvironmentVariables(
 function readPackageManifests(rootDir: string): PackageManifestRecord[] {
   const packagePaths = new Set<string>([
     join(rootDir, "package.json"),
-    ...walkFiles(join(rootDir, "artifacts"), "package.json"),
+    ...walkFiles(join(rootDir, "backend"), "package.json"),
+    ...walkFiles(join(rootDir, "frontend"), "package.json"),
     ...walkFiles(join(rootDir, "lib"), "package.json"),
     ...walkFiles(join(rootDir, "scripts"), "package.json"),
   ]);

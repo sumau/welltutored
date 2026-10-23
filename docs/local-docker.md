@@ -172,7 +172,7 @@ with it. The database is untouched, and this is the case that looks worse than
 it is: workspace accounts are keyed on the verified email address, not the
 Clerk user id. A new Clerk identity presenting an email that already has an
 account resolves to that account and creates no duplicate, which
-`artifacts/api-server/src/routes/workspace.lifecycle.test.ts` asserts. So
+`backend/src/routes/workspace.lifecycle.test.ts` asserts. So
 recovery is not a fresh start:
 
 1. Create a replacement application, as described above.

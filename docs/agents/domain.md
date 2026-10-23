@@ -28,7 +28,8 @@ This is a **single-context** repo: one glossary and one ADR directory at the roo
 ├── docs/adr/
 │   ├── 0001-....md
 │   └── 0002-....md
-├── artifacts/          ← api-server, welltutored
+├── backend/
+├── frontend/
 └── lib/                ← db, api-zod, api-client-react, api-spec
 ```
 

@@ -65,7 +65,7 @@ Which keys work depends on the hostname, and getting this wrong is the most
 common way a first Deployment fails.
 
 `publishableKeyFromHost` decides this, and the SPA
-(`artifacts/welltutored/src/app/config.ts`) and the API (`app.ts`) both call it:
+(`frontend/src/app/config.ts`) and the API (`app.ts`) both call it:
 
 ```js
 if (fallbackKey && isDevelopmentFromPublishableKey(fallbackKey)) return fallbackKey;
@@ -208,7 +208,7 @@ In this order, so the server's keys and the bundle's key change in one deploy:
 ## Content
 
 `ensureSeedContent()` only runs when `NODE_ENV=development`
-(`artifacts/api-server/src/index.ts`), so a fresh Deployment database has no
+(`backend/src/index.ts`), so a fresh Deployment database has no
 tutors or resources and the public directory renders empty.
 [Deploy](../GLOSSARY.md#delivery) empty and create content through `/workspace`.
 Two things behave differently until there is a published

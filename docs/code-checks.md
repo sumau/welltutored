@@ -39,7 +39,7 @@ connection coming from its `postgres:16` service container instead
 Run the API tests with:
 
 ```sh
-pnpm --filter @workspace/api-server test
+pnpm --filter @workspace/backend test
 ```
 
 This is the complete API suite used by CI: the in-memory unit checks and the
@@ -49,7 +49,7 @@ database; `pnpm run verify:ci` does, as above.
 Run only the non-mutating API checks with:
 
 ```sh
-pnpm --filter @workspace/api-server run test:unit
+pnpm --filter @workspace/backend run test:unit
 ```
 
 The lifecycle tests exercise the Express routes and database-backed behavior
@@ -86,7 +86,7 @@ stub assigned through it is silently discarded and the route reaches Clerk.
 Run the Well Tutored web tests with:
 
 ```sh
-pnpm --filter @workspace/welltutored test
+pnpm --filter @workspace/frontend test
 ```
 
 React components are rendered either into JSDOM or to static markup. Network

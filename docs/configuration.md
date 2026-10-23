@@ -16,7 +16,7 @@ set.
 | `CLERK_PUBLISHABLE_KEY` | runtime | `fly secrets`; `.env` locally | Used by the Clerk middleware. |
 | `VITE_CLERK_PUBLISHABLE_KEY` | **build** | a build argument in `fly.toml`'s `[build.args]`; `.env` locally | Compiled into the browser bundle. Setting it at runtime, as a Fly secret for instance, has no effect ([first-deploy.md](first-deploy.md#flyio)). |
 | `LOG_LEVEL` | runtime, optional | not set | The server's log level; `info` when unset. |
-| `BASE_PATH` | **build**, optional | not set | The path the frontend is served under, read by `artifacts/welltutored/vite.config.ts`; `/` when unset. |
+| `BASE_PATH` | **build**, optional | not set | The path the frontend is served under, read by `frontend/vite.config.ts`; `/` when unset. |
 
 Changing the domain means changing `TRUSTED_ORIGINS` and `PUBLIC_ORIGIN`
 together, after the new hostname has a certificate;
@@ -36,7 +36,7 @@ empty trusted-origin set rejects every credentialed request — including the
 public enquiry POST, which is the main thing visitors do. Set it to the public
 origin, with no trailing path, and update it when the domain changes.
 
-`configuredValues` in `artifacts/api-server/src/middlewares/request-origin.ts`
+`configuredValues` in `backend/src/middlewares/request-origin.ts`
 reads `TRUSTED_ORIGINS` and `CORS_ORIGINS`, treats them as one list, and falls
 back to the localhost defaults only outside production. Setting either one
 **replaces** those defaults, so a Deployment trusts what `fly.toml` names and
