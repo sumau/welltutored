@@ -120,6 +120,12 @@ using the development instance, and use the Workspace. Differences between the
 development and production Clerk instances are outside it.
 _Avoid_: Auth test, login check
 
+**Enquiry Smoke**:
+The check, before merge, that a person can fill in and send the enquiry form in
+a real browser, by keyboard alone. It intercepts the request that would send
+it, so it never creates a real Enquiry. Not blocking yet.
+_Avoid_: Enquiry browser check, form test
+
 **Docs Check**:
 The check, before merge, that the docs' mechanical claims hold: the ones a
 parser can verify against the repository. It blocks the build.

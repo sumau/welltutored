@@ -4,7 +4,16 @@ import { requireTestDatabaseUrl } from "./check.js";
 function runSchemaPush(testDatabaseUrl: string): Promise<number> {
   const child = spawn(
     "pnpm",
-    ["--filter", "@workspace/backend", "run", "push-force"],
+    [
+      "--filter",
+      "@workspace/backend",
+      "exec",
+      "drizzle-kit",
+      "push",
+      "--force",
+      "--config",
+      "./drizzle.config.ts",
+    ],
     {
       env: {
         ...process.env,

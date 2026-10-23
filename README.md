@@ -89,8 +89,9 @@ against a running service, or see
 - `pnpm run build` — docs check + typecheck + build all packages
 - `pnpm --filter @workspace/backend run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/backend run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
-- `pnpm run prepare:integration-database` — validate `TEST_DATABASE_URL` and apply the
-  current schema to the dedicated integration-test database
+
+The test commands are in [docs/code-checks.md](docs/code-checks.md), and the
+smoke checks in [docs/smoke-checks.md](docs/smoke-checks.md).
 
 The Vite config defaults `PORT` and `BASE_PATH`; compose overrides `PORT`
 ([docs/configuration.md](docs/configuration.md)).

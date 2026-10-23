@@ -291,7 +291,7 @@ test("extracts pnpm commands from inline and block run steps", () => {
       "      - name: Install dependencies",
       "        run: pnpm install --frozen-lockfile",
       "      - name: Verify",
-      "        run: pnpm run verify:ci && pnpm docs:check",
+      "        run: pnpm run verify && pnpm docs:check",
       "      - name: Smoke",
       "        run: |",
       "          echo checking",
@@ -307,7 +307,7 @@ test("extracts pnpm commands from inline and block run steps", () => {
     {
       filePath: ".github/workflows/ci.yml",
       lineNumber: 8,
-      command: "pnpm run verify:ci",
+      command: "pnpm run verify",
     },
     {
       filePath: ".github/workflows/ci.yml",
