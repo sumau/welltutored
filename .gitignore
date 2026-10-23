@@ -54,3 +54,6 @@ Thumbs.db
 # pnpm content-addressable store. Docker runs keep it in the repo so it
 # shares a filesystem with node_modules and can hardlink into it.
 .pnpm-store/
+
+# Docs Review reports, one per audited commit
+.docs-review/

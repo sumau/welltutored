@@ -8,7 +8,7 @@ argument-hint: "<doc>… | all"
 
 # Docs Review
 
-Read the docs as a list of **claims**, check each claim against the code, and report what is false and what can't be checked. The review changes no file and blocks nothing.
+Read the docs as a list of **claims**, check each claim against the code, and report what is false and what can't be checked. The review changes no tracked file and blocks nothing; it only saves its report.
 
 **Low recall is worse than false positives.** A false statement the review misses stays invisible; one it reports by mistake costs the reader a minute. When unsure whether a claim holds, report it with the evidence on both sides.
 
@@ -45,7 +45,7 @@ Done when every group has returned its verdicts.
 
 ### 4. Report
 
-Write the report in the session, in the format under **The report**, then stop. The user chooses what to fix.
+Write the report in the format under **The report**. Save it to `.docs-review/<commit>.md` at the repository root (`<commit>-2.md` and so on if that exists), which git ignores, then show it in the session and stop. The user chooses what to fix.
 
 ## What is a claim
 
