@@ -28,24 +28,20 @@ Done when you hold the doc paths, the commit, and what the gate verifies.
 
 ### 2. Extract the claims
 
-Read each doc line by line and list every claim, opening no code. Follow **What is a claim** below. Give each claim:
+Read each doc line by line and list every claim, opening no code. Follow **What is a claim** below. Write the claims straight to `.docs-review/work/claims/<doc>.tsv`, one file per doc (`docs/pipeline.md` becomes `docs-pipeline-md.tsv`), all in one message, replacing any from an earlier run. Don't list them anywhere else first: each claim is written once. One claim per line, four fields separated by tabs, with no tab or line break inside a field:
 
-- the doc's `file:line` and the claim, quoted;
-- the **file** it is about: a path the sentence or its section names in backticks, or `none` when it names no file. A claim about several files goes under the one that would prove it;
-- its **subject** in two or three words ("manual sign-in"), the same words for every claim about the same thing, whatever its file.
+1. the doc's `file:line`;
+2. the **file** it is about: a path the sentence or its section names in backticks, or `none` when it names no file. A claim about several files goes under the one that would prove it;
+3. its **subject** in two or three words ("manual sign-in"), the same words for every claim about the same thing, whatever its file;
+4. the claim, quoted.
 
-Done when every line of every chosen doc has been read and each claim has its file and subject.
+Then run `python3 <this skill's folder>/group-claims.py` from the repository root. It groups the claims by file, one group per subagent so each file is read once, and splits a group of more than 25 claims into parts, never between two claims with the same subject. When a subject's claims fall in more than one group, it gives each of those groups the others' claims as **related claims**, to compare against but not to verify. It writes `.docs-review/work/<n>.md` per group and prints the counts. If it rejects a line, fix that line and run it again.
+
+Done when every line of every chosen doc has been read and the script has written the groups. Use its counts in the step's progress line.
 
 ### 3. Verify, one subagent per file
 
-Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way, but never between two claims with the same subject: claims that could contradict each other must reach the same subagent. When a subject's claims fall in more than one group, give each of those groups the other groups' claims with that subject as **related claims**, to compare against but not to verify.
-
-Write the subagents' inputs to files in `.docs-review/work/`, replacing any from an earlier run, so each brief stays one line:
-
-- `.docs-review/work/brief.md`: **The verification brief** below, in full, then what the gate verifies;
-- one `.docs-review/work/<n>.md` per group or part: its file, its claims, and any related claims.
-
-Then dispatch every subagent in a single message, so they run in parallel, each with `model: sonnet`: verifying is most of the cost, so it runs on Sonnet, while extracting and reporting stay on the session's model. Each prompt is only: "Follow `.docs-review/work/brief.md` for the claims in `.docs-review/work/<n>.md`." Don't send one subagent and wait before writing the next.
+Write **The verification brief** below, in full, then what the gate verifies, to `.docs-review/work/brief.md`. Then dispatch one subagent per group file in a single message, so they run in parallel, each with `model: sonnet`: verifying is most of the cost, so it runs on Sonnet, while extracting and reporting stay on the session's model. Each prompt is only: "Follow `.docs-review/work/brief.md` for the claims in `.docs-review/work/<n>.md`." Don't send one subagent and wait before writing the next.
 
 Done when every group has returned its verdicts.
 
