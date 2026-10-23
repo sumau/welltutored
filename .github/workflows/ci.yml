@@ -1,4 +1,4 @@
-# Deterministic repository verification, as defined by `pnpm run verify:ci`,
+# Deterministic repository verification, as defined by `pnpm run verify`,
 # the Image Smoke against the production image, and then the deploy.
 # docs/pipeline.md is the description of what each gate covers and why;
 # this file only supplies the environment they need.
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   verify:
-    name: verify:ci
+    name: verify
     # ubuntu-latest is linux-x64/glibc. pnpm-workspace.yaml prunes every other
     # platform's native binaries (esbuild, lightningcss, @tailwindcss/oxide,
     # rollup) from the lockfile, so an arm runner or a musl container could not
@@ -47,9 +47,10 @@ jobs:
           --health-retries 30
 
     env:
-      # Both connections are set, and set differently, so backend/src/core/db.ts's
-      # refusal to run integration tests against the application database is
-      # exercised rather than trivially satisfied by an absent DATABASE_URL.
+      # Both connections are set, and set differently, so the refusal in
+      # backend/src/core/config.ts (databaseUrl()) to run integration tests
+      # against the application database is exercised rather than trivially
+      # satisfied by an absent DATABASE_URL.
       # Nothing writes to welltutored; it exists to be the URL the guard
       # compares against.
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/welltutored
@@ -72,7 +73,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # verify:ci runs the integration tests against TEST_DATABASE_URL. The
+      # verify runs the integration tests against TEST_DATABASE_URL. The
       # database it names has to exist first: prepare:integration-database
       # applies a schema through drizzle-kit, which cannot create the database
       # that holds it.
@@ -81,13 +82,9 @@ jobs:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -c 'CREATE DATABASE welltutored_test'
 
-      # Runs the guard tests, the integration-database checks, schema
-      # preparation, the API suite (including the integration tests), the
-      # web tests, the smoke-check tests, and finally `pnpm run build` — which
-      # is where docs:check and the full typecheck live, so a doc edit that
-      # would break the deployment build fails here instead.
+      # The steps and their order are `verify` in the root package.json.
       - name: Verify
-        run: pnpm run verify:ci
+        run: pnpm run verify
 
   # The Image Smoke: does the production image start and serve the site? It
   # builds docker/Dockerfile itself, so it checks the image's recipe, not the
@@ -196,14 +193,14 @@ jobs:
       - name: Development smoke
         env:
           SMOKE_BASE_URL: http://localhost:8080
-        run: pnpm run smoke:dev
+        run: pnpm run smoke:launch:dev
 
       # Not blocking yet: it moves through the form by tab order, so a harmless
       # markup change can fail it. It intercepts /api/enquiries, so it covers
       # the built form in a real browser; the development smoke covers the
       # server's handling of an invalid enquiry. The runner image carries
       # Google Chrome.
-      - name: Enquiry browser smoke
+      - name: Enquiry smoke
         continue-on-error: true
         env:
           SMOKE_BASE_URL: http://localhost:8080

@@ -98,8 +98,8 @@ services:
         condition: service_healthy
     command: pnpm --filter @workspace/backend run push
 
-  # Full CI suite. `verify:ci` needs a dedicated TEST_DATABASE_URL and stops at
-  # check:integration-database without one; this points it at a second
+  # Full CI suite. `verify` needs a dedicated TEST_DATABASE_URL and stops at
+  # prepare:integration-database without one; this points it at a second
   # database on the db service.
   #
   # The test database must differ from the application one:
@@ -122,7 +122,7 @@ services:
         condition: service_healthy
     # drizzle-kit applies a schema but cannot create the database that holds
     # it, so create it first. Repeat runs find it present and carry on.
-    command: bash -lc 'createdb -h db -U postgres welltutored_test 2>/dev/null || true; pnpm run verify:ci'
+    command: bash -lc 'createdb -h db -U postgres welltutored_test 2>/dev/null || true; pnpm run verify'
 
   # The deployment image, for checking it locally before pushing it anywhere.
   # Unlike the services above it has no bind mount and no pnpm: it runs the

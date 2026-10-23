@@ -7,15 +7,13 @@
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "build": "pnpm run docs:check && pnpm run typecheck && pnpm -r --if-present run build",
     "docs:check": "pnpm --filter @workspace/scripts run docs:check",
-    "test:database-check": "pnpm --filter @workspace/scripts run test:database-check",
-    "check:integration-database": "pnpm --filter @workspace/scripts run check:integration-database",
     "prepare:integration-database": "pnpm --filter @workspace/scripts run prepare:integration-database",
-    "verify:ci": "pnpm run test:database-check && pnpm run check:integration-database && pnpm run prepare:integration-database && pnpm --filter @workspace/backend test && pnpm --filter @workspace/frontend test && pnpm --filter @workspace/scripts run test:smoke && pnpm --filter @workspace/scripts run test:docs && pnpm run build && pnpm --filter @workspace/frontend run verify:css",
-    "smoke:launch": "pnpm --filter @workspace/scripts run smoke",
-    "smoke:dev": "pnpm --filter @workspace/scripts run smoke:dev",
+    "verify": "pnpm --filter @workspace/scripts run test:integration-database && pnpm run prepare:integration-database && pnpm --filter @workspace/backend test && pnpm --filter @workspace/frontend test && pnpm --filter @workspace/scripts run test:smoke && pnpm --filter @workspace/scripts run test:docs && pnpm run build && pnpm --filter @workspace/frontend run check:css-size",
+    "smoke:launch": "pnpm --filter @workspace/scripts run smoke:launch",
+    "smoke:launch:dev": "pnpm --filter @workspace/scripts run smoke:launch:dev",
     "smoke:enquiry": "pnpm --filter @workspace/scripts run smoke:enquiry",
     "smoke:sign-in": "pnpm --filter @workspace/scripts run smoke:sign-in",
-    "typecheck": "pnpm -r --filter \"./backend\" --filter \"./frontend\" --filter \"./scripts\" --if-present run typecheck"
+    "typecheck": "pnpm -r --if-present run typecheck"
   },
   "private": true,
   "devDependencies": {

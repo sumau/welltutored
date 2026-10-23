@@ -185,16 +185,28 @@ its status as `published` updates the public resource in place; changing it to
 `draft` removes it from public results while it is being revised. Resources do
 not currently keep a private draft alongside a live published version.
 
-## Styling payload
+## Bundle size
 
 The Well Tutored Vite build enables Tailwind's production Lightning CSS
 optimization. `frontend/scripts/verify-css-build.mjs` holds a size
 budget for the primary stylesheet, set about 7% above its size in October 2026
-so that growth is a decision rather than drift. `pnpm run verify:ci` checks it
+so that growth is a decision rather than drift. `pnpm run verify` checks it
 after the build. To check it alone, run
 `pnpm --filter @workspace/frontend run build` followed by
-`pnpm --filter @workspace/frontend run verify:css`; the script prints the
+`pnpm --filter @workspace/frontend run check:css-size`; the script prints the
 current size.
+
+For the JavaScript, run
+`pnpm --filter @workspace/frontend run report:bundle-size`. It builds the
+frontend, then reads the chunk report that a plugin in
+`frontend/vite.config.ts` writes on every build, and prints each chunk's raw
+and gzip size, marked as entry or lazy, followed by the twenty largest modules
+in the entry chunk and in any chunk that imports more than one other. Unlike
+`check:css-size` it has no budget, and nothing runs it in CI: it is for looking
+into a size change by hand.
+
+The commands in this section run inside the container
+([local-docker.md](local-docker.md)).
 
 The remaining global CSS is intentional: Tailwind preflight, theme variables,
 utilities used by both public and authenticated routes, motion states, and

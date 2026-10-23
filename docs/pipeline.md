@@ -2,7 +2,10 @@
 
 For whoever wants to know what happens between a pull request and the live
 site, or why a check went red: every check, where it runs and what blocks, and
-how a deploy switches over, fails or is rolled back.
+how a deploy switches over, fails or is rolled back. The `pnpm` commands on
+this page are the ones CI runs on its own runners; to run a check yourself,
+follow its By hand column.
+
 Each check, from pull request to live site:
 
 ```mermaid
@@ -61,8 +64,8 @@ flowchart TB
 
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
-| `verify` (`verify:ci`) | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
+| `verify` | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
+| [Image Smoke](#the-image-smoke) (`smoke:launch:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
 | [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
 | [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
@@ -70,11 +73,11 @@ flowchart TB
 
 ## Deterministic CI validation
 
-`pnpm run verify:ci` is the deterministic quality gate: the test suites,
+`pnpm run verify` is the deterministic quality gate: the test suites,
 `pnpm run build` (which runs the [Docs Check](code-checks.md#the-docs-check)
 and the typecheck) and the CSS budget, stopping at the first failure. It does
 not depend on a running dev stack or a deployed URL. The steps and their order
-are `verify:ci` in the root `package.json`, and
+are `verify` in the root `package.json`, and
 [code-checks.md](code-checks.md) explains each.
 
 It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
@@ -115,12 +118,13 @@ a broken Dockerfile or a startup failure would first show up in `flyctl deploy`
 on `main`.
 
 It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with the
-development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image and runs `pnpm smoke:dev`
+development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image and runs `pnpm smoke:launch:dev`
 against it. A failure there stops the deploy. Two browser checks follow, with
 the runner's Google Chrome, and neither blocks yet (`continue-on-error`):
 
-- `pnpm smoke:enquiry` moves through the form by tab order, so a harmless
-  markup change can fail it. Once it has proven stable, it should block.
+- The [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`pnpm smoke:enquiry`)
+  moves through the form by tab order, so a harmless markup change can fail
+  it. Once it has proven stable, it should block.
 - The [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) signs in as a
   `+clerk_test` user, which it promotes to owner in the job's database with the
   guarded update from [first-deploy.md](first-deploy.md#owner). Once it has run
@@ -136,7 +140,7 @@ recipe, not the exact image. To run it by hand, see
 
 ## Credentials
 
-`pnpm run verify:ci` needs no Clerk credentials. The suite passes with
+`pnpm run verify` needs no Clerk credentials. The suite passes with
 `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, and `VITE_CLERK_PUBLISHABLE_KEY`
 all absent, so the `verify` job is not given Clerk secrets, and the interactive
 `clerk auth login` flow has no place in it: that command authenticates a person

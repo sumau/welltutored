@@ -1,6 +1,3 @@
-import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
-
 const missingTestDatabaseMessage =
   "Test database unavailable: set TEST_DATABASE_URL to a dedicated PostgreSQL connection before running database-backed integration tests.";
 const sharedTestDatabaseMessage =
@@ -20,21 +17,4 @@ export function requireTestDatabaseUrl(
   }
 
   return testDatabaseUrl;
-}
-
-function runCheck(): void {
-  try {
-    requireTestDatabaseUrl();
-    console.log("Dedicated integration-test database is configured.");
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
-    process.exitCode = 1;
-  }
-}
-
-if (
-  process.argv[1] &&
-  resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))
-) {
-  runCheck();
 }

@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
-    "analyze:bundle": "pnpm run build && node ./scripts/analyze-bundle.mjs",
-    "verify:css": "node ./scripts/verify-css-build.mjs",
-    "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
+    "report:bundle-size": "pnpm run build && node ./scripts/analyze-bundle.mjs",
+    "check:css-size": "node ./scripts/verify-css-build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --tsconfig tsconfig.json --test-concurrency=1 --test \"src/**/*.test.{ts,tsx}\""
   },

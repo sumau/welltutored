@@ -2,22 +2,23 @@
 
 For whoever writes a test or reads a red `verify`: the checks that run against
 the repository before a merge — the test suites, typecheck, build and docs
-check that `pnpm run verify:ci` runs — and how to write a test. Checks against
+check that `pnpm run verify` runs — and how to write a test. Checks against
 a running site are in [smoke-checks.md](smoke-checks.md).
 
 Most automated tests use Node's built-in `node:test` runner and are executed
 with `tsx`; the web tests also use JSDOM where browser APIs are needed.
 
 The commands below run inside the containers: prefix them with
-`docker compose exec api` against a running stack. The full suite is:
+`docker compose exec api` against a running stack
+([local-docker.md](local-docker.md)). The full suite is:
 
 ```
 docker compose run --rm test
 ```
 
-It runs `verify:ci` against a second database, `welltutored_test`, on the same
+It runs `verify` against a second database, `welltutored_test`, on the same
 PostgreSQL service as the development database, and creates that database on
-first use. Running `pnpm run verify:ci` directly inside `api` or `web` does not
+first use. Running `pnpm run verify` directly inside `api` or `web` does not
 work, because neither sets `TEST_DATABASE_URL`, and the suite stops at its
 second step:
 
@@ -57,7 +58,7 @@ pnpm --filter @workspace/backend test
 
 This is the complete API suite used by CI: the in-memory unit checks and the
 database-backed integration tests. Running it directly does not provision a
-database; `pnpm run verify:ci` does, as above.
+database; `pnpm run verify` does, as above.
 
 Run only the non-mutating API checks with:
 
@@ -72,16 +73,14 @@ database. Set `TEST_DATABASE_URL` to the dedicated PostgreSQL connection;
 `test:integration` sets `NODE_ENV=test`, and `backend/src/core/config.ts` then
 refuses to fall back to `DATABASE_URL` or use the same URL as the application. CI must
 apply the current schema to that database before running the integration
-script. The CI preparation command does both checks explicitly:
+script. The CI preparation command does that:
 
 ```sh
-pnpm run check:integration-database
 pnpm run prepare:integration-database
 ```
 
-The first command fails if `TEST_DATABASE_URL` is missing or points to
-`DATABASE_URL`. The second applies the current schema using the test URL as its
-target and fails with a connection-specific message if that database is not
+It fails if `TEST_DATABASE_URL` is missing or points to `DATABASE_URL`, then
+applies the current schema using the test URL as its target, and fails with a connection-specific message if that database is not
 reachable. Each process also uses a unique fixture namespace, so overlapping
 runs do not reuse or delete one another's records.
 
@@ -123,12 +122,12 @@ its JSX transform, so when adding a web test:
 
 ### Repository scripts
 
-The script package has three test suites, all run by `verify:ci`:
+The script package has three test suites, all run by `verify`:
 
 ```sh
 pnpm --filter @workspace/scripts run test:smoke
 pnpm --filter @workspace/scripts run test:docs
-pnpm run test:database-check
+pnpm --filter @workspace/scripts run test:integration-database
 ```
 
 The smoke-check tests validate the logic of the scripts in
@@ -164,6 +163,6 @@ It also reads the code, skipping tests and generated code, and fails when:
 ## Before a pull request
 
 [CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request) has what
-has to pass: `docker compose run --rm test`, which runs `pnpm run verify:ci`, the
+has to pass: `docker compose run --rm test`, which runs `pnpm run verify`, the
 same gate CI runs. While working, run the affected package's suite first; it is
 faster.

@@ -7,11 +7,16 @@ to read a failure. Where each runs in CI, and which of them block, is in
 [pipeline.md](pipeline.md). Their own logic is tested by `test:smoke`
 ([code-checks.md](code-checks.md#repository-scripts)).
 
+The `pnpm` commands below run inside the `api` container
+([local-docker.md](local-docker.md)), except `smoke:enquiry` and
+`smoke:sign-in`: they need a Chromium, which none of the images carry, so they
+run on a machine that has one. In CI that is the runner.
+
 | Script | Check | Runs against |
 | --- | --- | --- |
 | `smoke:launch` | The [Launch Smoke](#the-launch-smoke) | The live Deployment |
-| `smoke:dev` | The same check with `--dev`, so without the Clerk check | [The local stack](#against-the-local-stack), and the image in [the Image Smoke](#the-image-smoke-by-hand) |
-| `smoke:enquiry` | [The enquiry form in a real browser](#the-enquiry-browser-check) | Any of them, from a machine with Chromium |
+| `smoke:launch:dev` | The same check with `--dev`, so without the Clerk check | [The local stack](#against-the-local-stack), and the image in [the Image Smoke](#the-image-smoke-by-hand) |
+| `smoke:enquiry` | [The Enquiry Smoke](#the-enquiry-smoke) | Any of them, from a machine with Chromium |
 | `smoke:sign-in` | [The Sign-in Smoke](#the-sign-in-smoke) | A local image built with Clerk development keys |
 
 ## The Launch Smoke
@@ -87,10 +92,10 @@ reported as skipped rather than silently dropped.
 | `--dev` | the Clerk check, since a local stack runs on a development instance with no `clerk.` CNAME to check | never; development is a permanent mode |
 | `--allow-empty` | the non-empty assertion on `/api/tutors` and the page that addresses a [Tutor](../GLOSSARY.md#the-public-site) by slug | the Deployment has a published Tutor |
 
-`smoke:dev` wraps `--dev`:
+`smoke:launch:dev` wraps `--dev`:
 
 ```sh
-SMOKE_BASE_URL=http://prod:8080 pnpm smoke:dev
+SMOKE_BASE_URL=http://prod:8080 pnpm smoke:launch:dev
 ```
 
 The Deployment has a published Tutor, so the deploy job in
@@ -123,7 +128,7 @@ smoke through the Vite dev server, which proxies `/api` to the API service, so
 the web application and `/api` are checked together:
 
 ```sh
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:dev'
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:launch:dev'
 ```
 
 It runs the Launch Smoke's checks except the Clerk one
@@ -144,7 +149,7 @@ deploying anything. Run the development smoke against it over the compose
 network:
 
 ```
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:dev'
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:launch:dev'
 ```
 
 It requests every public page with `Accept: text/html`, which is what caught the
@@ -154,10 +159,10 @@ and `smoke:sign-in` need a Chromium these images do not carry, so they run from
 the host. The `image-smoke` job in `.github/workflows/ci.yml` has the steps CI
 takes.
 
-## The enquiry browser check
+## The Enquiry Smoke
 
-The enquiry form also has a real-browser check that goes through it by
-keyboard alone. It intercepts the final response, so the check never creates a
+The [Enquiry Smoke](../GLOSSARY.md#delivery) goes through the enquiry form in a
+real browser by keyboard alone. It intercepts the final response, so the check never creates a
 real [Enquiry](../GLOSSARY.md#the-public-site).
 
 ```sh
