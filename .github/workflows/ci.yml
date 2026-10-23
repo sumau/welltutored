@@ -72,11 +72,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Supplying TEST_DATABASE_URL takes the short branch of
-      # scripts/integration-database/with-integration-database.sh, which skips
-      # building a throwaway cluster. The database it names has to exist first:
-      # prepare:integration-database applies a schema through drizzle-kit,
-      # which cannot create the database that holds it.
+      # verify:ci runs the integration tests against TEST_DATABASE_URL. The
+      # database it names has to exist first: prepare:integration-database
+      # applies a schema through drizzle-kit, which cannot create the database
+      # that holds it.
       - name: Create the integration-test database
         env:
           PGPASSWORD: postgres

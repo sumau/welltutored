@@ -61,7 +61,7 @@ flowchart TB
 
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
-| `verify` (`verify:ci`) | The repository, with a temporary PostgreSQL | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
+| `verify` (`verify:ci`) | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
 | [Image Smoke](#the-image-smoke) (`smoke:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the enquiry form in a real browser (`smoke:enquiry`, not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
 | [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
@@ -74,11 +74,11 @@ flowchart TB
 `pnpm run build` (which runs the [Docs Check](code-checks.md#the-docs-check)
 and the typecheck) and the CSS budget, stopping at the first failure. It does
 not depend on a running dev stack or a deployed URL. The steps and their order
-are `verify:ci:checks` in the root `package.json`, and
+are `verify:ci` in the root `package.json`, and
 [code-checks.md](code-checks.md) explains each.
 
 It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
-`DATABASE_URL`, and makes a temporary local cluster when none is supplied;
+`DATABASE_URL`, and stops before them when none is supplied;
 [code-checks.md](code-checks.md#api-server) has the rules.
 
 ## GitHub Actions
@@ -89,8 +89,6 @@ goes on to deploy. The gate therefore runs before a merge, not only after one.
 
 The workflow supplies a `postgres:16` service container and points
 `TEST_DATABASE_URL` at a `welltutored_test` database that it creates first.
-Supplying a connection takes the externally-provided branch of
-`scripts/integration-database/with-integration-database.sh`, so no throwaway cluster is built for the run.
 `DATABASE_URL` is set as well, to a different database on the same server, so
 the refusal to share a connection between application and integration-test data
 is exercised rather than vacuously satisfied by an absent value.
