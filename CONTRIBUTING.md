@@ -19,7 +19,7 @@ Issues live in `sumau/welltutored` on GitHub.
   decisions, then a `- [ ]` checklist of steps, with steps only a human can do
   marked as such. Tick each box as its step lands on `main`, link the pull
   requests, and close the issue when the last box is ticked. Before closing
-  it, run `/docs-review`, the [Docs Review](GLOSSARY.md#delivery).
+  it, run `/docs-review all`, the [Docs Review](GLOSSARY.md#delivery).
 - Plans live in issues, not in `*-PLAN.md` files in the repo.
 - Plan each change with `/grill-with-docs` from the mattpocock-skills plugin,
   which [.claude/settings.json](.claude/settings.json) enables. It records the
