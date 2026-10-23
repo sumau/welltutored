@@ -1,4 +1,4 @@
-import type { pool as Pool } from "../core/db";
+import type { pool as Pool } from "./db";
 import { logger } from "./logger";
 
 /**

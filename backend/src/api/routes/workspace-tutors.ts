@@ -9,20 +9,20 @@ import {
   ListWorkspaceTutorsResponse,
   RestoreWorkspaceTutorParams,
   RestoreWorkspaceTutorResponse,
-} from "../api/schemas";
-import { db } from "../core/db";
-import { tutorProfileDraftsTable, tutorsTable } from "../models";
-import { splitTutorName } from "../lib/tutor-names";
-import { publicTutorSlug } from "../lib/tutor-slugs";
+} from "../schemas";
+import { db } from "../../core/db";
+import { tutorProfileDraftsTable, tutorsTable } from "../../models";
+import { splitTutorName } from "../../domain/tutor-names";
+import { publicTutorSlug } from "../../domain/tutor-slugs";
 import {
   availableTutorAccents,
   uniqueTutorSlug,
   tutorInitials,
-} from "../services/workspace-account-service";
+} from "../../crud/workspace-accounts";
 import {
   requireOwner,
   requireWorkspaceAccount as workspaceAccount,
-} from "../auth/workspace-access";
+} from "../deps";
 import { toTutorResponse } from "../presenters/tutor-presenter";
 
 const router: IRouter = Router();

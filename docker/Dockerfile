@@ -53,4 +53,4 @@ USER node
 EXPOSE 8080
 
 # /api/healthz is the check to point a platform's health probe at.
-CMD ["node", "--enable-source-maps", "dist/index.mjs"]
+CMD ["node", "--enable-source-maps", "dist/main.mjs"]

@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   isPublishableProfile,
   isPublishableResource,
-} from "./workspace-validation";
+} from "../../src/domain/workspace-validation";
 
 const validResource = {
   title: "How to plan an English essay",

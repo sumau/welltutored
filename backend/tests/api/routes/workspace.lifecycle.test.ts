@@ -6,20 +6,20 @@ import test, { after, before } from "node:test";
 import express, { type Express } from "express";
 import { eq, inArray } from "drizzle-orm";
 import { clerkClient } from "@clerk/express";
-import { db, pool } from "../core/db";
+import { db, pool } from "../../../src/core/db";
 import {
   resourcesTable,
   tutorProfileDraftsTable,
   workspaceAccountsTable,
   tutorsTable,
-} from "../models";
+} from "../../../src/models";
 import {
   ListWorkspaceResourcesResponse,
   UpdateWorkspaceResourceResponse,
-} from "../api/schemas";
-import contentRouter from "./content";
-import workspaceRouter from "./workspace";
-import { PUBLIC_TUTOR_CACHE_CONTROL } from "../lib/public-tutors";
+} from "../../../src/api/schemas";
+import contentRouter from "../../../src/api/routes/content";
+import workspaceRouter from "../../../src/api/routes/workspace";
+import { PUBLIC_TUTOR_CACHE_CONTROL } from "../../../src/crud/public-tutors";
 
 const runId = randomUUID().replaceAll("-", "").slice(0, 12);
 const ownerUserId = `workspace-lifecycle-owner-${runId}`;

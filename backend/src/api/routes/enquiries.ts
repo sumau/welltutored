@@ -6,17 +6,17 @@ import {
   ListWorkspaceEnquiriesResponse,
   RetryWorkspaceEnquiryParams,
   RetryWorkspaceEnquiryResponse,
-} from "../api/schemas";
-import { db } from "../core/db";
-import { enquiriesTable, tutorsTable } from "../models";
+} from "../schemas";
+import { db } from "../../core/db";
+import { enquiriesTable, tutorsTable } from "../../models";
 import {
   canReceivePublicEnquiries,
   findPublishedTutor,
-} from "../lib/public-tutors";
+} from "../../crud/public-tutors";
 import {
   requireApproved,
   requireWorkspaceAccount as workspaceAccount,
-} from "../auth/workspace-access";
+} from "../deps";
 
 const router: IRouter = Router();
 const simpleEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

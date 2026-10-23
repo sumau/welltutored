@@ -8,22 +8,22 @@ import {
   UpdateWorkspaceResourceBody,
   UpdateWorkspaceResourceParams,
   UpdateWorkspaceResourceResponse,
-} from "../api/schemas";
-import { db } from "../core/db";
-import { resourcesTable, tutorsTable } from "../models";
-import { estimateReadMinutes } from "../lib/text";
-import { normalizeResourceType } from "../lib/resource-types";
-import { normalizeTutorTint } from "../lib/tutor-accents";
+} from "../schemas";
+import { db } from "../../core/db";
+import { resourcesTable, tutorsTable } from "../../models";
+import { estimateReadMinutes } from "../../domain/text";
+import { normalizeResourceType } from "../../domain/resource-types";
+import { normalizeTutorTint } from "../../domain/tutor-accents";
 import {
   canEdit,
   requireApproved,
   requireWorkspaceAccount as workspaceAccount,
-} from "../auth/workspace-access";
+} from "../deps";
 import {
   findJoinedResource,
   toResourceResponse,
 } from "../presenters/resource-presenter";
-import { isPublishableResource } from "../domain/workspace-validation";
+import { isPublishableResource } from "../../domain/workspace-validation";
 
 const router: IRouter = Router();
 

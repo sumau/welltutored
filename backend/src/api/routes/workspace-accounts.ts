@@ -5,13 +5,13 @@ import {
   UpdateWorkspaceAccountBody,
   UpdateWorkspaceAccountParams,
   UpdateWorkspaceAccountResponse,
-} from "../api/schemas";
-import { db } from "../core/db";
-import { tutorsTable, workspaceAccountsTable } from "../models";
+} from "../schemas";
+import { db } from "../../core/db";
+import { tutorsTable, workspaceAccountsTable } from "../../models";
 import {
   requireOwner,
   requireWorkspaceAccount as workspaceAccount,
-} from "../auth/workspace-access";
+} from "../deps";
 
 const router: IRouter = Router();
 

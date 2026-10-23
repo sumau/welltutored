@@ -69,8 +69,8 @@ Workspace.
 
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
 the public visual language. Public API handlers live in
-`backend/src/routes/content.ts` and
-`backend/src/routes/enquiries.ts`.
+`backend/src/api/routes/content.ts` and
+`backend/src/api/routes/enquiries.ts`.
 
 ## Authentication
 
@@ -111,12 +111,13 @@ one as pending, so the pending flag alone lets a duplicate through.
 Workspace code in `backend/src` is split by responsibility, one
 directory each:
 
-- `auth` — authenticated account lookup and role checks
-- `services` — Clerk-to-workspace account provisioning and tutor assignment
+- `api/deps.ts` — authenticated account lookup and role checks
+- `crud/workspace-accounts.ts` — Clerk-to-workspace account provisioning and
+  tutor assignment
 - `domain` — publishability rules for resources and tutor profiles
-- `presenters` — response mapping
-- `routes` — request validation and mutations, one subrouter per area, which
-  `routes/workspace.ts` mounts
+- `api/presenters` — response mapping
+- `api/routes` — request validation and mutations, one subrouter per area,
+  which `routes/workspace.ts` mounts
 
 The intended direction for future workspace changes is to keep route handlers
 thin: authenticate, validate the request, call a domain/service function, and

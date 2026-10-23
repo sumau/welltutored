@@ -1,11 +1,11 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { db } from "../core/db";
+import { db } from "./core/db";
 import {
   resourcesTable,
   tutorsTable,
   type ResourceSectionRow,
-} from "../models";
-import { normalizeResourceType } from "./resource-types";
+} from "./models";
+import { normalizeResourceType } from "./domain/resource-types";
 
 const tutorSeeds = [
   {

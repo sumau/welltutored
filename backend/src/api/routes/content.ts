@@ -8,18 +8,18 @@ import {
   ListResourcesQueryParams,
   ListResourcesResponse,
   ListTutorsResponse,
-} from "../api/schemas";
-import { db } from "../core/db";
-import { resourcesTable, tutorsTable } from "../models";
-import { estimateReadMinutes, truncateAtWordBoundary } from "../lib/text";
-import { tutorNameFields } from "../lib/tutor-names";
-import { publicTutorSlug } from "../lib/tutor-slugs";
-import { normalizeTutorTint } from "../lib/tutor-accents";
-import { normalizeResourceType } from "../lib/resource-types";
+} from "../schemas";
+import { db } from "../../core/db";
+import { resourcesTable, tutorsTable } from "../../models";
+import { estimateReadMinutes, truncateAtWordBoundary } from "../../domain/text";
+import { tutorNameFields } from "../../domain/tutor-names";
+import { publicTutorSlug } from "../../domain/tutor-slugs";
+import { normalizeTutorTint } from "../../domain/tutor-accents";
+import { normalizeResourceType } from "../../domain/resource-types";
 import {
   findPublishedTutor,
   setPublicTutorCacheHeaders,
-} from "../lib/public-tutors";
+} from "../../crud/public-tutors";
 
 const router: IRouter = Router();
 

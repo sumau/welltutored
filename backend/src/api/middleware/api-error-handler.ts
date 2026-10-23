@@ -1,5 +1,5 @@
 import type { ErrorRequestHandler, Request } from "express";
-import { logger } from "../lib/logger";
+import { logger } from "../../core/logger";
 
 type ErrorWithMetadata = {
   name?: unknown;

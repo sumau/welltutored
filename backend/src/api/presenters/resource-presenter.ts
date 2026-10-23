@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
-import { db } from "../core/db";
-import { resourcesTable, tutorsTable } from "../models";
-import { estimateReadMinutes } from "../lib/text";
-import { normalizeResourceType } from "../lib/resource-types";
-import { normalizeTutorTint } from "../lib/tutor-accents";
+import { db } from "../../core/db";
+import { resourcesTable, tutorsTable } from "../../models";
+import { estimateReadMinutes } from "../../domain/text";
+import { normalizeResourceType } from "../../domain/resource-types";
+import { normalizeTutorTint } from "../../domain/tutor-accents";
 
 export function toResourceResponse(
   resource: typeof resourcesTable.$inferSelect,

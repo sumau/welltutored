@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getPublicOrigin, redirectToPublicOrigin } from "./public-origin";
+import { getPublicOrigin, redirectToPublicOrigin } from "../../../src/api/middleware/public-origin";
 
 const deployment = {
   NODE_ENV: "production",

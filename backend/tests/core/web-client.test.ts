@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
-import { resolveWebClientRoot } from "./web-client";
+import { resolveWebClientRoot } from "../../src/core/web-client";
 
 test("serves nothing when nothing configured a root", () => {
   assert.equal(resolveWebClientRoot({ NODE_ENV: "development" }), undefined);

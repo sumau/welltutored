@@ -208,7 +208,7 @@ In this order, so the server's keys and the bundle's key change in one deploy:
 ## Content
 
 `ensureSeedContent()` only runs when `NODE_ENV=development`
-(`backend/src/index.ts`), so a fresh Deployment database has no
+(`backend/src/main.ts`), so a fresh Deployment database has no
 tutors or resources and the public directory renders empty.
 [Deploy](../GLOSSARY.md#delivery) empty and create content through `/workspace`.
 Two things behave differently until there is a published

@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import {
   findOrProvisionFromClerkUser,
   type WorkspaceAccount,
-} from "../services/workspace-account-service";
+} from "../crud/workspace-accounts";
 
 export async function requireWorkspaceAccount(
   req: Request,

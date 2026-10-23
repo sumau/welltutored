@@ -1,4 +1,4 @@
-import { APPROVED_TUTOR_ACCENTS } from "../lib/tutor-accents";
+import { APPROVED_TUTOR_ACCENTS } from "./tutor-accents";
 
 export function isPublishableResource(resource: {
   title: string;

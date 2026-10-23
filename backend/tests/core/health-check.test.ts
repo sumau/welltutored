@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { healthCheck } from "./health-check";
+import { healthCheck } from "../../src/core/health-check";
 
 type Answer = { status: number; body: unknown };
 

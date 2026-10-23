@@ -6,13 +6,13 @@ import test, { after, before } from "node:test";
 import express from "express";
 import { eq, inArray } from "drizzle-orm";
 import { clerkClient } from "@clerk/express";
-import { db, pool } from "../core/db";
+import { db, pool } from "../../../src/core/db";
 import {
   enquiriesTable,
   tutorsTable,
   workspaceAccountsTable,
-} from "../models";
-import enquiriesRouter from "./enquiries";
+} from "../../../src/models";
+import enquiriesRouter from "../../../src/api/routes/enquiries";
 
 const runId = randomUUID().replaceAll("-", "").slice(0, 12);
 const ownerUserId = `enquiries-owner-${runId}`;

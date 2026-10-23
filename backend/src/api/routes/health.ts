@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { pool } from "../core/db";
-import { healthCheck } from "../lib/health-check";
+import { pool } from "../../core/db";
+import { healthCheck } from "../../core/health-check";
 
 const router: IRouter = Router();
 

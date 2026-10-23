@@ -4,17 +4,17 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
-import router from "./routes";
-import { logger } from "./lib/logger";
-import { mountWebClient } from "./lib/web-client";
+import router from "./api/routes";
+import { logger } from "./core/logger";
+import { mountWebClient } from "./core/web-client";
 import {
   getTrustedOrigins,
   isTrustedOrigin,
   requireTrustedMutationOrigin,
   RequestOriginError,
-} from "./middlewares/request-origin";
-import { apiErrorHandler } from "./middlewares/api-error-handler";
-import { redirectToPublicOrigin } from "./middlewares/public-origin";
+} from "./api/middleware/request-origin";
+import { apiErrorHandler } from "./api/middleware/api-error-handler";
+import { redirectToPublicOrigin } from "./api/middleware/public-origin";
 
 /**
  * The client-facing hostname: x-forwarded-host when a proxy set it, else Host.

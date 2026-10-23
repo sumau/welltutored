@@ -139,7 +139,7 @@ jobs:
         run: |
           pnpm --filter @workspace/backend run build
           NODE_ENV=development PORT=8090 \
-            node backend/dist/index.mjs > seed.log 2>&1 &
+            node backend/dist/main.mjs > seed.log 2>&1 &
           pid=$!
           timeout 120 bash -c \
             "until grep -q 'Server listening' seed.log; do kill -0 $pid || exit 1; sleep 1; done" \

@@ -1,13 +1,13 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { GetWorkspaceSessionResponse } from "../api/schemas";
-import { db } from "../core/db";
-import { tutorsTable } from "../models";
-import { publicTutorSlug } from "../lib/tutor-slugs";
+import { GetWorkspaceSessionResponse } from "../schemas";
+import { db } from "../../core/db";
+import { tutorsTable } from "../../models";
+import { publicTutorSlug } from "../../domain/tutor-slugs";
 import {
   availableTutorAccents,
-} from "../services/workspace-account-service";
-import { requireWorkspaceAccount as workspaceAccount } from "../auth/workspace-access";
+} from "../../crud/workspace-accounts";
+import { requireWorkspaceAccount as workspaceAccount } from "../deps";
 import {
   findWorkspaceTutor,
   toTutorResponse,

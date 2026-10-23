@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test, { after } from "node:test";
-import { pool } from "../core/db";
-import { logPoolErrors } from "./pool-errors";
+import { pool } from "../../src/core/db";
+import { logPoolErrors } from "../../src/core/pool-errors";
 
 after(async () => {
   await pool.end();

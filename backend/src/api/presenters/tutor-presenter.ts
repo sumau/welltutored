@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
-import { db } from "../core/db";
-import { tutorProfileDraftsTable, tutorsTable } from "../models";
-import { truncateAtWordBoundary } from "../lib/text";
-import { tutorNameFields } from "../lib/tutor-names";
-import { publicTutorSlug } from "../lib/tutor-slugs";
-import { normalizeTutorTint } from "../lib/tutor-accents";
+import { db } from "../../core/db";
+import { tutorProfileDraftsTable, tutorsTable } from "../../models";
+import { truncateAtWordBoundary } from "../../domain/text";
+import { tutorNameFields } from "../../domain/tutor-names";
+import { publicTutorSlug } from "../../domain/tutor-slugs";
+import { normalizeTutorTint } from "../../domain/tutor-accents";
 
 export function toTutorResponse(
   tutor: typeof tutorsTable.$inferSelect,

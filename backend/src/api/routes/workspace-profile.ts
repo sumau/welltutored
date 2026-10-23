@@ -4,27 +4,27 @@ import {
   DiscardWorkspaceProfileDraftResponse,
   UpdateWorkspaceProfileBody,
   UpdateWorkspaceProfileResponse,
-} from "../api/schemas";
-import { db } from "../core/db";
+} from "../schemas";
+import { db } from "../../core/db";
 import {
   resourcesTable,
   tutorProfileDraftsTable,
   tutorsTable,
-} from "../models";
-import { truncateAtWordBoundary, estimateReadMinutes } from "../lib/text";
-import { splitTutorName } from "../lib/tutor-names";
-import { publicTutorSlug } from "../lib/tutor-slugs";
-import { normalizeTutorTint } from "../lib/tutor-accents";
+} from "../../models";
+import { truncateAtWordBoundary, estimateReadMinutes } from "../../domain/text";
+import { splitTutorName } from "../../domain/tutor-names";
+import { publicTutorSlug } from "../../domain/tutor-slugs";
+import { normalizeTutorTint } from "../../domain/tutor-accents";
 import {
   requireApproved,
   requireWorkspaceAccount as workspaceAccount,
-} from "../auth/workspace-access";
-import { isUniqueViolation } from "../services/workspace-account-service";
+} from "../deps";
+import { isUniqueViolation } from "../../crud/workspace-accounts";
 import {
   applyTutorDraft,
   toTutorResponse,
 } from "../presenters/tutor-presenter";
-import { isPublishableProfile } from "../domain/workspace-validation";
+import { isPublishableProfile } from "../../domain/workspace-validation";
 
 const router: IRouter = Router();
 

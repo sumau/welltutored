@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { Response } from "express";
 import { db } from "../core/db";
 import { tutorsTable } from "../models";
-import { publicTutorSlug } from "./tutor-slugs";
+import { publicTutorSlug } from "../domain/tutor-slugs";
 
 export const PUBLIC_TUTOR_CACHE_CONTROL =
   "public, max-age=30, stale-while-revalidate=60";

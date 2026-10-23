@@ -36,7 +36,7 @@ empty trusted-origin set rejects every credentialed request — including the
 public enquiry POST, which is the main thing visitors do. Set it to the public
 origin, with no trailing path, and update it when the domain changes.
 
-`configuredValues` in `backend/src/middlewares/request-origin.ts`
+`configuredValues` in `backend/src/api/middleware/request-origin.ts`
 reads `TRUSTED_ORIGINS` and `CORS_ORIGINS`, treats them as one list, and falls
 back to the localhost defaults only outside production. Setting either one
 **replaces** those defaults, so a Deployment trusts what `fly.toml` names and

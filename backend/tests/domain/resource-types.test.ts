@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   normalizeResourceType,
   RESOURCE_TYPES,
-} from "./resource-types";
+} from "../../src/domain/resource-types";
 
 test("supports exactly the approved resource formats", () => {
   assert.deepEqual(

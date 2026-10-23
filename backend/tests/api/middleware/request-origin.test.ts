@@ -6,7 +6,7 @@ import {
   normalizeOrigin,
   requireTrustedMutationOrigin,
   RequestOriginError,
-} from "./request-origin";
+} from "../../../src/api/middleware/request-origin";
 
 test("normalizes only origin-shaped values", () => {
   assert.equal(normalizeOrigin("HTTPS://Example.test/"), "https://example.test");

@@ -2,13 +2,13 @@ import { clerkClient } from "@clerk/express";
 import { and, asc, count, eq, ilike } from "drizzle-orm";
 import { db } from "../core/db";
 import { tutorsTable, workspaceAccountsTable } from "../models";
-import { splitTutorName } from "../lib/tutor-names";
-import { tutorSlugBase } from "../lib/tutor-slugs";
+import { splitTutorName } from "../domain/tutor-names";
+import { tutorSlugBase } from "../domain/tutor-slugs";
 import {
   APPROVED_TUTOR_ACCENTS,
   normalizeTutorTint,
-} from "../lib/tutor-accents";
-import { applyTutorDraft } from "../presenters/tutor-presenter";
+} from "../domain/tutor-accents";
+import { applyTutorDraft } from "../api/presenters/tutor-presenter";
 
 export type WorkspaceAccount = typeof workspaceAccountsTable.$inferSelect;
 

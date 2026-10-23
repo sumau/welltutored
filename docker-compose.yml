@@ -59,7 +59,7 @@ services:
       # Browser requests reach the API through the Vite proxy, so the origin
       # the API sees is the web service's. Stated explicitly here because
       # TRUSTED_ORIGINS replaces the built-in defaults rather than adding to
-      # them (backend/src/middlewares/request-origin.ts).
+      # them (backend/src/api/middleware/request-origin.ts).
       TRUSTED_ORIGINS: http://localhost:5173
     ports:
       - "8080:8080"
