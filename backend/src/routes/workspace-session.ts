@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { GetWorkspaceSessionResponse } from "@workspace/api-zod";
+import { GetWorkspaceSessionResponse } from "../api/schemas";
 import { db } from "../core/db";
 import { tutorsTable } from "../models";
 import { publicTutorSlug } from "../lib/tutor-slugs";

@@ -9,7 +9,7 @@ import {
   ListWorkspaceTutorsResponse,
   RestoreWorkspaceTutorParams,
   RestoreWorkspaceTutorResponse,
-} from "@workspace/api-zod";
+} from "../api/schemas";
 import { db } from "../core/db";
 import { tutorProfileDraftsTable, tutorsTable } from "../models";
 import { splitTutorName } from "../lib/tutor-names";

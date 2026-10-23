@@ -8,7 +8,7 @@ import {
   UpdateWorkspaceResourceBody,
   UpdateWorkspaceResourceParams,
   UpdateWorkspaceResourceResponse,
-} from "@workspace/api-zod";
+} from "../api/schemas";
 import { db } from "../core/db";
 import { resourcesTable, tutorsTable } from "../models";
 import { estimateReadMinutes } from "../lib/text";

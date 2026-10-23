@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import { HealthCheckResponse } from "@workspace/api-zod";
+import { HealthCheckResponse } from "../api/schemas";
 import { logger } from "./logger";
 
 // Above the time Neon takes to wake a suspended compute, below the 5s timeout

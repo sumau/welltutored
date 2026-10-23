@@ -4,7 +4,7 @@ import {
   DiscardWorkspaceProfileDraftResponse,
   UpdateWorkspaceProfileBody,
   UpdateWorkspaceProfileResponse,
-} from "@workspace/api-zod";
+} from "../api/schemas";
 import { db } from "../core/db";
 import {
   resourcesTable,

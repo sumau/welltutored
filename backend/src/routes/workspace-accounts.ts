@@ -5,7 +5,7 @@ import {
   UpdateWorkspaceAccountBody,
   UpdateWorkspaceAccountParams,
   UpdateWorkspaceAccountResponse,
-} from "@workspace/api-zod";
+} from "../api/schemas";
 import { db } from "../core/db";
 import { tutorsTable, workspaceAccountsTable } from "../models";
 import {

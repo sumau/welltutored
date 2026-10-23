@@ -8,7 +8,7 @@ import {
   ListResourcesQueryParams,
   ListResourcesResponse,
   ListTutorsResponse,
-} from "@workspace/api-zod";
+} from "../api/schemas";
 import { db } from "../core/db";
 import { resourcesTable, tutorsTable } from "../models";
 import { estimateReadMinutes, truncateAtWordBoundary } from "../lib/text";

@@ -49,7 +49,7 @@ flowchart LR
 Amber shapes are people, grey boxes are hosted services outside the container,
 and dashed boxes are build-time code rather than running parts. Solid arrows
 are runtime requests. Dotted arrows are code generated from
-`lib/api-spec/openapi.yaml`, which keeps the client and server agreeing on one
+`backend/openapi.yaml`, which keeps the client and server agreeing on one
 contract. Serving everything from one origin is
 [ADR-0001](adr/0001-single-origin-deployment.md).
 
@@ -120,7 +120,7 @@ directory each:
 
 The intended direction for future workspace changes is to keep route handlers
 thin: authenticate, validate the request, call a domain/service function, and
-present the response. `lib/api-spec/openapi.yaml` generates both the React
+present the response. `backend/openapi.yaml` generates both the React
 Query hooks and the Zod schemas, which keeps client and server contracts
 aligned. Generated API clients and schemas remain generated artifacts and
 should not be edited manually.

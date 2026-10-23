@@ -16,7 +16,7 @@ import {
 import {
   ListWorkspaceResourcesResponse,
   UpdateWorkspaceResourceResponse,
-} from "@workspace/api-zod";
+} from "../api/schemas";
 import contentRouter from "./content";
 import workspaceRouter from "./workspace";
 import { PUBLIC_TUTOR_CACHE_CONTROL } from "../lib/public-tutors";

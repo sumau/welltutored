@@ -47,11 +47,11 @@ watch, so restart it after server changes:
 docker compose restart api
 ```
 
-After changing `lib/api-spec/openapi.yaml`, regenerate the client inside the
+After changing `backend/openapi.yaml`, regenerate the client inside the
 container, then restart:
 
 ```
-docker compose exec api pnpm --filter @workspace/api-spec run codegen
+docker compose exec api pnpm --filter @workspace/backend run codegen
 ```
 
 Schema changes are applied the same way as the initial push, with
