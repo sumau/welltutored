@@ -15,6 +15,8 @@ The method is borrowed from [2389-research/documentation-audit](https://github.c
 
 ## Steps
 
+When each of steps 1 to 3 is done, print one line saying so and what it produced, such as `Step 2 of 4 done: 241 claims from 6 docs.` In step 3, also print a line as each subagent returns, such as `Verified 3 of 11 groups.` The user is waiting with no other sign of progress.
+
 ### 1. Pin the inputs
 
 - Read `docs/agents/docs-review.md`: the docs in scope and the gate. If it is missing, stop and say so.
