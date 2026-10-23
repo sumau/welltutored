@@ -36,6 +36,10 @@ plant docs/pipeline.md '    image --> merge' '    image --> merge
 # Contradiction: docs/pipeline.md says the manual sign-in comes after merging.
 plant CONTRIBUTING.md "- After merging a change that touches auth" "- Before merging a change that touches auth"
 
+# Glossary: the Sign-in Smoke can't fail (continue-on-error), so merging waits
+# for nothing from it.
+plant GLOSSARY.md "The check, before merge, that a person can sign in" "The check that merging waits for: a person can sign in"
+
 # Hedged claims: both "for now" sentences become false.
 plant artifacts/welltutored/src/lib/features.ts "PUBLIC_RESOURCES_ENABLED: boolean = false" "PUBLIC_RESOURCES_ENABLED: boolean = true"
 

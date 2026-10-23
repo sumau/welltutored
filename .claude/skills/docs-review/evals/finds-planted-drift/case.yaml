@@ -2,7 +2,7 @@ schema_version: "1.1"
 name: finds-planted-drift
 expected_outcome: |
   Run in a copy of this repo after plant.sh has run at its root. plant.sh
-  plants four kinds of drift and commits them as the copy's only commit. The
+  plants five pieces of drift and commits them as the copy's only commit. The
   report finds each plant, leaves the historical #55 sentence in
   docs/schema-changes.md alone, and reports nothing only for being
   undocumented. The CLI can't run this case as is, since it needs the whole
