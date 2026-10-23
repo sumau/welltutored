@@ -73,7 +73,8 @@ A Workspace Account is `owner`, `tutor` or `pending`. A new account is
 
 **Owner**:
 The single Workspace Account with the `owner` role, who promotes other
-accounts. There is exactly one.
+accounts. There is at most one: a new database has none until the first is
+promoted by hand.
 _Avoid_: Admin, superuser, root
 
 ### Delivery
@@ -85,7 +86,8 @@ _Avoid_: Publish, publication, the app, the environment
 
 **Public Origin**:
 The one origin the Deployment is known by. Every other hostname that reaches
-the Deployment redirects there.
+the Deployment redirects there, except for the Health Check's `/api/healthz`.
+With `PUBLIC_ORIGIN` unset, nothing redirects.
 _Avoid_: Primary domain, main URL, canonical domain
 
 **Deploy**:
@@ -100,7 +102,7 @@ _Avoid_: Liveness, readiness, ping
 
 **Launch Smoke**:
 The check that a Deployment is *usable* — it has a published Tutor, its pages
-render, and an Enquiry can be submitted. While Resources are hidden from
+render, and the API rejects an invalid Enquiry and keeps answering. While Resources are hidden from
 visitors, a usable Deployment needs no published Resource. A
 successful Deploy does not imply a passing Launch Smoke; they assert different
 things.

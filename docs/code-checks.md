@@ -130,7 +130,8 @@ integration tests require a dedicated `TEST_DATABASE_URL` distinct from
 ## The Docs Check
 
 The [Docs Check](../GLOSSARY.md#delivery), `pnpm run docs:check`, runs as part
-of `pnpm run build`, so a broken doc breaks the deployment build. It parses
+of `pnpm run build`, so a broken doc fails CI's `verify` job and blocks the
+deploy. It parses
 `README.md`, `CONTRIBUTING.md`, `GLOSSARY.md`, everything under `docs/`, and
 the `run:` steps of `.github/workflows/*.yml`, and fails when:
 

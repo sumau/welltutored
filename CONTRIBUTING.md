@@ -60,11 +60,12 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   development instance, so this is the part CI can't cover.
 - **The lockfile must stay stable.** CI and the deployment build both install
   with `--frozen-lockfile`. `package.json` pins `packageManager`, and
-  `docker/Dockerfile.dev` pins the matching pnpm; change them together or the
-  deploy fails on a lockfile it did not expect.
+  `docker/Dockerfile` and `docker/Dockerfile.dev` pin the matching pnpm; change
+  all three together or the deploy fails on a lockfile it did not expect.
 - **Documentation is validated.** The
   [Docs Check](docs/code-checks.md#the-docs-check) runs as part of
-  `pnpm run build`, so a broken doc breaks the deployment build.
+  `pnpm run build`, so a broken doc fails CI's `verify` job and blocks the
+  deploy.
 
 ## Schema changes
 

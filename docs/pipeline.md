@@ -98,9 +98,9 @@ is exercised rather than vacuously satisfied by an absent value.
 Two environment constraints are load-bearing. The job runs on `ubuntu-latest`
 because it is linux-x64 with glibc, and `pnpm-workspace.yaml` prunes every other
 platform's native binaries from the lockfile. And pnpm is installed from the
-`packageManager` field rather than a version named in the workflow, so the pin
-that `docker/Dockerfile.dev` and the deployment build also depend on stays in
-one place.
+`packageManager` field rather than a version named in the workflow, so the
+workflow adds no copy of the pin. `docker/Dockerfile` and
+`docker/Dockerfile.dev` each repeat it.
 
 `docs:check` also reads this workflow's `run:` steps and validates the `pnpm`
 scripts they name, so a renamed script cannot reach a deploy job that calls it.
@@ -116,8 +116,8 @@ The `image-smoke` job runs alongside `verify`, on every pull request and on
 a broken Dockerfile or a startup failure would first show up in `flyctl deploy`
 on `main`.
 
-It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with an
-empty `VITE_CLERK_PUBLISHABLE_KEY`, runs the image and runs `pnpm smoke:dev`
+It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with the
+development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image and runs `pnpm smoke:dev`
 against it. A failure there stops the deploy. Two browser checks follow, with
 the runner's Google Chrome, and neither blocks yet (`continue-on-error`):
 
@@ -144,9 +144,10 @@ all absent, so the `verify` job is not given Clerk secrets, and the interactive
 `clerk auth login` flow has no place in it: that command authenticates a person
 through a browser, which CI does not have.
 
-The one check that depends on a live Clerk instance is the launch smoke
-check's request to the production instance's `/v1/environment`, which goes to
-Clerk directly and needs no keys at all.
+Two checks depend on a live Clerk instance. The launch smoke check requests
+the production instance's `/v1/environment`, which goes to Clerk directly and
+needs no keys at all. The Sign-in Smoke signs in through the development
+instance.
 
 The dedicated test database is the only external dependency the
 deterministic gate has.
