@@ -30,15 +30,15 @@ Read each doc line by line and list every claim, opening no code. Follow **What 
 
 - the doc's `file:line` and the claim, quoted;
 - the **file** it is about: a path the sentence or its section names in backticks, or `none` when it names no file. A claim about several files goes under the one that would prove it;
-- for a claim with file `none`, its **subject** in two or three words ("manual sign-in"), the same words for every claim about the same thing.
+- its **subject** in two or three words ("manual sign-in"), the same words for every claim about the same thing, whatever its file.
 
-Done when every line of every chosen doc has been read and each claim has its file.
+Done when every line of every chosen doc has been read and each claim has its file and subject.
 
 ### 3. Verify, one subagent per file
 
-Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way, but never between two claims with the same subject: claims that could contradict each other must reach the same subagent.
+Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way, but never between two claims with the same subject: claims that could contradict each other must reach the same subagent. When a subject's claims fall in more than one group, give each of those groups the other groups' claims with that subject as **related claims**, to compare against but not to verify.
 
-Dispatch every subagent in one message so they run in parallel, each with `model: sonnet`: verifying is most of the cost, so it runs on Sonnet, while extracting and reporting stay on the session's model. Give each the file, its claims, what the gate verifies, and **The verification brief** below, pasted in full: the subagent has no other access to it.
+Dispatch every subagent in one message so they run in parallel, each with `model: sonnet`: verifying is most of the cost, so it runs on Sonnet, while extracting and reporting stay on the session's model. Give each the file, its claims, any related claims, what the gate verifies, and **The verification brief** below, pasted in full: the subagent has no other access to it.
 
 Done when every group has returned its verdicts.
 
@@ -75,7 +75,7 @@ A statement about what the code, the configuration or the running system does or
 >
 > **Diagrams.** If the legend says a solid arrow means "the next step waits for this", find what makes the next step wait; a dotted arrow means nothing waits. A file showing that a step can't fail (`continue-on-error: true`, say) settles a solid arrow out of that step as false.
 >
-> **Contradictions.** Two claims in your list that disagree are a finding even when the code can't say which is right. Quote both.
+> **Contradictions.** Two claims in your list that disagree are a finding even when the code can't say which is right, and so is a claim that disagrees with a related claim. Quote both.
 >
 > Return every false claim, every contradiction and every unverifiable claim, each with the doc's `file:line` and the claim quoted, plus a count of the true claims.
 
