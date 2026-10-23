@@ -1,13 +1,18 @@
 import { Router, type IRouter } from "express";
-import { and, asc, eq, ne } from "drizzle-orm";
 import {
   ListWorkspaceAccountsResponse,
   UpdateWorkspaceAccountBody,
   UpdateWorkspaceAccountParams,
   UpdateWorkspaceAccountResponse,
 } from "../schemas";
-import { db } from "../../core/db";
-import { tutorsTable, workspaceAccountsTable } from "../../models";
+import { findTutorSummary, tutorExists } from "../../crud/tutors";
+import {
+  deleteWorkspaceAccount,
+  findWorkspaceAccount,
+  isTutorAssignedElsewhere,
+  listWorkspaceAccounts,
+  updateWorkspaceAccount,
+} from "../../crud/workspace-accounts";
 import {
   requireOwner,
   requireWorkspaceAccount as workspaceAccount,
@@ -18,15 +23,7 @@ const router: IRouter = Router();
 router.get("/workspace/accounts", async (req, res): Promise<void> => {
   const account = await workspaceAccount(req, res);
   if (!account || !requireOwner(account, res)) return;
-  const rows = await db
-    .select({
-      account: workspaceAccountsTable,
-      tutorName: tutorsTable.name,
-      tutorProfileStatus: tutorsTable.profileStatus,
-    })
-    .from(workspaceAccountsTable)
-    .leftJoin(tutorsTable, eq(workspaceAccountsTable.tutorId, tutorsTable.id))
-    .orderBy(asc(workspaceAccountsTable.id));
+  const rows = await listWorkspaceAccounts();
   res.json(
     ListWorkspaceAccountsResponse.parse(
       rows.map(({
@@ -56,11 +53,7 @@ router.delete("/workspace/accounts/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [target] = await db
-    .select()
-    .from(workspaceAccountsTable)
-    .where(eq(workspaceAccountsTable.id, params.data.id))
-    .limit(1);
+  const target = await findWorkspaceAccount(params.data.id);
   if (!target) {
     res.status(404).json({ error: "Workspace account not found." });
     return;
@@ -70,9 +63,7 @@ router.delete("/workspace/accounts/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  await db
-    .delete(workspaceAccountsTable)
-    .where(eq(workspaceAccountsTable.id, params.data.id));
+  await deleteWorkspaceAccount(params.data.id);
   res.sendStatus(204);
 });
 
@@ -85,11 +76,7 @@ router.patch("/workspace/accounts/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Please check the account assignment." });
     return;
   }
-  const [target] = await db
-    .select()
-    .from(workspaceAccountsTable)
-    .where(eq(workspaceAccountsTable.id, params.data.id))
-    .limit(1);
+  const target = await findWorkspaceAccount(params.data.id);
   if (!target) {
     res.status(404).json({ error: "Workspace account not found." });
     return;
@@ -107,53 +94,28 @@ router.patch("/workspace/accounts/:id", async (req, res): Promise<void> => {
     return;
   }
   if (body.data.tutorId != null) {
-    const [tutor] = await db
-      .select({ id: tutorsTable.id })
-      .from(tutorsTable)
-      .where(eq(tutorsTable.id, body.data.tutorId))
-      .limit(1);
-    if (!tutor) {
+    if (!(await tutorExists(body.data.tutorId))) {
       res.status(400).json({ error: "Tutor profile not found." });
       return;
     }
 
-    const [assignedAccount] = await db
-      .select({ id: workspaceAccountsTable.id })
-      .from(workspaceAccountsTable)
-      .where(
-        and(
-          eq(workspaceAccountsTable.tutorId, body.data.tutorId),
-          ne(workspaceAccountsTable.id, params.data.id),
-        ),
-      )
-      .limit(1);
-    if (assignedAccount) {
+    if (await isTutorAssignedElsewhere(body.data.tutorId, params.data.id)) {
       res.status(400).json({ error: "That tutor profile is already assigned to another account." });
       return;
     }
   }
 
-  const [updated] = await db
-    .update(workspaceAccountsTable)
-    .set({
-      role: body.data.role,
-      tutorId: body.data.tutorId ?? null,
-    })
-    .where(eq(workspaceAccountsTable.id, params.data.id))
-    .returning();
+  const updated = await updateWorkspaceAccount(params.data.id, {
+    role: body.data.role,
+    tutorId: body.data.tutorId ?? null,
+  });
   if (!updated) {
     res.status(404).json({ error: "Workspace account not found." });
     return;
   }
-  const [tutor] = updated.tutorId
-    ? await db
-        .select({
-          name: tutorsTable.name,
-          profileStatus: tutorsTable.profileStatus,
-        })
-        .from(tutorsTable)
-        .where(eq(tutorsTable.id, updated.tutorId))
-    : [];
+  const tutor = updated.tutorId
+    ? await findTutorSummary(updated.tutorId)
+    : undefined;
   res.json(
     UpdateWorkspaceAccountResponse.parse({
       id: updated.id,

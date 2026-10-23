@@ -1,5 +1,5 @@
 import { clerkClient } from "@clerk/express";
-import { and, asc, count, eq, ilike } from "drizzle-orm";
+import { and, asc, count, eq, ilike, ne } from "drizzle-orm";
 import { db } from "../core/db";
 import { tutorsTable, workspaceAccountsTable } from "../models";
 import { splitTutorName } from "../domain/tutor-names";
@@ -10,6 +10,66 @@ import {
 } from "../domain/tutor-accents";
 
 export type WorkspaceAccount = typeof workspaceAccountsTable.$inferSelect;
+
+/** Every Workspace account, with the name and status of its tutor profile. */
+export function listWorkspaceAccounts() {
+  return db
+    .select({
+      account: workspaceAccountsTable,
+      tutorName: tutorsTable.name,
+      tutorProfileStatus: tutorsTable.profileStatus,
+    })
+    .from(workspaceAccountsTable)
+    .leftJoin(tutorsTable, eq(workspaceAccountsTable.tutorId, tutorsTable.id))
+    .orderBy(asc(workspaceAccountsTable.id));
+}
+
+export async function findWorkspaceAccount(
+  id: number,
+): Promise<WorkspaceAccount | undefined> {
+  const [account] = await db
+    .select()
+    .from(workspaceAccountsTable)
+    .where(eq(workspaceAccountsTable.id, id))
+    .limit(1);
+  return account;
+}
+
+export async function deleteWorkspaceAccount(id: number): Promise<void> {
+  await db
+    .delete(workspaceAccountsTable)
+    .where(eq(workspaceAccountsTable.id, id));
+}
+
+/** Whether an account other than this one already has the tutor profile. */
+export async function isTutorAssignedElsewhere(
+  tutorId: number,
+  accountId: number,
+): Promise<boolean> {
+  const [assignedAccount] = await db
+    .select({ id: workspaceAccountsTable.id })
+    .from(workspaceAccountsTable)
+    .where(
+      and(
+        eq(workspaceAccountsTable.tutorId, tutorId),
+        ne(workspaceAccountsTable.id, accountId),
+      ),
+    )
+    .limit(1);
+  return Boolean(assignedAccount);
+}
+
+export async function updateWorkspaceAccount(
+  id: number,
+  values: Pick<WorkspaceAccount, "role" | "tutorId">,
+): Promise<WorkspaceAccount | undefined> {
+  const [updated] = await db
+    .update(workspaceAccountsTable)
+    .set(values)
+    .where(eq(workspaceAccountsTable.id, id))
+    .returning();
+  return updated;
+}
 
 export async function findOrProvisionFromClerkUser(
   userId: string,
