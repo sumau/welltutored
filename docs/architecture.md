@@ -112,16 +112,16 @@ Workspace code in `backend/src` is split by responsibility, one
 directory each:
 
 - `api/deps.ts` — authenticated account lookup and role checks
-- `crud/workspace-accounts.ts` — Clerk-to-workspace account provisioning and
-  tutor assignment
+- `crud` — every database query, one module per area (tutors, resources,
+  enquiries, workspace accounts), including Clerk-to-workspace account
+  provisioning and tutor assignment
 - `domain` — publishability rules for resources and tutor profiles
 - `api/presenters` — response mapping
-- `api/routes` — request validation and mutations, one subrouter per area,
-  which `routes/workspace.ts` mounts
+- `api/routes` — request validation and status codes, one subrouter per
+  area, which `routes/workspace.ts` mounts
 
-The intended direction for future workspace changes is to keep route handlers
-thin: authenticate, validate the request, call a domain/service function, and
-present the response. `backend/openapi.yaml` generates both the React
+Route handlers stay thin: authenticate, validate the request, call `crud` and
+`domain` functions, and present the response. `backend/openapi.yaml` generates both the React
 Query hooks and the Zod schemas, which keeps client and server contracts
 aligned. Generated API clients and schemas remain generated artifacts and
 should not be edited manually.
