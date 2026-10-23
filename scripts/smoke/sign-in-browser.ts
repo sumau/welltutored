@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { chromium, type Page } from "playwright-core";
-import { resolveBaseUrl, resolveTimeoutMs } from "./smoke-check.js";
+import { resolveBaseUrl, resolveTimeoutMs } from "./launch.js";
 
 // The Sign-in Smoke: a real sign-in through the Clerk development instance,
 // into the Workspace of a production image. Run by the Image Smoke job in CI.

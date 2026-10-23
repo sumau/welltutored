@@ -27,7 +27,7 @@ Test database unavailable: required command 'initdb' was not found.
 ```
 
 The `test` service supplies the connection, which takes the other branch of
-`scripts/with-test-database.sh`. CI takes the same branch, with the dedicated
+`scripts/test-database/with-test-database.sh`. CI takes the same branch, with the dedicated
 connection coming from its `postgres:16` service container instead
 ([pipeline.md](pipeline.md#github-actions)). The suite needs no Clerk keys
 ([pipeline.md](pipeline.md#credentials)).

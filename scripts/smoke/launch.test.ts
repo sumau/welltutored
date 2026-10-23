@@ -14,7 +14,7 @@ import {
   SMOKE_TOTAL_TIMEOUT_MIN_MS,
   SMOKE_TIMEOUT_MAX_MS,
   SMOKE_TIMEOUT_MIN_MS,
-} from "./smoke-check.js";
+} from "./launch.js";
 
 type FailureCase = {
   name: string;
@@ -338,7 +338,7 @@ function runSmokeCommand(
   exitCode: number | null;
   output: string;
 }> {
-  const smokeFile = resolve(scriptsRoot, "src/smoke-check.ts");
+  const smokeFile = resolve(scriptsRoot, "smoke/launch.ts");
   const child = spawn(
     process.execPath,
     [

@@ -101,7 +101,7 @@ services:
   # Full CI suite. `verify:ci` builds a throwaway PostgreSQL cluster when
   # TEST_DATABASE_URL is unset, which needs initdb and pg_ctl — server binaries
   # the dev image does not carry, only the client ones. Supplying a dedicated
-  # connection takes the other branch of scripts/with-test-database.sh and
+  # connection takes the other branch of scripts/test-database/with-test-database.sh and
   # reuses the db service instead.
   #
   # The test database must differ from the application one: backend/src/core/db.ts

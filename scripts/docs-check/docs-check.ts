@@ -392,7 +392,7 @@ export function validateDocumentedPaths(
     )
     .map(
       ({ filePath, lineNumber, path }) =>
-        `${filePath}:${lineNumber}: "${path}" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.`,
+        `${filePath}:${lineNumber}: "${path}" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/docs-check/docs-check.ts.`,
     );
 }
 

@@ -108,7 +108,7 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 
 `SMOKE_TIMEOUT_MS` limits each request and `SMOKE_TOTAL_TIMEOUT_MS` the whole
 check, in milliseconds. Raise them for a target that is slow on purpose. The
-defaults and accepted ranges are in `scripts/src/smoke-check.ts`, which rejects
+defaults and accepted ranges are in `scripts/smoke/launch.ts`, which rejects
 a value outside them before making any request.
 
 ### When it fails

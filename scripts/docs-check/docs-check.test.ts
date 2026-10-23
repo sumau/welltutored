@@ -437,7 +437,7 @@ test("validates file paths by their end, on whole segments, with an allowlist", 
   );
 
   assert.deepEqual(errors, [
-    'docs/architecture.md:3: "routes/missing.ts" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.',
+    'docs/architecture.md:3: "routes/missing.ts" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/docs-check/docs-check.ts.',
   ]);
 
   assert.deepEqual(
@@ -446,7 +446,7 @@ test("validates file paths by their end, on whole segments, with an allowlist", 
       ["backend/src/routes/my-workspace.ts"],
       new Set(),
     ),
-    ['docs/architecture.md:1: "workspace.ts" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/src/docs-check.ts.'],
+    ['docs/architecture.md:1: "workspace.ts" names a file, but no file in the repository ends with that path. If it names a file a reader creates, add it to UNTRACKED_PATHS in scripts/docs-check/docs-check.ts.'],
   );
 });
 
