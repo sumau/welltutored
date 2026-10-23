@@ -37,6 +37,8 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   request when its base merges, so it can land on a branch instead of `main`.
   Wait for the previous one to merge, then branch from `main` again.
 - Use the terms in [GLOSSARY.md](GLOSSARY.md), and avoid the synonyms it lists.
+- A change keeps the docs true. If it makes a statement in the docs false,
+  update the statement in the same pull request.
 - Docs state the current rules and what they are for. History goes in issues
   and ADRs: an issue number is fine as a pointer, not as the story.
   Record a decision a reader will question as an ADR in
