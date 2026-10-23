@@ -27,12 +27,27 @@ Test database unavailable: required command 'initdb' was not found.
 ```
 
 The `test` service supplies the connection, which takes the other branch of
-`scripts/test-database/with-test-database.sh`. CI takes the same branch, with the dedicated
+`scripts/integration-database/with-integration-database.sh`. CI takes the same branch, with the dedicated
 connection coming from its `postgres:16` service container instead
 ([pipeline.md](pipeline.md#github-actions)). The suite needs no Clerk keys
 ([pipeline.md](pipeline.md#credentials)).
 
 ## Test suites
+
+A test file's name decides how it is checked and run:
+
+- **A file named `*.test.ts` or `*.test.tsx` is a test.** It is typechecked,
+  and it runs because its name matches the glob in its package's test script,
+  with no list to add it to.
+- **A test that needs the database is named `*.integration.test.ts`.** Anything
+  else is a unit test. In the backend, `test:unit` runs
+  `tests/**/!(*.integration).test.ts` and `test:integration` runs
+  `tests/**/*.integration.test.ts`.
+- **Only tests have test-like names.** Code that supports the tests is named
+  after what it does, such as `scripts/integration-database/`.
+
+The exception is `scripts/`, where each folder is one standalone tool and its
+package script names that tool's one test file.
 
 ### API server
 
@@ -52,7 +67,7 @@ Run only the non-mutating API checks with:
 pnpm --filter @workspace/backend run test:unit
 ```
 
-The lifecycle tests exercise the Express routes and database-backed behavior
+The integration tests exercise the Express routes and database-backed behavior
 end to end within the test process. They create, update, publish, and delete
 test records and are therefore reserved for CI with an isolated test
 database. Set `TEST_DATABASE_URL` to the dedicated PostgreSQL connection;
@@ -62,8 +77,8 @@ apply the current schema to that database before running the integration
 script. The CI preparation command does both checks explicitly:
 
 ```sh
-pnpm run check:test-database
-pnpm run prepare:test-database
+pnpm run check:integration-database
+pnpm run prepare:integration-database
 ```
 
 The first command fails if `TEST_DATABASE_URL` is missing or points to
@@ -72,7 +87,7 @@ target and fails with a connection-specific message if that database is not
 reachable. Each process also uses a unique fixture namespace, so overlapping
 runs do not reuse or delete one another's records.
 
-The test database holds the schema and no seed data, so a lifecycle test must
+The test database holds the schema and no seed data, so an integration test must
 create every row it asserts against, such as a second tutor, and clean up only
 its own namespace. The test files run in parallel against that one database,
 so a published tutor that one file creates shows up in another file's public
@@ -115,15 +130,15 @@ The script package has three test suites, all run by `verify:ci`:
 ```sh
 pnpm --filter @workspace/scripts run test:smoke
 pnpm --filter @workspace/scripts run test:docs
-pnpm run test:database-config
+pnpm run test:database-check
 ```
 
 The smoke-check tests validate the logic of the scripts in
 [smoke-checks.md](smoke-checks.md), without a running site: target selection,
 the waiver flags in both directions, redirect protection, timeout handling, and
 healthy responses against a local fixture. The documentation tests cover
-[the Docs Check](#the-docs-check). The database-config tests ensure that
-integration tests require a dedicated `TEST_DATABASE_URL` distinct from
+[the Docs Check](#the-docs-check). The integration-database check tests ensure
+that integration tests require a dedicated `TEST_DATABASE_URL` distinct from
 `DATABASE_URL`.
 
 ## The Docs Check

@@ -10,7 +10,7 @@
     "verify:css": "node ./scripts/verify-css-build.mjs",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --tsconfig tsconfig.json --test-concurrency=1 --test src/app/route-map.test.ts src/components/layout/WorkspaceAuthBoundary.test.tsx src/components/layout/Shell.test.tsx src/components/EnquiryForm.test.tsx src/lib/public-tutor-query.test.ts src/pages/TutorProfile.test.tsx src/pages/Home.test.tsx src/pages/workspace/profile.test.tsx"
+    "test": "tsx --tsconfig tsconfig.json --test-concurrency=1 --test \"src/**/*.test.{ts,tsx}\""
   },
   "devDependencies": {
     "@hookform/resolvers": "^5.9.1",
