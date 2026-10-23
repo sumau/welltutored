@@ -1,7 +1,6 @@
-import { pool } from "./core/db";
+import { logPoolErrors, pool } from "./core/db";
 import app from "./app";
 import { logger } from "./core/logger";
-import { logPoolErrors } from "./core/pool-errors";
 import { ensureSeedContent } from "./seed";
 
 logPoolErrors(pool);
