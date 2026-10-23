@@ -30,7 +30,7 @@ Done when you hold the doc paths, the commit, and what the gate verifies.
 Read each doc line by line and list every claim, opening no code. Follow **What is a claim** below. Give each claim:
 
 - the doc's `file:line` and the claim, quoted;
-- the **file** it is about: a path the sentence or its section names in backticks (the Docs Check guarantees these exist), or `none` when it names no file. A claim about several files goes under the one that would prove it;
+- the **file** it is about: a path the sentence or its section names in backticks, or `none` when it names no file. A claim about several files goes under the one that would prove it;
 - for a claim with file `none`, its **subject** in two or three words ("manual sign-in"), the same words for every claim about the same thing.
 
 Done when every line of every chosen doc has been read and each claim has its file.
@@ -57,7 +57,7 @@ A statement about what the code, the configuration or the running system does or
 
 ## The verification brief
 
-> Verify each claim below. Read the named file first and cite `file:line`; search the codebase only for what the file can't settle, or for a claim with no file. Read the code that does the thing: a matching name is not evidence.
+> Verify each claim below. The named file may be only the end of a path (`src/lib/features.ts`): read the file whose path ends with it, which the Docs Check guarantees exists. Read it first and cite `file:line`; search the codebase only for what the file can't settle, or for a claim with no file. Read the code that does the thing: a matching name is not evidence.
 >
 > Give each claim a verdict:
 >
