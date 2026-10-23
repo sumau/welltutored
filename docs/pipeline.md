@@ -256,8 +256,8 @@ Run it from a checkout of `main`, since it still reads `fly.toml` from there.
 Then revert the change on `main`, or the next merge ships it again.
 
 **Rolling back past a schema push is only safe if the push was additive.** The
-schema is pushed before merge ([ADR-0002](adr/0002-schema-by-deliberate-push.md)),
-so the previous image runs against the new schema. A new nullable column or
+schema is pushed before merge
+([schema-changes.md](schema-changes.md#push-or-merge-first)), so the previous image runs against the new schema. A new nullable column or
 table is fine. A renamed or dropped column breaks the old code too, and the
 rollback then means pushing the old schema back by hand
 ([schema-changes.md](schema-changes.md)).

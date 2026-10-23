@@ -73,7 +73,8 @@ CI does not apply the schema. It is a deliberate `push` run by hand
 ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)), and
 [docs/schema-changes.md](docs/schema-changes.md#pushing) has the command.
 
-- Push to production **before** merging anything that expects the new schema.
+- Push and merge in the order in
+  [docs/schema-changes.md](docs/schema-changes.md#push-or-merge-first).
 - A merged pull request does not mean its push happened. Confirm the push
   before ticking its box or starting the next schema change.
 - Rehearse a push that touches existing rows (a rename, a dropped column, a new

@@ -33,7 +33,8 @@ The trade-off accepted is real. These are only ever checked in production:
 And a broken page reaches visitors before the Launch Smoke reports it, since
 that runs after the switch. Rolling back is then by hand, and it is only safe
 across an additive schema push. The previous image runs against a schema that
-was pushed before merge.
+was pushed before merge
+([schema-changes.md](../schema-changes.md#push-or-merge-first)).
 
 ## Considered options
 
