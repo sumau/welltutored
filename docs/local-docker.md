@@ -55,7 +55,7 @@ docker compose exec api pnpm --filter @workspace/api-spec run codegen
 ```
 
 Schema changes are applied the same way as the initial push, with
-`pnpm --filter @workspace/db run push` via `docker compose run --rm migrate`.
+`pnpm --filter @workspace/backend run push` via `docker compose run --rm migrate`.
 
 ## How requests are routed
 

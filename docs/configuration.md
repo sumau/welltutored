@@ -6,7 +6,7 @@ set.
 
 | Variable | When | Set in | Notes |
 | --- | --- | --- | --- |
-| `DATABASE_URL` | runtime, required | `fly secrets`; `docker-compose.yml` locally | Append `?sslmode=require` for a hosted database: `lib/db/src/index.ts` creates a bare `pg` pool with no SSL options of its own. The [Deployment](../GLOSSARY.md#delivery) uses Neon's pooled string ([first-deploy.md](first-deploy.md#database)). |
+| `DATABASE_URL` | runtime, required | `fly secrets`; `docker-compose.yml` locally | Append `?sslmode=require` for a hosted database: `backend/src/core/db.ts` creates a bare `pg` pool with no SSL options of its own. The [Deployment](../GLOSSARY.md#delivery) uses Neon's pooled string ([first-deploy.md](first-deploy.md#database)). |
 | `TRUSTED_ORIGINS` | runtime, required | `fly.toml`; `docker-compose.yml` locally | The exact public origin, e.g. `https://welltutored.co.uk`. See below. |
 | `PUBLIC_ORIGIN` | runtime, optional | `fly.toml` | The [Public Origin](../GLOSSARY.md#delivery), e.g. `https://welltutored.example`. When set, a request arriving on any other hostname gets a `301` to the same path and query there; `/api/healthz` is exempt, because Fly's health checks do not use the public hostname. It must also appear in `TRUSTED_ORIGINS`, or the server refuses to start. Unset, nothing redirects. |
 | `PORT` | runtime, required | `docker/Dockerfile` and `fly.toml`; `docker-compose.yml` locally | The image defaults it to `8080`. |

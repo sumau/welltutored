@@ -9,7 +9,8 @@ import {
   UpdateWorkspaceResourceParams,
   UpdateWorkspaceResourceResponse,
 } from "@workspace/api-zod";
-import { db, resourcesTable, tutorsTable } from "@workspace/db";
+import { db } from "../core/db";
+import { resourcesTable, tutorsTable } from "../models";
 import { estimateReadMinutes } from "../lib/text";
 import { normalizeResourceType } from "../lib/resource-types";
 import { normalizeTutorTint } from "../lib/tutor-accents";

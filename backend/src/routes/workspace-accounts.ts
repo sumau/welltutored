@@ -6,11 +6,8 @@ import {
   UpdateWorkspaceAccountParams,
   UpdateWorkspaceAccountResponse,
 } from "@workspace/api-zod";
-import {
-  db,
-  tutorsTable,
-  workspaceAccountsTable,
-} from "@workspace/db";
+import { db } from "../core/db";
+import { tutorsTable, workspaceAccountsTable } from "../models";
 import {
   requireOwner,
   requireWorkspaceAccount as workspaceAccount,

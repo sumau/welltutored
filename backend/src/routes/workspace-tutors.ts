@@ -10,11 +10,8 @@ import {
   RestoreWorkspaceTutorParams,
   RestoreWorkspaceTutorResponse,
 } from "@workspace/api-zod";
-import {
-  db,
-  tutorProfileDraftsTable,
-  tutorsTable,
-} from "@workspace/db";
+import { db } from "../core/db";
+import { tutorProfileDraftsTable, tutorsTable } from "../models";
 import { splitTutorName } from "../lib/tutor-names";
 import { publicTutorSlug } from "../lib/tutor-slugs";
 import {

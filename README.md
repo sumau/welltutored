@@ -65,7 +65,7 @@ opening a pull request.
 | `frontend` | React + Vite frontend: public directory, tutor and resource pages, enquiry flow, auth screens, and private workspace |
 | `frontend/src/index.css` | Editorial visual system and theme tokens |
 | `backend` | Express 5 API, which also serves the frontend build: routes, Clerk middleware, seed/bootstrap behavior, and server startup |
-| `lib/db/src/schema` | Drizzle/PostgreSQL schema |
+| `backend/src/models` | Drizzle/PostgreSQL schema |
 | `lib/api-spec/openapi.yaml` | API contract, source for the generated client and Zod schemas |
 | `lib/api-client-react`, `lib/api-zod` | Generated frontend hooks and runtime schemas |
 | `scripts` | Docs check, smoke checks and test-database tooling |
@@ -80,7 +80,7 @@ against a running service, or see
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — docs check + typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
+- `pnpm --filter @workspace/backend run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
 - `pnpm run prepare:test-database` — validate `TEST_DATABASE_URL` and apply the
   current schema to the dedicated integration-test database
 

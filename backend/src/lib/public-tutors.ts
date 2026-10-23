@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import type { Response } from "express";
-import { db, tutorsTable } from "@workspace/db";
+import { db } from "../core/db";
+import { tutorsTable } from "../models";
 import { publicTutorSlug } from "./tutor-slugs";
 
 export const PUBLIC_TUTOR_CACHE_CONTROL =

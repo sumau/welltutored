@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { pool } from "@workspace/db";
+import { pool } from "../core/db";
 import { healthCheck } from "../lib/health-check";
 
 const router: IRouter = Router();

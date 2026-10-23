@@ -1,10 +1,7 @@
 import { clerkClient } from "@clerk/express";
 import { and, asc, count, eq, ilike } from "drizzle-orm";
-import {
-  db,
-  tutorsTable,
-  workspaceAccountsTable,
-} from "@workspace/db";
+import { db } from "../core/db";
+import { tutorsTable, workspaceAccountsTable } from "../models";
 import { splitTutorName } from "../lib/tutor-names";
 import { tutorSlugBase } from "../lib/tutor-slugs";
 import {

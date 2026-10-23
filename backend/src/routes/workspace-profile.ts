@@ -5,12 +5,12 @@ import {
   UpdateWorkspaceProfileBody,
   UpdateWorkspaceProfileResponse,
 } from "@workspace/api-zod";
+import { db } from "../core/db";
 import {
-  db,
   resourcesTable,
   tutorProfileDraftsTable,
   tutorsTable,
-} from "@workspace/db";
+} from "../models";
 import { truncateAtWordBoundary, estimateReadMinutes } from "../lib/text";
 import { splitTutorName } from "../lib/tutor-names";
 import { publicTutorSlug } from "../lib/tutor-slugs";

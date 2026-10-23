@@ -5,7 +5,8 @@ import http from "node:http";
 import test, { after, before } from "node:test";
 import express from "express";
 import { inArray } from "drizzle-orm";
-import { db, pool, resourcesTable, tutorsTable } from "@workspace/db";
+import { db, pool } from "../core/db";
+import { resourcesTable, tutorsTable } from "../models";
 import contentRouter from "./content";
 
 // Every resource here has the run id in its title, excerpt or tutor name, so

@@ -1,4 +1,4 @@
-import { pool } from "@workspace/db";
+import { pool } from "./core/db";
 import app from "./app";
 import { logger } from "./lib/logger";
 import { logPoolErrors } from "./lib/pool-errors";

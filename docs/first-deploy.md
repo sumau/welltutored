@@ -50,7 +50,7 @@ interchangeable:
 - The **direct** string is for schema work. Use it for the
   [schema push](schema-changes.md#pushing).
 
-Both need `?sslmode=require` appended: `lib/db/src/index.ts` builds a bare `pg`
+Both need `?sslmode=require` appended: `backend/src/core/db.ts` builds a bare `pg`
 pool from `DATABASE_URL` and sets no SSL options of its own, so without it the
 connection is refused.
 

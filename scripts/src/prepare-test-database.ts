@@ -4,7 +4,7 @@ import { requireTestDatabaseUrl } from "./test-database.js";
 function runSchemaPush(testDatabaseUrl: string): Promise<number> {
   const child = spawn(
     "pnpm",
-    ["--filter", "@workspace/db", "run", "push-force"],
+    ["--filter", "@workspace/backend", "run", "push-force"],
     {
       env: {
         ...process.env,

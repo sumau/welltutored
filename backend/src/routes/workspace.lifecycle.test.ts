@@ -6,14 +6,13 @@ import test, { after, before } from "node:test";
 import express, { type Express } from "express";
 import { eq, inArray } from "drizzle-orm";
 import { clerkClient } from "@clerk/express";
+import { db, pool } from "../core/db";
 import {
-  db,
-  pool,
   resourcesTable,
   tutorProfileDraftsTable,
   workspaceAccountsTable,
   tutorsTable,
-} from "@workspace/db";
+} from "../models";
 import {
   ListWorkspaceResourcesResponse,
   UpdateWorkspaceResourceResponse,

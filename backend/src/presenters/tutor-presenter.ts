@@ -1,9 +1,6 @@
 import { eq } from "drizzle-orm";
-import {
-  db,
-  tutorProfileDraftsTable,
-  tutorsTable,
-} from "@workspace/db";
+import { db } from "../core/db";
+import { tutorProfileDraftsTable, tutorsTable } from "../models";
 import { truncateAtWordBoundary } from "../lib/text";
 import { tutorNameFields } from "../lib/tutor-names";
 import { publicTutorSlug } from "../lib/tutor-slugs";

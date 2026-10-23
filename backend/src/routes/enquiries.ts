@@ -7,11 +7,8 @@ import {
   RetryWorkspaceEnquiryParams,
   RetryWorkspaceEnquiryResponse,
 } from "@workspace/api-zod";
-import {
-  db,
-  enquiriesTable,
-  tutorsTable,
-} from "@workspace/db";
+import { db } from "../core/db";
+import { enquiriesTable, tutorsTable } from "../models";
 import {
   canReceivePublicEnquiries,
   findPublishedTutor,

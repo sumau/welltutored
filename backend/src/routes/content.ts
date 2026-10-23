@@ -9,7 +9,8 @@ import {
   ListResourcesResponse,
   ListTutorsResponse,
 } from "@workspace/api-zod";
-import { db, resourcesTable, tutorsTable } from "@workspace/db";
+import { db } from "../core/db";
+import { resourcesTable, tutorsTable } from "../models";
 import { estimateReadMinutes, truncateAtWordBoundary } from "../lib/text";
 import { tutorNameFields } from "../lib/tutor-names";
 import { publicTutorSlug } from "../lib/tutor-slugs";

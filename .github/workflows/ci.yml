@@ -47,7 +47,7 @@ jobs:
           --health-retries 30
 
     env:
-      # Both connections are set, and set differently, so lib/db/src/index.ts's
+      # Both connections are set, and set differently, so backend/src/core/db.ts's
       # refusal to run integration tests against the application database is
       # exercised rather than trivially satisfied by an absent DATABASE_URL.
       # Nothing writes to welltutored; it exists to be the URL the guard
@@ -130,7 +130,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply the schema
-        run: pnpm --filter @workspace/db run push
+        run: pnpm --filter @workspace/backend run push
 
       # The API seeds sample content when it starts with NODE_ENV=development
       # on an empty database (docs/first-deploy.md). Start it once, wait until it

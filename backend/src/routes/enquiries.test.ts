@@ -6,13 +6,12 @@ import test, { after, before } from "node:test";
 import express from "express";
 import { eq, inArray } from "drizzle-orm";
 import { clerkClient } from "@clerk/express";
+import { db, pool } from "../core/db";
 import {
-  db,
   enquiriesTable,
-  pool,
   tutorsTable,
   workspaceAccountsTable,
-} from "@workspace/db";
+} from "../models";
 import enquiriesRouter from "./enquiries";
 
 const runId = randomUUID().replaceAll("-", "").slice(0, 12);
