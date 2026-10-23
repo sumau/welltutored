@@ -49,7 +49,7 @@ Write the report in the session, in the format under **The report**, then stop. 
 
 ## What is a claim
 
-A statement about what the code, the configuration or the running system does or is. Table rows, list items, a command with its stated effect, and each node and arrow of a Mermaid diagram are claims. A hedged claim ("for now", "not blocking yet", "usually") is still a claim: "hidden for now" is false once the thing is shown.
+A statement about what the code, the configuration or the running system does or is. Table rows, list items, a command with its stated effect, and each node and arrow of a Mermaid diagram are claims. A hedged claim ("for now", "not blocking yet", "usually") is still a claim: "hidden for now" is false once the thing is shown. A rule or instruction for the reader (what to run, when, in which order) is a claim too: the code or another doc can contradict it.
 
 - **Diagrams.** An arrow means what the diagram's legend says it means; with no legend, only the nodes and labels are claims.
 - **Historical** statements record what happened ("#55 did exactly that in rehearsal", a captured prompt with what was answered). They stay true when the code moves on, so they are not claims. A sentence that uses the past to explain a current rule still states that rule, and the rule is a claim.
