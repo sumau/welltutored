@@ -38,7 +38,12 @@ Done when every line of every chosen doc has been read and each claim has its fi
 
 Group the claims by file. Each group, from whichever docs, goes to one subagent, so each file is read once. Split a group of more than about 25 claims into parts; each part still reads its file. The claims with file `none` form their own group, split the same way, but never between two claims with the same subject: claims that could contradict each other must reach the same subagent. When a subject's claims fall in more than one group, give each of those groups the other groups' claims with that subject as **related claims**, to compare against but not to verify.
 
-Dispatch every subagent in one message so they run in parallel, each with `model: sonnet`: verifying is most of the cost, so it runs on Sonnet, while extracting and reporting stay on the session's model. Give each the file, its claims, any related claims, what the gate verifies, and **The verification brief** below, pasted in full: the subagent has no other access to it.
+Write the subagents' inputs to files in `.docs-review/work/`, replacing any from an earlier run, so each brief stays one line:
+
+- `.docs-review/work/brief.md`: **The verification brief** below, in full, then what the gate verifies;
+- one `.docs-review/work/<n>.md` per group or part: its file, its claims, and any related claims.
+
+Then dispatch every subagent in a single message, so they run in parallel, each with `model: sonnet`: verifying is most of the cost, so it runs on Sonnet, while extracting and reporting stay on the session's model. Each prompt is only: "Follow `.docs-review/work/brief.md` for the claims in `.docs-review/work/<n>.md`." Don't send one subagent and wait before writing the next.
 
 Done when every group has returned its verdicts.
 
@@ -53,7 +58,7 @@ Merge the verdicts into items. One item is one fix: claims that a single edit co
 
 The tier is a judgement to help the reader triage. Never drop an item because of its tier.
 
-Write the report in the format under **The report**. Save it to `.docs-review/<commit>.md` at the repository root (`<commit>-2.md` and so on if that exists), which git ignores, then show it in the session and stop. The user chooses what to fix.
+Write the report in the format under **The report**. Save it to `.docs-review/<commit>.md` at the repository root (`<commit>-2.md` and so on if that exists), which git ignores. Then show only the first line of the report, the summary line, the checklist and the saved path, and stop: printing the full report again costs as much as writing it. The user chooses what to fix.
 
 ## What is a claim
 
@@ -65,7 +70,7 @@ A statement about what the code, the configuration or the running system does or
 
 ## The verification brief
 
-> Verify each claim below. The named file may be only the end of a path (`src/lib/features.ts`): read the file whose path ends with it, which the Docs Check guarantees exists. Read it first and cite `file:line`; search the codebase only for what the file can't settle, or for a claim with no file. Read the code that does the thing: a matching name is not evidence.
+> Verify each claim in your claims file. Use only Read, Grep and Glob: Bash may be refused, and nothing here needs it. The named file may be only the end of a path (`src/lib/features.ts`): read the file whose path ends with it, which the Docs Check guarantees exists. Read it first and cite `file:line`; search the codebase only for what the file can't settle, or for a claim with no file. Read the code that does the thing: a matching name is not evidence.
 >
 > Give each claim a verdict:
 >
