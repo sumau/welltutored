@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import { asc, eq } from "drizzle-orm";
 import {
   CreateWorkspaceResourceBody,
   CreateWorkspaceResourceResponse,
@@ -9,8 +8,14 @@ import {
   UpdateWorkspaceResourceParams,
   UpdateWorkspaceResourceResponse,
 } from "../schemas";
-import { db } from "../../core/db";
-import { resourcesTable, tutorsTable } from "../../models";
+import {
+  createResource,
+  deleteResource,
+  findResource,
+  listWorkspaceResources,
+  updateResource,
+} from "../../crud/resources";
+import { findTutorAuthor } from "../../crud/tutors";
 import { estimateReadMinutes } from "../../domain/text";
 import { normalizeResourceType } from "../../domain/resource-types";
 import { normalizeTutorTint } from "../../domain/tutor-accents";
@@ -19,10 +24,7 @@ import {
   requireApproved,
   requireWorkspaceAccount as workspaceAccount,
 } from "../deps";
-import {
-  findJoinedResource,
-  toResourceResponse,
-} from "../presenters/resource-presenter";
+import { toResourceResponse } from "../presenters/resource-presenter";
 import { isPublishableResource } from "../../domain/workspace-validation";
 
 const router: IRouter = Router();
@@ -42,18 +44,7 @@ router.get(["/workspace/resources", "/workspace/articles"], async (req, res): Pr
   const account = await workspaceAccount(req, res);
   if (!account || !requireApproved(account, res)) return;
 
-  const rows = await db
-    .select({
-      resource: resourcesTable,
-      tutor: {
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(account.tutorId ? eq(resourcesTable.tutorId, account.tutorId) : undefined)
-    .orderBy(asc(resourcesTable.id));
+  const rows = await listWorkspaceResources(account.tutorId);
   res.json(
     ListWorkspaceResourcesResponse.parse(
       rows.map((row) => toResourceResponse(row.resource, row.tutor)),
@@ -73,33 +64,26 @@ router.post(["/workspace/resources", "/workspace/articles"], async (req, res): P
     res.status(400).json({ error: "Please check the resource fields." });
     return;
   }
-  const [tutor] = await db
-    .select({ name: tutorsTable.name, tint: tutorsTable.tint })
-    .from(tutorsTable)
-    .where(eq(tutorsTable.id, account.tutorId))
-    .limit(1);
+  const tutor = await findTutorAuthor(account.tutorId);
   if (!tutor) {
     res.status(404).json({ error: "Tutor profile not found." });
     return;
   }
-  const [resource] = await db
-    .insert(resourcesTable)
-    .values({
-      title: body.data.title,
-      subject: body.data.subject ?? "",
-      level: body.data.level ?? "",
-      type: body.data.type ?? "Study note",
-      excerpt: body.data.excerpt ?? "",
-      body: body.data.body ?? "",
-      sections: body.data.sections ?? [],
-      slug: slugify(body.data.title),
-      tutorId: account.tutorId,
-      readMinutes: estimateReadMinutes(body.data.body ?? "", body.data.sections ?? []),
-      tint: normalizeTutorTint(tutor.tint),
-      publishedAt: new Date().toISOString().slice(0, 10),
-      status: "draft",
-    })
-    .returning();
+  const resource = await createResource({
+    title: body.data.title,
+    subject: body.data.subject ?? "",
+    level: body.data.level ?? "",
+    type: body.data.type ?? "Study note",
+    excerpt: body.data.excerpt ?? "",
+    body: body.data.body ?? "",
+    sections: body.data.sections ?? [],
+    slug: slugify(body.data.title),
+    tutorId: account.tutorId,
+    readMinutes: estimateReadMinutes(body.data.body ?? "", body.data.sections ?? []),
+    tint: normalizeTutorTint(tutor.tint),
+    publishedAt: new Date().toISOString().slice(0, 10),
+    status: "draft",
+  });
   res
     .status(201)
     .json(CreateWorkspaceResourceResponse.parse(toResourceResponse(resource, tutor)));
@@ -114,7 +98,7 @@ router.patch(["/workspace/resources/:id", "/workspace/articles/:id"], async (req
     res.status(400).json({ error: "Please check the resource fields." });
     return;
   }
-  const current = await findJoinedResource(params.data.id);
+  const current = await findResource(params.data.id);
   if (!current) {
     res.status(404).json({ error: "Resource not found" });
     return;
@@ -142,18 +126,14 @@ router.patch(["/workspace/resources/:id", "/workspace/articles/:id"], async (req
   }
   const nextBody = body.data.body ?? current.resource.body;
   const nextSections = body.data.sections ?? current.resource.sections;
-  const [updated] = await db
-    .update(resourcesTable)
-    .set({
-      ...body.data,
-      readMinutes: estimateReadMinutes(nextBody, nextSections),
-      tint: normalizeTutorTint(current.tutor.tint),
-      ...(body.data.status === "published"
-        ? { publishedAt: new Date().toISOString().slice(0, 10) }
-        : {}),
-    })
-    .where(eq(resourcesTable.id, params.data.id))
-    .returning();
+  const updated = await updateResource(params.data.id, {
+    ...body.data,
+    readMinutes: estimateReadMinutes(nextBody, nextSections),
+    tint: normalizeTutorTint(current.tutor.tint),
+    ...(body.data.status === "published"
+      ? { publishedAt: new Date().toISOString().slice(0, 10) }
+      : {}),
+  });
   res.json(
     UpdateWorkspaceResourceResponse.parse(
       toResourceResponse(updated, current.tutor),
@@ -169,7 +149,7 @@ router.delete(["/workspace/resources/:id", "/workspace/articles/:id"], async (re
     res.status(400).json({ error: "Invalid resource." });
     return;
   }
-  const current = await findJoinedResource(params.data.id);
+  const current = await findResource(params.data.id);
   if (!current) {
     res.status(404).json({ error: "Resource not found" });
     return;
@@ -178,7 +158,7 @@ router.delete(["/workspace/resources/:id", "/workspace/articles/:id"], async (re
     res.status(403).json({ error: "You cannot delete this resource." });
     return;
   }
-  await db.delete(resourcesTable).where(eq(resourcesTable.id, params.data.id));
+  await deleteResource(params.data.id);
   res.sendStatus(204);
 });
 

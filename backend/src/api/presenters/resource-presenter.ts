@@ -1,6 +1,4 @@
-import { eq } from "drizzle-orm";
-import { db } from "../../core/db";
-import { resourcesTable, tutorsTable } from "../../models";
+import type { resourcesTable, tutorsTable } from "../../models";
 import { estimateReadMinutes } from "../../domain/text";
 import { normalizeResourceType } from "../../domain/resource-types";
 import { normalizeTutorTint } from "../../domain/tutor-accents";
@@ -26,20 +24,4 @@ export function toResourceResponse(
     tint: normalizeTutorTint(tutor.tint),
     status: resource.status,
   };
-}
-
-export async function findJoinedResource(id: number) {
-  const [row] = await db
-    .select({
-      resource: resourcesTable,
-      tutor: {
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(eq(resourcesTable.id, id))
-    .limit(1);
-  return row;
 }

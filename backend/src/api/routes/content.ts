@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import { and, asc, count, eq, ilike, inArray, or } from "drizzle-orm";
 import {
   GetResourceParams,
   GetResourceResponse,
@@ -9,14 +8,19 @@ import {
   ListResourcesResponse,
   ListTutorsResponse,
 } from "../schemas";
-import { db } from "../../core/db";
-import { resourcesTable, tutorsTable } from "../../models";
+import type { resourcesTable, tutorsTable } from "../../models";
 import { estimateReadMinutes, truncateAtWordBoundary } from "../../domain/text";
 import { tutorNameFields } from "../../domain/tutor-names";
 import { publicTutorSlug } from "../../domain/tutor-slugs";
 import { normalizeTutorTint } from "../../domain/tutor-accents";
 import { normalizeResourceType } from "../../domain/resource-types";
 import { findPublishedTutor, listPublishedTutors } from "../../crud/tutors";
+import {
+  findPublishedResource,
+  listPublishedResources,
+  listRelatedResources,
+  searchPublishedResources,
+} from "../../crud/resources";
 import { setPublicTutorCacheHeaders } from "../public-cache";
 
 const router: IRouter = Router();
@@ -44,30 +48,10 @@ function toResource(row: ResourceJoined) {
   };
 }
 
-async function listJoinedResources() {
-  return db
-    .select({
-      resource: resourcesTable,
-      tutor: {
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(resourcesTable.status, "published"),
-        eq(tutorsTable.profileStatus, "published"),
-      ),
-    )
-    .orderBy(asc(resourcesTable.id));
-}
-
 router.get("/tutors", async (_req, res): Promise<void> => {
   const [tutors, resources] = await Promise.all([
     listPublishedTutors(),
-    listJoinedResources(),
+    listPublishedResources(),
   ]);
 
   const payload = tutors.map((tutor) => ({
@@ -112,7 +96,7 @@ router.get("/tutors/:slug", async (req, res): Promise<void> => {
     return;
   }
 
-  const resources = await listJoinedResources();
+  const resources = await listPublishedResources();
   setPublicTutorCacheHeaders(res);
   res.json(
     GetTutorResponse.parse({
@@ -148,52 +132,14 @@ router.get("/resources", async (req, res): Promise<void> => {
     return;
   }
 
-  const filters = [
-    eq(resourcesTable.status, "published"),
-    eq(tutorsTable.profileStatus, "published"),
-  ];
-  if (params.data.subject) {
-    filters.push(
-      params.data.subject === "Science"
-        ? inArray(resourcesTable.subject, ["Biology", "Physics", "Chemistry"])
-        : eq(resourcesTable.subject, params.data.subject),
-    );
-  }
-  if (params.data.query) {
-    const search = `%${params.data.query}%`;
-    filters.push(
-      or(
-        ilike(resourcesTable.title, search),
-        ilike(resourcesTable.excerpt, search),
-        ilike(tutorsTable.name, search),
-      )!,
-    );
-  }
-
   const page = params.data.page ?? 1;
   const pageSize = params.data.pageSize ?? 9;
-  const where = and(...filters);
-  const [rows, [{ total }]] = await Promise.all([
-    db
-      .select({
-        resource: resourcesTable,
-        tutor: {
-          name: tutorsTable.name,
-          tint: tutorsTable.tint,
-        },
-      })
-      .from(resourcesTable)
-      .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-      .where(where)
-      .orderBy(asc(resourcesTable.id))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-    db
-      .select({ total: count() })
-      .from(resourcesTable)
-      .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-      .where(where),
-  ]);
+  const { rows, total } = await searchPublishedResources({
+    subject: params.data.subject,
+    query: params.data.query,
+    page,
+    pageSize,
+  });
 
   res.json(
     ListResourcesResponse.parse({
@@ -213,49 +159,14 @@ router.get("/resources/:slug", async (req, res): Promise<void> => {
     return;
   }
 
-  const [row] = await db
-    .select({
-      resource: resourcesTable,
-      tutor: {
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(resourcesTable.slug, params.data.slug),
-        eq(resourcesTable.status, "published"),
-        eq(tutorsTable.profileStatus, "published"),
-      ),
-    )
-    .limit(1);
+  const row = await findPublishedResource(params.data.slug);
 
   if (!row) {
     res.status(404).json({ error: "Resource not found" });
     return;
   }
 
-  const relatedRows = await db
-    .select({
-      resource: resourcesTable,
-      tutor: {
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(resourcesTable.tutorId, row.resource.tutorId),
-        eq(resourcesTable.status, "published"),
-        eq(tutorsTable.profileStatus, "published"),
-      ),
-    )
-    .orderBy(asc(resourcesTable.id))
-    .limit(4);
+  const relatedRows = await listRelatedResources(row.resource.tutorId);
 
   res.json(
     GetResourceResponse.parse({

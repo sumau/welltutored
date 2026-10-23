@@ -1,12 +1,9 @@
 import { Router, type IRouter } from "express";
-import { and, eq } from "drizzle-orm";
 import {
   DiscardWorkspaceProfileDraftResponse,
   UpdateWorkspaceProfileBody,
   UpdateWorkspaceProfileResponse,
 } from "../schemas";
-import { db } from "../../core/db";
-import { resourcesTable, tutorsTable } from "../../models";
 import {
   deleteTutorDraft,
   findTutor,
@@ -16,6 +13,7 @@ import {
   saveTutorDraft,
   type Tutor,
 } from "../../crud/tutors";
+import { listPublishedResourcesByTutor } from "../../crud/resources";
 import { applyTutorDraft } from "../../domain/tutor-drafts";
 import { truncateAtWordBoundary, estimateReadMinutes } from "../../domain/text";
 import { splitTutorName } from "../../domain/tutor-names";
@@ -164,28 +162,12 @@ router.patch("/workspace/profile", async (req, res): Promise<void> => {
     }
     throw error;
   }
-  const resources = await db
-    .select({
-      resource: resourcesTable,
-      tutor: {
-        slug: tutorsTable.slug,
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(resourcesTable.tutorId, tutor.id),
-        eq(resourcesTable.status, "published"),
-      ),
-    );
+  const resources = await listPublishedResourcesByTutor(tutor.id);
   res.json(
     UpdateWorkspaceProfileResponse.parse({
       ...toTutorResponse(
         tutor,
-        resources.map(({ resource, tutor: author }) => ({
+        resources.map(({ resource, author }) => ({
           ...resource,
           tutorSlug: author.slug,
           tutorName: author.name,
@@ -223,23 +205,7 @@ router.delete("/workspace/profile/draft", async (req, res): Promise<void> => {
 
   await deleteTutorDraft(tutor.id);
 
-  const resources = await db
-    .select({
-      resource: resourcesTable,
-      author: {
-        slug: tutorsTable.slug,
-        name: tutorsTable.name,
-        tint: tutorsTable.tint,
-      },
-    })
-    .from(resourcesTable)
-    .innerJoin(tutorsTable, eq(resourcesTable.tutorId, tutorsTable.id))
-    .where(
-      and(
-        eq(resourcesTable.tutorId, tutor.id),
-        eq(resourcesTable.status, "published"),
-      ),
-    );
+  const resources = await listPublishedResourcesByTutor(tutor.id);
 
   res.json(
     DiscardWorkspaceProfileDraftResponse.parse(
