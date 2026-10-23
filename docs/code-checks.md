@@ -18,17 +18,15 @@ docker compose run --rm test
 It runs `verify:ci` against a second database, `welltutored_test`, on the same
 PostgreSQL service as the development database, and creates that database on
 first use. Running `pnpm run verify:ci` directly inside `api` or `web` does not
-work. Without `TEST_DATABASE_URL` it tries to build a throwaway cluster with
-`initdb` and `pg_ctl`, and the image carries only the PostgreSQL client
-binaries:
+work, because neither sets `TEST_DATABASE_URL`, and the suite stops at its
+second step:
 
 ```
-Test database unavailable: required command 'initdb' was not found.
+Test database unavailable: set TEST_DATABASE_URL to a dedicated PostgreSQL connection before running database-backed integration tests.
 ```
 
-The `test` service supplies the connection, which takes the other branch of
-`scripts/integration-database/with-integration-database.sh`. CI takes the same branch, with the dedicated
-connection coming from its `postgres:16` service container instead
+The `test` service supplies the connection. CI does the same, with the
+dedicated connection coming from its `postgres:16` service container instead
 ([pipeline.md](pipeline.md#github-actions)). The suite needs no Clerk keys
 ([pipeline.md](pipeline.md#credentials)).
 
