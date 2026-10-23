@@ -4,7 +4,7 @@ import * as z from "zod";
 import {
   useCreateWorkspaceTutor,
   type TutorStubInput,
-} from "@workspace/api-client-react";
+} from "@/client";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

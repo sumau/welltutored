@@ -4,7 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import {
   getGetTutorQueryKey,
   getListTutorsQueryKey,
-} from "@workspace/api-client-react";
+} from "@/client";
 import {
   invalidatePublicTutorQueries,
   PUBLIC_TUTOR_STALE_TIME_MS,

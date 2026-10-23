@@ -30,8 +30,6 @@ minimumReleaseAge: 1440
 packages:
   - backend
   - frontend
-  - lib/*
-  - lib/integrations/*
   - scripts
 
 catalog:

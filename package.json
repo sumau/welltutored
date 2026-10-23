@@ -16,8 +16,7 @@
     "smoke:dev": "pnpm --filter @workspace/scripts run smoke:dev",
     "smoke:enquiry": "pnpm --filter @workspace/scripts run smoke:enquiry",
     "smoke:sign-in": "pnpm --filter @workspace/scripts run smoke:sign-in",
-    "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./backend\" --filter \"./frontend\" --filter \"./scripts\" --if-present run typecheck"
+    "typecheck": "pnpm -r --filter \"./backend\" --filter \"./frontend\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useGetWorkspaceSession, useListWorkspaceResources, useDeleteWorkspaceResource, getListWorkspaceResourcesQueryKey } from "@workspace/api-client-react";
+import { useGetWorkspaceSession, useListWorkspaceResources, useDeleteWorkspaceResource, getListWorkspaceResourcesQueryKey } from "@/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useListTutors } from "@workspace/api-client-react";
+import { useListTutors } from "@/client";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { ErrorState } from "@/components/ErrorState";

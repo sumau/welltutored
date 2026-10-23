@@ -9,7 +9,7 @@ import {
   useListWorkspaceTutors,
   useRestoreWorkspaceTutor,
   useUpdateWorkspaceAccount,
-} from "@workspace/api-client-react";
+} from "@/client";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Archive,

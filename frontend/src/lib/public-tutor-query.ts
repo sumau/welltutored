@@ -1,7 +1,7 @@
 import {
   getGetTutorQueryKey,
   getListTutorsQueryKey,
-} from "@workspace/api-client-react";
+} from "@/client";
 import type { QueryClient } from "@tanstack/react-query";
 
 export const PUBLIC_TUTOR_STALE_TIME_MS = 30_000;

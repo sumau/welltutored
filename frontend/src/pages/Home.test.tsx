@@ -5,7 +5,7 @@ import * as React from "react";
 import { act } from "react";
 import type { Root } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { Tutor } from "@workspace/api-client-react";
+import type { Tutor } from "@/client";
 
 const tutor: Tutor = {
   id: 1,

@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   getGetWorkspaceSessionQueryKey,
   type WorkspaceSession,
-} from "@workspace/api-client-react";
+} from "@/client";
 
 const session: WorkspaceSession = {
   id: 7,

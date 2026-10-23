@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "wouter";
-import { useListWorkspaceResources, useCreateWorkspaceResource, useUpdateWorkspaceResource, getListWorkspaceResourcesQueryKey, WorkspaceResourceStatus } from "@workspace/api-client-react";
+import { useListWorkspaceResources, useCreateWorkspaceResource, useUpdateWorkspaceResource, getListWorkspaceResourcesQueryKey, WorkspaceResourceStatus } from "@/client";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";

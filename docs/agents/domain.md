@@ -29,8 +29,7 @@ This is a **single-context** repo: one glossary and one ADR directory at the roo
 │   ├── 0001-....md
 │   └── 0002-....md
 ├── backend/
-├── frontend/
-└── lib/                ← api-client-react
+└── frontend/
 ```
 
 The packages are separate build units, not separate domains. They share one vocabulary, so they share one `GLOSSARY.md`, and there is no `GLOSSARY-MAP.md`.

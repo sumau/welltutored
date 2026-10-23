@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { Clock3 } from "lucide-react";
-import type { Resource } from "@workspace/api-client-react";
+import type { Resource } from "@/client";
 import { Link } from "wouter";
 import { ResourceTypeIcon } from "@/components/ResourceType";
 

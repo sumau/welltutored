@@ -558,7 +558,6 @@ function readPackageManifests(rootDir: string): PackageManifestRecord[] {
     join(rootDir, "package.json"),
     ...walkFiles(join(rootDir, "backend"), "package.json"),
     ...walkFiles(join(rootDir, "frontend"), "package.json"),
-    ...walkFiles(join(rootDir, "lib"), "package.json"),
     ...walkFiles(join(rootDir, "scripts"), "package.json"),
   ]);
 

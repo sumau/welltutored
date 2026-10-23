@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { Tutor } from "@workspace/api-client-react";
+import type { Tutor } from "@/client";
 import { TutorAvailability, TutorBackground, TutorEnquiry, TutorResources } from "./TutorProfile";
 
 const fullTutor: Tutor = {

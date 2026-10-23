@@ -1,6 +1,6 @@
 import { useParams } from "wouter";
 import * as React from "react";
-import { useGetTutor, getGetTutorQueryKey, type Tutor } from "@workspace/api-client-react";
+import { useGetTutor, getGetTutorQueryKey, type Tutor } from "@/client";
 import { Link } from "wouter";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ErrorState } from "@/components/ErrorState";

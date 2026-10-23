@@ -67,7 +67,7 @@ opening a pull request.
 | `backend` | Express 5 API, which also serves the frontend build: routes, Clerk middleware, seed/bootstrap behavior, and server startup |
 | `backend/src/models` | Drizzle/PostgreSQL schema |
 | `backend/openapi.yaml` | API contract, source for the generated client and Zod schemas |
-| `lib/api-client-react`, `backend/src/api/schemas` | Generated frontend hooks and runtime schemas |
+| `frontend/src/client`, `backend/src/api/schemas` | Generated frontend hooks and runtime schemas |
 | `scripts` | Docs check, smoke checks and test-database tooling |
 
 ## Commands

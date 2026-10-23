@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useListResources } from "@workspace/api-client-react";
+import { useListResources } from "@/client";
 import { Search } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";

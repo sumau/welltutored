@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as React from "react";
-import { useCreateEnquiry, type EnquiryReceipt } from "@workspace/api-client-react";
+import { useCreateEnquiry, type EnquiryReceipt } from "@/client";
 import { ArrowRight, Check, ShieldCheck } from "lucide-react";
-import type { Tutor } from "@workspace/api-client-react";
+import type { Tutor } from "@/client";
 
 interface EnquiryFormProps {
   tutor?: Tutor;

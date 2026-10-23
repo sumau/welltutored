@@ -8,7 +8,7 @@ import {
   useGetTutor,
   getGetTutorQueryKey,
   type WorkspaceTutor,
-} from "@workspace/api-client-react";
+} from "@/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertCircle, Check, Loader2, ExternalLink } from "lucide-react";
-import { TutorProfileUpdateIntake } from "@workspace/api-client-react";
+import { TutorProfileUpdateIntake } from "@/client";
 import {
   normalizeTutorAccent,
   TUTOR_ACCENTS,

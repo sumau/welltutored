@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth, useClerk } from "@clerk/react";
-import { useGetWorkspaceSession } from "@workspace/api-client-react";
+import { useGetWorkspaceSession } from "@/client";
 import { FileText, Inbox, LayoutDashboard, UserRound, UsersRound } from "lucide-react";
 import { Toaster } from "sonner";
 

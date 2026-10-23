@@ -3,7 +3,7 @@ import { type ReactNode } from "react";
 import {
   type WorkspaceSession,
   useGetWorkspaceSession,
-} from "@workspace/api-client-react";
+} from "@/client";
 import { AlertCircle, Clock3 } from "lucide-react";
 import { useAuth, useClerk } from "@clerk/react";
 import { Button } from "@/components/ui/button";

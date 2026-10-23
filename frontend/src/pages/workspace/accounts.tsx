@@ -7,7 +7,7 @@ import {
   useListWorkspaceAccounts,
   useDeleteWorkspaceAccount,
   useUpdateWorkspaceAccount,
-} from "@workspace/api-client-react";
+} from "@/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";

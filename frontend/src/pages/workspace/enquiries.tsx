@@ -4,7 +4,7 @@ import {
   getListWorkspaceEnquiriesQueryKey,
   useListWorkspaceEnquiries,
   useRetryWorkspaceEnquiry,
-} from "@workspace/api-client-react";
+} from "@/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";

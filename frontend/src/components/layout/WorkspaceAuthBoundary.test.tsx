@@ -3,7 +3,7 @@ import test from "node:test";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { WorkspaceAuthBoundaryView } from "./WorkspaceAuthBoundary";
-import type { WorkspaceSession } from "@workspace/api-client-react";
+import type { WorkspaceSession } from "@/client";
 
 const session = (role: WorkspaceSession["role"]): WorkspaceSession => ({
   id: 1,

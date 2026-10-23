@@ -1,4 +1,4 @@
-import { useListTutors } from "@workspace/api-client-react";
+import { useListTutors } from "@/client";
 import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
 import { EnquiryForm } from "@/components/EnquiryForm";

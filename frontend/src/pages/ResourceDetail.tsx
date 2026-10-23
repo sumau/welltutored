@@ -2,7 +2,7 @@ import { useParams, Link } from "wouter";
 import {
   getGetResourceQueryKey,
   useGetResource,
-} from "@workspace/api-client-react";
+} from "@/client";
 import { ArrowRight, Clock3, List, Printer, Share2 } from "lucide-react";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
