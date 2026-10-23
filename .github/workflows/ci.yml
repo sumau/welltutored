@@ -47,7 +47,7 @@ jobs:
           --health-retries 30
 
     env:
-      # Both connections are set, and set differently, so lib/db/src/index.ts's
+      # Both connections are set, and set differently, so backend/src/core/db.ts's
       # refusal to run integration tests against the application database is
       # exercised rather than trivially satisfied by an absent DATABASE_URL.
       # Nothing writes to welltutored; it exists to be the URL the guard
@@ -73,7 +73,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Supplying TEST_DATABASE_URL takes the short branch of
-      # scripts/with-test-database.sh, which skips building a throwaway
+      # scripts/test-database/with-test-database.sh, which skips building a throwaway
       # cluster. The database it names has to exist first: prepare:test-database
       # applies a schema through drizzle-kit, which cannot create the database
       # that holds it.
@@ -130,16 +130,16 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply the schema
-        run: pnpm --filter @workspace/db run push
+        run: pnpm --filter @workspace/backend run push
 
       # The API seeds sample content when it starts with NODE_ENV=development
       # on an empty database (docs/first-deploy.md). Start it once, wait until it
       # listens, and stop it: the database then has Tutors to smoke.
       - name: Seed sample content
         run: |
-          pnpm --filter @workspace/api-server run build
+          pnpm --filter @workspace/backend run build
           NODE_ENV=development PORT=8090 \
-            node artifacts/api-server/dist/index.mjs > seed.log 2>&1 &
+            node backend/dist/main.mjs > seed.log 2>&1 &
           pid=$!
           timeout 120 bash -c \
             "until grep -q 'Server listening' seed.log; do kill -0 $pid || exit 1; sleep 1; done" \

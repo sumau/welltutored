@@ -43,9 +43,9 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   and ADRs: an issue number is fine as a pointer, not as the story.
   Record a decision a reader will question as an ADR in
   [docs/adr/](docs/adr/).
-- After changing `lib/api-spec/openapi.yaml`, run
-  `pnpm --filter @workspace/api-spec run codegen`. Never edit the generated
-  code in `lib/api-client-react` or `lib/api-zod` by hand.
+- After changing `backend/openapi.yaml`, run
+  `pnpm --filter @workspace/backend run codegen`. Never edit the generated
+  code in `frontend/src/client/generated` or `backend/src/api/schemas` by hand.
 
 ## Before opening a pull request
 

@@ -47,7 +47,7 @@ domain. It must be a bare origin, and is validated before any request.
   a `400` validation response, and checking health again afterward.
 
 [Resources](../GLOSSARY.md#the-public-site) are hidden from visitors for now
-(`PUBLIC_RESOURCES_ENABLED` in `artifacts/welltutored/src/lib/features.ts`), so
+(`PUBLIC_RESOURCES_ENABLED` in `frontend/src/lib/features.ts`), so
 the check needs no published Resource and does not request the resource pages.
 Restore both when that switch turns on.
 
@@ -108,7 +108,7 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
 
 `SMOKE_TIMEOUT_MS` limits each request and `SMOKE_TOTAL_TIMEOUT_MS` the whole
 check, in milliseconds. Raise them for a target that is slow on purpose. The
-defaults and accepted ranges are in `scripts/src/smoke-check.ts`, which rejects
+defaults and accepted ranges are in `scripts/smoke/launch.ts`, which rejects
 a value outside them before making any request.
 
 ### When it fails

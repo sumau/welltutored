@@ -47,15 +47,15 @@ watch, so restart it after server changes:
 docker compose restart api
 ```
 
-After changing `lib/api-spec/openapi.yaml`, regenerate the client inside the
+After changing `backend/openapi.yaml`, regenerate the client inside the
 container, then restart:
 
 ```
-docker compose exec api pnpm --filter @workspace/api-spec run codegen
+docker compose exec api pnpm --filter @workspace/backend run codegen
 ```
 
 Schema changes are applied the same way as the initial push, with
-`pnpm --filter @workspace/db run push` via `docker compose run --rm migrate`.
+`pnpm --filter @workspace/backend run push` via `docker compose run --rm migrate`.
 
 ## How requests are routed
 
@@ -172,7 +172,7 @@ with it. The database is untouched, and this is the case that looks worse than
 it is: workspace accounts are keyed on the verified email address, not the
 Clerk user id. A new Clerk identity presenting an email that already has an
 account resolves to that account and creates no duplicate, which
-`artifacts/api-server/src/routes/workspace.lifecycle.test.ts` asserts. So
+`backend/tests/api/routes/workspace.lifecycle.test.ts` asserts. So
 recovery is not a fresh start:
 
 1. Create a replacement application, as described above.

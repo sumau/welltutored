@@ -35,8 +35,8 @@ flowchart LR
   workspace -- "session cookie" --> api
   api -- "Drizzle" --> db[("PostgreSQL<br/>(Neon in production)")]
 
-  spec["openapi.yaml"] -. "codegen" .-> hooks["React Query hooks"]
-  spec -. "codegen" .-> zod["Zod schemas"]
+  spec["backend/openapi.yaml"] -. "codegen" .-> hooks["React Query hooks<br/>(frontend/src/client)"]
+  spec -. "codegen" .-> zod["Zod schemas<br/>(backend/src/api/schemas)"]
   hooks -. "used by" .-> browser
   zod -. "used by" .-> api
 
@@ -49,11 +49,11 @@ flowchart LR
 Amber shapes are people, grey boxes are hosted services outside the container,
 and dashed boxes are build-time code rather than running parts. Solid arrows
 are runtime requests. Dotted arrows are code generated from
-`lib/api-spec/openapi.yaml`, which keeps the client and server agreeing on one
+`backend/openapi.yaml`, which keeps the client and server agreeing on one
 contract. Serving everything from one origin is
 [ADR-0001](adr/0001-single-origin-deployment.md).
 
-Every route is defined in `artifacts/welltutored/src/app/route-map.ts`.
+Every route is defined in `frontend/src/app/route-map.ts`.
 
 ## Public website
 
@@ -69,8 +69,8 @@ Workspace.
 
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
 the public visual language. Public API handlers live in
-`artifacts/api-server/src/routes/content.ts` and
-`artifacts/api-server/src/routes/enquiries.ts`.
+`backend/src/api/routes/content.ts` and
+`backend/src/api/routes/enquiries.ts`.
 
 ## Authentication
 
@@ -106,24 +106,60 @@ the mutation's pending state, as `submissionInFlight` does in `EnquiryForm`.
 Keyboard activation can fire a second submit before React renders the first
 one as pending, so the pending flag alone lets a duplicate through.
 
-## API boundaries
+## Backend layout
 
-Workspace code in `artifacts/api-server/src` is split by responsibility, one
-directory each:
+The backend follows the shape of the
+[full-stack FastAPI template](https://github.com/fastapi/full-stack-fastapi-template),
+in TypeScript. Each folder in `backend/src` has one job, and a request passes
+through them in one direction:
 
-- `auth` — authenticated account lookup and role checks
-- `services` — Clerk-to-workspace account provisioning and tutor assignment
-- `domain` — publishability rules for resources and tutor profiles
-- `presenters` — response mapping
-- `routes` — request validation and mutations, one subrouter per area, which
-  `routes/workspace.ts` mounts
+```mermaid
+flowchart LR
+  request(["Request to /api"]) --> app["app.ts<br/>middleware"]
+  app --> routes["api/routes<br/>parse, status codes"]
+  routes --> deps["api/deps.ts<br/>account and role"]
+  routes --> crud["crud<br/>queries"]
+  routes --> domain["domain<br/>rules"]
+  routes --> presenters["api/presenters<br/>response shapes"]
+  deps --> crud
+  crud --> models["models<br/>tables"]
+  crud --> db["core/db.ts"]
+  presenters --> domain
+  db --> pg[("PostgreSQL")]
 
-The intended direction for future workspace changes is to keep route handlers
-thin: authenticate, validate the request, call a domain/service function, and
-present the response. `lib/api-spec/openapi.yaml` generates both the React
-Query hooks and the Zod schemas, which keeps client and server contracts
-aligned. Generated API clients and schemas remain generated artifacts and
-should not be edited manually.
+  classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
+  class pg external
+```
+
+- `main.ts` starts the process: seeds illustrative content in development,
+  then listens. `app.ts` builds the Express app: the Public Origin redirect,
+  CORS, Clerk on `/api`, the trusted-origin check on `/api/workspace`, the
+  routes, then the frontend build and the error handler.
+- `api/routes` — one router per area, which `api/routes/index.ts` mounts and
+  `api/routes/workspace.ts` splits further. Handlers stay thin: authenticate,
+  validate the request against `api/schemas`, call `crud` and `domain`, and
+  present the response.
+- `api/deps.ts` — the signed-in workspace account and role checks.
+- `api/middleware` — request origin, Public Origin redirect and the API error
+  handler.
+- `api/presenters` — database rows to response bodies.
+- `crud` — every database query, one module per area (tutors, resources,
+  enquiries, workspace accounts), including Clerk-to-workspace account
+  provisioning and tutor assignment.
+- `domain` — rules with no database or HTTP in them, such as
+  publishability of resources and tutor profiles, names, slugs and accents.
+- `models` — the Drizzle schema, one file per table.
+- `core` — settings (`config.ts` names every environment variable the API reads),
+  the database pool, logging, the health check and serving the frontend build.
+- `seed.ts` — the illustrative content for development.
+
+Backend tests live in `backend/tests`, mirroring `src`. Frontend tests sit
+next to the components they test.
+
+`backend/openapi.yaml` generates both the React Query hooks in
+`frontend/src/client` and the Zod schemas in `backend/src/api/schemas`, which
+keeps client and server contracts aligned. Generated code is not edited by
+hand.
 
 ## Publishing rules
 
@@ -152,12 +188,12 @@ not currently keep a private draft alongside a live published version.
 ## Styling payload
 
 The Well Tutored Vite build enables Tailwind's production Lightning CSS
-optimization. `artifacts/welltutored/scripts/verify-css-build.mjs` holds a size
+optimization. `frontend/scripts/verify-css-build.mjs` holds a size
 budget for the primary stylesheet, set about 7% above its size in October 2026
 so that growth is a decision rather than drift. `pnpm run verify:ci` checks it
 after the build. To check it alone, run
-`pnpm --filter @workspace/welltutored run build` followed by
-`pnpm --filter @workspace/welltutored run verify:css`; the script prints the
+`pnpm --filter @workspace/frontend run build` followed by
+`pnpm --filter @workspace/frontend run verify:css`; the script prints the
 current size.
 
 The remaining global CSS is intentional: Tailwind preflight, theme variables,

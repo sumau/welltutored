@@ -34,7 +34,7 @@ document then uses it as-is, so keep that terminal open for the session:
 read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
 
 docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
-  -lc 'pnpm --filter @workspace/db run push'
+  -lc 'pnpm --filter @workspace/backend run push'
 ```
 
 This runs from your machine to the database. Secrets set on Fly play no part in
@@ -59,7 +59,7 @@ Three things about that command:
   DDL.
 
 `push` prompts before anything destructive. Read the prompt, and review the diff
-of `lib/db/src/schema/` first — nothing downstream asks.
+of `backend/src/models/` first — nothing downstream asks.
 [What push prompts](#what-push-prompts) has what each kind of change prompts and
 how past pushes were answered.
 
@@ -269,7 +269,7 @@ moment you create it, made in seconds, with its own connection strings.
    read -rsp 'Rehearsal branch DATABASE_URL: ' REHEARSAL_DATABASE_URL; echo
 
    docker compose run --rm -e DATABASE_URL="$REHEARSAL_DATABASE_URL" --entrypoint bash migrate \
-     -lc 'pnpm --filter @workspace/db run push'
+     -lc 'pnpm --filter @workspace/backend run push'
    ```
 
    It is read as `REHEARSAL_DATABASE_URL` so that it cannot be confused with

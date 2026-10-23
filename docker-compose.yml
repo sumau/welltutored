@@ -1,6 +1,6 @@
 # Local development stack. The Deployment serves the frontend and the API from
 # one origin; here the Vite dev server proxies /api to the API service instead
-# (see artifacts/welltutored/vite.config.ts).
+# (see frontend/vite.config.ts).
 name: welltutored
 
 x-node: &node
@@ -59,7 +59,7 @@ services:
       # Browser requests reach the API through the Vite proxy, so the origin
       # the API sees is the web service's. Stated explicitly here because
       # TRUSTED_ORIGINS replaces the built-in defaults rather than adding to
-      # them (artifacts/api-server/src/middlewares/request-origin.ts).
+      # them (backend/src/api/middleware/request-origin.ts).
       TRUSTED_ORIGINS: http://localhost:5173
     ports:
       - "8080:8080"
@@ -68,7 +68,7 @@ services:
         condition: service_completed_successfully
       db:
         condition: service_healthy
-    command: pnpm --filter @workspace/api-server run dev
+    command: pnpm --filter @workspace/backend run dev
 
   web:
     <<: *node
@@ -81,7 +81,7 @@ services:
     depends_on:
       deps:
         condition: service_completed_successfully
-    command: pnpm --filter @workspace/welltutored run dev
+    command: pnpm --filter @workspace/frontend run dev
 
   # Schema push. Kept out of the default startup because drizzle-kit can
   # prompt; run it with `docker compose run --rm migrate` so it gets a TTY.
@@ -96,15 +96,15 @@ services:
         condition: service_completed_successfully
       db:
         condition: service_healthy
-    command: pnpm --filter @workspace/db run push
+    command: pnpm --filter @workspace/backend run push
 
   # Full CI suite. `verify:ci` builds a throwaway PostgreSQL cluster when
   # TEST_DATABASE_URL is unset, which needs initdb and pg_ctl — server binaries
   # the dev image does not carry, only the client ones. Supplying a dedicated
-  # connection takes the other branch of scripts/with-test-database.sh and
+  # connection takes the other branch of scripts/test-database/with-test-database.sh and
   # reuses the db service instead.
   #
-  # The test database must differ from the application one: lib/db/src/index.ts
+  # The test database must differ from the application one: backend/src/core/db.ts
   # refuses a TEST_DATABASE_URL equal to DATABASE_URL, so integration tests can
   # never mutate application data. Both are set here so that check is exercised
   # rather than trivially satisfied by an absent DATABASE_URL.

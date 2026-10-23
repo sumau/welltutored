@@ -2,7 +2,7 @@
 
 There is no migrations directory and no migration runner. Schema changes are
 applied by running Drizzle's `push` by hand against the target database from a
-checkout, which diffs `lib/db/src/schema/` against the live database and alters
+checkout, which diffs `backend/src/models/` against the live database and alters
 it to match. Nothing applies the schema automatically, and the Deploy pipeline
 deliberately does not.
 
@@ -37,7 +37,7 @@ change that has to move data, cannot.
 - A merge to `main` deploys code that may expect a schema the database does not
   have. Apply an added or changed schema **before** merging it. The order for a
   removal is in [schema-changes.md](../schema-changes.md#push-or-merge-first).
-- Review the diff of `lib/db/src/schema/` before pushing. Nothing downstream
+- Review the diff of `backend/src/models/` before pushing. Nothing downstream
   asks, and `push` against a populated database can drop a column.
 - Use the database provider's direct (non-pooled) connection string for schema
   work; pooled connections are a poor fit for DDL.

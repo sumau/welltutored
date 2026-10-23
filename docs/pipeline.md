@@ -90,7 +90,7 @@ goes on to deploy. The gate therefore runs before a merge, not only after one.
 The workflow supplies a `postgres:16` service container and points
 `TEST_DATABASE_URL` at a `welltutored_test` database that it creates first.
 Supplying a connection takes the externally-provided branch of
-`scripts/with-test-database.sh`, so no throwaway cluster is built for the run.
+`scripts/test-database/with-test-database.sh`, so no throwaway cluster is built for the run.
 `DATABASE_URL` is set as well, to a different database on the same server, so
 the refusal to share a connection between application and integration-test data
 is exercised rather than vacuously satisfied by an absent value.

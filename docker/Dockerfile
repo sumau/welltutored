@@ -31,10 +31,9 @@ RUN pnpm install --frozen-lockfile
 
 # Targeted builds, not `pnpm run build`: docs:check and the full typecheck are
 # CI's job (.github/workflows/ci.yml), and the deployment image does not need
-# the other artifacts. The API bundles its workspace dependencies from source
-# through esbuild, so lib/* needs no separate build step.
-RUN pnpm --filter @workspace/welltutored run build \
-  && pnpm --filter @workspace/api-server run build
+# the other packages.
+RUN pnpm --filter @workspace/frontend run build \
+  && pnpm --filter @workspace/backend run build
 
 
 FROM --platform=linux/amd64 node:24-bookworm-slim AS runtime
@@ -47,11 +46,11 @@ ENV WEB_CLIENT_ROOT=/app/web
 
 WORKDIR /app
 
-COPY --from=build --chown=node:node /workspace/artifacts/api-server/dist ./dist
-COPY --from=build --chown=node:node /workspace/artifacts/welltutored/dist/public ./web
+COPY --from=build --chown=node:node /workspace/backend/dist ./dist
+COPY --from=build --chown=node:node /workspace/frontend/dist/public ./web
 
 USER node
 EXPOSE 8080
 
 # /api/healthz is the check to point a platform's health probe at.
-CMD ["node", "--enable-source-maps", "dist/index.mjs"]
+CMD ["node", "--enable-source-maps", "dist/main.mjs"]

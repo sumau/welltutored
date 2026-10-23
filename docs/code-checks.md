@@ -27,7 +27,7 @@ Test database unavailable: required command 'initdb' was not found.
 ```
 
 The `test` service supplies the connection, which takes the other branch of
-`scripts/with-test-database.sh`. CI takes the same branch, with the dedicated
+`scripts/test-database/with-test-database.sh`. CI takes the same branch, with the dedicated
 connection coming from its `postgres:16` service container instead
 ([pipeline.md](pipeline.md#github-actions)). The suite needs no Clerk keys
 ([pipeline.md](pipeline.md#credentials)).
@@ -39,7 +39,7 @@ connection coming from its `postgres:16` service container instead
 Run the API tests with:
 
 ```sh
-pnpm --filter @workspace/api-server test
+pnpm --filter @workspace/backend test
 ```
 
 This is the complete API suite used by CI: the in-memory unit checks and the
@@ -49,15 +49,15 @@ database; `pnpm run verify:ci` does, as above.
 Run only the non-mutating API checks with:
 
 ```sh
-pnpm --filter @workspace/api-server run test:unit
+pnpm --filter @workspace/backend run test:unit
 ```
 
 The lifecycle tests exercise the Express routes and database-backed behavior
 end to end within the test process. They create, update, publish, and delete
 test records and are therefore reserved for CI with an isolated test
 database. Set `TEST_DATABASE_URL` to the dedicated PostgreSQL connection;
-`test:integration` sets `NODE_ENV=test`, and the database package refuses to
-fall back to `DATABASE_URL` or use the same URL as the application. CI must
+`test:integration` sets `NODE_ENV=test`, and `backend/src/core/config.ts` then
+refuses to fall back to `DATABASE_URL` or use the same URL as the application. CI must
 apply the current schema to that database before running the integration
 script. The CI preparation command does both checks explicitly:
 
@@ -86,18 +86,17 @@ stub assigned through it is silently discarded and the route reaches Clerk.
 Run the Well Tutored web tests with:
 
 ```sh
-pnpm --filter @workspace/welltutored test
+pnpm --filter @workspace/frontend test
 ```
 
 React components are rendered either into JSDOM or to static markup. Network
 and query behavior is supplied by test doubles rather than making real
 production requests.
 
-The command runs `tsx` from the API package, which has neither Vite's aliases
-nor its JSX transform, so when adding a web test:
+The command runs the tests with `tsx`, which has neither Vite's aliases nor
+its JSX transform, so when adding a web test:
 
-- Keep `--tsconfig ../welltutored/tsconfig.json`, which resolves the `@/*`
-  aliases, and import `React` explicitly in test files and the components they
+- Keep `--tsconfig tsconfig.json`, which resolves the `@/*` aliases, and import `React` explicitly in test files and the components they
   render.
 - Put the JSDOM window, its event constructors, `location`, `history`, and the
   window event listener functions on `globalThis` before importing

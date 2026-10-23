@@ -62,13 +62,21 @@ opening a pull request.
 
 | Path | What it holds |
 | --- | --- |
-| `artifacts/welltutored` | React + Vite frontend: public directory, tutor and resource pages, enquiry flow, auth screens, and private workspace |
-| `artifacts/welltutored/src/index.css` | Editorial visual system and theme tokens |
-| `artifacts/api-server` | Express 5 API, which also serves the frontend build: routes, Clerk middleware, seed/bootstrap behavior, and server startup |
-| `lib/db/src/schema` | Drizzle/PostgreSQL schema |
-| `lib/api-spec/openapi.yaml` | API contract, source for the generated client and Zod schemas |
-| `lib/api-client-react`, `lib/api-zod` | Generated frontend hooks and runtime schemas |
-| `scripts` | Docs check, smoke checks and test-database tooling |
+| `frontend` | React + Vite frontend: public directory, tutor and resource pages, enquiry flow, auth screens, and private workspace |
+| `frontend/src/index.css` | Editorial visual system and theme tokens |
+| `frontend/src/client` | Generated React Query hooks and the fetch they use |
+| `backend` | Express 5 API, which also serves the frontend build |
+| `backend/openapi.yaml` | API contract, source for the generated hooks and Zod schemas |
+| `backend/src/api` | Routes, request checks, response shapes and generated Zod schemas |
+| `backend/src/crud` | Every database query |
+| `backend/src/domain` | Rules with no database or HTTP in them |
+| `backend/src/models` | Drizzle/PostgreSQL schema |
+| `backend/src/core` | Settings, database pool, logging, health check |
+| `backend/tests` | Backend tests, mirroring `backend/src` |
+| `scripts` | Smoke checks, the Docs Check and test-database tooling, a folder each |
+
+What each backend folder is for is in
+[docs/architecture.md](docs/architecture.md#backend-layout).
 
 ## Commands
 
@@ -76,11 +84,11 @@ These run inside the containers. Prefix them with `docker compose exec api`
 against a running service, or see
 [docs/local-docker.md](docs/local-docker.md) for one-off runs.
 
-- `PORT=8080 pnpm --filter @workspace/api-server run dev` — run the API server
+- `PORT=8080 pnpm --filter @workspace/backend run dev` — run the API server
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — docs check + typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
+- `pnpm --filter @workspace/backend run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm --filter @workspace/backend run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
 - `pnpm run prepare:test-database` — validate `TEST_DATABASE_URL` and apply the
   current schema to the dedicated integration-test database
 

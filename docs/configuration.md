@@ -2,11 +2,11 @@
 
 For whoever needs to change a setting, or the domain: every environment
 variable the application reads, what it does, when it is read, and where it is
-set.
+set. The API reads its settings through `backend/src/core/config.ts`.
 
 | Variable | When | Set in | Notes |
 | --- | --- | --- | --- |
-| `DATABASE_URL` | runtime, required | `fly secrets`; `docker-compose.yml` locally | Append `?sslmode=require` for a hosted database: `lib/db/src/index.ts` creates a bare `pg` pool with no SSL options of its own. The [Deployment](../GLOSSARY.md#delivery) uses Neon's pooled string ([first-deploy.md](first-deploy.md#database)). |
+| `DATABASE_URL` | runtime, required | `fly secrets`; `docker-compose.yml` locally | Append `?sslmode=require` for a hosted database: `backend/src/core/db.ts` creates a bare `pg` pool with no SSL options of its own. The [Deployment](../GLOSSARY.md#delivery) uses Neon's pooled string ([first-deploy.md](first-deploy.md#database)). |
 | `TRUSTED_ORIGINS` | runtime, required | `fly.toml`; `docker-compose.yml` locally | The exact public origin, e.g. `https://welltutored.co.uk`. See below. |
 | `PUBLIC_ORIGIN` | runtime, optional | `fly.toml` | The [Public Origin](../GLOSSARY.md#delivery), e.g. `https://welltutored.example`. When set, a request arriving on any other hostname gets a `301` to the same path and query there; `/api/healthz` is exempt, because Fly's health checks do not use the public hostname. It must also appear in `TRUSTED_ORIGINS`, or the server refuses to start. Unset, nothing redirects. |
 | `PORT` | runtime, required | `docker/Dockerfile` and `fly.toml`; `docker-compose.yml` locally | The image defaults it to `8080`. |
@@ -16,7 +16,7 @@ set.
 | `CLERK_PUBLISHABLE_KEY` | runtime | `fly secrets`; `.env` locally | Used by the Clerk middleware. |
 | `VITE_CLERK_PUBLISHABLE_KEY` | **build** | a build argument in `fly.toml`'s `[build.args]`; `.env` locally | Compiled into the browser bundle. Setting it at runtime, as a Fly secret for instance, has no effect ([first-deploy.md](first-deploy.md#flyio)). |
 | `LOG_LEVEL` | runtime, optional | not set | The server's log level; `info` when unset. |
-| `BASE_PATH` | **build**, optional | not set | The path the frontend is served under, read by `artifacts/welltutored/vite.config.ts`; `/` when unset. |
+| `BASE_PATH` | **build**, optional | not set | The path the frontend is served under, read by `frontend/vite.config.ts`; `/` when unset. |
 
 Changing the domain means changing `TRUSTED_ORIGINS` and `PUBLIC_ORIGIN`
 together, after the new hostname has a certificate;
@@ -36,9 +36,9 @@ empty trusted-origin set rejects every credentialed request — including the
 public enquiry POST, which is the main thing visitors do. Set it to the public
 origin, with no trailing path, and update it when the domain changes.
 
-`configuredValues` in `artifacts/api-server/src/middlewares/request-origin.ts`
-reads `TRUSTED_ORIGINS` and `CORS_ORIGINS`, treats them as one list, and falls
-back to the localhost defaults only outside production. Setting either one
+`configuredValues` in `backend/src/api/middleware/request-origin.ts`
+takes `TRUSTED_ORIGINS` and `CORS_ORIGINS` from `core/config.ts` as one list,
+and falls back to the localhost defaults only outside production. Setting either one
 **replaces** those defaults, so a Deployment trusts what `fly.toml` names and
 nothing else.
 
