@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useListTutors, type Tutor } from "@/client";
+import { useListTutors } from "@/client";
 import { Link } from "wouter";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
@@ -22,30 +22,14 @@ const intakeDotClasses = {
   full: "bg-red-500",
 } as const;
 
-// Every subject the tutors teach, in order, each with the tint of the first
-// tutor who teaches it. A subject line like "Mathematics & Chemistry" holds two.
-function taughtSubjects(tutors: Tutor[]) {
-  const subjects = new Map<string, { name: string; tint: string }>();
-  for (const tutor of tutors) {
-    for (const part of tutor.subject.split(/\s*(?:&|,|\band\b)\s*/)) {
-      const name = part.trim();
-      const key = name.toLowerCase();
-      if (name && !subjects.has(key)) subjects.set(key, { name, tint: tutor.tint });
-    }
-  }
-  return [...subjects.values()];
-}
-
 export default function Home() {
   const { data: tutors, isLoading: tutorsLoading, error: tutorsError, refetch: refetchTutors } = useListTutors({
     query: publicTutorQueryOptions,
     request: publicTutorRequestOptions,
   });
 
-  const subjects = taughtSubjects(tutors ?? []);
-
   // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
-  // loaded, since the hero's subjects change its height.
+  // loaded, so the grid has its full height.
   React.useEffect(() => {
     if (tutorsLoading || window.location.hash !== "#tutors") return;
     scrollToTutors("auto");
@@ -54,32 +38,15 @@ export default function Home() {
   return (
     <main className="flex-1" data-testid="page-home">
       {/* Hero */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[40px] md:pt-[72px] pb-[56px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-[36px] lg:gap-[64px] items-end" id="top">
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[40px] md:pt-[72px] pb-[56px] md:pb-[80px]" id="top">
         <div>
-          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5.6vw,72px)] leading-[1.02] mb-[24px] max-w-[16ch]" data-testid="hero-title">
+          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,6.2vw,88px)] leading-[1.02] mb-[28px] max-w-[24ch]" data-testid="hero-title">
             Women tutors for girls at GCSE and A-level.
           </h1>
           <p className="max-w-[34em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="hero-copy">
             Thoughtful one-to-one support from women with deep knowledge of their subject. Choose the tutor who feels right and send her an enquiry.
           </p>
         </div>
-
-        {subjects.length > 0 && (
-          <p className="font-serif text-[clamp(24px,2.6vw,34px)] leading-[1.45] m-0 lg:pb-[6px]" data-testid="hero-subjects">
-            Our tutors teach{" "}
-            {subjects.map((subject, index) => (
-              <React.Fragment key={subject.name}>
-                <span
-                  className="subject-highlight"
-                  style={{ "--tint": subject.tint, animationDelay: `${index * 110}ms` } as React.CSSProperties}
-                >
-                  {subject.name}
-                </span>
-                {index < subjects.length - 2 ? ", " : index === subjects.length - 2 ? " and " : "."}
-              </React.Fragment>
-            ))}
-          </p>
-        )}
       </section>
 
       {/* Tutors */}

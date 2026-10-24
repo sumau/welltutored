@@ -206,24 +206,7 @@ body:has(.public-site) {
   }
 }
 
-/* The hero's subjects, marked like revision notes in each tutor's tint.
-   The marks sweep in once on load: the page's one load moment. */
-.subject-highlight {
-  background-image: linear-gradient(color-mix(in srgb, var(--tint) 60%, transparent), color-mix(in srgb, var(--tint) 60%, transparent));
-  background-repeat: no-repeat;
-  background-position: 0 85%;
-  background-size: 100% .45em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  animation: highlight-sweep 700ms cubic-bezier(.22, 1, .36, 1) both;
-}
-
-@keyframes highlight-sweep {
-  from { background-size: 0% .45em; }
-  to { background-size: 100% .45em; }
-}
-
-/* A profile's circle settles into place. */
+/* The one load moment: the hero circles settle into place. */
 @keyframes circle-settle {
   from { opacity: 0; transform: scale(.6); }
   to { opacity: 1; transform: scale(1); }
