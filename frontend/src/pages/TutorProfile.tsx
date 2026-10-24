@@ -179,11 +179,11 @@ export default function TutorProfile() {
         </div>
       </div>
 
-      {/* Hero */}
-      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[32px] md:gap-[56px] items-center">
-        <TutorCircle tutor={tutor} size={200} className="circle-settle [--circle-scale:0.64] md:[--circle-scale:1]" />
+      {/* Hero: who she is, beside her approach, after Home's hero */}
+      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[36px] lg:gap-[56px] items-center">
         <div>
-          <h1 className="font-serif text-[clamp(44px,6vw,76px)] leading-[1.02] mb-[10px]" data-testid="tutor-name">
+          <TutorCircle tutor={tutor} size={96} className="circle-settle mb-[24px] [--circle-scale:0.75] md:[--circle-scale:1]" />
+          <h1 className="font-serif text-[clamp(44px,5vw,68px)] leading-[1.02] mb-[10px]" data-testid="tutor-name">
             {tutor.name}
           </h1>
           <p className="text-[19px] font-semibold mb-[18px]" data-testid="tutor-subject-kicker">
@@ -197,18 +197,14 @@ export default function TutorProfile() {
             {tutor.profileSummary}
           </p>
         </div>
-      </section>
-
-      {/* Her approach */}
-      <section className="px-6 md:px-[30px] max-w-[1210px] mx-auto mb-[64px]">
         <figure
-          className="tutor-wash rounded-[28px] px-[28px] md:px-[56px] py-[36px] md:py-[48px] m-0"
+          className="tutor-wash rounded-[28px] px-[28px] md:px-[40px] py-[32px] md:py-[40px] m-0"
           style={{ "--tint": tutor.tint } as React.CSSProperties}
         >
-          <blockquote className="font-serif text-[24px] md:text-[32px] leading-[1.3] max-w-[30em] m-0 text-foreground">
+          <blockquote className="font-serif text-[22px] md:text-[26px] leading-[1.35] m-0 text-foreground">
             {tutor.teachingIntro}
           </blockquote>
-          <figcaption className="text-[15px] text-foreground/80 mt-[18px] font-semibold">
+          <figcaption className="text-[15px] text-foreground/80 mt-[24px] font-semibold">
             {firstName} on her approach
           </figcaption>
         </figure>
