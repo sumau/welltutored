@@ -25,24 +25,16 @@ flowchart TB
     prodSmoke -.-> manual["Manual sign-in<br/>after auth changes"]
   end
 
-  %% The legend. Links written ~~~ are invisible and only position things.
+  %% The legend, on one row. Links written ~~~ are invisible and only
+  %% position things.
   subgraph legend[" "]
-    direction TB
-    subgraph legendArrows[" "]
-      direction LR
-      keyA[" "] -->|"next step waits for this to pass"| keyB[" "]
-      keyC[" "] -.->|"runs, but nothing waits for it"| keyD[" "]
-    end
-
-    subgraph legendBoxes[" "]
-      direction LR
-      keyJob["GitHub Actions job"]
-      keyEvent["Step from pull request to live site"]
-      keyOther["Check outside GitHub Actions"]
-      keyJob ~~~ keyEvent ~~~ keyOther
-    end
-
-    legendArrows ~~~ legendBoxes
+    direction LR
+    keyA[" "] -->|"next step waits for this to pass"| keyB[" "]
+    keyB ~~~ keyC[" "]
+    keyC -.->|"runs, but nothing waits for it"| keyD[" "]
+    keyD ~~~ keyJob["GitHub Actions job"]
+    keyJob ~~~ keyEvent["Step from pull request to live site"]
+    keyEvent ~~~ keyOther["Check outside GitHub Actions"]
   end
 
   pipeline ~~~ legend
@@ -58,8 +50,6 @@ flowchart TB
 
   style pipeline fill:none,stroke:none
   style legend fill:none,stroke:#888,stroke-dasharray:4
-  style legendArrows fill:none,stroke:none
-  style legendBoxes fill:none,stroke:none
 ```
 
 | Check | Runs against | When | Covers | By hand |
