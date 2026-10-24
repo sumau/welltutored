@@ -181,7 +181,9 @@ body:has(.public-site) {
     text-wrap: balance;
   }
 
-  .public-site :focus-visible {
+  /* Controls show focus. A section focused only as a jump target
+     (tabindex="-1") doesn't: it can't be pressed. */
+  .public-site :focus-visible:not([tabindex="-1"]) {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 3px;
   }

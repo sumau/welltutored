@@ -83,7 +83,7 @@ export default function Home() {
       </section>
 
       {/* Tutors */}
-      <section className="bg-secondary px-6 md:px-[30px] py-[64px] md:py-[88px] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
+      <section className="bg-secondary px-6 md:px-[30px] py-[64px] md:py-[88px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
         <div className="max-w-[1150px] mx-auto">
           <div className="mb-[40px] max-w-[640px]">
             <h2 id="home-tutors-title" className="font-serif text-[clamp(34px,4vw,48px)] leading-[1.08] m-0 mb-[14px]">
