@@ -86,8 +86,8 @@ jobs:
       - name: Verify
         run: pnpm run verify
 
-  # The CI Smoke: the Image Smoke (does the production image start and serve
-  # the site?), then the browser Smokes against the same container. It builds
+  # The CI Smoke: the Public Site Smoke (does the production image start and
+  # serve a usable site?), then the browser Smokes against the same container. It builds
   # docker/Dockerfile itself, so it checks the image's recipe, not the exact
   # image Fly builds and ships (that one carries the pk_live_ key).
   ci-smoke:
@@ -143,7 +143,7 @@ jobs:
             || { cat seed.log; exit 1; }
           kill "$pid"
 
-      # The Sign-in Smoke uses the Clerk development instance's keys, here and
+      # The Workspace Smoke uses the Clerk development instance's keys, here and
       # nowhere else: `verify` stays free of Clerk secrets. A production key
       # would sign CI in to the Deployment's instance, so refuse one.
       - name: Check the Clerk keys are development keys
@@ -191,49 +191,49 @@ jobs:
           curl -fsS --retry 30 --retry-delay 1 --retry-all-errors \
             http://localhost:8080/api/healthz
 
-      - name: Development smoke
+      - name: Public Site Smoke
         env:
           SMOKE_BASE_URL: http://localhost:8080
-        run: pnpm run smoke:launch:dev
+        run: pnpm run smoke:public-site
 
       # It intercepts /api/enquiries, so it covers the built form in a real
-      # browser; the development smoke covers the server's handling of an
+      # browser; the Public Site Smoke covers the server's handling of an
       # invalid enquiry. The runner image carries Google Chrome.
-      - name: Enquiry smoke
+      - name: Enquiry Smoke
         env:
           SMOKE_BASE_URL: http://localhost:8080
         run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:enquiry
 
-      # The Sign-in Smoke. It signs in as a +clerk_test user (a secret, since
+      # The Workspace Smoke. It signs in as a +clerk_test user (a secret, since
       # this repository is public), promotes it to owner in this job's
       # database, and uses the Workspace. It runs last because it writes to
       # that database. On failure it saves a screenshot and a Playwright trace,
       # uploaded below. A pull request from a fork gets no secrets, so it can't
       # sign in: skip it there, with a notice. Dependabot runs read the
       # Dependabot copies of the secrets, so they run it.
-      - name: Sign-in smoke skipped on a fork
+      - name: Workspace Smoke skipped on a fork
         if: github.event.pull_request.head.repo.fork
-        run: echo "::notice title=Sign-in Smoke skipped::A pull request from a fork gets no Clerk secrets, so the Sign-in Smoke can't sign in. It runs again once the change is on a branch of this repository."
+        run: echo "::notice title=Workspace Smoke skipped::A pull request from a fork gets no Clerk secrets, so the Workspace Smoke can't sign in. It runs again once the change is on a branch of this repository."
 
-      - name: Sign-in smoke
-        id: sign-in-smoke
+      - name: Workspace Smoke
+        id: workspace-smoke
         if: ${{ !github.event.pull_request.head.repo.fork }}
         env:
           SMOKE_BASE_URL: http://localhost:8080
           SMOKE_SIGN_IN_EMAIL: ${{ secrets.CLERK_TEST_EMAIL }}
           SMOKE_DATABASE_URL: ${{ env.DATABASE_URL }}
-          SMOKE_FAILURE_SCREENSHOT: ${{ runner.temp }}/sign-in-smoke/screenshot.png
-          SMOKE_FAILURE_TRACE: ${{ runner.temp }}/sign-in-smoke/trace.zip
+          SMOKE_FAILURE_SCREENSHOT: ${{ runner.temp }}/workspace-smoke/screenshot.png
+          SMOKE_FAILURE_TRACE: ${{ runner.temp }}/workspace-smoke/trace.zip
         run: |
-          mkdir -p "$RUNNER_TEMP/sign-in-smoke"
-          SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:sign-in
+          mkdir -p "$RUNNER_TEMP/workspace-smoke"
+          SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:workspace
 
-      - name: Upload the Sign-in Smoke failure
-        if: failure() && steps.sign-in-smoke.outcome == 'failure'
+      - name: Upload the Workspace Smoke failure
+        if: failure() && steps.workspace-smoke.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
-          name: sign-in-smoke-failure
-          path: ${{ runner.temp }}/sign-in-smoke/
+          name: workspace-smoke-failure
+          path: ${{ runner.temp }}/workspace-smoke/
           if-no-files-found: ignore
 
       - name: Image logs

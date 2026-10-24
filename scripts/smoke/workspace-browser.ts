@@ -2,10 +2,11 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { chromium, type Page } from "playwright-core";
-import { resolveBaseUrl, resolveTimeoutMs } from "./launch.js";
+import { resolveBaseUrl, resolveTimeoutMs } from "./shared.js";
 
-// The Sign-in Smoke: a real sign-in through the Clerk development instance,
-// into the Workspace of a production image. Run by the ci-smoke job in CI.
+// The Workspace Smoke: a real sign-in through the Clerk development instance,
+// then use of the Workspace of a production image: a profile edit, and a
+// Resource published that stays hidden. Run by the ci-smoke job in CI.
 const CHROMIUM_PATH_ENV_KEY = "SMOKE_CHROMIUM_PATH";
 const EMAIL_ENV_KEY = "SMOKE_SIGN_IN_EMAIL";
 const DATABASE_URL_ENV_KEY = "SMOKE_DATABASE_URL";
@@ -19,18 +20,18 @@ const FAILURE_TRACE_ENV_KEY = "SMOKE_FAILURE_TRACE";
 const TEST_EMAIL_CODE = "424242";
 const LOCAL_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1", "db"]);
 
-class SignInSmokeCheckError extends Error {}
+class WorkspaceSmokeCheckError extends Error {}
 
 function requiredEnv(key: string): string {
   const value = process.env[key]?.trim();
-  if (!value) throw new SignInSmokeCheckError(`${key} is required.`);
+  if (!value) throw new WorkspaceSmokeCheckError(`${key} is required.`);
   return value;
 }
 
 function resolveTestEmail(): string {
   const email = requiredEnv(EMAIL_ENV_KEY);
   if (!email.includes("+clerk_test@")) {
-    throw new SignInSmokeCheckError(
+    throw new WorkspaceSmokeCheckError(
       `${EMAIL_ENV_KEY} must be a +clerk_test address, which Clerk signs in ` +
         "with a fixed code and never emails.",
     );
@@ -44,7 +45,7 @@ function resolveDatabaseUrl(): string {
   const value = requiredEnv(DATABASE_URL_ENV_KEY);
   const { hostname } = new URL(value);
   if (!LOCAL_DATABASE_HOSTS.has(hostname)) {
-    throw new SignInSmokeCheckError(
+    throw new WorkspaceSmokeCheckError(
       `${DATABASE_URL_ENV_KEY} must name a local database; received host "${hostname}".`,
     );
   }
@@ -75,7 +76,7 @@ async function signIn(page: Page, baseUrl: URL, email: string, timeoutMs: number
     fieldError.waitFor({ state: "visible", timeout: timeoutMs }),
   ]);
   if (await fieldError.isVisible()) {
-    throw new SignInSmokeCheckError(
+    throw new WorkspaceSmokeCheckError(
       `Clerk rejected ${EMAIL_ENV_KEY}: "${await fieldError.innerText()}". ` +
         "The test user must exist in the instance the publishable key names.",
     );
@@ -115,7 +116,7 @@ async function promoteToOwner(databaseUrl: string, email: string) {
       [email],
     );
     if (promoted.rowCount !== 1) {
-      throw new SignInSmokeCheckError(
+      throw new WorkspaceSmokeCheckError(
         "No pending account to promote: the first sign-in did not create one, " +
           "or the database already has an owner.",
       );
@@ -137,7 +138,7 @@ async function promoteToOwner(databaseUrl: string, email: string) {
       [promoted.rows[0].id],
     );
     if (linked.rowCount !== 1) {
-      throw new SignInSmokeCheckError("No unassigned published Tutor to link.");
+      throw new WorkspaceSmokeCheckError("No unassigned published Tutor to link.");
     }
     return linked.rows[0].slug;
   } finally {
@@ -153,7 +154,7 @@ async function expectToast(page: Page, text: string, timeoutMs: number) {
 }
 
 async function editProfile(page: Page, baseUrl: URL, timeoutMs: number) {
-  const availability = `Sign-in Smoke availability ${Date.now()}`;
+  const availability = `Workspace Smoke availability ${Date.now()}`;
   await page.goto(new URL("/workspace/profile", baseUrl).href);
   const field = page.getByLabel("Availability", { exact: true });
   await field.fill(availability, { timeout: timeoutMs });
@@ -164,19 +165,19 @@ async function editProfile(page: Page, baseUrl: URL, timeoutMs: number) {
   const saved = page.getByLabel("Availability", { exact: true });
   await saved.waitFor({ state: "visible", timeout: timeoutMs });
   if ((await saved.inputValue()) !== availability) {
-    throw new SignInSmokeCheckError("The saved profile edit did not survive a reload.");
+    throw new WorkspaceSmokeCheckError("The saved profile edit did not survive a reload.");
   }
 }
 
 async function publishResource(page: Page, baseUrl: URL, timeoutMs: number) {
   await page.goto(new URL("/workspace/resources/new", baseUrl).href);
-  await page.getByLabel("Title", { exact: true }).fill("Sign-in Smoke resource", { timeout: timeoutMs });
+  await page.getByLabel("Title", { exact: true }).fill("Workspace Smoke resource", { timeout: timeoutMs });
   await page.getByLabel("Subject", { exact: true }).fill("English");
   await page.getByLabel("Level", { exact: true }).fill("GCSE");
-  await page.getByLabel("Excerpt", { exact: true }).fill("Written by the Sign-in Smoke in CI.");
+  await page.getByLabel("Excerpt", { exact: true }).fill("Written by the Workspace Smoke in CI.");
   await page
     .getByLabel("Introduction", { exact: true })
-    .fill("This Resource is published by the Sign-in Smoke and should stay hidden.");
+    .fill("This Resource is published by the Workspace Smoke and should stay hidden.");
   await page.getByRole("button", { name: "Publish", exact: true }).click();
   await expectToast(page, "Resource created and published.", timeoutMs);
 
@@ -184,9 +185,9 @@ async function publishResource(page: Page, baseUrl: URL, timeoutMs: number) {
     const response = await fetch("/api/workspace/resources", { credentials: "include" });
     return (await response.json()) as Array<{ slug: string; status: string; title: string }>;
   });
-  const resource = resources.find((r) => r.title === "Sign-in Smoke resource");
+  const resource = resources.find((r) => r.title === "Workspace Smoke resource");
   if (resource?.status !== "published") {
-    throw new SignInSmokeCheckError("The Workspace does not list the Resource as published.");
+    throw new WorkspaceSmokeCheckError("The Workspace does not list the Resource as published.");
   }
   return resource.slug;
 }
@@ -198,7 +199,7 @@ async function expectResourceHidden(page: Page, baseUrl: URL, slug: string, time
   await page.getByText("404 Page Not Found").waitFor({ state: "visible", timeout: timeoutMs });
 }
 
-async function runSignInSmokeCheck() {
+async function runWorkspaceSmokeCheck() {
   const baseUrl = resolveBaseUrl();
   const timeoutMs = resolveTimeoutMs();
   const executablePath = requiredEnv(CHROMIUM_PATH_ENV_KEY);
@@ -239,7 +240,7 @@ async function runSignInSmokeCheck() {
     await expectResourceHidden(page, baseUrl, resourceSlug, timeoutMs);
     if (tracePath) await context.tracing.stop();
 
-    console.log(`Sign-in smoke check passed for ${baseUrl.origin}`);
+    console.log(`Workspace smoke check passed for ${baseUrl.origin}`);
     console.log("  ✓ first sign-in through Clerk shows Awaiting approval");
     console.log(`  ✓ promoted to owner, linked to ${tutorSlug}`);
     console.log("  ✓ second sign-in opens the owner's Workspace");
@@ -277,11 +278,11 @@ async function runSignInSmokeCheck() {
 
 export async function main(): Promise<number> {
   try {
-    await runSignInSmokeCheck();
+    await runWorkspaceSmokeCheck();
     return 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Sign-in smoke check failed: ${message}`);
+    console.error(`Workspace smoke check failed: ${message}`);
     return 1;
   }
 }

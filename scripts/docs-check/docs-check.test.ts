@@ -27,7 +27,7 @@ test("extracts inline and fenced pnpm commands with source locations", () => {
       "- `pnpm --filter @welltutored/backend run dev` — start the API",
       "",
       "```sh",
-      "SMOKE_BASE_URL=https://example.test pnpm smoke:launch",
+      "SMOKE_BASE_URL=https://example.test pnpm smoke:public-site",
       "```",
       "",
       "The phrase pnpm workspaces is not a command.",
@@ -44,7 +44,7 @@ test("extracts inline and fenced pnpm commands with source locations", () => {
     {
       filePath: "docs/example.md",
       lineNumber: 4,
-      command: "pnpm smoke:launch",
+      command: "pnpm smoke:public-site",
     },
   ]);
 });
@@ -295,7 +295,7 @@ test("extracts pnpm commands from inline and block run steps", () => {
       "      - name: Smoke",
       "        run: |",
       "          echo checking",
-      "          pnpm run smoke:launch",
+      "          pnpm run smoke:public-site",
       "      - name: Deploy",
       "        run: flyctl deploy --remote-only",
     ].join("\n"),
@@ -317,7 +317,7 @@ test("extracts pnpm commands from inline and block run steps", () => {
     {
       filePath: ".github/workflows/ci.yml",
       lineNumber: 12,
-      command: "pnpm run smoke:launch",
+      command: "pnpm run smoke:public-site",
     },
   ]);
 });
@@ -328,7 +328,7 @@ test("validates the pnpm scripts a workflow runs", () => {
       "jobs:",
       "  deploy:",
       "    steps:",
-      "      - name: Launch smoke",
+      "      - name: Public Site Smoke",
       "        run: pnpm run missing",
     ].join("\n"),
     [
@@ -348,7 +348,7 @@ test("validates the pnpm scripts a workflow runs", () => {
 test("accepts a guide that opens with prose after its title", () => {
   assert.deepEqual(
     validateOpeningLine(
-      ["# Smoke checks", "", "For whoever runs a smoke check.", "", "## The Launch Smoke"].join("\n"),
+      ["# Smoke checks", "", "For whoever runs a smoke check.", "", "## The Public Site Smoke"].join("\n"),
       "docs/smoke-checks.md",
     ),
     [],

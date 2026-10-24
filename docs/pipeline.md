@@ -66,11 +66,11 @@ The following table lists every check and the job it runs in:
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` | The repository, with a dedicated test database | Every PR | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm verify` |
-| [Image Smoke](#the-ci-smoke) (`smoke:launch:dev`) | The production image in the `ci-smoke` job, with a seeded throwaway database | Every PR | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#run-the-image-smoke-by-hand) |
+| [Public Site Smoke](smoke-checks.md#the-public-site-smoke) (`smoke:public-site`) | The production image in the `ci-smoke` job, with a seeded throwaway database, then `https://welltutored.co.uk` in the `prod-smoke` job | Every PR, and after a [Deploy](#the-deploy-job) | Health, catalogue, a published [Tutor](../GLOSSARY.md#the-public-site), public pages, invalid-enquiry recovery | [Against the local prod image](smoke-checks.md#run-against-the-local-prod-image) |
 | [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `ci-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR, and after a [Deploy](#the-deploy-job) | The enquiry form, by keyboard alone, with the final request intercepted | — (CI only; [smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
-| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR, except a PR from a fork | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | — (CI only; [smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| [Workspace Smoke](smoke-checks.md#the-workspace-smoke) (`smoke:workspace`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR, except a PR from a fork | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | — (CI only; [smoke-checks.md](smoke-checks.md#the-workspace-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk`, in the `prod-smoke` job | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
+| [Domain Smoke](smoke-checks.md#the-domain-smoke) (`smoke:domain`) | The Deployment's other hostnames and `https://clerk.welltutored.co.uk`, in the `prod-smoke` job | After a [Deploy](#the-deploy-job) | Redirects to the Public Origin, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-domain-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -140,16 +140,17 @@ the merge.
 
 It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with the
 development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image, and runs
-the Image Smoke, `pnpm smoke:launch:dev`, against it. Two browser checks
-follow, with the runner's Google Chrome:
+the [Public Site Smoke](smoke-checks.md#the-public-site-smoke),
+`pnpm smoke:public-site`, against it. Two browser checks follow, with the
+runner's Google Chrome:
 
 - The [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`pnpm smoke:enquiry`)
   moves through the form by tab order. It blocks.
-- The [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) signs in as a
+- The [Workspace Smoke](smoke-checks.md#the-workspace-smoke) signs in as a
   `+clerk_test` user, which it promotes to owner in the job's database with the
   guarded update from [first-deploy.md](first-deploy.md#promote-the-first-owner). It blocks.
   When it fails, the run keeps its screenshot and trace as the
-  `sign-in-smoke-failure` artifact. A pull request from a fork skips it, with
+  `workspace-smoke-failure` artifact. A pull request from a fork skips it, with
   a notice, since it gets no secrets (see [Credentials](#credentials)).
 
 A failure in any of the three fails the job, and so stops the merge, and the
@@ -159,8 +160,9 @@ job then prints the image's logs. The `ci-smoke` job in
 The image it checks isn't the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
 against keeping the Clerk instances separate. So this checks the image's
-recipe, not the exact image. To run it by hand, see
-[smoke-checks.md](smoke-checks.md#run-the-image-smoke-by-hand).
+recipe, not the exact image. To run the Public Site Smoke against the image by
+hand, see
+[smoke-checks.md](smoke-checks.md#run-against-the-local-prod-image).
 
 ## Credentials
 
@@ -171,9 +173,9 @@ all absent, so the `verify` job isn't given Clerk secrets, and the interactive
 through a browser, which CI doesn't have. The gate's only external dependency
 is the dedicated test database.
 
-Two checks depend on a live Clerk instance. The Launch Smoke requests the
+Two checks depend on a live Clerk instance. The Domain Smoke requests the
 production instance's `/v1/environment`, which goes to Clerk directly and needs
-no keys at all. The Sign-in Smoke signs in through the development instance, so
+no keys at all. The Workspace Smoke signs in through the development instance, so
 the `ci-smoke` job, and no other, reads three repository secrets from the
 **development** instance of the Clerk application
 in the dashboard, the one whose production instance serves
@@ -186,18 +188,18 @@ user is created in that instance's dashboard, under Users.
 | --- | --- |
 | `CLERK_TEST_PUBLISHABLE_KEY` | The image's `VITE_CLERK_PUBLISHABLE_KEY` build argument, and its `CLERK_PUBLISHABLE_KEY` |
 | `CLERK_TEST_SECRET_KEY` | The image's `CLERK_SECRET_KEY` |
-| `CLERK_TEST_EMAIL` | The `+clerk_test` user the Sign-in Smoke signs in as. A secret only because the repository is public. |
+| `CLERK_TEST_EMAIL` | The `+clerk_test` user the Workspace Smoke signs in as. A secret only because the repository is public. |
 
 The job refuses keys that aren't `pk_test_` and `sk_test_`. Dependabot pull
 requests don't get repository secrets, so the same three are also set as
 **Dependabot secrets**, and those runs read them. A pull request from a fork
 gets neither: the image builds with an empty publishable key and runs with the
-`.env.example` placeholder secret key, the Image Smoke and the Enquiry Smoke
-still pass, and the Sign-in Smoke is skipped with a notice. It runs when the
+`.env.example` placeholder secret key, the Public Site Smoke and the Enquiry
+Smoke still pass, and the Workspace Smoke is skipped with a notice. It runs when the
 change is on a branch of this repository. A rotated key has to be updated in
 both places.
 
-What the Sign-in Smoke can't cover is the production Clerk instance itself:
+What the Workspace Smoke can't cover is the production Clerk instance itself:
 its first-party cookies on `clerk.welltutored.co.uk` and the dashboard
 settings that can differ between the two instances. That is a manual sign-in
 after merging an auth or Clerk change
@@ -228,14 +230,16 @@ It does **not** apply the schema. That is
 ## Post-deploy validation
 
 The `prod-smoke` job runs the [Prod Smoke](../GLOSSARY.md#delivery) after the
-`deploy` job passes, against the live site. A failure in either of its
-checks fails the run:
+`deploy` job passes, against the live site. A failure in any of its checks
+fails the run. In order:
 
-- the [Launch Smoke](smoke-checks.md#the-launch-smoke), without waivers and
-  with `SMOKE_REDIRECT_FROM` set to the Deployment's other hostnames;
+- the [Public Site Smoke](smoke-checks.md#the-public-site-smoke), without
+  waivers;
 - the [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke), in the runner's
   Google Chrome. It intercepts the final request, so it never creates a real
-  Enquiry on the Deployment.
+  Enquiry on the Deployment;
+- the [Domain Smoke](smoke-checks.md#the-domain-smoke), with
+  `SMOKE_REDIRECT_FROM` set to the Deployment's other hostnames.
 
 A successful Deploy doesn't mean a usable Deployment, which is why it runs at
 all. It is a job of its own, so a failure can be re-run without redeploying,

@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, type Page } from "playwright-core";
-import { resolveBaseUrl, resolveTimeoutMs } from "./launch.js";
+import { resolveBaseUrl, resolveTimeoutMs } from "./shared.js";
 
 const CHROMIUM_PATH_ENV_KEY = "SMOKE_CHROMIUM_PATH";
 

@@ -79,6 +79,32 @@ The proxy deliberately doesn't rewrite the `Origin` header: the API only
 trusts the frontend's own origin, which Compose states explicitly through
 `TRUSTED_ORIGINS`.
 
+## The local dev image and the local prod image
+
+Both run the site locally against the `db` container. They differ in the image
+the site runs from:
+
+| | Local dev image | Local prod image |
+| --- | --- | --- |
+| Start it | `docker compose up api web` (the local stack) | `docker compose up --build prod` |
+| Built from | `docker/Dockerfile.dev`: only Node, pnpm, and the PostgreSQL client. Your checkout is mounted in | `docker/Dockerfile`, the one CI and Fly build, with the built app copied in |
+| Serves | Vite on <http://localhost:5173>, forwarding `/api` to the API on port 8080 | One container serving the frontend and the API from one origin, on <http://localhost:8081> |
+| `NODE_ENV` | `development` | `production` |
+| For | Day-to-day work | Checking the production build without deploying |
+
+Some faults show only on the local prod image, because only it builds and
+serves the app the way the Deployment does: a frontend that isn't served, a
+`TRUSTED_ORIGINS` that rejects the enquiry form, and the Clerk handshake
+redirect in [ADR-0001](adr/0001-single-origin-deployment.md#consequences).
+
+Sign-in works on the local dev image with the `pk_test_` and `sk_test_` keys
+in `.env` ([Clerk](#clerk)). On the local prod image it doesn't by default. The
+publishable key is baked into the frontend bundle at build time, and the `prod`
+service passes `VITE_CLERK_PUBLISHABLE_KEY: ""` as a build argument; `.env` is
+read only at runtime, too late. To sign in there, set that build argument in
+`docker-compose.yml` to a `pk_test_` key and rebuild with
+`docker compose up --build prod`.
+
 ## Clerk
 
 `CLERK_SECRET_KEY` is required even for the public site. The API mounts Clerk
@@ -126,7 +152,7 @@ Three Clerk instances can be in play, and each has its own users:
 | Instance | Where its keys live | Who it signs in |
 | --- | --- | --- |
 | An accountless development application, if `.env` came from `--accountless` | `.env` | Whoever signed up at `localhost`. Not visible in the dashboard. |
-| The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([pipeline.md](pipeline.md#credentials)) | The [Sign-in Smoke](../GLOSSARY.md#delivery)'s `+clerk_test` user, created in the dashboard |
+| The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([pipeline.md](pipeline.md#credentials)) | The [Workspace Smoke](../GLOSSARY.md#delivery)'s `+clerk_test` user, created in the dashboard |
 | The production instance of the same application | `fly.toml` and Fly secrets ([first-deploy.md](first-deploy.md#deploy-to-flyio)) | [Tutors](../GLOSSARY.md#the-public-site) on `welltutored.co.uk` |
 
 A user exists only in the instance it was created in. "Couldn't find your
