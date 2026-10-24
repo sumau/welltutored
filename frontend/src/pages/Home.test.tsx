@@ -205,3 +205,21 @@ test("keeps the homepage visible and offers retry when tutors fail to load", asy
 
   await cleanupHome(rendered);
 });
+test("the hero shows the approach of a tutor who can take a student", async () => {
+  const full: Tutor = { ...tutor, id: 2, slug: "beth-jones", name: "Beth Jones", intake: "full", teachingIntro: "Beth's approach." };
+  const rendered = await renderHome(async () =>
+    new Response(JSON.stringify([full, tutor]), {
+      headers: { "content-type": "application/json" },
+    }),
+  );
+
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  });
+
+  const hero = rendered.container.querySelector("[data-testid=hero-tutor]");
+  assert.match(hero?.textContent ?? "", /Clear explanations and practical guidance\./);
+  assert.equal(hero?.querySelector("[data-testid=hero-tutor-link]")?.getAttribute("href"), "/tutors/alice-smith");
+
+  await cleanupHome(rendered);
+});

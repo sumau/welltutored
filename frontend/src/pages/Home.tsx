@@ -23,6 +23,13 @@ export default function Home() {
     request: publicTutorRequestOptions,
   });
 
+  // The hero shows one tutor's approach, a different one on each visit,
+  // chosen from those who can take a student.
+  const [heroPick] = React.useState(() => Math.random());
+  const open = (tutors || []).filter((tutor) => tutor.intake !== "full");
+  const heroPool = open.length > 0 ? open : tutors || [];
+  const heroTutor = heroPool[Math.floor(heroPick * heroPool.length)];
+
   // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
   // loaded, so the grid has its full height.
   React.useEffect(() => {
@@ -33,29 +40,35 @@ export default function Home() {
   return (
     <main className="flex-1" data-testid="page-home">
       {/* Hero */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[80px] grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[32px] md:gap-[56px] items-center" id="top">
-        {/* The logo's "w", set like a tutor's circle on her profile, in the
-            site's marigold. */}
-        <span
-          className="tutor-circle circle-settle bg-primary [--circle-scale:0.64] md:[--circle-scale:1]"
-          style={{
-            width: "calc(200px * var(--circle-scale))",
-            height: "calc(200px * var(--circle-scale))",
-            fontSize: "calc(100px * var(--circle-scale))",
-          }}
-          aria-hidden="true"
-          data-testid="hero-mark"
-        >
-          w
-        </span>
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[36px] lg:gap-[56px] items-center" id="top">
         <div>
-          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5.4vw,76px)] leading-[1.02] mb-[24px] max-w-[22ch]" data-testid="hero-title">
+          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5vw,68px)] leading-[1.02] mb-[24px] max-w-[14ch]" data-testid="hero-title">
             Women tutors for girls at GCSE and A-level.
           </h1>
           <p className="max-w-[34em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="hero-copy">
             Thoughtful one-to-one support from women with deep knowledge of their subject. Choose the tutor who feels right and send her an enquiry.
           </p>
         </div>
+        {heroTutor && (
+          <figure
+            className="tutor-wash rounded-[28px] px-[28px] md:px-[40px] py-[32px] md:py-[40px] m-0"
+            style={{ "--tint": heroTutor.tint } as React.CSSProperties}
+            data-testid="hero-tutor"
+          >
+            <blockquote className="font-serif text-[22px] md:text-[26px] leading-[1.35] m-0 text-foreground">
+              {heroTutor.teachingIntro}
+            </blockquote>
+            <figcaption className="mt-[24px]">
+              <Link href={`/tutors/${heroTutor.slug}`} className="inline-flex items-center gap-[14px] rounded-full pr-2 group" data-testid="hero-tutor-link">
+                <TutorCircle tutor={heroTutor} size={48} />
+                <span className="text-[15px] leading-[1.35]">
+                  <b className="block font-semibold group-hover:underline underline-offset-4">{heroTutor.name}</b>
+                  <span className="text-foreground/80">{heroTutor.subject}</span>
+                </span>
+              </Link>
+            </figcaption>
+          </figure>
+        )}
       </section>
 
       {/* Tutors */}
