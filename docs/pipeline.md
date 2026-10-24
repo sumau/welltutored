@@ -6,7 +6,8 @@ how a deploy switches over, fails or is rolled back. The `pnpm` commands on
 this page are the ones CI runs on its own runners; to run a check yourself,
 follow its By hand column.
 
-Each check, from pull request to live site:
+Each step from pull request to live site, with each job's Smokes as one box.
+The table below lists every check and the job it runs in.
 
 ```mermaid
 flowchart TB
@@ -14,63 +15,47 @@ flowchart TB
   subgraph pipeline[" "]
     direction LR
     pr["Pull request"] --> verify["verify"]
-    subgraph imageJob["ci-smoke job"]
-      image["Image Smoke<br/>(development smoke)"]
-      enquiry["Enquiry Smoke"]
-      signIn["Sign-in Smoke"]
-    end
-    pr --> image
-    pr --> enquiry
-    pr -.-> signIn
+    pr --> ciSmoke["ci-smoke"]
     verify --> merge["Merge to main"]
-    image --> merge
-    enquiry --> merge
-    merge --> deploy["Deploy<br/>blue-green"]
+    ciSmoke --> merge
+    merge --> deploy["deploy<br/>blue-green"]
     deploy --> health["Health Check<br/>on the new machine"]
     health --> live["New version<br/>takes traffic"]
-    subgraph prodJob["prod-smoke job"]
-      launch["Launch Smoke"]
-      prodEnquiry["Enquiry Smoke"]
-    end
-    live --> launch
-    live --> prodEnquiry
-    launch -.-> manual["Manual sign-in<br/>after auth changes"]
+    live --> prodSmoke["prod-smoke"]
+    prodSmoke -.-> manual["Manual sign-in<br/>after auth changes"]
   end
 
-  %% The legend. Links written ~~~ are invisible and only position things.
+  %% The legend: the arrows beside the box colours. Links written ~~~ are
+  %% invisible and only position things.
   subgraph legend[" "]
-    direction TB
+    direction LR
     subgraph legendArrows[" "]
       direction LR
       keyA[" "] -->|"next step waits for this to pass"| keyB[" "]
       keyC[" "] -.->|"runs, but nothing waits for it"| keyD[" "]
     end
-
     subgraph legendBoxes[" "]
       direction LR
+      keyJob["GitHub Actions job"]
       keyEvent["Step from pull request to live site"]
-      keySoft["Check that doesn't block yet"]
-      keyGate["Check that blocks"]
-      keyEvent ~~~ keySoft ~~~ keyGate
+      keyOther["Check outside GitHub Actions"]
+      keyJob ~~~ keyEvent ~~~ keyOther
     end
-
     legendArrows ~~~ legendBoxes
   end
 
   pipeline ~~~ legend
 
-  classDef gate fill:#e8eefc,stroke:#4666a8,color:#172554
-  classDef soft fill:#fff7df,stroke:#b7791f,color:#713f12
+  classDef job fill:#e8eefc,stroke:#4666a8,color:#172554
+  classDef other fill:#fff7df,stroke:#b7791f,color:#713f12
   classDef event fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
   classDef blank fill:none,stroke:#888,color:#888
-  class verify,image,enquiry,health,launch,prodEnquiry,keyGate gate
-  class signIn,manual,keySoft soft
-  class pr,merge,deploy,live,keyEvent event
+  class verify,ciSmoke,deploy,prodSmoke,keyJob job
+  class health,manual,keyOther other
+  class pr,merge,live,keyEvent event
   class keyA,keyB,keyC,keyD blank
 
   style pipeline fill:none,stroke:none
-  style imageJob fill:none,stroke:#888
-  style prodJob fill:none,stroke:#888
   style legend fill:none,stroke:#888,stroke-dasharray:4
   style legendArrows fill:none,stroke:none
   style legendBoxes fill:none,stroke:none
@@ -81,7 +66,7 @@ flowchart TB
 | `verify` | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
 | [Image Smoke](#the-ci-smoke) (`smoke:launch:dev`) | The production image in the `ci-smoke` job, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
 | [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `ci-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR and `main`, and after a [Deploy](#the-deploy-job) | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
-| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR and `main`, except a PR from a fork | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
 | [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk`, in the `prod-smoke` job | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
@@ -142,13 +127,14 @@ follow, with the runner's Google Chrome:
   moves through the form by tab order. It blocks.
 - The [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) signs in as a
   `+clerk_test` user, which it promotes to owner in the job's database with the
-  guarded update from [first-deploy.md](first-deploy.md#owner). It doesn't
-  block yet (`continue-on-error`): once it has run reliably for a couple of
-  weeks, it should. When it fails, the run keeps its screenshot and trace as
-  the `sign-in-smoke-failure` artifact, and the job prints the image's logs.
+  guarded update from [first-deploy.md](first-deploy.md#owner). It blocks.
+  When it fails, the run keeps its screenshot and trace as the
+  `sign-in-smoke-failure` artifact. A pull request from a fork skips it, with
+  a notice, since it gets no secrets (see [Credentials](#credentials)).
 
-A failure in the Image Smoke or the Enquiry Smoke fails the job, and so stops
-the deploy. The `ci-smoke` job in `.github/workflows/ci.yml` has each step.
+A failure in any of the three fails the job, and so stops the deploy, and the
+job then prints the image's logs. The `ci-smoke` job in
+`.github/workflows/ci.yml` has each step.
 
 The image it checks isn't the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
@@ -186,11 +172,14 @@ user is created in that instance's dashboard, under Users.
 | `CLERK_TEST_SECRET_KEY` | The image's `CLERK_SECRET_KEY` |
 | `CLERK_TEST_EMAIL` | The `+clerk_test` user the Sign-in Smoke signs in as. A secret only because the repository is public. |
 
-The job refuses keys that aren't `pk_test_` and `sk_test_`. Without the
-secrets, as on a pull request from a fork or Dependabot, the image builds with
-an empty publishable key and runs with the `.env.example` placeholder secret
-key. The development smoke then still passes and the Sign-in Smoke fails
-without blocking.
+The job refuses keys that aren't `pk_test_` and `sk_test_`. Dependabot pull
+requests don't get repository secrets, so the same three are also set as
+**Dependabot secrets**, and those runs read them. A pull request from a fork
+gets neither: the image builds with an empty publishable key and runs with the
+`.env.example` placeholder secret key, the Image Smoke and the Enquiry Smoke
+still pass, and the Sign-in Smoke is skipped with a notice. It runs once the
+change is on a branch of this repository. A rotated key has to be updated in
+both places.
 
 What the Sign-in Smoke can't cover is the production Clerk instance itself:
 its first-party cookies on `clerk.welltutored.co.uk` and the dashboard

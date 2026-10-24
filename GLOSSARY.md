@@ -127,7 +127,7 @@ _Avoid_: Docker test, build check
 **Sign-in Smoke**:
 The check, before merge, that a person can sign in through the real Clerk form,
 using the development instance, and use the Workspace. Differences between the
-development and production Clerk instances are outside it. Not blocking yet.
+development and production Clerk instances are outside it.
 _Avoid_: Auth test, login check
 
 **Enquiry Smoke**:
