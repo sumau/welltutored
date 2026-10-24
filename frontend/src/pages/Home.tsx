@@ -39,14 +39,14 @@ export default function Home() {
     <main className="flex-1" data-testid="page-home">
       {/* Hero */}
       <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[80px] grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[32px] md:gap-[56px] items-center" id="top">
-        {/* The logo's "w", set like a tutor's circle on her profile. */}
+        {/* The logo's "w", set like a tutor's circle on her profile, in the
+            site's marigold. */}
         <span
-          className="tutor-circle circle-settle bg-foreground [--circle-scale:0.64] md:[--circle-scale:1]"
+          className="tutor-circle circle-settle bg-primary [--circle-scale:0.64] md:[--circle-scale:1]"
           style={{
             width: "calc(200px * var(--circle-scale))",
             height: "calc(200px * var(--circle-scale))",
             fontSize: "calc(100px * var(--circle-scale))",
-            color: "hsl(var(--background))",
           }}
           aria-hidden="true"
           data-testid="hero-mark"
