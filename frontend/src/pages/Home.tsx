@@ -38,9 +38,23 @@ export default function Home() {
   return (
     <main className="flex-1" data-testid="page-home">
       {/* Hero */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[40px] md:pt-[72px] pb-[56px] md:pb-[80px]" id="top">
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[80px] grid grid-cols-1 md:grid-cols-[auto_1fr] gap-[32px] md:gap-[56px] items-center" id="top">
+        {/* The logo's "w", set like a tutor's circle on her profile. */}
+        <span
+          className="tutor-circle circle-settle bg-foreground [--circle-scale:0.64] md:[--circle-scale:1]"
+          style={{
+            width: "calc(200px * var(--circle-scale))",
+            height: "calc(200px * var(--circle-scale))",
+            fontSize: "calc(100px * var(--circle-scale))",
+            color: "hsl(var(--background))",
+          }}
+          aria-hidden="true"
+          data-testid="hero-mark"
+        >
+          w
+        </span>
         <div>
-          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,6.2vw,88px)] leading-[1.02] mb-[28px] max-w-[24ch]" data-testid="hero-title">
+          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5.4vw,76px)] leading-[1.02] mb-[24px] max-w-[22ch]" data-testid="hero-title">
             Women tutors for girls at GCSE and A-level.
           </h1>
           <p className="max-w-[34em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="hero-copy">
