@@ -15,13 +15,13 @@ flowchart TB
   subgraph pipeline[" "]
     direction LR
     pr["Pull request"] --> verify["verify"]
-    pr --> ciSmoke["CI Smoke<br/>(ci-smoke job)"]
+    pr --> ciSmoke["ci-smoke"]
     verify --> merge["Merge to main"]
     ciSmoke --> merge
     merge --> deploy["Deploy<br/>blue-green"]
     deploy --> health["Health Check<br/>on the new machine"]
     health --> live["New version<br/>takes traffic"]
-    live --> prodSmoke["Prod Smoke<br/>(prod-smoke job)"]
+    live --> prodSmoke["prod-smoke"]
     prodSmoke -.-> manual["Manual sign-in<br/>after auth changes"]
   end
 
