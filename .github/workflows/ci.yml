@@ -208,17 +208,33 @@ jobs:
       # The Sign-in Smoke. Not blocking yet, until it has proven reliable. It
       # signs in as a +clerk_test user (a secret, since this repository is
       # public), promotes it to owner in this job's database, and uses the
-      # Workspace. It runs last because it writes to that database.
+      # Workspace. It runs last because it writes to that database. On failure
+      # it saves a screenshot and a Playwright trace, uploaded below.
       - name: Sign-in smoke
+        id: sign-in-smoke
         continue-on-error: true
         env:
           SMOKE_BASE_URL: http://localhost:8080
           SMOKE_SIGN_IN_EMAIL: ${{ secrets.CLERK_TEST_EMAIL }}
           SMOKE_DATABASE_URL: ${{ env.DATABASE_URL }}
-        run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:sign-in
+          SMOKE_FAILURE_SCREENSHOT: ${{ runner.temp }}/sign-in-smoke/screenshot.png
+          SMOKE_FAILURE_TRACE: ${{ runner.temp }}/sign-in-smoke/trace.zip
+        run: |
+          mkdir -p "$RUNNER_TEMP/sign-in-smoke"
+          SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:sign-in
+
+      # continue-on-error hides the Sign-in Smoke's failure from failure(), so
+      # these check its outcome as well.
+      - name: Upload the Sign-in Smoke failure
+        if: steps.sign-in-smoke.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: sign-in-smoke-failure
+          path: ${{ runner.temp }}/sign-in-smoke/
+          if-no-files-found: ignore
 
       - name: Image logs
-        if: failure()
+        if: failure() || steps.sign-in-smoke.outcome == 'failure'
         run: docker logs welltutored
 
   # Merging to main ships. Nothing else does: a pull request run stops at

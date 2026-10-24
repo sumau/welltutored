@@ -190,9 +190,11 @@ its database must be a fresh, seeded one with no owner: the check promotes its
 user to owner there. It refuses a database that isn't local.
 `SMOKE_SIGN_IN_EMAIL` must be a `+clerk_test` user of the instance those keys
 belong to, which may not be the one CI uses
-([local-docker.md](local-docker.md#which-clerk-instance-is-which)), and
-`SMOKE_FAILURE_SCREENSHOT` optionally names a file for a screenshot of the page
-when it fails. To run it:
+([local-docker.md](local-docker.md#which-clerk-instance-is-which)). Two
+optional files help when it fails: `SMOKE_FAILURE_SCREENSHOT` names one for a
+screenshot of the page, and `SMOKE_FAILURE_TRACE` one for a Playwright trace of
+the run (console, network and page snapshots), which
+[trace.playwright.dev](https://trace.playwright.dev) opens. To run it:
 
 ```sh
 SMOKE_BASE_URL=http://localhost:8080 \
