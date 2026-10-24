@@ -14,8 +14,15 @@ flowchart TB
   subgraph pipeline[" "]
     direction LR
     pr["Pull request"] --> verify["verify"]
-    pr --> image["Image Smoke"]
-    image -.-> signIn["Sign-in Smoke"]
+    subgraph imageJob["image-smoke job"]
+      direction TB
+      image["Image Smoke<br/>(development smoke)"]
+      enquiry["Enquiry Smoke"]
+      signIn["Sign-in Smoke"]
+    end
+    pr --> image
+    pr -.-> enquiry
+    pr -.-> signIn
     verify --> merge["Merge to main"]
     image --> merge
     merge --> deploy["Deploy<br/>blue-green"]
@@ -52,11 +59,12 @@ flowchart TB
   classDef event fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
   classDef blank fill:none,stroke:#888,color:#888
   class verify,image,health,launch,keyGate gate
-  class signIn,manual,keySoft soft
+  class enquiry,signIn,manual,keySoft soft
   class pr,merge,deploy,live,keyEvent event
   class keyA,keyB,keyC,keyD blank
 
   style pipeline fill:none,stroke:none
+  style imageJob fill:none,stroke:#888
   style legend fill:none,stroke:#888,stroke-dasharray:4
   style legendArrows fill:none,stroke:none
   style legendBoxes fill:none,stroke:none
@@ -65,8 +73,9 @@ flowchart TB
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-image-smoke) (`smoke:launch:dev`, `smoke:enquiry`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery; the [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (not blocking yet) | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
-| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| [Image Smoke](#the-image-smoke) (`smoke:launch:dev`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
+| [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `image-smoke` job, in the runner's Google Chrome | Every PR and `main`, not blocking yet | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
+| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `image-smoke` job, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
 | [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
@@ -106,7 +115,7 @@ workflow adds no copy of the pin. `docker/Dockerfile` and
 `docs:check` also reads this workflow's `run:` steps and validates the `pnpm`
 scripts they name, so a renamed script can't reach a deploy job that calls it.
 
-Only the [Image Smoke](../GLOSSARY.md#delivery) job has Clerk credentials; see
+Only the `image-smoke` job has Clerk credentials; see
 [Credentials](#credentials) for why.
 
 ## The Image Smoke
@@ -118,8 +127,9 @@ a broken Dockerfile or a startup failure would first show up in `flyctl deploy`
 on `main`.
 
 It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with the
-development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image and runs `pnpm smoke:launch:dev`
-against it. A failure there stops the deploy. Two browser checks follow, with
+development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image, and runs
+the Image Smoke, `pnpm smoke:launch:dev`, against it. A failure there stops the
+deploy. Two browser checks follow, with
 the runner's Google Chrome, and neither blocks yet (`continue-on-error`):
 
 - The [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`pnpm smoke:enquiry`)
@@ -154,7 +164,7 @@ instance.
 The dedicated test database is the only external dependency the
 deterministic gate has.
 
-The Image Smoke job is the exception, for the Sign-in Smoke. It reads three
+The `image-smoke` job is the exception, for the Sign-in Smoke. It reads three
 repository secrets from the **development** instance of the Clerk application
 in the dashboard, the one whose production instance serves
 `welltutored.co.uk`. That isn't necessarily the instance in a local `.env`,

@@ -4,8 +4,8 @@ There is one environment: the Deployment at `welltutored.co.uk`. Nothing runs a
 copy of it to try changes on first. Instead, a change passes these checks on its
 way there:
 
-- `verify` and the Image Smoke on every pull request, including the Sign-in
-  Smoke against the Clerk development instance.
+- `verify` and the Image Smoke on every pull request, alongside the Enquiry
+  Smoke and the Sign-in Smoke against the Clerk development instance.
 - A blue-green Deploy, where the new machine takes traffic only after it passes
   the Health Check, which needs the database to answer.
 - The Launch Smoke against the live site once it has switched.
