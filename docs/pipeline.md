@@ -6,8 +6,8 @@ how a deploy switches over, fails or is rolled back. The `pnpm` commands on
 this page are the ones CI runs on its own runners; to run a check yourself,
 follow its By hand column.
 
-Each step from pull request to live site, with each job's Smokes as one box.
-The table below lists every check and the job it runs in.
+The following diagram shows each step from pull request to live site, with
+each job's Smokes as one box:
 
 ```mermaid
 flowchart TB
@@ -61,10 +61,12 @@ flowchart TB
   style legendBoxes fill:none,stroke:none
 ```
 
+The following table lists every check and the job it runs in:
+
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` | The repository, with a dedicated test database | Every PR | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm verify` |
-| [Image Smoke](#the-ci-smoke) (`smoke:launch:dev`) | The production image in the `ci-smoke` job, with a seeded throwaway database | Every PR | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
+| [Image Smoke](#the-ci-smoke) (`smoke:launch:dev`) | The production image in the `ci-smoke` job, with a seeded throwaway database | Every PR | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#run-the-image-smoke-by-hand) |
 | [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `ci-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR, and after a [Deploy](#the-deploy-job) | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
 | [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR, except a PR from a fork | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
@@ -94,7 +96,7 @@ merge to `main`: the [deploy](#the-deploy-job), then the
 
 The checks don't run again on `main`, and don't need to: the `main` ruleset
 requires branches to be up to date before merging, so a pull request merges
-only once it contains the latest `main`, and the tree that lands is the one
+only when it contains the latest `main`, and the tree that lands is the one
 its checks tested. The cost is that after each merge, every other open pull
 request has to be updated, and its checks run again, before it can merge.
 
@@ -145,7 +147,7 @@ follow, with the runner's Google Chrome:
   moves through the form by tab order. It blocks.
 - The [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) signs in as a
   `+clerk_test` user, which it promotes to owner in the job's database with the
-  guarded update from [first-deploy.md](first-deploy.md#owner). It blocks.
+  guarded update from [first-deploy.md](first-deploy.md#promote-the-first-owner). It blocks.
   When it fails, the run keeps its screenshot and trace as the
   `sign-in-smoke-failure` artifact. A pull request from a fork skips it, with
   a notice, since it gets no secrets (see [Credentials](#credentials)).
@@ -158,7 +160,7 @@ The image it checks isn't the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
 against keeping the Clerk instances separate. So this checks the image's
 recipe, not the exact image. To run it by hand, see
-[smoke-checks.md](smoke-checks.md#the-image-smoke-by-hand).
+[smoke-checks.md](smoke-checks.md#run-the-image-smoke-by-hand).
 
 ## Credentials
 
@@ -166,18 +168,14 @@ recipe, not the exact image. To run it by hand, see
 `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, and `VITE_CLERK_PUBLISHABLE_KEY`
 all absent, so the `verify` job isn't given Clerk secrets, and the interactive
 `clerk auth login` flow has no place in it: that command authenticates a person
-through a browser, which CI doesn't have.
+through a browser, which CI doesn't have. The gate's only external dependency
+is the dedicated test database.
 
-Two checks depend on a live Clerk instance. The launch smoke check requests
-the production instance's `/v1/environment`, which goes to Clerk directly and
-needs no keys at all. The Sign-in Smoke signs in through the development
-instance.
-
-The dedicated test database is the only external dependency the
-deterministic gate has.
-
-The `ci-smoke` job is the exception, for the Sign-in Smoke. It reads three
-repository secrets from the **development** instance of the Clerk application
+Two checks depend on a live Clerk instance. The Launch Smoke requests the
+production instance's `/v1/environment`, which goes to Clerk directly and needs
+no keys at all. The Sign-in Smoke signs in through the development instance, so
+the `ci-smoke` job, and no other, reads three repository secrets from the
+**development** instance of the Clerk application
 in the dashboard, the one whose production instance serves
 `welltutored.co.uk`. That isn't necessarily the instance in a local `.env`,
 which may be an accountless application
@@ -195,7 +193,7 @@ requests don't get repository secrets, so the same three are also set as
 **Dependabot secrets**, and those runs read them. A pull request from a fork
 gets neither: the image builds with an empty publishable key and runs with the
 `.env.example` placeholder secret key, the Image Smoke and the Enquiry Smoke
-still pass, and the Sign-in Smoke is skipped with a notice. It runs once the
+still pass, and the Sign-in Smoke is skipped with a notice. It runs when the
 change is on a branch of this repository. A rotated key has to be updated in
 both places.
 
@@ -203,7 +201,7 @@ What the Sign-in Smoke can't cover is the production Clerk instance itself:
 its first-party cookies on `clerk.welltutored.co.uk` and the dashboard
 settings that can differ between the two instances. That is a manual sign-in
 after merging an auth or Clerk change
-([CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request)).
+([CONTRIBUTING.md](../CONTRIBUTING.md#prepare-a-pull-request)).
 
 ## The deploy job
 
@@ -213,7 +211,7 @@ merge, since both are required checks. It checks out, installs
 `flyctl` and runs `flyctl deploy`. The checks against the live site come after
 it, in the [`prod-smoke` job](#post-deploy-validation).
 
-The deploy is [blue-green](#blue-green-deploys), switching only once the new
+The deploy is [blue-green](#blue-green-deploys), switching only after the new
 machine passes the Health Check.
 [ADR-0003](adr/0003-no-staging-environment.md) is why there is no staging
 environment in front of this.
@@ -229,8 +227,8 @@ It does **not** apply the schema. That is
 
 ## Post-deploy validation
 
-The `prod-smoke` job runs the [Prod Smoke](../GLOSSARY.md#delivery) once the
-`deploy` job has passed, against the live site. A failure in either of its
+The `prod-smoke` job runs the [Prod Smoke](../GLOSSARY.md#delivery) after the
+`deploy` job passes, against the live site. A failure in either of its
 checks fails the run:
 
 - the [Launch Smoke](smoke-checks.md#the-launch-smoke), without waivers and
@@ -271,38 +269,53 @@ doesn't match the live schema, which still answers `SELECT 1`. Those surface in
 the [Prod Smoke](../GLOSSARY.md#delivery), which runs after the switch,
 against the version visitors already see.
 
-## A failed deploy
+## Recover from a failed deploy
 
 A failed deploy is a red `Deploy to Fly` step. `flyctl` reports the new
 machine failing its checks, and the old machine keeps serving the previous
-version. Run `fly machines list` afterwards: if a machine from the failed
-attempt is still there, destroy it, replacing `MACHINE_ID` with its ID:
+version. To clean up after it:
 
-```
-fly machines destroy MACHINE_ID --force
-```
+1. List the machines:
+
+   ```
+   fly machines list
+   ```
+
+2. If a machine from the failed attempt is still there, destroy it:
+
+   ```
+   fly machines destroy MACHINE_ID --force
+   ```
+
+   Replace `MACHINE_ID` with that machine's ID.
 
 ## Roll back a deploy
 
 A deploy that passes but breaks the site is a red `prod-smoke` after a green
 `deploy`. The new version is live, and nothing rolls it back by itself.
-To go back to the previous image, list the releases, then deploy the image of
-the one before the current release:
+To go back to the previous image, work from a checkout of `main`, since
+`fly deploy` still reads `fly.toml` from there:
 
-```
-fly releases --image
-fly deploy --image PREVIOUS_IMAGE
-```
+1. List the releases with their images:
 
-Replace `PREVIOUS_IMAGE` with that release's image reference from the first
-command's output.
+   ```
+   fly releases --image
+   ```
 
-Run it from a checkout of `main`, since it still reads `fly.toml` from there.
-Then revert the change on `main`, or the next merge ships it again.
+2. Deploy the image of the release before the current one:
+
+   ```
+   fly deploy --image PREVIOUS_IMAGE
+   ```
+
+   Replace `PREVIOUS_IMAGE` with that release's image reference from the
+   first command's output.
+
+3. Revert the change on `main`, or the next merge ships it again.
 
 **Rolling back past a schema push is only safe if the push was additive.** The
 schema is pushed before merge
 ([schema-changes.md](schema-changes.md#push-or-merge-first)), so the previous
-image runs against the new schema. A new nullable column or table is fine. A renamed or dropped column breaks the old code too, and the
-rollback then means pushing the old schema back by hand
+image runs against the new schema. A new nullable column or table is fine. A
+renamed or dropped column breaks the old code too, and the rollback then means pushing the old schema back by hand
 ([schema-changes.md](schema-changes.md)).

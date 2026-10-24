@@ -8,7 +8,7 @@ covers how to change it.
 
 CI deploys to Fly on every push to `main` and then runs the Prod Smoke
 against the live site. There is no separate release step, so a merged pull
-request is a shipped one. Everything below follows from that.
+request is a shipped one. The rest of this page follows from that.
 [docs/pipeline.md](docs/pipeline.md) shows every check between a pull
 request and the live site, and which of them block.
 
@@ -28,7 +28,7 @@ Issues live in `sumau/welltutored` on GitHub.
 - Triage uses the labels `needs-triage`, `needs-info`, `ready-for-agent`,
   `ready-for-human` and `wontfix`.
 
-## Making a change
+## Make a change
 
 Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 [docs/local-docker.md](docs/local-docker.md).
@@ -48,7 +48,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   `pnpm --filter @welltutored/backend run codegen`. Never edit the generated
   code in `frontend/src/client/generated` or `backend/src/api/schemas` by hand.
 
-## Before opening a pull request
+## Prepare a pull request
 
 - `docker compose run --rm verify` is green. It runs `pnpm run verify`, the same
   checks as CI's `verify` job ([docs/code-checks.md](docs/code-checks.md)).
@@ -58,7 +58,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   (`docker compose up api web`).
 - For a change to routing, public API responses, deployment configuration or
   the enquiry journey, also run the development smoke against the local stack
-  ([docs/smoke-checks.md](docs/smoke-checks.md#against-the-local-stack)).
+  ([docs/smoke-checks.md](docs/smoke-checks.md#run-against-the-local-stack)).
 - After merging a change that touches auth, Clerk or the `@clerk/*` versions,
   sign in on `https://welltutored.co.uk` and open the
   [Workspace](GLOSSARY.md#the-private-area). The Sign-in Smoke uses the Clerk
@@ -102,9 +102,9 @@ Never write a placeholder literal for someone to edit in place, and never
 `export` the value. Each Neon string has its own name (`DIRECT_DATABASE_URL`,
 `POOLED_DATABASE_URL`, `REHEARSAL_DATABASE_URL`), never a bare `DATABASE_URL`.
 
-## Merging
+## Merge a pull request
 
-The maintainer merges, since merging deploys. A pull request merges only once
+The maintainer merges, since merging deploys. A pull request merges only when
 it contains the latest `main`, and nothing checks it again after the merge,
 so re-run an old pull request's checks before merging it
 ([docs/pipeline.md](docs/pipeline.md#github-actions)). When a pull request is part of a

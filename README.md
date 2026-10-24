@@ -2,14 +2,14 @@
 
 Well Tutored helps families find women tutors and send named-tutor enquiries.
 [Tutors](GLOSSARY.md#the-public-site) maintain their profiles and the resources
-they write in a private workspace.
+they write in the private [Workspace](GLOSSARY.md#the-private-area).
 
 The public site presents women tutors, their expertise and availability.
 Visitors can open a tutor profile and submit a named-tutor enquiry. Resources
-are hidden from visitors for now
-([docs/architecture.md](docs/architecture.md)). In the workspace, a tutor edits
-their own profile and resources and sees their enquiries, and the
-[Owner](GLOSSARY.md#the-private-area) also manages every tutor profile and
+are hidden from visitors while a feature switch is off
+([docs/architecture.md](docs/architecture.md#public-website)). In the Workspace,
+a tutor edits their own profile and resources and sees their enquiries, and
+the [Owner](GLOSSARY.md#the-private-area) also manages every tutor profile and
 approves accounts.
 
 This file is for developers: it gets the project running locally and points to
@@ -23,7 +23,7 @@ To set up and start the stack, run:
 
 ```
 cp .env.example .env
-docker compose run --rm deps        # install the workspace
+docker compose run --rm deps        # install dependencies
 docker compose up -d db
 docker compose run --rm migrate     # push the database schema
 docker compose up api web
@@ -114,6 +114,6 @@ The Vite config defaults `PORT` and `BASE_PATH`; compose overrides `PORT`
 
 One container serves the frontend and the API from one origin
 ([ADR-0001](docs/adr/0001-single-origin-deployment.md)). The public site needs
-no account; Clerk gates only the private workspace. The routes, API boundaries
+no account; Clerk gates only the Workspace. The routes, API boundaries
 and publishing rules are in [docs/architecture.md](docs/architecture.md), and
 every decision a reader will question has an ADR in [docs/adr/](docs/adr/).

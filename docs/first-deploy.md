@@ -11,24 +11,24 @@ this is for rebuilding it or starting another. Running the live one is
 
 Each step has its own section on this page. Do them in this order:
 
-1. **[Database](#database)** — create the Neon project in London, take the
+1. **[Database](#create-the-database)** — create the Neon project in London, take the
    pooled and direct connection strings.
 2. **[Apply the schema](schema-changes.md#push-the-schema)** — from this checkout,
    using the direct string. Nothing does this for you.
 3. **[Clerk keys](#clerk-keys)** — a development instance, because you don't
    control DNS for `*.fly.dev`.
-4. **[Deploy](#flyio)** — create the app, set the secrets, put the publishable
+4. **[Deploy](#deploy-to-flyio)** — create the app, set the secrets, put the publishable
    key in `fly.toml`, `fly deploy`.
 5. **[Attach a domain](#attach-a-custom-domain)**, then
    **[move to a production Clerk instance](#move-to-a-production-clerk-instance)**.
 6. **Expect an empty site.** A fresh database has no tutors or resources — see
-   [Content](#content) — and no Owner: [promote the first one](#owner).
+   [Content](#content) — and no Owner: [promote the first one](#promote-the-first-owner).
 
 The image can be checked first without deploying: see the
 [Image Smoke](../GLOSSARY.md#delivery)
-[by hand](smoke-checks.md#the-image-smoke-by-hand).
+[by hand](smoke-checks.md#run-the-image-smoke-by-hand).
 
-## Database
+## Create the database
 
 [Neon](https://neon.tech) hosts the PostgreSQL. It is reachable over the
 public internet, so every step that runs from this checkout (the schema push,
@@ -91,7 +91,7 @@ The live Deployment runs on a production instance for `welltutored.co.uk`,
 reached at `clerk.welltutored.co.uk`. There is no Frontend API proxy: the
 browser talks to that CNAME directly.
 
-## Fly.io
+## Deploy to Fly.io
 
 `fly.toml` is committed and points at `docker/Dockerfile`. Before you begin,
 the Neon project exists, the schema is pushed, and you have Clerk development
@@ -148,7 +148,7 @@ keys.
 
    **The publishable key has to be here and not in `fly secrets`.** Vite
    compiles it into the bundle while the image is built, and a Fly secret only
-   exists once the container runs. Set as a secret, the build silently uses the
+   exists after the container starts. Set as a secret, the build silently uses the
    empty string and sign-in never initialises. A publishable key is public by
    design, so committing it isn't a leak; the three secrets from step 1 must
    never appear in this file.
@@ -241,7 +241,7 @@ Two things behave differently until there is a published
   that accepts enquiries. Run the Launch Smoke by hand with `--allow-empty`
   until there is one ([smoke-checks.md](smoke-checks.md#waivers)).
 
-## Owner
+## Promote the first Owner
 
 A new database has no Owner, and nothing creates one. The API creates a
 `pending` [Workspace Account](../GLOSSARY.md#the-private-area) the first time
@@ -251,9 +251,8 @@ production database has no Owner: a first deploy, or a rebuild from empty. A
 local database is promoted the same way with a simpler command, in
 [local-docker.md](local-docker.md#sign-in-to-the-workspace).
 
-Approved on 2026-09-27 for the Deployment's first Owner, until an automated
-bootstrap replaces it ([#48](https://github.com/sumau/welltutored/issues/48)).
-It is a guarded update, run against the **direct** Neon connection string from
+This is the approved procedure until an automated bootstrap replaces it
+([#48](https://github.com/sumau/welltutored/issues/48)). It is a guarded update, run against the **direct** Neon connection string from
 a checkout. The person to promote must first sign in once at the Public Origin,
 because the pending record is written on first sign-in and not before. Run
 this, replacing `OWNER_EMAIL` with the address they signed in with:
@@ -283,7 +282,7 @@ everyone else.
 For whoever automates this ([#48](https://github.com/sumau/welltutored/issues/48)):
 
 - Run this against a local database, or against production under the
-  procedure in [Owner](#owner); no other production use is approved.
+  procedure in [Owner](#promote-the-first-owner); no other production use is approved.
 - Don't add automatic owner elevation to server startup or normal login
   handling.
 - Don't run the update if an Owner already exists.
@@ -294,6 +293,6 @@ For whoever automates this ([#48](https://github.com/sumau/welltutored/issues/48
 Recreating a database removes all account roles, tutor assignments, content,
 and enquiries. Clerk users remain separate from the database, but their
 Workspace Account records must be recreated. After the schema and deployment
-configuration are restored, repeat the [Owner](#owner) procedure for the
+configuration are restored, repeat the [Owner](#promote-the-first-owner) procedure for the
 intended Owner,
 then use the normal Workspace approval flow.

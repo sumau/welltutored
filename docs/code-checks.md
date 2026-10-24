@@ -5,8 +5,8 @@ the repository before a merge — the test suites, typecheck, build and docs
 check that `pnpm run verify` runs — and how to write a test. Checks against
 a running site are in [smoke-checks.md](smoke-checks.md).
 
-Most automated tests use Node's built-in `node:test` runner and are executed
-with `tsx`; the web tests also use JSDOM where browser APIs are needed.
+Most tests run on Node's built-in `node:test` runner through `tsx`; the web
+tests also use JSDOM where they need browser APIs.
 
 The commands on this page run inside the containers: prefix them with
 `docker compose exec api` against a running stack
@@ -68,12 +68,13 @@ pnpm --filter @welltutored/backend run test:unit
 
 The integration tests exercise the Express routes and database-backed behaviour
 end to end within the test process. They create, update, publish, and delete
-test records and are therefore reserved for CI with an isolated test
-database. Set `TEST_DATABASE_URL` to the dedicated PostgreSQL connection;
+test records, so they run only against an isolated test database: the one
+`verify` provides, in CI or through the `verify` service. Set
+`TEST_DATABASE_URL` to the dedicated PostgreSQL connection;
 `test:integration` sets `NODE_ENV=test`, and `backend/src/core/config.ts` then
-refuses to fall back to `DATABASE_URL` or use the same URL as the application. CI must
-apply the current schema to that database before running the integration
-script. The CI preparation command does that:
+refuses to fall back to `DATABASE_URL` or use the same URL as the
+application. The database needs the current schema before the integration
+script runs, and the preparation command applies it:
 
 ```sh
 pnpm run prepare:integration-database
@@ -92,8 +93,9 @@ so a published tutor that one file creates shows up in another file's public
 tutor list: give it everything the public API requires, such as a teaching
 point, or that list fails with a 500.
 
-To stub Clerk, replace the method on the shared users API prototype: `clerkClient.users` can return a fresh object on each access, so a
-stub assigned through it is silently discarded and the route reaches Clerk.
+To stub Clerk, replace the method on the shared users API prototype:
+`clerkClient.users` can return a fresh object on each access, so a stub
+assigned through it is silently discarded and the route reaches Clerk.
 
 ### Web application
 
@@ -166,7 +168,7 @@ It also reads the code, skipping tests and generated code, and fails when:
 
 ## Before a pull request
 
-[CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request) has what
+[CONTRIBUTING.md](../CONTRIBUTING.md#prepare-a-pull-request) has what
 has to pass: `docker compose run --rm verify`, which runs `pnpm run verify`, the
 same gate CI runs. While working, run the affected package's suite first; it is
 faster.
