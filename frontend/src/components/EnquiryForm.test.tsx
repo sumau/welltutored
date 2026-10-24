@@ -328,7 +328,7 @@ test("keyboard users can complete an enquiry, recover validation focus, and reac
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry delivered/);
     assert.match(receipt.textContent ?? "", /Your enquiry has been sent securely\./);
 
     const resetButton = rendered.container.querySelector<HTMLButtonElement>("[data-testid=enquiry-reset]")!;
@@ -376,7 +376,7 @@ test("repeated Enter presses send one enquiry while the request is pending", asy
 
     assert.equal(requestCount, 1);
     assert.equal(submitButton.disabled, true);
-    assert.equal(submitButton.textContent?.includes("Submitting..."), true);
+    assert.equal(submitButton.textContent?.includes("Sending..."), true);
 
     await act(async () => {
       resolveFetch?.(new Response(
@@ -475,7 +475,7 @@ test("a failed submission keeps an announced form error and a successful retry f
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry delivered/);
     assert.match(receipt.textContent ?? "", /Your enquiry has been sent securely\./);
   } finally {
     globalThis.fetch = originalFetch;
@@ -544,7 +544,7 @@ test("a dropped connection keeps the enquiry details and supports a keyboard ret
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry delivered/);
   } finally {
     globalThis.fetch = originalFetch;
     await cleanupForm(rendered);
@@ -589,7 +589,7 @@ test("a successful receipt receives focus and announces the delivery outcome", a
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry delivered/);
     assert.match(receipt.textContent ?? "", /Your enquiry has been sent securely\./);
   } finally {
     globalThis.fetch = originalFetch;

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&family=Young+Serif&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -131,6 +131,82 @@
   --sidebar-accent: 160 20% 34%;
   --sidebar-accent-foreground: 40 44% 94%;
   --sidebar-ring: 15 62% 59%;
+}
+
+/* The public site: paper, plum and marigold, with each tutor's own tint.
+   Scoped to the public Shell so the Workspace keeps the palette above. */
+.public-site {
+  --background: 34 100% 99%;
+  --foreground: 286 31% 20%;
+  --card: 0 0% 100%;
+  --card-foreground: 286 31% 20%;
+  --border: 14 42% 86%;
+  --card-border: 14 42% 86%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 286 31% 20%;
+  --popover-border: 14 42% 86%;
+
+  --primary: 39 87% 59%;
+  --primary-foreground: 286 31% 20%;
+  --primary-border: 39 80% 52%;
+
+  --secondary: 14 58% 93%;
+  --secondary-foreground: 286 31% 20%;
+  --secondary-border: 14 42% 86%;
+
+  --muted: 14 58% 93%;
+  --muted-foreground: 289 13% 40%;
+  --muted-border: 14 42% 86%;
+
+  --accent: 14 58% 93%;
+  --accent-foreground: 286 31% 20%;
+  --accent-border: 14 42% 86%;
+
+  --input: 14 30% 78%;
+  --ring: 286 31% 20%;
+
+  --app-font-sans: 'Figtree', sans-serif;
+  --app-font-serif: 'Young Serif', Georgia, serif;
+}
+
+@layer components {
+  .public-site h1, .public-site h2, .public-site h3 {
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .public-site :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+
+  /* A tutor's circle: her tint and initial, after the logo's circle and "w". */
+  .tutor-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    font-family: var(--app-font-serif);
+    line-height: 1;
+    color: hsl(286 31% 20%);
+    flex-shrink: 0;
+  }
+
+  /* A tutor's card wash: a light mix of her tint, light enough for body text. */
+  .tutor-wash {
+    background-color: color-mix(in srgb, var(--tint) 22%, white);
+  }
+}
+
+/* The one load moment: the hero circles settle into place. */
+@keyframes circle-settle {
+  from { opacity: 0; transform: scale(.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.circle-settle {
+  animation: circle-settle 640ms cubic-bezier(.34, 1.4, .64, 1) both;
 }
 
 @layer base {

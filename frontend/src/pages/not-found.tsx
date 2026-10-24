@@ -1,20 +1,22 @@
-import { AlertCircle } from 'lucide-react';
+import { Link } from "wouter";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md mx-4 bg-white p-6">
-        <div className="flex mb-4 gap-2">
-          <AlertCircle className="h-8 w-8 text-red-500" />
-          <h1 className="text-2xl font-bold text-gray-900">
-            404 Page Not Found
-          </h1>
-        </div>
-
-        <p className="mt-4 text-sm text-gray-600">
-          Did you forget to add the page to the router?
+    <main className="flex-1 flex items-center justify-center px-6 py-24" data-testid="page-not-found">
+      <div className="max-w-[30em] text-center">
+        <h1 className="font-serif text-[36px] md:text-[44px] leading-[1.1] mb-4">
+          Page not found
+        </h1>
+        <p className="text-muted-foreground text-[17px] leading-[1.6] mb-8">
+          This page doesn't exist or has moved. The tutors are all on the home page.
         </p>
+        <Link
+          href="/"
+          className="inline-flex rounded-full bg-foreground text-background text-[15px] font-semibold px-6 py-3.5 hover:bg-foreground/90 transition-colors"
+        >
+          See the tutors
+        </Link>
       </div>
-    </div>
+    </main>
   );
 }

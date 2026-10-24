@@ -110,7 +110,7 @@ test("renders the homepage structure and a localized tutor loading state immedia
   });
   const rendered = await renderHome(async () => request);
 
-  assert.equal(rendered.container.querySelector("[data-testid=hero-title]")?.textContent, "Academic excellence,personalised for her.");
+  assert.equal(rendered.container.querySelector("[data-testid=hero-title]")?.textContent, "Women tutors for girls at GCSE and A-level.");
   assert.ok(rendered.container.querySelector("[data-testid=button-home-enquire]"));
   assert.ok(rendered.container.querySelector("[data-testid=tutor-loading-state]"));
   assert.equal(rendered.container.querySelector("[data-testid=loading-state]"), null);
