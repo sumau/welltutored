@@ -99,7 +99,7 @@ SMOKE_BASE_URL=http://prod:8080 pnpm smoke:launch:dev
 ```
 
 The Deployment has a published Tutor, so the `prod-smoke` job in
-`.github/workflows/ci.yml` runs `smoke:launch` with no waiver. `--allow-empty`
+`.github/workflows/deploy.yml` runs `smoke:launch` with no waiver. `--allow-empty`
 stays for a Deployment rebuilt from an empty database (#48), and has no script
 entry. Pass it through `smoke:launch` until the rebuilt Deployment has a
 published Tutor again:

@@ -104,7 +104,10 @@ Never write a placeholder literal for someone to edit in place, and never
 
 ## Merging
 
-The maintainer merges, since merging deploys. When a pull request is part of a
+The maintainer merges, since merging deploys. A pull request merges only once
+it contains the latest `main`, and nothing checks it again after the merge,
+so re-run an old pull request's checks before merging it
+([docs/pipeline.md](docs/pipeline.md#github-actions)). When a pull request is part of a
 plan, say in it which pull requests are ready and the order to merge them in,
 and leave a status comment on the tracking issue: what is ready, what comes
 next, and anything learned along the way.
