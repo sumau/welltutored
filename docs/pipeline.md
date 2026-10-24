@@ -18,7 +18,7 @@ flowchart TB
     pr --> ciSmoke["ci-smoke"]
     verify --> merge["Merge to main"]
     ciSmoke --> merge
-    merge --> deploy["Deploy<br/>blue-green"]
+    merge --> deploy["deploy<br/>blue-green"]
     deploy --> health["Health Check<br/>on the new machine"]
     health --> live["New version<br/>takes traffic"]
     live --> prodSmoke["prod-smoke"]
@@ -36,10 +36,10 @@ flowchart TB
 
     subgraph legendBoxes[" "]
       direction LR
+      keyJob["GitHub Actions job"]
       keyEvent["Step from pull request to live site"]
-      keySoft["Check that doesn't block yet"]
-      keyGate["Check that blocks"]
-      keyEvent ~~~ keySoft ~~~ keyGate
+      keyOther["Check outside GitHub Actions"]
+      keyJob ~~~ keyEvent ~~~ keyOther
     end
 
     legendArrows ~~~ legendBoxes
@@ -47,13 +47,13 @@ flowchart TB
 
   pipeline ~~~ legend
 
-  classDef gate fill:#e8eefc,stroke:#4666a8,color:#172554
-  classDef soft fill:#fff7df,stroke:#b7791f,color:#713f12
+  classDef job fill:#e8eefc,stroke:#4666a8,color:#172554
+  classDef other fill:#fff7df,stroke:#b7791f,color:#713f12
   classDef event fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
   classDef blank fill:none,stroke:#888,color:#888
-  class verify,ciSmoke,health,prodSmoke,keyGate gate
-  class manual,keySoft soft
-  class pr,merge,deploy,live,keyEvent event
+  class verify,ciSmoke,deploy,prodSmoke,keyJob job
+  class health,manual,keyOther other
+  class pr,merge,live,keyEvent event
   class keyA,keyB,keyC,keyD blank
 
   style pipeline fill:none,stroke:none
