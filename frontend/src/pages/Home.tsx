@@ -28,19 +28,8 @@ export default function Home() {
     request: publicTutorRequestOptions,
   });
 
-  // Sizes and offsets for the hero's circles, so the group reads as people
-  // gathered together rather than a grid.
-  const heroCircles = [
-    { size: 150, offset: 0 },
-    { size: 112, offset: 46 },
-    { size: 128, offset: -18 },
-    { size: 98, offset: 30 },
-    { size: 120, offset: -6 },
-    { size: 104, offset: 38 },
-  ];
-
   // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
-  // loaded, since the hero's circles change its height.
+  // loaded, so the grid has its full height.
   React.useEffect(() => {
     if (tutorsLoading || window.location.hash !== "#tutors") return;
     scrollToTutors("auto");
@@ -49,40 +38,15 @@ export default function Home() {
   return (
     <main className="flex-1" data-testid="page-home">
       {/* Hero */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[40px] md:pt-[72px] pb-[64px] md:pb-[96px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[48px] lg:gap-[56px] items-center" id="top">
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[40px] md:pt-[72px] pb-[56px] md:pb-[80px]" id="top">
         <div>
-          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5.6vw,72px)] leading-[1.02] mb-[24px] max-w-[13ch]" data-testid="hero-title">
+          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5.6vw,72px)] leading-[1.02] mb-[24px] max-w-[16ch]" data-testid="hero-title">
             Women tutors for girls at GCSE and A-level.
           </h1>
           <p className="max-w-[34em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="hero-copy">
             Thoughtful one-to-one support from women with deep knowledge of their subject. Choose the tutor who feels right and send her an enquiry.
           </p>
         </div>
-
-        {tutors && tutors.length > 0 && (
-          <ul className="flex flex-wrap items-start justify-center lg:justify-start gap-x-[14px] gap-y-[6px] list-none p-0 m-0 [--circle-scale:0.6] sm:[--circle-scale:0.8] lg:[--circle-scale:1]" aria-label="Our tutors" data-testid="hero-tutors">
-            {tutors.slice(0, heroCircles.length).map((tutor, index) => {
-              const circle = heroCircles[index];
-              return (
-                <li key={tutor.id} style={{ marginTop: `calc(${Math.max(circle.offset, 0)}px * var(--circle-scale))`, marginBottom: `calc(${Math.max(-circle.offset, 0)}px * var(--circle-scale))` }}>
-                  <Link
-                    href={`/tutors/${tutor.slug}`}
-                    className="group flex flex-col items-center gap-[10px] rounded-[24px] p-1"
-                    data-testid={`hero-tutor-${tutor.slug}`}
-                  >
-                    <TutorCircle
-                      tutor={tutor}
-                      size={circle.size}
-                      className="circle-settle transition-transform group-hover:scale-[1.04]"
-                      style={{ animationDelay: `${index * 90}ms` }}
-                    />
-                    <span className="text-[15px] font-semibold">{tutor.firstName}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
       </section>
 
       {/* Tutors */}
