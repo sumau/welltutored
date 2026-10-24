@@ -24,9 +24,9 @@ Each step has its own section on this page. Do them in this order:
 6. **Expect an empty site.** A fresh database has no tutors or resources — see
    [Content](#content) — and no Owner: [promote the first one](#promote-the-first-owner).
 
-The image can be checked first without deploying: see the
-[Image Smoke](../GLOSSARY.md#delivery)
-[by hand](smoke-checks.md#run-the-image-smoke-by-hand).
+The image can be checked first without deploying: run the
+[Public Site Smoke](../GLOSSARY.md#delivery)
+[against the image](smoke-checks.md#run-against-the-local-prod-image).
 
 ## Create the database
 
@@ -159,10 +159,11 @@ keys.
 
 4. Point the Prod Smoke at this Deployment. The `prod-smoke` job in
    `.github/workflows/deploy.yml` names the live Deployment's hostnames: set
-   `SMOKE_BASE_URL` in both its steps to your `*.fly.dev` origin, and remove
-   `SMOKE_REDIRECT_FROM` and `SMOKE_CLERK_FRONTEND_API` until you
-   [attach a custom domain](#attach-a-custom-domain). Left as they are, the
-   job checks `welltutored.co.uk` instead of your app.
+   `SMOKE_BASE_URL` in each of its Smoke steps to your `*.fly.dev` origin, and
+   remove the Domain Smoke step until you
+   [move to a production Clerk instance](#move-to-a-production-clerk-instance):
+   it needs other hostnames and a `clerk.` CNAME that don't exist yet. Left as
+   they are, the job checks `welltutored.co.uk` instead of your app.
 
 5. Merge to `main`, which deploys. To ship a first image before any of this is
    merged, run `fly deploy` from a checkout.
@@ -188,9 +189,9 @@ two lines of `fly.toml`, in that order. The live Deployment is on
    `*.fly.dev` one included, then answers with a `301` to the same path there.
    Only after step 2: a redirect to a hostname without a certificate sends
    every visitor to a browser warning.
-4. **Prod Smoke.** Point the `prod-smoke` job's `SMOKE_BASE_URL`, in both its
-   steps, at the new origin and list the other hostnames in
-   `SMOKE_REDIRECT_FROM`.
+4. **Prod Smoke.** Point the `prod-smoke` job's `SMOKE_BASE_URL`, in each of
+   its Smoke steps, at the new origin. The Domain Smoke comes back with the
+   [production Clerk instance](#move-to-a-production-clerk-instance).
 
 `app` in `fly.toml` stays as it is throughout.
 
@@ -220,10 +221,11 @@ In this order, so the server's keys and the bundle's key change in one deploy:
      CLERK_PUBLISHABLE_KEY="$CLERK_PUBLISHABLE_KEY"
    ```
 
-5. Put the `pk_live_…` key in `fly.toml` under `[build.args]` and merge. The
-   deploy picks up the staged secrets, and the launch smoke checks
-   `https://clerk.DOMAIN/v1/environment` for a production instance, where
-   `DOMAIN` is the Public Origin's domain.
+5. Put the `pk_live_…` key in `fly.toml` under `[build.args]`, restore the
+   Domain Smoke step in the `prod-smoke` job with the other hostnames in
+   `SMOKE_REDIRECT_FROM`, and merge. The deploy picks up the staged secrets,
+   and the Domain Smoke checks `https://clerk.DOMAIN/v1/environment` for a
+   production instance, where `DOMAIN` is the Public Origin's domain.
 
 ## Content
 
@@ -236,10 +238,11 @@ Two things behave differently until there is a published
 
 - The directory renders its empty state, and `/api/tutors` returns an empty
   list.
-- `pnpm run smoke:launch` **fails**, and so does the `prod-smoke` job, because
-  the Launch Smoke asserts a published Tutor and the Enquiry Smoke needs one
-  that accepts enquiries. Run the Launch Smoke by hand with `--allow-empty`
-  until there is one ([smoke-checks.md](smoke-checks.md#waivers)).
+- `pnpm run smoke:public-site` **fails**, and so does the `prod-smoke` job,
+  because the Public Site Smoke asserts a published Tutor and the Enquiry Smoke
+  needs one that accepts enquiries. Run the Public Site Smoke by hand with
+  `--allow-empty` until there is one
+  ([smoke-checks.md](smoke-checks.md#waivers)).
 
 ## Promote the first Owner
 

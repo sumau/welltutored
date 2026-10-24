@@ -98,26 +98,35 @@ _Avoid_: Publish, ship, release, launch
 **Health Check**:
 Whether a machine of the Deployment may take traffic: its process is up and the
 database answers. Gates the switch to a new version during a Deploy. Says
-nothing about whether the site is usable; that is the Launch Smoke.
+nothing about whether the site is usable; that is the Public Site Smoke.
 _Avoid_: Liveness, readiness, ping
 
 **CI Smoke**:
 The group of Smokes that runs before merge against a throwaway build of the
-production image, with the Clerk development instance. It is a required check.
-_Avoid_: Image Smoke (one of its Smokes), development smoke
+production image, with the Clerk development instance and a throwaway database
+seeded with sample content. It checks the image's recipe, not the exact image
+that ships. It is a required check.
+_Avoid_: Image Smoke, development smoke
 
 **Prod Smoke**:
 The group of Smokes that runs against the live Deployment after each Deploy, on
 the image that ships. A failure there means visitors are already seeing it.
-_Avoid_: Launch Smoke (one of its Smokes), post-deploy check
+_Avoid_: post-deploy check
 
-**Launch Smoke**:
-The check that a Deployment is *usable* — it has a published Tutor, its pages
-render, and the API rejects an invalid Enquiry and keeps answering. While
-Resources are hidden from visitors, a usable Deployment needs no published
-Resource. A successful Deploy doesn't imply a passing Launch Smoke; they assert
-different things.
-_Avoid_: Health check, published smoke
+**Public Site Smoke**:
+The check that the site is *usable*: it has a published Tutor, its pages
+render, and the API rejects an invalid Enquiry and keeps answering. It runs
+before merge and again on the Deployment after each Deploy. While Resources are
+hidden from visitors, a usable site needs no published Resource. A successful
+Deploy doesn't imply a passing Public Site Smoke; they assert different things.
+_Avoid_: Launch Smoke, Image Smoke, health check, published smoke
+
+**Domain Smoke**:
+The check, on the Deployment after each Deploy, that the domain setup around it
+holds: every other hostname redirects permanently to the Public Origin, and
+Clerk answers on its own hostname as the production instance. A broken DNS
+record, a lapsed certificate or a development key shipped by mistake fails it.
+_Avoid_: DNS check, redirect check, Launch Smoke
 
 **Verify**:
 The check, before merge, that the repository holds together: its tests pass
@@ -126,17 +135,12 @@ passes and the CSS stays within budget. The one check every pull request must
 pass.
 _Avoid_: Test, CI, the build
 
-**Image Smoke**:
-The check, before merge, that the production image starts and serves the site
-against a throwaway database seeded with sample content. It checks the image's
-recipe, not the exact image that ships.
-_Avoid_: Docker test, build check
-
-**Sign-in Smoke**:
+**Workspace Smoke**:
 The check, before merge, that a person can sign in through the real Clerk form,
-using the development instance, and use the Workspace. Differences between the
+using the development instance, and use the Workspace: edit a profile, and
+publish a Resource that stays hidden from visitors. Differences between the
 development and production Clerk instances are outside it.
-_Avoid_: Auth test, login check
+_Avoid_: Sign-in Smoke, auth test, login check
 
 **Enquiry Smoke**:
 The check, before merge and again on the Deployment after each Deploy, that a

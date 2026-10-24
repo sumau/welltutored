@@ -9,10 +9,10 @@
     "docs:check": "pnpm --filter @welltutored/scripts run docs:check",
     "prepare:integration-database": "pnpm --filter @welltutored/scripts run prepare:integration-database",
     "verify": "pnpm --filter @welltutored/scripts run test:integration-database && pnpm run prepare:integration-database && pnpm --filter @welltutored/backend test && pnpm --filter @welltutored/frontend test && pnpm --filter @welltutored/scripts run test:smoke && pnpm --filter @welltutored/scripts run test:docs && pnpm run build && pnpm --filter @welltutored/frontend run check:css-size",
-    "smoke:launch": "pnpm --filter @welltutored/scripts run smoke:launch",
-    "smoke:launch:dev": "pnpm --filter @welltutored/scripts run smoke:launch:dev",
+    "smoke:public-site": "pnpm --filter @welltutored/scripts run smoke:public-site",
+    "smoke:domain": "pnpm --filter @welltutored/scripts run smoke:domain",
     "smoke:enquiry": "pnpm --filter @welltutored/scripts run smoke:enquiry",
-    "smoke:sign-in": "pnpm --filter @welltutored/scripts run smoke:sign-in",
+    "smoke:workspace": "pnpm --filter @welltutored/scripts run smoke:workspace",
     "typecheck": "pnpm -r --if-present run typecheck"
   },
   "private": true,

@@ -57,11 +57,11 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 - For a UI or build change, click through the running app as well
   (`docker compose up api web`).
 - For a change to routing, public API responses, deployment configuration or
-  the enquiry journey, also run the development smoke against the local stack
-  ([docs/smoke-checks.md](docs/smoke-checks.md#run-against-the-local-stack)).
+  the enquiry journey, also run the Public Site Smoke against the local stack
+  ([docs/smoke-checks.md](docs/smoke-checks.md#run-against-the-local-dev-image)).
 - After merging a change that touches auth, Clerk or the `@clerk/*` versions,
   sign in on `https://welltutored.co.uk` and open the
-  [Workspace](GLOSSARY.md#the-private-area). The Sign-in Smoke uses the Clerk
+  [Workspace](GLOSSARY.md#the-private-area). The Workspace Smoke uses the Clerk
   development instance, so this is the part CI can't cover.
 - **The lockfile must stay stable.** CI and the deployment build both install
   with `--frozen-lockfile`. `package.json` pins `packageManager`, and
