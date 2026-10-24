@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { TutorCircle } from "@/components/TutorCircle";
+import { scrollToTutors } from "@/lib/scroll-to-tutors";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
@@ -38,11 +39,12 @@ export default function Home() {
     { size: 104, offset: 38 },
   ];
 
-  const handleJump = (id: string) => {
-    const target = document.getElementById(id);
-    target?.scrollIntoView({ behavior: "smooth" });
-    target?.focus({ preventScroll: true });
-  };
+  // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
+  // loaded, since the hero's circles change its height.
+  React.useEffect(() => {
+    if (tutorsLoading || window.location.hash !== "#tutors") return;
+    scrollToTutors("auto");
+  }, [tutorsLoading]);
 
   return (
     <main className="flex-1" data-testid="page-home">
@@ -52,16 +54,9 @@ export default function Home() {
           <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5.6vw,72px)] leading-[1.02] mb-[24px] max-w-[13ch]" data-testid="hero-title">
             Women tutors for girls at GCSE and A-level.
           </h1>
-          <p className="max-w-[34em] text-muted-foreground text-[18px] leading-[1.6] mb-[32px]" data-testid="hero-copy">
+          <p className="max-w-[34em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="hero-copy">
             Thoughtful one-to-one support from women with deep knowledge of their subject. Choose the tutor who feels right and send her an enquiry.
           </p>
-          <button
-            className="rounded-full bg-primary text-primary-foreground px-7 py-4 text-[16px] font-semibold hover:bg-primary-border transition-colors"
-            onClick={() => handleJump("tutors")}
-            data-testid="button-browse-tutors"
-          >
-            Meet the tutors
-          </button>
         </div>
 
         {tutors && tutors.length > 0 && (

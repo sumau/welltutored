@@ -70,6 +70,12 @@ test("changing only the query string or hash keeps the scroll", async () => {
   assert.deepEqual(scrolls, []);
 });
 
+test("opening a new page at an anchor leaves the scroll to that page", async () => {
+  scrolls.length = 0;
+  await act(async () => navigate("/#tutors"));
+  assert.deepEqual(scrolls, []);
+});
+
 test("a redirect to a new page scrolls to the top", async () => {
   scrolls.length = 0;
   await act(async () => navigate("/enquire", { replace: true }));
