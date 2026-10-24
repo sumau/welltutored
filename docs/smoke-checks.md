@@ -7,7 +7,7 @@ to read a failure. Where each runs in CI, and which of them block, is in
 [pipeline.md](pipeline.md). Their own logic is tested by `test:smoke`
 ([code-checks.md](code-checks.md#repository-scripts)).
 
-The `pnpm` commands below run inside the `api` container
+The `pnpm` commands on this page run inside the `api` container
 ([local-docker.md](local-docker.md)), except `smoke:enquiry` and
 `smoke:sign-in`: they need a Chromium, which none of the images carry, so they
 run on a machine that has one. In CI that is the runner.
@@ -22,7 +22,7 @@ run on a machine that has one. In CI that is the runner.
 ## The Launch Smoke
 
 The [Launch Smoke](../GLOSSARY.md#delivery) asserts that a Deployment is
-*usable*, which a successful [Deploy](../GLOSSARY.md#delivery) does not imply.
+*usable*, which a successful [Deploy](../GLOSSARY.md#delivery) doesn't imply.
 It needs no workspace credentials and writes nothing.
 
 ```sh
@@ -51,9 +51,9 @@ domain. It must be a bare origin, and is validated before any request.
 - invalid enquiry recovery by sending `{}` to `POST /api/enquiries`, expecting
   a `400` validation response, and checking health again afterward.
 
-[Resources](../GLOSSARY.md#the-public-site) are hidden from visitors for now
-(`PUBLIC_RESOURCES_ENABLED` in `frontend/src/lib/features.ts`), so
-the check needs no published Resource and does not request the resource pages.
+While [Resources](../GLOSSARY.md#the-public-site) are hidden from visitors
+(`PUBLIC_RESOURCES_ENABLED` in `frontend/src/lib/features.ts` is `false`), the
+check needs no published Resource and doesn't request the resource pages.
 Restore both when that switch turns on.
 
 Every request must also finish on the origin it was sent to. A target that
@@ -82,7 +82,7 @@ The Deployment sends these redirects itself once `PUBLIC_ORIGIN` is set; see
 
 ### Waivers
 
-Two flags waive an assertion the target genuinely cannot meet. Each is named
+Two flags waive an assertion the target genuinely can't meet. Each is named
 for the condition under which passing it is correct, not for what it skips, so
 a stale one reads as a bug rather than as configuration. A waived check is
 reported as skipped rather than silently dropped.
@@ -155,20 +155,24 @@ docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:80
 It requests every public page with `Accept: text/html`, which is what caught the
 Clerk handshake redirect in
 [ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
-and `smoke:sign-in` need a Chromium these images do not carry, so they run from
+and `smoke:sign-in` need a Chromium these images don't carry, so they run from
 the host. The `image-smoke` job in `.github/workflows/ci.yml` has the steps CI
 takes.
 
 ## The Enquiry Smoke
 
 The [Enquiry Smoke](../GLOSSARY.md#delivery) goes through the enquiry form in a
-real browser by keyboard alone. It intercepts the final response, so the check never creates a
-real [Enquiry](../GLOSSARY.md#the-public-site).
+real browser by keyboard alone. It intercepts the final response, so the
+check never creates a real [Enquiry](../GLOSSARY.md#the-public-site). To run
+it:
 
 ```sh
 SMOKE_BASE_URL=https://welltutored.co.uk \
-  SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:enquiry
+  SMOKE_CHROMIUM_PATH=CHROMIUM_PATH pnpm smoke:enquiry
 ```
+
+Replace `CHROMIUM_PATH` with the path to a Chromium or Google Chrome
+executable.
 
 `SMOKE_CHROMIUM_PATH` is required: `playwright-core` bundles no browser and
 none of this project's images carry one, so this check runs from wherever a
@@ -180,19 +184,23 @@ Smoke ([pipeline.md](pipeline.md#the-image-smoke)).
 The [Sign-in Smoke](../GLOSSARY.md#delivery) signs in through the real Clerk
 form, so its target must be built and run with Clerk **development** keys, and
 its database must be a fresh, seeded one with no owner: the check promotes its
-user to owner there. It refuses a database that is not local.
+user to owner there. It refuses a database that isn't local.
 `SMOKE_SIGN_IN_EMAIL` must be a `+clerk_test` user of the instance those keys
 belong to, which may not be the one CI uses
 ([local-docker.md](local-docker.md#which-clerk-instance-is-which)), and
 `SMOKE_FAILURE_SCREENSHOT` optionally names a file for a screenshot of the page
-when it fails:
+when it fails. To run it:
 
 ```sh
 SMOKE_BASE_URL=http://localhost:8080 \
-  SMOKE_SIGN_IN_EMAIL=someone+clerk_test@example.com \
+  SMOKE_SIGN_IN_EMAIL=TEST_USER_EMAIL \
   SMOKE_DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
-  SMOKE_CHROMIUM_PATH=/path/to/chromium pnpm smoke:sign-in
+  SMOKE_CHROMIUM_PATH=CHROMIUM_PATH pnpm smoke:sign-in
 ```
+
+Replace `TEST_USER_EMAIL` with the `+clerk_test` address, such as
+`someone+clerk_test@example.com`, and `CHROMIUM_PATH` with the path to a
+Chromium or Google Chrome executable.
 
 The `image-smoke` job in `.github/workflows/ci.yml` prepares that target the
 same way.

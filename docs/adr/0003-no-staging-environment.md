@@ -55,7 +55,7 @@ was pushed before merge
 ## Consequences
 
 - A broken page, a missing Tutor or a schema mismatch is live until someone
-  rolls back. [pipeline.md](../pipeline.md#rolling-back) has how.
+  rolls back. [pipeline.md](../pipeline.md#roll-back-a-deploy) has how.
 - Keep schema pushes additive where possible, so a rollback stays safe.
 - Revisit this when any of these happen: the site goes public, traffic grows
   beyond a handful of tutors, or a bug that staging would have caught gets

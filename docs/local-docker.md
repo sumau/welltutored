@@ -40,7 +40,7 @@ What the suite runs, and why it needs the `test` service, is in
 [code-checks.md](code-checks.md).
 
 The repository is bind-mounted, so edits on the host apply inside the
-containers. Vite hot-reloads. The API server builds with esbuild and does not
+containers. Vite hot-reloads. The API server builds with esbuild and doesn't
 watch, so restart it after server changes:
 
 ```
@@ -65,7 +65,7 @@ run on separate ports, so the Vite dev server proxies `/api` to the API service.
 The target is set by `API_PROXY_TARGET` (`http://api:8080` in Compose,
 defaulting to `http://localhost:8080` for a host-native run).
 
-The proxy deliberately does not rewrite the `Origin` header: the API only
+The proxy deliberately doesn't rewrite the `Origin` header: the API only
 trusts the frontend's own origin, which Compose states explicitly through
 `TRUSTED_ORIGINS`.
 
@@ -78,7 +78,7 @@ signing in to `/workspace` needs real Clerk keys.
 
 They must be **development** keys (`pk_test_` / `sk_test_`), not production
 keys: a `pk_live_` key is discarded in favour of one for `clerk.localhost`,
-which does not resolve ([first-deploy.md](first-deploy.md#clerk-keys) explains
+which doesn't resolve ([first-deploy.md](first-deploy.md#clerk-keys) explains
 `publishableKeyFromHost`, which decides this). Clerk development instances
 accept any host, so localhost needs no domain configuration.
 
@@ -88,8 +88,8 @@ Get a set of keys in one of these ways:
   application and writes its keys, with no Clerk account or login. Run it in a
   scratch directory and copy the keys over: it is framework-aware and will
   otherwise try to scaffold Clerk into this repository, which already has it
-  wired up. The application is not in your Clerk dashboard, so its users are
-  only the ones who sign up at `localhost`, and it is not the instance CI uses
+  wired up. The application isn't in your Clerk dashboard, so its users are
+  only the ones who sign up at `localhost`, and it isn't the instance CI uses
   (see [Which Clerk instance is which](#which-clerk-instance-is-which)).
 - `npx clerk@latest env pull` writes the keys of an application you already
   own, after logging in.
@@ -125,18 +125,18 @@ different instance. The publishable key says which one: the part after
 `pk_test_` is base64 for the instance's Frontend API host, such as
 `example-name-12.clerk.accounts.dev`.
 
-## Signing in to the workspace
+## Sign in to the Workspace
 
 Sign up before trying to sign in. A Clerk application starts with no users, and
 the sign-in form answers an unknown address with "Couldn't find your account",
-which reads like a configuration fault but is not one. Go to
+which reads like a configuration fault but isn't one. Go to
 <http://localhost:5173/sign-up>.
 
 Development instances accept `+clerk_test` subaddresses and never send mail to
 them: register `you+clerk_test@example.com` and enter the fixed verification
 code `424242`. A real address works too, and Clerk emails a genuine code.
 
-Authenticating is not the same as having workspace access. On first sign-in the
+Authenticating isn't the same as having workspace access. On first sign-in the
 API creates a `workspace_accounts` row with the role `pending`, which the
 workspace boundary refuses. A database created by Compose contains no owner to
 approve it, so the first account has to be promoted directly:
@@ -165,7 +165,8 @@ so access carries over untouched.
 `docker compose down -v` discards the database, and every account role with it.
 The Clerk user is unaffected, because it lives on Clerk's side rather than in
 PostgreSQL — so sign in rather than sign up, which writes a fresh `pending`
-row, then repeat the promotion above.
+row, then repeat the promotion in
+[Sign in to the Workspace](#sign-in-to-the-workspace).
 
 An unclaimed accountless application expires on its own and takes its users
 with it. The database is untouched, and this is the case that looks worse than
@@ -173,9 +174,9 @@ it is: workspace accounts are keyed on the verified email address, not the
 Clerk user id. A new Clerk identity presenting an email that already has an
 account resolves to that account and creates no duplicate, which
 `backend/tests/api/routes/workspace.lifecycle.integration.test.ts` asserts. So
-recovery is not a fresh start:
+recovery isn't a fresh start:
 
-1. Create a replacement application, as described above.
+1. Create a replacement application, as described in [Clerk](#clerk).
 2. Put its three keys in `.env`.
 3. Recreate the containers: `docker compose up -d --force-recreate api web`.
 4. Sign up with the same email address as before.
@@ -190,7 +191,7 @@ and is worth doing once if this login is meant to last.
 ## Notes on the image
 
 - Debian (glibc), not Alpine: `pnpm-workspace.yaml` excludes every `*-musl`
-  native binary, so a musl base cannot resolve lightningcss, Tailwind's oxide
+  native binary, so a musl base can't resolve lightningcss, Tailwind's oxide
   binary, or rolldown.
 - `linux/amd64`: the same overrides keep only the `linux-x64` esbuild binary.
 - pnpm is pinned in the image to the exact version in the root

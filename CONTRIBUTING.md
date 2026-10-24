@@ -76,7 +76,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 
 CI doesn't apply the schema. It is a deliberate `push` run by hand
 ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)), and
-[docs/schema-changes.md](docs/schema-changes.md#pushing) has the command.
+[docs/schema-changes.md](docs/schema-changes.md#push-the-schema) has the command.
 
 - Push and merge in the order in
   [docs/schema-changes.md](docs/schema-changes.md#push-or-merge-first).
@@ -85,7 +85,7 @@ CI doesn't apply the schema. It is a deliberate `push` run by hand
 - Rehearse a push that touches existing rows (a rename, a dropped column, a new
   constraint) on the local database, then on a Neon branch of the
   [Deployment](GLOSSARY.md#delivery)
-  ([docs/schema-changes.md](docs/schema-changes.md#rehearsing-a-push-on-a-neon-branch)).
+  ([docs/schema-changes.md](docs/schema-changes.md#rehearse-a-push-on-a-neon-branch)).
   Write what the push prompted, and what you answered, into
   `docs/schema-changes.md`.
 

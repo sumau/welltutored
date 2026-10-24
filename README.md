@@ -55,7 +55,7 @@ opening a pull request. Each task has one doc to start from:
 | Write or fix a test | [docs/code-checks.md](docs/code-checks.md) |
 | Understand a red check | [docs/pipeline.md](docs/pipeline.md) says which check it is; [docs/code-checks.md](docs/code-checks.md) or [docs/smoke-checks.md](docs/smoke-checks.md) explains it |
 | Change the schema | [CONTRIBUTING.md](CONTRIBUTING.md#schema-changes)'s Schema changes, then [docs/schema-changes.md](docs/schema-changes.md) |
-| Undo a bad deploy | [docs/pipeline.md](docs/pipeline.md#rolling-back)'s Rolling back |
+| Undo a bad deploy | [docs/pipeline.md](docs/pipeline.md#roll-back-a-deploy)'s Roll back a deploy |
 | Change a setting or the domain | [docs/configuration.md](docs/configuration.md) |
 | Understand how it fits together | [docs/architecture.md](docs/architecture.md), then [docs/adr/](docs/adr/) for why |
 | Rebuild production from nothing | [docs/first-deploy.md](docs/first-deploy.md) |

@@ -1,4 +1,4 @@
-# Standing up a Deployment
+# Stand up a Deployment
 
 For whoever stands a [Deployment](../GLOSSARY.md#delivery) up from nothing: a
 new database, Fly app, domain, Clerk instance, content and first
@@ -7,20 +7,20 @@ this is for rebuilding it or starting another. Running the live one is
 [schema-changes.md](schema-changes.md) for schema pushes and
 [pipeline.md](pipeline.md) for deploys and rollback.
 
-## In order
+## Order of steps
 
-Each step has its own section below; this is the order they have to happen in.
+Each step has its own section on this page. Do them in this order:
 
 1. **[Database](#database)** — create the Neon project in London, take the
    pooled and direct connection strings.
-2. **[Apply the schema](schema-changes.md#pushing)** — from this checkout,
+2. **[Apply the schema](schema-changes.md#push-the-schema)** — from this checkout,
    using the direct string. Nothing does this for you.
-3. **[Clerk keys](#clerk-keys)** — a development instance, because you do not
+3. **[Clerk keys](#clerk-keys)** — a development instance, because you don't
    control DNS for `*.fly.dev`.
 4. **[Deploy](#flyio)** — create the app, set the secrets, put the publishable
    key in `fly.toml`, `fly deploy`.
-5. **[Attach a domain](#attaching-a-custom-domain)**, then
-   **[move to a production Clerk instance](#moving-to-a-production-clerk-instance)**.
+5. **[Attach a domain](#attach-a-custom-domain)**, then
+   **[move to a production Clerk instance](#move-to-a-production-clerk-instance)**.
 6. **Expect an empty site.** A fresh database has no tutors or resources — see
    [Content](#content) — and no Owner: [promote the first one](#owner).
 
@@ -36,19 +36,19 @@ copying data in) needs no tunnel.
 
 Create the project in **AWS Europe West 2 (London)**, the region nearest
 `primary_region = "lhr"` in `fly.toml`, and if `primary_region` ever changes,
-move the database with it. Neon cannot move a project afterwards, and distance
+move the database with it. Neon can't move a project afterwards, and distance
 costs more than it looks: every query is a round trip, and `pg` drops a
 connection after 10 seconds idle, so on a quiet site most visitors also pay for
 a fresh TCP, TLS and Postgres handshake (#65 has the measurements).
 
 Then take **two** connection strings from its dashboard. Neon
-marks the pooled one with `-pooler` in the hostname, and they are not
+marks the pooled one with `-pooler` in the hostname, and they aren't
 interchangeable:
 
 - The **pooled** string is the application's. Set it as the `DATABASE_URL`
   secret on the Deployment.
 - The **direct** string is for schema work. Use it for the
-  [schema push](schema-changes.md#pushing).
+  [schema push](schema-changes.md#push-the-schema).
 
 Both need `?sslmode=require` appended: `backend/src/core/db.ts` builds a bare `pg`
 pool from `DATABASE_URL` and sets no SSL options of its own, so without it the
@@ -65,7 +65,8 @@ Which keys work depends on the hostname, and getting this wrong is the most
 common way a first Deployment fails.
 
 `publishableKeyFromHost` decides this, and the SPA
-(`frontend/src/app/config.ts`) and the API (`app.ts`) both call it:
+(`frontend/src/app/config.ts`) and the API (`app.ts`) both call it. Its
+decision comes down to these two lines:
 
 ```js
 if (fallbackKey && isDevelopmentFromPublishableKey(fallbackKey)) return fallbackKey;
@@ -73,16 +74,17 @@ return buildPublishableKey(`clerk.${hostname}`);
 ```
 
 - A **development** key (`pk_test_…`) is used exactly as given, so Clerk is
-  reached at `<slug>.clerk.accounts.dev` whatever the hostname. This is the only
-  configuration that works on a hostname whose DNS you do not control, such as
-  `*.fly.dev`, and it needs no records.
+  reached at the instance's own `*.clerk.accounts.dev` hostname whatever the
+  page's hostname. This is the only configuration that works on a hostname
+  whose DNS you don't control, such as `*.fly.dev`, and it needs no records.
 - A **production** key (`pk_live_…`), or no key at all, is discarded: both sides
-  derive a key for `clerk.<hostname>` instead. That expects the CNAME a Clerk
+  derive a key for `clerk.HOSTNAME` instead, where `HOSTNAME` is the one the
+  browser used. That expects the CNAME a Clerk
   production instance asks you to add, so it requires a domain of your own.
 
 So stand the Deployment up on development keys, and move to a production
 instance when you attach a real domain. `TRUSTED_ORIGINS` and `PUBLIC_ORIGIN`
-change with the domain; `app` in `fly.toml` does not, because it is the Fly
+change with the domain; `app` in `fly.toml` doesn't, because it is the Fly
 app's name rather than a hostname, and changing it means creating a new app.
 
 The live Deployment runs on a production instance for `welltutored.co.uk`,
@@ -91,66 +93,71 @@ browser talks to that CNAME directly.
 
 ## Fly.io
 
-`fly.toml` is committed and points at `docker/Dockerfile`.
+`fly.toml` is committed and points at `docker/Dockerfile`. Before you begin,
+the Neon project exists, the schema is pushed, and you have Clerk development
+keys.
 
-Before this step the Neon project exists, the schema is pushed, and you have
-Clerk development keys. Read each secret into a shell variable (paste it, then
-press Enter), then set them:
+1. Read each secret into a shell variable (paste it, then press Enter), create
+   the app, and set the secrets:
 
-```
-read -rsp 'Pooled DATABASE_URL: ' POOLED_DATABASE_URL; echo
-read -rsp 'CLERK_SECRET_KEY: ' CLERK_SECRET_KEY; echo
-read -rsp 'CLERK_PUBLISHABLE_KEY: ' CLERK_PUBLISHABLE_KEY; echo
+   ```
+   read -rsp 'Pooled DATABASE_URL: ' POOLED_DATABASE_URL; echo
+   read -rsp 'CLERK_SECRET_KEY: ' CLERK_SECRET_KEY; echo
+   read -rsp 'CLERK_PUBLISHABLE_KEY: ' CLERK_PUBLISHABLE_KEY; echo
 
-fly apps create welltutored
-fly secrets set \
-  DATABASE_URL="$POOLED_DATABASE_URL" \
-  CLERK_SECRET_KEY="$CLERK_SECRET_KEY" \
-  CLERK_PUBLISHABLE_KEY="$CLERK_PUBLISHABLE_KEY"
-```
+   fly apps create welltutored
+   fly secrets set \
+     DATABASE_URL="$POOLED_DATABASE_URL" \
+     CLERK_SECRET_KEY="$CLERK_SECRET_KEY" \
+     CLERK_PUBLISHABLE_KEY="$CLERK_PUBLISHABLE_KEY"
+   ```
 
-This is the **pooled** string, not the `DIRECT_DATABASE_URL` used for
-[schema work](schema-changes.md#pushing). The direct one works here too, and
-quietly costs you connection pooling in production.
+   This is the **pooled** string, not the `DIRECT_DATABASE_URL` used for
+   [schema work](schema-changes.md#push-the-schema). The direct one works here
+   too, and quietly costs you connection pooling in production.
 
-Use `fly apps create`, which only reserves the name, rather than `fly launch`,
-which rewrites the committed `fly.toml` from its own guesses.
+   Use `fly apps create`, which only reserves the name, rather than
+   `fly launch`, which rewrites the committed `fly.toml` from its own guesses.
 
-CI needs a token of its own. This is the one step nothing else can do for you:
+2. Give CI a deploy token of its own. Nothing else can do this step for you.
+   Create the token, then paste it when `gh` prompts for the secret's value:
 
-```
-fly tokens create deploy
-gh secret set FLY_API_TOKEN
-```
+   ```
+   fly tokens create deploy
+   gh secret set FLY_API_TOKEN
+   ```
 
-Then edit two values in `fly.toml` itself. They are committed to the
-repository, which is correct for both:
+3. Edit `fly.toml`. Its values are committed to the repository, which is
+   correct for all of them. Set the publishable key and `TRUSTED_ORIGINS`, and
+   delete the `PUBLIC_ORIGIN` line until you
+   [attach a custom domain](#attach-a-custom-domain):
 
-```toml
-[build.args]
-  # Your Clerk publishable key, pasted in full.
-  VITE_CLERK_PUBLISHABLE_KEY = "pk_test_..."
+   ```toml
+   [build.args]
+     # Your Clerk publishable key, pasted in full.
+     VITE_CLERK_PUBLISHABLE_KEY = "pk_test_..."
 
-[env]
-  # The hostname `fly apps create` gave you, with the scheme and no trailing
-  # slash.
-  TRUSTED_ORIGINS = "https://welltutored.fly.dev"
-```
+   [env]
+     # The hostname `fly apps create` gave you, with the scheme and no trailing
+     # slash.
+     TRUSTED_ORIGINS = "https://welltutored.fly.dev"
+   ```
 
-**The publishable key has to be here and not in `fly secrets`.** Vite compiles
-it into the bundle while the image is built, and a Fly secret only exists once
-the container runs. Set as a secret, the build silently uses the empty string
-and sign-in never initialises. A publishable key is public by design, so
-committing it is not a leak; the three secrets above must never appear in this
-file.
+   **The publishable key has to be here and not in `fly secrets`.** Vite
+   compiles it into the bundle while the image is built, and a Fly secret only
+   exists once the container runs. Set as a secret, the build silently uses the
+   empty string and sign-in never initialises. A publishable key is public by
+   design, so committing it isn't a leak; the three secrets from step 1 must
+   never appear in this file.
 
-**`TRUSTED_ORIGINS` must match the deployed hostname exactly** — see the
-[configuration reference](configuration.md).
+   **`TRUSTED_ORIGINS` must match the deployed hostname exactly.** See the
+   [configuration reference](configuration.md). A `PUBLIC_ORIGIN` that
+   `TRUSTED_ORIGINS` doesn't name stops the server from starting.
 
-After that, merging to `main` deploys. `fly deploy` from a checkout still works
-and is how you would ship a first image before any of this is merged.
+4. Merge to `main`, which deploys. To ship a first image before any of this is
+   merged, run `fly deploy` from a checkout.
 
-## Attaching a custom domain
+## Attach a custom domain
 
 The Deployment starts on the `*.fly.dev` hostname `fly apps create` gives it.
 Moving it onto a domain of its own takes DNS, a certificate per hostname, and
@@ -161,10 +168,11 @@ two lines of `fly.toml`, in that order. The live Deployment is on
 1. **DNS.** For every hostname, an `A` record for the app's IPv4 address and an
    `AAAA` record for its IPv6 address; `fly ips list` shows both. Where DNS is
    on Cloudflare, set each record to **DNS only**: with Cloudflare's proxy in
-   front, Fly cannot issue its certificates without further setup.
-2. **Certificates.** `fly certs add <hostname>` for each one, then wait until
+   front, Fly can't issue its certificates without further setup.
+2. **Certificates.** Run `fly certs add HOSTNAME` for each hostname, then wait
+   until
    `fly certs list` shows every one `Issued`. Fly validates against the DNS
-   from step 1, so this cannot usefully come first.
+   from step 1, so this can't usefully come first.
 3. **`fly.toml`.** Set `PUBLIC_ORIGIN` to the domain visitors should end up on,
    and `TRUSTED_ORIGINS` to the same value. Every other hostname, the
    `*.fly.dev` one included, then answers with a `301` to the same path there.
@@ -175,7 +183,7 @@ two lines of `fly.toml`, in that order. The live Deployment is on
 
 `app` in `fly.toml` stays as it is throughout.
 
-## Moving to a production Clerk instance
+## Move to a production Clerk instance
 
 In this order, so the server's keys and the bundle's key change in one deploy:
 
@@ -185,7 +193,7 @@ In this order, so the server's keys and the bundle's key change in one deploy:
 2. Add the DNS records it lists (`clerk.`, `accounts.`, `clkmail.` and two
    DKIM records) in Cloudflare as **DNS only**, and wait until Clerk shows the
    domain verified and its certificates issued.
-3. Social sign-in needs credentials of your own; a production instance does not
+3. Social sign-in needs credentials of your own; a production instance doesn't
    share Clerk's. For Google: create a Web OAuth client in Google Cloud with
    the redirect URI Clerk shows, set the consent screen to **In production**
    (in Testing, only listed test users can sign in), and paste the client ID
@@ -203,7 +211,8 @@ In this order, so the server's keys and the bundle's key change in one deploy:
 
 5. Put the `pk_live_…` key in `fly.toml` under `[build.args]` and merge. The
    deploy picks up the staged secrets, and the launch smoke checks
-   `https://clerk.<domain>/v1/environment` for a production instance.
+   `https://clerk.DOMAIN/v1/environment` for a production instance, where
+   `DOMAIN` is the Public Origin's domain.
 
 ## Content
 
@@ -229,18 +238,19 @@ someone signs in with a verified primary email address, and only an Owner can
 approve it, so the first one is promoted by hand. This applies whenever a
 production database has no Owner: a first deploy, or a rebuild from empty. A
 local database is promoted the same way with a simpler command, in
-[local-docker.md](local-docker.md#signing-in-to-the-workspace).
+[local-docker.md](local-docker.md#sign-in-to-the-workspace).
 
 Approved on 2026-09-27 for the Deployment's first Owner, until an automated
 bootstrap replaces it ([#48](https://github.com/sumau/welltutored/issues/48)).
 It is a guarded update, run against the **direct** Neon connection string from
 a checkout. The person to promote must first sign in once at the Public Origin,
-because the pending record is written on first sign-in and not before.
+because the pending record is written on first sign-in and not before. Run
+this, replacing `OWNER_EMAIL` with the address they signed in with:
 
 ```
 read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
 docker compose run --rm -T -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
-  -lc 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v email=you@example.com' <<'SQL'
+  -lc 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v email=OWNER_EMAIL' <<'SQL'
 \conninfo
 UPDATE workspace_accounts
 SET role = 'owner', updated_at = NOW()
@@ -262,16 +272,17 @@ everyone else.
 For whoever automates this ([#48](https://github.com/sumau/welltutored/issues/48)):
 
 - Run this against a local database, or against production under the
-  procedure above; no other production use is approved.
-- Do not add automatic owner elevation to server startup or normal login
+  procedure in [Owner](#owner); no other production use is approved.
+- Don't add automatic owner elevation to server startup or normal login
   handling.
-- Do not run the update if an Owner already exists.
-- Do not change an existing Owner through this bootstrap step.
+- Don't run the update if an Owner already exists.
+- Don't change an existing Owner through this bootstrap step.
 
 ### Database recovery
 
 Recreating a database removes all account roles, tutor assignments, content,
 and enquiries. Clerk users remain separate from the database, but their
 Workspace Account records must be recreated. After the schema and deployment
-configuration are restored, repeat the procedure above for the intended Owner,
+configuration are restored, repeat the [Owner](#owner) procedure for the
+intended Owner,
 then use the normal Workspace approval flow.

@@ -16,12 +16,12 @@ and merge.
   the live code still reads what was dropped until the merge deploys, so merge
   straight after the push. Merge first, and the merged code must no longer
   read what is removed; push straight after. Whichever you choose, rehearse the
-  push first ([Rehearsing a push on a Neon branch](#rehearsing-a-push-on-a-neon-branch)).
+  push first ([Rehearse a push on a Neon branch](#rehearse-a-push-on-a-neon-branch)).
 
-## Pushing
+## Push the schema
 
 Nothing applies the schema for you, and the [Deploy](../GLOSSARY.md#delivery)
-job deliberately does not — [ADR-0002](adr/0002-schema-by-deliberate-push.md) is
+job deliberately doesn't — [ADR-0002](adr/0002-schema-by-deliberate-push.md) is
 why. Drizzle's `push` is the only mechanism this project has; run it
 deliberately against the Deployment database from a checkout.
 
@@ -46,9 +46,9 @@ Three things about that command:
   DATABASE_URL`.** `docker-compose.yml` sets `DATABASE_URL` on the `migrate`
   service to the local development database, and an explicit `environment:`
   entry beats anything from `.env`. The bare form asks Compose to forward the
-  variable from your shell, and when that forwarding does not happen the service
+  variable from your shell, and when that forwarding doesn't happen the service
   default applies — so you push to your local container instead of the
-  Deployment, successfully and quietly. The expanded form cannot fail that way:
+  Deployment, successfully and quietly. The expanded form can't fail that way:
   your shell substitutes the value before Docker sees it, and an unset variable
   passes an empty string, which fails loudly with `DATABASE_URL, ensure the
   database is provisioned` instead of silently choosing the wrong database.
@@ -65,9 +65,9 @@ how past pushes were answered.
 
 Prefer an additive change, such as a new nullable column or table: only then
 can a deploy be rolled back past the push
-([pipeline.md](pipeline.md#rolling-back) has why).
+([pipeline.md](pipeline.md#roll-back-a-deploy) has why).
 
-### Checking where it landed
+### Check where it landed
 
 Check what landed, and check *where* it landed at the same time:
 
@@ -82,9 +82,9 @@ listed.
 Read the `\conninfo` line first, and read it twice. It names the host you
 actually reached, and it is the only output here that distinguishes the
 Deployment from your local container — the table list looks the same either way.
-There are two ways to be somewhere you did not intend:
+There are two ways to be somewhere you didn't intend:
 
-- **Host `db` at port `5432`** — the environment variable did not reach the
+- **Host `db` at port `5432`** — the environment variable didn't reach the
   container and you are inspecting, or pushing to, the local database.
 - **A hostname containing `-pooler`** — you are on the pooled endpoint, which is
   the application's, not the one for schema work. Drop `-pooler` from the
@@ -98,9 +98,9 @@ Record each new kind of prompt here, with what you answered
 ([CONTRIBUTING.md](../CONTRIBUTING.md#schema-changes)).
 
 Against an empty database there is nothing to drop, so a *truncate* prompt there
-means the connection string is not pointing where you think it is. When you are
-unsure what a push will do to existing rows, run it on a copy first — see
-[Rehearsing a push on a Neon branch](#rehearsing-a-push-on-a-neon-branch).
+means the connection string isn't pointing where you think it is. When you are
+unsure what a push will do to existing rows, run it on a copy first. See
+[Rehearse a push on a Neon branch](#rehearse-a-push-on-a-neon-branch).
 
 Dropping a column prompts with a count of the rows that hold a value. Removing
 the tutor `style` field (issue #53) looked like this against seeded data:
@@ -116,8 +116,7 @@ Do you still want to push changes?
 ```
 
 Answer yes only when every listed column is one the schema diff removes on
-purpose. When to push, relative to the merge, is in
-[Push or merge first](#push-or-merge-first).
+purpose.
 
 Dropping a table prompts the same way, with a count of its rows. Removing saved
 resources (issue #69) looked like this against local data:
@@ -138,14 +137,14 @@ When to push, relative to the merge, is in
 
 **Both prompts appear only when there is data to lose.** `push` counts the rows
 first and asks only when the count is above zero. An empty table, or a column
-no row holds a value in, is dropped with no prompt, and the push just reports
+no row holds a value in, is dropped with no prompt, and the push reports
 `Changes applied`. Production's `saved_resources` was empty, so its push showed
 no prompt. To confirm the drop, run the
-[`\conninfo` and `\dt` check](#checking-where-it-landed), then push again: it should print
-`No changes detected`.
+[`\conninfo` and `\dt` check](#check-where-it-landed), then push again: it
+should print `No changes detected`.
 
 **Renames are the exception, and they prompt on any database, empty or not.**
-`push` diffs states, so it cannot tell a renamed type or constraint from a
+`push` diffs states, so it can't tell a renamed type or constraint from a
 dropped one and a new one — it asks. The highlighted default is `create`, which
 is the drop-and-recreate; the rename is the line below it:
 
@@ -211,7 +210,7 @@ ALTER TABLE "tutor_profile_drafts" RENAME COLUMN "availability" TO "intake";
 ```
 
 The column prompts list every column of that table the schema no longer has,
-so read the names, not the position: `rename` is not always the line directly
+so read the names, not the position: `rename` isn't always the line directly
 below `create`. Between the `ALTER TYPE` and the merge, the live code still
 writes the old label, so saving a profile as `unavailable` fails until the
 deploy lands. Push and merge back to back.
@@ -219,11 +218,11 @@ deploy lands. Push and merge back to back.
 Renaming a constraint additionally asks whether to truncate the table before
 adding the new one — answer no; the default is already no.
 
-## Recovering from a push that stopped partway
+## Recover from a push that stopped partway
 
-Do not run a push that stopped partway again as it is. A rerun generates
+Don't run a push that stopped partway again as it is. A rerun generates
 statements from whatever state was left, and it fails at the same row. When #56
-was merged without the `ALTER TYPE` above, the first push renamed the type and
+was merged without the `ALTER TYPE` from the previous section, the first push renamed the type and
 the columns, then left `intake` as plain `text` with two rows still holding
 `unavailable`. The live site kept working, since a `text` column holds the same
 values.
@@ -244,24 +243,24 @@ column back with `SET DATA TYPE ... USING intake::tutor_intake`, restores the
 default, and applies anything else pending. Push a second time to confirm it
 reports `No changes detected`. Before touching the Deployment, rebuild the
 half-applied state in a local scratch database (`create database ... template
-welltutored`, then undo the parts that did not land) and rehearse both steps
+welltutored`, then undo the parts that didn't land) and rehearse both steps
 there.
 
-## Rehearsing a push on a Neon branch
+## Rehearse a push on a Neon branch
 
 A push you are unsure of — a rename, a dropped column, a new constraint on a
 table that already has rows — can be run against a copy of the Deployment
 database first. The local development database has seed content, not the
-Deployment's rows, so it cannot tell you whether a constraint holds against
+Deployment's rows, so it can't tell you whether a constraint holds against
 real data. A Neon branch can: it is a copy-on-write clone of the database at the
 moment you create it, made in seconds, with its own connection strings.
 
 1. **Create the branch.** In the Neon dashboard, open the project, go to
    **Branches**, and create one from the branch the Deployment's
-   `DATABASE_URL` points at. Name it for what it is, e.g. `push-rehearsal`.
+   `DATABASE_URL` points at. Name it for what it is, such as `push-rehearsal`.
 2. **Take its direct connection string**, not the pooled one, and append
    `?sslmode=require`, for the reasons under
-   [Pushing](#pushing).
+   [Push the schema](#push-the-schema).
 3. **Push to it** with the same command as a real push, and answer the prompts
    as you intend to answer them for real:
 
@@ -272,10 +271,10 @@ moment you create it, made in seconds, with its own connection strings.
      -lc 'pnpm --filter @workspace/backend run push'
    ```
 
-   It is read as `REHEARSAL_DATABASE_URL` so that it cannot be confused with
+   It is read as `REHEARSAL_DATABASE_URL` so that it can't be confused with
    the `DIRECT_DATABASE_URL` you read for the real push.
 4. **Check the result** with the
-   [`\conninfo` and `\dt` command](#checking-where-it-landed), passing
+   [`\conninfo` and `\dt` command](#check-where-it-landed), passing
    `"$REHEARSAL_DATABASE_URL"`. The host in `\conninfo` should be the branch's
    endpoint, which differs from the Deployment's. Query the tables the change
    touches to confirm the rows came through as you expected.
