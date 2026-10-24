@@ -5,7 +5,7 @@ import { chromium, type Page } from "playwright-core";
 import { resolveBaseUrl, resolveTimeoutMs } from "./launch.js";
 
 // The Sign-in Smoke: a real sign-in through the Clerk development instance,
-// into the Workspace of a production image. Run by the Image Smoke job in CI.
+// into the Workspace of a production image. Run by the ci-smoke job in CI.
 const CHROMIUM_PATH_ENV_KEY = "SMOKE_CHROMIUM_PATH";
 const EMAIL_ENV_KEY = "SMOKE_SIGN_IN_EMAIL";
 const DATABASE_URL_ENV_KEY = "SMOKE_DATABASE_URL";

@@ -14,16 +14,17 @@ flowchart TB
   subgraph pipeline[" "]
     direction LR
     pr["Pull request"] --> verify["verify"]
-    subgraph imageJob["image-smoke job"]
+    subgraph imageJob["ci-smoke job"]
       image["Image Smoke<br/>(development smoke)"]
       enquiry["Enquiry Smoke"]
       signIn["Sign-in Smoke"]
     end
     pr --> image
-    pr -.-> enquiry
+    pr --> enquiry
     pr -.-> signIn
     verify --> merge["Merge to main"]
     image --> merge
+    enquiry --> merge
     merge --> deploy["Deploy<br/>blue-green"]
     deploy --> health["Health Check<br/>on the new machine"]
     health --> live["New version<br/>takes traffic"]
@@ -62,8 +63,8 @@ flowchart TB
   classDef soft fill:#fff7df,stroke:#b7791f,color:#713f12
   classDef event fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
   classDef blank fill:none,stroke:#888,color:#888
-  class verify,image,health,launch,prodEnquiry,keyGate gate
-  class enquiry,signIn,manual,keySoft soft
+  class verify,image,enquiry,health,launch,prodEnquiry,keyGate gate
+  class signIn,manual,keySoft soft
   class pr,merge,deploy,live,keyEvent event
   class keyA,keyB,keyC,keyD blank
 
@@ -78,9 +79,9 @@ flowchart TB
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
 | `verify` | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-image-smoke) (`smoke:launch:dev`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
-| [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `image-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR and `main`, not blocking yet; after a [Deploy](#the-deploy-job), blocking | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
-| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `image-smoke` job, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| [Image Smoke](#the-ci-smoke) (`smoke:launch:dev`) | The production image in the `ci-smoke` job, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
+| [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `ci-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR and `main`, and after a [Deploy](#the-deploy-job) | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
+| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
 | [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk`, in the `prod-smoke` job | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
@@ -120,32 +121,33 @@ workflow adds no copy of the pin. `docker/Dockerfile` and
 `docs:check` also reads this workflow's `run:` steps and validates the `pnpm`
 scripts they name, so a renamed script can't reach a deploy job that calls it.
 
-Only the `image-smoke` job has Clerk credentials; see
+Only the `ci-smoke` job has Clerk credentials; see
 [Credentials](#credentials) for why.
 
-## The Image Smoke
+## The CI Smoke
 
-The `image-smoke` job runs alongside `verify`, on every pull request and on
-`main`. It checks that the production image starts and serves the site, which
-`verify` can't: it builds the repository, not `docker/Dockerfile`. Without it,
-a broken Dockerfile or a startup failure would first show up in `flyctl deploy`
-on `main`.
+The `ci-smoke` job runs the [CI Smoke](../GLOSSARY.md#delivery) alongside
+`verify`, on every pull request and on `main`. It is a required check. It
+checks that the production image starts and serves the site, which `verify`
+can't: it builds the repository, not `docker/Dockerfile`. Without it, a broken
+Dockerfile or a startup failure would first show up in `flyctl deploy` on
+`main`.
 
 It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with the
 development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image, and runs
-the Image Smoke, `pnpm smoke:launch:dev`, against it. A failure there stops the
-deploy. Two browser checks follow, with
-the runner's Google Chrome, and neither blocks yet (`continue-on-error`):
+the Image Smoke, `pnpm smoke:launch:dev`, against it. Two browser checks
+follow, with the runner's Google Chrome:
 
 - The [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`pnpm smoke:enquiry`)
-  moves through the form by tab order, so a harmless markup change can fail
-  it. Once it has proven stable, it should block.
+  moves through the form by tab order. It blocks.
 - The [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) signs in as a
   `+clerk_test` user, which it promotes to owner in the job's database with the
-  guarded update from [first-deploy.md](first-deploy.md#owner). Once it has run
-  reliably for a couple of weeks, it should block.
+  guarded update from [first-deploy.md](first-deploy.md#owner). It doesn't
+  block yet (`continue-on-error`): once it has run reliably for a couple of
+  weeks, it should.
 
-The `image-smoke` job in `.github/workflows/ci.yml` has each step.
+A failure in the Image Smoke or the Enquiry Smoke fails the job, and so stops
+the deploy. The `ci-smoke` job in `.github/workflows/ci.yml` has each step.
 
 The image it checks isn't the one that ships. Fly builds the same Dockerfile
 again with the `pk_live_` key from `fly.toml`, and giving CI that key would work
@@ -169,7 +171,7 @@ instance.
 The dedicated test database is the only external dependency the
 deterministic gate has.
 
-The `image-smoke` job is the exception, for the Sign-in Smoke. It reads three
+The `ci-smoke` job is the exception, for the Sign-in Smoke. It reads three
 repository secrets from the **development** instance of the Clerk application
 in the dashboard, the one whose production instance serves
 `welltutored.co.uk`. That isn't necessarily the instance in a local `.env`,
@@ -198,7 +200,7 @@ after merging an auth or Clerk change
 ## The deploy job
 
 The `deploy` job in the same workflow runs only on a push to `main`, and only
-once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
+once `verify` and `ci-smoke` have passed — `needs: [verify, ci-smoke]`
 is what makes a failure in either stop a deploy. It checks out, installs
 `flyctl` and runs `flyctl deploy`. The checks against the live site come after
 it, in the [`prod-smoke` job](#post-deploy-validation).

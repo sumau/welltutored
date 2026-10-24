@@ -1,5 +1,5 @@
 # Deterministic repository verification, as defined by `pnpm run verify`,
-# the Image Smoke against the production image, then the deploy, and then
+# the CI Smoke against the production image, then the deploy, and then
 # the Prod Smoke against the live site.
 # docs/pipeline.md is the description of what each gate covers and why;
 # this file only supplies the environment they need.
@@ -87,11 +87,12 @@ jobs:
       - name: Verify
         run: pnpm run verify
 
-  # The Image Smoke: does the production image start and serve the site? It
-  # builds docker/Dockerfile itself, so it checks the image's recipe, not the
-  # exact image Fly builds and ships (that one carries the pk_live_ key).
-  image-smoke:
-    name: Image Smoke
+  # The CI Smoke: the Image Smoke (does the production image start and serve
+  # the site?), then the browser Smokes against the same container. It builds
+  # docker/Dockerfile itself, so it checks the image's recipe, not the exact
+  # image Fly builds and ships (that one carries the pk_live_ key).
+  ci-smoke:
+    name: ci-smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -196,13 +197,10 @@ jobs:
           SMOKE_BASE_URL: http://localhost:8080
         run: pnpm run smoke:launch:dev
 
-      # Not blocking yet: it moves through the form by tab order, so a harmless
-      # markup change can fail it. It intercepts /api/enquiries, so it covers
-      # the built form in a real browser; the development smoke covers the
-      # server's handling of an invalid enquiry. The runner image carries
-      # Google Chrome.
+      # It intercepts /api/enquiries, so it covers the built form in a real
+      # browser; the development smoke covers the server's handling of an
+      # invalid enquiry. The runner image carries Google Chrome.
       - name: Enquiry smoke
-        continue-on-error: true
         env:
           SMOKE_BASE_URL: http://localhost:8080
         run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:enquiry
@@ -224,11 +222,11 @@ jobs:
         run: docker logs welltutored
 
   # Merging to main ships. Nothing else does: a pull request run stops at
-  # `verify` and the Image Smoke, and `needs` keeps a failure in either from
+  # `verify` and `ci-smoke`, and `needs` keeps a failure in either from
   # deploying.
   deploy:
     name: deploy
-    needs: [verify, image-smoke]
+    needs: [verify, ci-smoke]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
