@@ -53,7 +53,7 @@ package script names that tool's one test file.
 Run the API tests with:
 
 ```sh
-pnpm --filter @workspace/backend test
+pnpm --filter @welltutored/backend test
 ```
 
 This is the complete API suite used by CI: the in-memory unit checks and the
@@ -63,7 +63,7 @@ database; `pnpm run verify` does, through `prepare:integration-database`.
 Run only the non-mutating API checks with:
 
 ```sh
-pnpm --filter @workspace/backend run test:unit
+pnpm --filter @welltutored/backend run test:unit
 ```
 
 The integration tests exercise the Express routes and database-backed behaviour
@@ -100,7 +100,7 @@ stub assigned through it is silently discarded and the route reaches Clerk.
 Run the Well Tutored web tests with:
 
 ```sh
-pnpm --filter @workspace/frontend test
+pnpm --filter @welltutored/frontend test
 ```
 
 React components are rendered either into JSDOM or to static markup. Network
@@ -127,9 +127,9 @@ its JSX transform, so when adding a web test:
 The script package has three test suites, all run by `verify`:
 
 ```sh
-pnpm --filter @workspace/scripts run test:smoke
-pnpm --filter @workspace/scripts run test:docs
-pnpm --filter @workspace/scripts run test:integration-database
+pnpm --filter @welltutored/scripts run test:smoke
+pnpm --filter @welltutored/scripts run test:docs
+pnpm --filter @welltutored/scripts run test:integration-database
 ```
 
 The smoke-check tests validate the logic of the scripts in

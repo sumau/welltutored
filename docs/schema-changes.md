@@ -34,7 +34,7 @@ document then uses it as-is, so keep that terminal open for the session:
 read -rsp 'Direct DATABASE_URL: ' DIRECT_DATABASE_URL; echo
 
 docker compose run --rm -e DATABASE_URL="$DIRECT_DATABASE_URL" --entrypoint bash migrate \
-  -lc 'pnpm --filter @workspace/backend run push'
+  -lc 'pnpm --filter @welltutored/backend run push'
 ```
 
 This runs from your machine to the database. Secrets set on Fly play no part in
@@ -268,7 +268,7 @@ moment you create it, made in seconds, with its own connection strings.
    read -rsp 'Rehearsal branch DATABASE_URL: ' REHEARSAL_DATABASE_URL; echo
 
    docker compose run --rm -e DATABASE_URL="$REHEARSAL_DATABASE_URL" --entrypoint bash migrate \
-     -lc 'pnpm --filter @workspace/backend run push'
+     -lc 'pnpm --filter @welltutored/backend run push'
    ```
 
    It is read as `REHEARSAL_DATABASE_URL` so that it can't be confused with

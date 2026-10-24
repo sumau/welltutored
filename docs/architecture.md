@@ -197,12 +197,12 @@ budget for the primary stylesheet, set about 7% above its size in October 2026
 so that growth is a decision rather than drift. `pnpm run verify` checks it
 after the build. Run the commands in this section inside the container
 ([local-docker.md](local-docker.md)). To check the budget alone, run
-`pnpm --filter @workspace/frontend run build` followed by
-`pnpm --filter @workspace/frontend run check:css-size`; the script prints the
+`pnpm --filter @welltutored/frontend run build` followed by
+`pnpm --filter @welltutored/frontend run check:css-size`; the script prints the
 current size.
 
 For the JavaScript, run
-`pnpm --filter @workspace/frontend run report:bundle-size`. It builds the
+`pnpm --filter @welltutored/frontend run report:bundle-size`. It builds the
 frontend, then reads the chunk report that a plugin in
 `frontend/vite.config.ts` writes on every build, and prints each chunk's raw
 and gzip size, marked as entry or lazy, followed by the twenty largest modules

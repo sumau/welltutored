@@ -22,7 +22,7 @@ ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
 # and the CI setup action. Keep all of them in step.
 RUN npm install -g pnpm@10.34.5 && npm cache clean --force
 
-WORKDIR /workspace
+WORKDIR /app
 
 # NODE_ENV is deliberately left alone in this stage: setting it to production
 # here would make pnpm skip the devDependencies that vite and esbuild live in.
@@ -32,8 +32,8 @@ RUN pnpm install --frozen-lockfile
 # Targeted builds, not `pnpm run build`: docs:check and the full typecheck are
 # CI's job (.github/workflows/ci.yml), and the deployment image does not need
 # the other packages.
-RUN pnpm --filter @workspace/frontend run build \
-  && pnpm --filter @workspace/backend run build
+RUN pnpm --filter @welltutored/frontend run build \
+  && pnpm --filter @welltutored/backend run build
 
 
 FROM --platform=linux/amd64 node:24-bookworm-slim AS runtime
@@ -46,8 +46,8 @@ ENV WEB_CLIENT_ROOT=/app/web
 
 WORKDIR /app
 
-COPY --from=build --chown=node:node /workspace/backend/dist ./dist
-COPY --from=build --chown=node:node /workspace/frontend/dist/public ./web
+COPY --from=build --chown=node:node /app/backend/dist ./dist
+COPY --from=build --chown=node:node /app/frontend/dist/public ./web
 
 USER node
 EXPOSE 8080

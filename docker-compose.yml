@@ -8,15 +8,15 @@ x-node: &node
     context: ./docker
     dockerfile: Dockerfile.dev
   image: welltutored-dev:latest
-  working_dir: /workspace
+  working_dir: /app
   volumes:
-    - .:/workspace
+    - .:/app
   # The store must share a filesystem with node_modules for pnpm to hardlink
   # into it, and node_modules lives in the bind mount. A named volume would sit
   # on a different device and be silently ignored, so keep the store in the
   # repo (gitignored) where it persists between runs and stays fast.
   environment:
-    PNPM_STORE_DIR: /workspace/.pnpm-store
+    PNPM_STORE_DIR: /app/.pnpm-store
   # `flyctl proxy` (or any other tunnel to a deployment database) listens on the
   # host, so the migrate service needs a route to it. Inert for local work.
   extra_hosts:
@@ -53,7 +53,7 @@ services:
   api:
     <<: *node
     environment:
-      PNPM_STORE_DIR: /workspace/.pnpm-store
+      PNPM_STORE_DIR: /app/.pnpm-store
       PORT: "8080"
       DATABASE_URL: postgres://postgres:postgres@db:5432/welltutored
       # Browser requests reach the API through the Vite proxy, so the origin
@@ -68,12 +68,12 @@ services:
         condition: service_completed_successfully
       db:
         condition: service_healthy
-    command: pnpm --filter @workspace/backend run dev
+    command: pnpm --filter @welltutored/backend run dev
 
   web:
     <<: *node
     environment:
-      PNPM_STORE_DIR: /workspace/.pnpm-store
+      PNPM_STORE_DIR: /app/.pnpm-store
       PORT: "5173"
       API_PROXY_TARGET: http://api:8080
     ports:
@@ -81,7 +81,7 @@ services:
     depends_on:
       deps:
         condition: service_completed_successfully
-    command: pnpm --filter @workspace/frontend run dev
+    command: pnpm --filter @welltutored/frontend run dev
 
   # Schema push. Kept out of the default startup because drizzle-kit can
   # prompt; run it with `docker compose run --rm migrate` so it gets a TTY.
@@ -89,14 +89,14 @@ services:
     <<: *node
     profiles: ["tools"]
     environment:
-      PNPM_STORE_DIR: /workspace/.pnpm-store
+      PNPM_STORE_DIR: /app/.pnpm-store
       DATABASE_URL: postgres://postgres:postgres@db:5432/welltutored
     depends_on:
       deps:
         condition: service_completed_successfully
       db:
         condition: service_healthy
-    command: pnpm --filter @workspace/backend run push
+    command: pnpm --filter @welltutored/backend run push
 
   # Runs `pnpm run verify`, the checks of CI's verify job. It needs a dedicated TEST_DATABASE_URL and stops at
   # prepare:integration-database without one; this points it at a second
@@ -111,7 +111,7 @@ services:
     <<: *node
     profiles: ["tools"]
     environment:
-      PNPM_STORE_DIR: /workspace/.pnpm-store
+      PNPM_STORE_DIR: /app/.pnpm-store
       DATABASE_URL: postgres://postgres:postgres@db:5432/welltutored
       TEST_DATABASE_URL: postgres://postgres:postgres@db:5432/welltutored_test
       PGPASSWORD: postgres

@@ -127,14 +127,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply the schema
-        run: pnpm --filter @workspace/backend run push
+        run: pnpm --filter @welltutored/backend run push
 
       # The API seeds sample content when it starts with NODE_ENV=development
       # on an empty database (docs/first-deploy.md). Start it once, wait until it
       # listens, and stop it: the database then has Tutors to smoke.
       - name: Seed sample content
         run: |
-          pnpm --filter @workspace/backend run build
+          pnpm --filter @welltutored/backend run build
           NODE_ENV=development PORT=8090 \
             node backend/dist/main.mjs > seed.log 2>&1 &
           pid=$!

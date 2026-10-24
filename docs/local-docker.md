@@ -14,7 +14,7 @@ Docker with Compose v2. Nothing else.
 
 ```
 cp .env.example .env
-docker compose run --rm deps        # installs the workspace (a few minutes)
+docker compose run --rm deps        # installs dependencies (a few minutes)
 docker compose up -d db
 docker compose run --rm migrate     # pushes the Drizzle schema
 docker compose up api web
@@ -25,6 +25,10 @@ Then open <http://localhost:5173>. The API is also reachable directly on
 
 On first boot the API seeds illustrative tutors and resources, because the
 `dev` script sets `NODE_ENV=development`.
+
+A checkout installed before the container directory became `/app` makes `deps`
+fail, wanting to purge `node_modules`, because the old store path is recorded
+there. Remove them once with `rm -rf node_modules */node_modules`, then run `deps` again.
 
 ## Everyday use
 
@@ -51,11 +55,11 @@ After changing `backend/openapi.yaml`, regenerate the client inside the
 container, then restart:
 
 ```
-docker compose exec api pnpm --filter @workspace/backend run codegen
+docker compose exec api pnpm --filter @welltutored/backend run codegen
 ```
 
 Schema changes are applied the same way as the initial push, with
-`pnpm --filter @workspace/backend run push` via `docker compose run --rm migrate`.
+`pnpm --filter @welltutored/backend run push` via `docker compose run --rm migrate`.
 
 ## How requests are routed
 

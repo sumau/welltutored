@@ -2,7 +2,7 @@
 
 A public directory of tutors and the teaching resources they write, plus a
 private area where those tutors maintain their own profiles and content. One
-vocabulary is shared by every package in this workspace.
+vocabulary is shared by every package in this repository.
 
 ## Language
 
@@ -59,7 +59,8 @@ _Avoid_: Qualifications, academic history
 
 **Workspace**:
 The private, authenticated area where Tutors and the Owner manage profiles and
-Resources.
+Resources. The word means only this area; the repository and its packages are
+not "the workspace".
 _Avoid_: Studio, admin, dashboard, back office, CMS
 
 **Workspace Account**:
