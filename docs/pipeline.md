@@ -6,7 +6,8 @@ how a deploy switches over, fails or is rolled back. The `pnpm` commands on
 this page are the ones CI runs on its own runners; to run a check yourself,
 follow its By hand column.
 
-Each check, from pull request to live site:
+Each step from pull request to live site, with each job's Smokes as one box.
+The table below lists every check and the job it runs in.
 
 ```mermaid
 flowchart TB
@@ -14,28 +15,14 @@ flowchart TB
   subgraph pipeline[" "]
     direction LR
     pr["Pull request"] --> verify["verify"]
-    subgraph imageJob["ci-smoke job"]
-      image["Image Smoke<br/>(development smoke)"]
-      enquiry["Enquiry Smoke"]
-      signIn["Sign-in Smoke"]
-    end
-    pr --> image
-    pr --> enquiry
-    pr --> signIn
+    pr --> ciSmoke["CI Smoke<br/>(ci-smoke job)"]
     verify --> merge["Merge to main"]
-    image --> merge
-    enquiry --> merge
-    signIn --> merge
+    ciSmoke --> merge
     merge --> deploy["Deploy<br/>blue-green"]
     deploy --> health["Health Check<br/>on the new machine"]
     health --> live["New version<br/>takes traffic"]
-    subgraph prodJob["prod-smoke job"]
-      launch["Launch Smoke"]
-      prodEnquiry["Enquiry Smoke"]
-    end
-    live --> launch
-    live --> prodEnquiry
-    launch -.-> manual["Manual sign-in<br/>after auth changes"]
+    live --> prodSmoke["Prod Smoke<br/>(prod-smoke job)"]
+    prodSmoke -.-> manual["Manual sign-in<br/>after auth changes"]
   end
 
   %% The legend. Links written ~~~ are invisible and only position things.
@@ -64,14 +51,12 @@ flowchart TB
   classDef soft fill:#fff7df,stroke:#b7791f,color:#713f12
   classDef event fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
   classDef blank fill:none,stroke:#888,color:#888
-  class verify,image,enquiry,signIn,health,launch,prodEnquiry,keyGate gate
+  class verify,ciSmoke,health,prodSmoke,keyGate gate
   class manual,keySoft soft
   class pr,merge,deploy,live,keyEvent event
   class keyA,keyB,keyC,keyD blank
 
   style pipeline fill:none,stroke:none
-  style imageJob fill:none,stroke:#888
-  style prodJob fill:none,stroke:#888
   style legend fill:none,stroke:#888,stroke-dasharray:4
   style legendArrows fill:none,stroke:none
   style legendBoxes fill:none,stroke:none
