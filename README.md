@@ -1,17 +1,25 @@
 # Well Tutored
 
-Well Tutored helps families discover women tutors, read tutor-written resources,
-and send named-tutor enquiries. [Tutors](GLOSSARY.md#the-public-site) maintain
-their profiles and resources in a private workspace.
+Well Tutored helps families find women tutors and send named-tutor enquiries.
+[Tutors](GLOSSARY.md#the-public-site) maintain their profiles and the resources
+they write in a private workspace.
 
-The public site presents women tutors, their expertise and availability, and a
-library of tutor-written learning resources. Visitors can open a tutor profile
-and submit a named-tutor enquiry. Approved workspace users manage tutor
-profiles, resources, and workspace accounts.
+The public site presents women tutors, their expertise and availability.
+Visitors can open a tutor profile and submit a named-tutor enquiry. Resources
+are hidden from visitors for now
+([docs/architecture.md](docs/architecture.md)). In the workspace, a tutor edits
+their own profile and resources, and the
+[Owner](GLOSSARY.md#the-private-area) also manages every tutor profile and
+approves accounts.
+
+This file is for developers: it gets the project running locally and points to
+the doc for each task.
 
 ## Quick start
 
 Everything runs in containers. Docker with Compose v2 is the only prerequisite.
+
+To set up and start the stack, run:
 
 ```
 cp .env.example .env
@@ -21,20 +29,24 @@ docker compose run --rm migrate     # push the database schema
 docker compose up api web
 ```
 
-Then open <http://localhost:5173>. The API seeds illustrative tutors and
-resources on first boot. To sign in to `/workspace`, put real Clerk dev keys in
-`.env`; the placeholder is enough to browse the public site.
+Open <http://localhost:5173>. In development, the API seeds illustrative tutors
+and resources when it starts. The placeholder Clerk key in `.env` is enough to
+browse the public site. To sign in to `/workspace`, replace it with real Clerk
+development keys.
 
-Run the full CI suite with:
+To run the same checks as CI's `verify` job, run:
 
 ```
 docker compose run --rm test
 ```
 
-## I want to…
+CI also runs smokes against the production image; see
+[docs/pipeline.md](docs/pipeline.md).
+
+## Find the right doc
 
 **Merging to `main` deploys to production**, so read CONTRIBUTING before
-opening a pull request.
+opening a pull request. Each task has one doc to start from:
 
 | I want to… | Read |
 | --- | --- |
@@ -51,12 +63,14 @@ opening a pull request.
 
 ## Stack
 
+The project is built with:
+
 - pnpm workspaces, Node.js 24, TypeScript 7.0
 - API: Express 5
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Build: esbuild (ESM bundle)
 
 ## Layout
 
@@ -80,7 +94,7 @@ What each backend folder is for is in
 
 ## Commands
 
-These run inside the containers. Prefix them with `docker compose exec api`
+These commands run inside the containers. Prefix them with `docker compose exec api`
 against a running service, or see
 [docs/local-docker.md](docs/local-docker.md) for one-off runs.
 

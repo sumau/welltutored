@@ -33,7 +33,7 @@ docker compose up api web           # start
 docker compose logs -f api          # follow logs
 docker compose down                 # stop, keeping the database
 docker compose down -v              # stop and discard the database
-docker compose run --rm test        # the full CI suite
+docker compose run --rm test        # CI's verify job
 ```
 
 What the suite runs, and why it needs the `test` service, is in

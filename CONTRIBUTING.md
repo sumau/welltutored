@@ -1,7 +1,8 @@
 # Contributing
 
-How a change gets from an idea to production. [README.md](README.md) covers
-what the project is and how to run it; this file covers how to change it.
+How a change gets from an idea to production, for anyone changing the project.
+[README.md](README.md) covers what the project is and how to run it; this file
+covers how to change it.
 
 ## Merging to `main` ships to production
 
@@ -33,7 +34,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 [docs/local-docker.md](docs/local-docker.md).
 
 - Branch from an up-to-date `main`, one branch per pull request.
-- Do not stack pull requests. GitHub does not always retarget a stacked pull
+- Don't stack pull requests. GitHub doesn't always retarget a stacked pull
   request when its base merges, so it can land on a branch instead of `main`.
   Wait for the previous one to merge, then branch from `main` again.
 - Use the terms in [GLOSSARY.md](GLOSSARY.md), and avoid the synonyms it lists.
@@ -49,8 +50,10 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 
 ## Before opening a pull request
 
-- `docker compose run --rm test` is green. It runs the same suite as CI
-  ([docs/code-checks.md](docs/code-checks.md)).
+- `docker compose run --rm test` is green. It runs `pnpm run verify`, the same
+  checks as CI's `verify` job ([docs/code-checks.md](docs/code-checks.md)).
+  The smokes against the production image run in CI
+  ([docs/pipeline.md](docs/pipeline.md)).
 - For a UI or build change, click through the running app as well
   (`docker compose up api web`).
 - For a change to routing, public API responses, deployment configuration or
@@ -63,7 +66,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 - **The lockfile must stay stable.** CI and the deployment build both install
   with `--frozen-lockfile`. `package.json` pins `packageManager`, and
   `docker/Dockerfile` and `docker/Dockerfile.dev` pin the matching pnpm; change
-  all three together or the deploy fails on a lockfile it did not expect.
+  all three together or the deploy fails on a lockfile it didn't expect.
 - **Documentation is validated.** The
   [Docs Check](docs/code-checks.md#the-docs-check) runs as part of
   `pnpm run build`, so a broken doc fails CI's `verify` job and blocks the
@@ -71,13 +74,13 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 
 ## Schema changes
 
-CI does not apply the schema. It is a deliberate `push` run by hand
+CI doesn't apply the schema. It is a deliberate `push` run by hand
 ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md)), and
 [docs/schema-changes.md](docs/schema-changes.md#pushing) has the command.
 
 - Push and merge in the order in
   [docs/schema-changes.md](docs/schema-changes.md#push-or-merge-first).
-- A merged pull request does not mean its push happened. Confirm the push
+- A merged pull request doesn't mean its push happened. Confirm the push
   before ticking its box or starting the next schema change.
 - Rehearse a push that touches existing rows (a rename, a dropped column, a new
   constraint) on the local database, then on a Neon branch of the

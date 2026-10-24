@@ -102,10 +102,10 @@ _Avoid_: Liveness, readiness, ping
 
 **Launch Smoke**:
 The check that a Deployment is *usable* — it has a published Tutor, its pages
-render, and the API rejects an invalid Enquiry and keeps answering. While Resources are hidden from
-visitors, a usable Deployment needs no published Resource. A
-successful Deploy does not imply a passing Launch Smoke; they assert different
-things.
+render, and the API rejects an invalid Enquiry and keeps answering. While
+Resources are hidden from visitors, a usable Deployment needs no published
+Resource. A successful Deploy doesn't imply a passing Launch Smoke; they assert
+different things.
 _Avoid_: Health check, published smoke
 
 **Image Smoke**:
@@ -117,7 +117,7 @@ _Avoid_: Docker test, build check
 **Sign-in Smoke**:
 The check, before merge, that a person can sign in through the real Clerk form,
 using the development instance, and use the Workspace. Differences between the
-development and production Clerk instances are outside it.
+development and production Clerk instances are outside it. Not blocking yet.
 _Avoid_: Auth test, login check
 
 **Enquiry Smoke**:
