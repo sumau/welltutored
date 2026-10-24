@@ -1,0 +1,124 @@
+# Runs on every merge to main: the deploy, then the Prod Smoke against the
+# live site, and beside them a job that refills the caches pull requests read.
+# The checks ran on the pull request (ci.yml), and the main ruleset merges one
+# only once it contains the latest main, so the merged tree is the tested one.
+# docs/pipeline.md is the description of what each job covers and why.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Without cancel-in-progress: a cancelled deploy leaves the Deployment
+    # wherever flyctl had got to. Queue them instead.
+    concurrency:
+      group: deploy-welltutored
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # No build arguments: fly.toml already carries
+      # VITE_CLERK_PUBLISHABLE_KEY under [build.args], which is where it
+      # belongs — Vite compiles it into the browser bundle at build time, so a
+      # Fly secret would not exist yet.
+      #
+      # This does not apply the schema. Pushing it is a deliberate, separate
+      # act — see docs/adr/0002-schema-by-deliberate-push.md.
+      - name: Deploy to Fly
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  # The Prod Smoke: the Smokes that can run against the live Deployment, the
+  # image Fly built with the production key. A job of its own, so a failure
+  # can be re-run without redeploying. It is outside the deploy-welltutored
+  # group: it deploys nothing, and a re-run shouldn't queue behind a deploy.
+  prod-smoke:
+    name: prod-smoke
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # A Deploy succeeding does not mean the Deployment is usable.
+      #
+      # SMOKE_REDIRECT_FROM is every other hostname the Deployment answers on;
+      # each must redirect permanently to the Public Origin, so a lapsed
+      # certificate or a broken DNS record fails here. SMOKE_CLERK_FRONTEND_API
+      # is the Clerk production instance's CNAME, checked the same way.
+      - name: Launch smoke
+        env:
+          SMOKE_BASE_URL: https://welltutored.co.uk
+          SMOKE_CLERK_FRONTEND_API: https://clerk.welltutored.co.uk
+          SMOKE_REDIRECT_FROM: >-
+            https://www.welltutored.co.uk
+            https://welltutored.com
+            https://www.welltutored.com
+            https://welltutored.fly.dev
+        run: pnpm run smoke:launch
+
+      # It intercepts every POST to /api/enquiries, so it never creates a real
+      # Enquiry on the Deployment. The runner image carries Google Chrome.
+      - name: Enquiry smoke
+        env:
+          SMOKE_BASE_URL: https://welltutored.co.uk
+        run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:enquiry
+
+  # A pull request reads caches only from its own branch and main, so this
+  # job fills them on main: the pnpm store, and the production image's layers,
+  # which nothing else here builds. Without it they expire after 7 days and
+  # every pull request builds cold. It deploys and checks nothing, so it
+  # neither waits for the deploy nor holds it up.
+  cache:
+    name: cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - uses: docker/setup-buildx-action@v4
+
+      # The same build argument as ci-smoke's build: the ARG comes before the
+      # RUN layers, so a different value would miss the cache.
+      - name: Build the production image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile
+          build-args: VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_TEST_PUBLISHABLE_KEY }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

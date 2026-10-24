@@ -63,10 +63,10 @@ flowchart TB
 
 | Check | Runs against | When | Covers | By hand |
 |---|---|---|---|---|
-| `verify` | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
-| [Image Smoke](#the-ci-smoke) (`smoke:launch:dev`) | The production image in the `ci-smoke` job, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
-| [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `ci-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR and `main`, and after a [Deploy](#the-deploy-job) | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
-| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR and `main`, except a PR from a fork | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
+| `verify` | The repository, with a dedicated test database | Every PR | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
+| [Image Smoke](#the-ci-smoke) (`smoke:launch:dev`) | The production image in the `ci-smoke` job, with a seeded throwaway database | Every PR | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
+| [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `ci-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR, and after a [Deploy](#the-deploy-job) | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
+| [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `ci-smoke` job, through the Clerk development instance | Every PR, except a PR from a fork | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
 | [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk`, in the `prod-smoke` job | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
@@ -86,11 +86,29 @@ It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
 
 ## GitHub Actions
 
-[.github/workflows/ci.yml](../.github/workflows/ci.yml) runs this same gate on
-every pull request and on pushes to `main`, and a push to `main` that passes it
-goes on to deploy. The gate therefore runs before a merge, not only after one.
+[.github/workflows/ci.yml](../.github/workflows/ci.yml) runs this same gate,
+and the [CI Smoke](#the-ci-smoke), on every pull request, and only there.
+[.github/workflows/deploy.yml](../.github/workflows/deploy.yml) runs on every
+merge to `main`: the [deploy](#the-deploy-job), then the
+[Prod Smoke](#post-deploy-validation).
 
-The workflow supplies a `postgres:16` service container and points
+The checks don't run again on `main`, and don't need to: the `main` ruleset
+requires branches to be up to date before merging, so a pull request merges
+only once it contains the latest `main`, and the tree that lands is the one
+its checks tested. The cost is that after each merge, every other open pull
+request has to be updated, and its checks run again, before it can merge.
+
+What the rule doesn't require is a recent run. Checks that passed days ago
+can miss drift in Chrome, the `node` base image or the Clerk development
+instance, so re-run an old pull request's checks before merging it.
+
+`deploy.yml` also has a `cache` job, beside the deploy. A pull request reads
+caches only from its own branch and `main`, so this job fills them on `main`:
+the installed pnpm packages, and the production image's layers, built with the
+same build argument as the `ci-smoke` job. Without it they would expire after
+7 days and every pull request would build cold.
+
+The `verify` job supplies a `postgres:16` service container and points
 `TEST_DATABASE_URL` at a `welltutored_test` database that it creates first.
 `DATABASE_URL` is set as well, to a different database on the same server, so
 the refusal to share a connection between application and integration-test data
@@ -103,7 +121,7 @@ platform's native binaries from the lockfile. And pnpm is installed from the
 workflow adds no copy of the pin. `docker/Dockerfile` and
 `docker/Dockerfile.dev` each repeat it.
 
-`docs:check` also reads this workflow's `run:` steps and validates the `pnpm`
+`docs:check` also reads the workflows' `run:` steps and validates the `pnpm`
 scripts they name, so a renamed script can't reach a deploy job that calls it.
 
 Only the `ci-smoke` job has Clerk credentials; see
@@ -112,11 +130,11 @@ Only the `ci-smoke` job has Clerk credentials; see
 ## The CI Smoke
 
 The `ci-smoke` job runs the [CI Smoke](../GLOSSARY.md#delivery) alongside
-`verify`, on every pull request and on `main`. It is a required check. It
+`verify`, on every pull request. It is a required check. It
 checks that the production image starts and serves the site, which `verify`
 can't: it builds the repository, not `docker/Dockerfile`. Without it, a broken
-Dockerfile or a startup failure would first show up in `flyctl deploy` on
-`main`.
+Dockerfile or a startup failure would first show up in `flyctl deploy` after
+the merge.
 
 It seeds a throwaway `postgres:16` database, builds `docker/Dockerfile` with the
 development instance's `VITE_CLERK_PUBLISHABLE_KEY`, runs the image, and runs
@@ -132,7 +150,7 @@ follow, with the runner's Google Chrome:
   `sign-in-smoke-failure` artifact. A pull request from a fork skips it, with
   a notice, since it gets no secrets (see [Credentials](#credentials)).
 
-A failure in any of the three fails the job, and so stops the deploy, and the
+A failure in any of the three fails the job, and so stops the merge, and the
 job then prints the image's logs. The `ci-smoke` job in
 `.github/workflows/ci.yml` has each step.
 
@@ -189,9 +207,9 @@ after merging an auth or Clerk change
 
 ## The deploy job
 
-The `deploy` job in the same workflow runs only on a push to `main`, and only
-once `verify` and `ci-smoke` have passed — `needs: [verify, ci-smoke]`
-is what makes a failure in either stop a deploy. It checks out, installs
+The `deploy` job in `.github/workflows/deploy.yml` runs on every merge to
+`main`. A failure in `verify` or `ci-smoke` stops a deploy by stopping the
+merge, since both are required checks. It checks out, installs
 `flyctl` and runs `flyctl deploy`. The checks against the live site come after
 it, in the [`prod-smoke` job](#post-deploy-validation).
 
@@ -200,8 +218,8 @@ machine passes the Health Check.
 [ADR-0003](adr/0003-no-staging-environment.md) is why there is no staging
 environment in front of this.
 
-It has its own `concurrency` group, without `cancel-in-progress`. The
-workflow-level group cancels superseded pull-request runs, which is right for
+It has its own `concurrency` group, without `cancel-in-progress`.
+`ci.yml` cancels superseded pull-request runs, which is right for
 verification and wrong for a deploy: a cancelled one leaves the
 [Deployment](../GLOSSARY.md#delivery) wherever `flyctl` had got to. Deploys
 queue instead.

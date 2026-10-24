@@ -158,7 +158,7 @@ keys.
    `TRUSTED_ORIGINS` doesn't name stops the server from starting.
 
 4. Point the Prod Smoke at this Deployment. The `prod-smoke` job in
-   `.github/workflows/ci.yml` names the live Deployment's hostnames: set
+   `.github/workflows/deploy.yml` names the live Deployment's hostnames: set
    `SMOKE_BASE_URL` in both its steps to your `*.fly.dev` origin, and remove
    `SMOKE_REDIRECT_FROM` and `SMOKE_CLERK_FRONTEND_API` until you
    [attach a custom domain](#attach-a-custom-domain). Left as they are, the
