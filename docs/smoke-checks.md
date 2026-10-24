@@ -8,16 +8,16 @@ to read a failure. Where each runs in CI, and which of them block, is in
 ([code-checks.md](code-checks.md#repository-scripts)).
 
 The `pnpm` commands on this page run inside the `api` container
-([local-docker.md](local-docker.md)), except `smoke:enquiry` and
-`smoke:sign-in`: they need a Chromium, which none of the images carry, so they
-run on a machine that has one. In CI that is the runner.
+([local-docker.md](local-docker.md)). The two browser checks, `smoke:enquiry`
+and `smoke:sign-in`, run only in CI: they need a Chromium, which none of the
+images carry, and the runner has Google Chrome.
 
 | Script | Check | Runs against |
 | --- | --- | --- |
 | `smoke:launch` | The [Launch Smoke](#the-launch-smoke) | The live Deployment |
 | `smoke:launch:dev` | The same check with `--dev`, so without the Clerk check | [The local stack](#run-against-the-local-stack), and the image in [the Image Smoke](#run-the-image-smoke-by-hand) |
-| `smoke:enquiry` | [The Enquiry Smoke](#the-enquiry-smoke) | Any of them, from a machine with Chromium |
-| `smoke:sign-in` | [The Sign-in Smoke](#the-sign-in-smoke) | A local image built with Clerk development keys |
+| `smoke:enquiry` | [The Enquiry Smoke](#the-enquiry-smoke) | The image in CI, then the live Deployment; CI only |
+| `smoke:sign-in` | [The Sign-in Smoke](#the-sign-in-smoke) | The image in CI, built with Clerk development keys; CI only |
 
 ## The Launch Smoke
 
@@ -92,13 +92,11 @@ reported as skipped rather than silently dropped.
 | Flag | Waives | Ends when |
 | --- | --- | --- |
 | `--dev` | the Clerk check, since a local stack runs on a development instance with no `clerk.` CNAME to check | never; development is a permanent mode |
-| `--allow-empty` | the non-empty assertion on `/api/tutors` and the page that addresses a [Tutor](../GLOSSARY.md#the-public-site) by slug | the Deployment has a published Tutor |
+| `--allow-empty` | the non-empty assertion on `/api/tutors` and the page that addresses a [Tutor](../GLOSSARY.md#the-public-site) by slug | a rebuilt, empty Deployment has a published Tutor again |
 
-`smoke:launch:dev` wraps `--dev`:
-
-```sh
-SMOKE_BASE_URL=http://prod:8080 pnpm smoke:launch:dev
-```
+`smoke:launch:dev` wraps `--dev`, for
+[the local stack](#run-against-the-local-stack) and
+[the Image Smoke](#run-the-image-smoke-by-hand).
 
 The Deployment has a published Tutor, so the `prod-smoke` job in
 `.github/workflows/deploy.yml` runs `smoke:launch` with no waiver. `--allow-empty`
@@ -125,16 +123,32 @@ What to do is in [pipeline.md](pipeline.md#post-deploy-validation).
 
 ## Run against the local stack
 
-With the local stack running (`docker compose up api web`), run the development
-smoke through the Vite dev server, which proxies `/api` to the API service, so
-the web application and `/api` are checked together:
+This runs the Launch Smoke against the app you develop on, the one at
+<http://localhost:5173>, instead of the live site. Run it before opening a pull
+request that changes routing, public API responses, deployment configuration or
+the enquiry form ([CONTRIBUTING.md](../CONTRIBUTING.md#prepare-a-pull-request)).
+It catches a broken page or endpoint before CI does.
+
+With the local stack running (`docker compose up api web`), run:
 
 ```sh
 docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:launch:dev'
 ```
 
-It runs the Launch Smoke's checks except the Clerk one
-([waivers](#waivers)).
+The check runs in its own container, which reaches the `web` service by name
+rather than as `localhost`. The `web` service forwards every `/api` request to
+the `api` service, so the one address checks both the pages and the API. It
+skips the Clerk check, since the local stack uses the Clerk development
+instance ([waivers](#waivers)).
+
+A pass prints `Launch smoke check passed`, a `✓` line for each check and a `-`
+line for each skipped one. A failure prints `Launch smoke check failed:` with
+the error, and exits non-zero.
+
+This checks your code on the development servers. The
+[Image Smoke](#run-the-image-smoke-by-hand) runs the same check against the
+production image, which also catches faults in how the app is built and
+served.
 
 ## Run the Image Smoke by hand
 
@@ -151,38 +165,32 @@ deploying anything. Run the development smoke against it over the compose
 network:
 
 ```
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm run smoke:launch:dev'
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm smoke:launch:dev'
 ```
 
 It requests every public page with `Accept: text/html`, which is what caught the
 Clerk handshake redirect in
-[ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
-and `smoke:sign-in` need a Chromium these images don't carry, so they run from
-the host. The `ci-smoke` job in `.github/workflows/ci.yml` has the steps CI
-takes.
+[ADR-0001](adr/0001-single-origin-deployment.md#consequences). In CI, the
+`ci-smoke` job in `.github/workflows/ci.yml` also runs the two browser checks
+against the image; by hand, this covers only the development smoke.
 
 ## The Enquiry Smoke
 
 The [Enquiry Smoke](../GLOSSARY.md#delivery) goes through the enquiry form in a
 real browser by keyboard alone. It intercepts the request that would send the
-form and answers it itself, so the check never creates a real [Enquiry](../GLOSSARY.md#the-public-site). To run
-it:
+form and answers it itself, so the check never creates a real
+[Enquiry](../GLOSSARY.md#the-public-site).
 
-```sh
-SMOKE_BASE_URL=https://welltutored.co.uk \
-  SMOKE_CHROMIUM_PATH=CHROMIUM_PATH pnpm smoke:enquiry
-```
+It runs only in CI, in the runner's Google Chrome, twice: in the `ci-smoke` job
+before merge, against the image ([pipeline.md](pipeline.md#the-ci-smoke)), and
+in the `prod-smoke` job after a Deploy, against the Deployment
+([pipeline.md](pipeline.md#post-deploy-validation)). `playwright-core` bundles
+no browser and none of this project's images carry one, so the script takes
+the browser's path from `SMOKE_CHROMIUM_PATH`.
 
-Replace `CHROMIUM_PATH` with the path to a Chromium or Google Chrome
-executable.
-
-`SMOKE_CHROMIUM_PATH` is required: `playwright-core` bundles no browser and
-none of this project's images carry one, so this check runs from wherever a
-Chromium already exists. In CI that is the runner's Google Chrome, twice: in
-the `ci-smoke` job before merge, against the image
-([pipeline.md](pipeline.md#the-ci-smoke)), and in the `prod-smoke` job after
-a Deploy, against the Deployment
-([pipeline.md](pipeline.md#post-deploy-validation)).
+A pass prints `Enquiry keyboard smoke check passed` and a `✓` line for each
+behavior checked. A failure prints `Enquiry keyboard smoke check failed:` with
+the error, and exits non-zero.
 
 ## The Sign-in Smoke
 
@@ -190,99 +198,18 @@ The [Sign-in Smoke](../GLOSSARY.md#delivery) signs in through the real Clerk
 form, so its target must be built and run with Clerk **development** keys, and
 its database must be a fresh, seeded one with no owner: the check promotes its
 user to owner there. It refuses a database that isn't local.
-`SMOKE_SIGN_IN_EMAIL` must be a `+clerk_test` user of the instance those keys
-belong to, which may not be the one CI uses
-([local-docker.md](local-docker.md#which-clerk-instance-is-which)). Two
-optional files help when it fails: `SMOKE_FAILURE_SCREENSHOT` names one for a
-screenshot of the page, and `SMOKE_FAILURE_TRACE` one for a Playwright trace of
-the run (console, network and page snapshots), which
-[trace.playwright.dev](https://trace.playwright.dev) opens.
 
-TODO(verify): these steps are adapted from the `ci-smoke` job in
-`.github/workflows/ci.yml` and haven't been run outside CI.
+It runs only in CI, in the `ci-smoke` job, against the image
+([pipeline.md](pipeline.md#the-ci-smoke)). It signs in as the `+clerk_test`
+user in the `CLERK_TEST_EMAIL` secret, of the Clerk development instance whose
+keys CI holds ([local-docker.md](local-docker.md#which-clerk-instance-is-which)).
+A pull request from a fork gets no secrets, so it skips the check with a
+notice.
 
-Before you begin, you need:
-
-- Clerk development keys and a `+clerk_test` user in that instance
-  ([local-docker.md](local-docker.md#clerk)).
-- Node.js, pnpm and Chromium or Google Chrome on the host, as for the
-  [Enquiry Smoke](#the-enquiry-smoke).
-- The local `db` service running (`docker compose up -d db`), and nothing else
-  listening on port 8080, so stop the `api` service.
-
-To run it:
-
-1. Read the development keys into shell variables:
-
-   ```sh
-   read -rsp 'Clerk development publishable key: ' CLERK_TEST_PUBLISHABLE_KEY; echo
-   read -rsp 'Clerk development secret key: ' CLERK_TEST_SECRET_KEY; echo
-   ```
-
-2. Create a fresh database, `image_smoke`, on the `db` service:
-
-   ```sh
-   docker compose exec -T db dropdb -U postgres --if-exists image_smoke
-   docker compose exec -T db createdb -U postgres image_smoke
-   ```
-
-3. Push the schema to it:
-
-   ```sh
-   docker compose run --rm \
-     -e DATABASE_URL=postgres://postgres:postgres@db:5432/image_smoke migrate
-   ```
-
-4. Seed it by starting the API against it in development mode:
-
-   ```sh
-   docker compose run --rm \
-     -e DATABASE_URL=postgres://postgres:postgres@db:5432/image_smoke api
-   ```
-
-   After the log shows `Server listening`, stop it with Ctrl+C.
-
-5. Build the production image with the development publishable key:
-
-   ```sh
-   docker build -f docker/Dockerfile \
-     --build-arg VITE_CLERK_PUBLISHABLE_KEY="$CLERK_TEST_PUBLISHABLE_KEY" \
-     -t welltutored:sign-in .
-   ```
-
-6. Start the image on the host network, so it reaches the database on
-   `localhost` and serves on <http://localhost:8080>:
-
-   ```sh
-   docker run -d --name welltutored-sign-in --network host \
-     -e PORT=8080 \
-     -e DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
-     -e TRUSTED_ORIGINS=http://localhost:8080 \
-     -e CLERK_SECRET_KEY="$CLERK_TEST_SECRET_KEY" \
-     -e CLERK_PUBLISHABLE_KEY="$CLERK_TEST_PUBLISHABLE_KEY" \
-     welltutored:sign-in
-   ```
-
-7. Run the smoke:
-
-   ```sh
-   SMOKE_BASE_URL=http://localhost:8080 \
-     SMOKE_SIGN_IN_EMAIL=TEST_USER_EMAIL \
-     SMOKE_DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
-     SMOKE_CHROMIUM_PATH=CHROMIUM_PATH pnpm smoke:sign-in
-   ```
-
-   Replace `TEST_USER_EMAIL` with the `+clerk_test` address, such as
-   `someone+clerk_test@example.com`, and `CHROMIUM_PATH` with the path to a
-   Chromium or Google Chrome executable. Each passing step prints a line
-   starting with `✓`; a failure prints `Sign-in smoke check failed:` and
-   exits non-zero.
-
-8. Remove the container:
-
-   ```sh
-   docker rm -f welltutored-sign-in
-   ```
-
-The check promotes its user to owner, so repeat from step 2 before the next
-run.
+A pass prints `Sign-in smoke check passed` and a `✓` line for each step. A
+failure prints the step it was on and the page's URL, then
+`Sign-in smoke check failed:` with the error, and exits non-zero. The run then keeps the `sign-in-smoke-failure` artifact,
+with a screenshot of the page and a Playwright trace of the run (console,
+network and page snapshots). To read it, download the artifact from the
+workflow run's summary page and open `trace.zip` at
+[trace.playwright.dev](https://trace.playwright.dev).
