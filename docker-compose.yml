@@ -98,7 +98,7 @@ services:
         condition: service_healthy
     command: pnpm --filter @workspace/backend run push
 
-  # Full CI suite. `verify` needs a dedicated TEST_DATABASE_URL and stops at
+  # CI's verify job. `verify` needs a dedicated TEST_DATABASE_URL and stops at
   # prepare:integration-database without one; this points it at a second
   # database on the db service.
   #

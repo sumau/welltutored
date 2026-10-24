@@ -4,11 +4,14 @@ For whoever needs to change a setting, or the domain: every environment
 variable the application reads, what it does, when it is read, and where it is
 set. The API reads its settings through `backend/src/core/config.ts`.
 
+The application reads these variables:
+
 | Variable | When | Set in | Notes |
 | --- | --- | --- | --- |
 | `DATABASE_URL` | runtime, required | `fly secrets`; `docker-compose.yml` locally | Append `?sslmode=require` for a hosted database: `backend/src/core/db.ts` creates a bare `pg` pool with no SSL options of its own. The [Deployment](../GLOSSARY.md#delivery) uses Neon's pooled string ([first-deploy.md](first-deploy.md#database)). |
-| `TRUSTED_ORIGINS` | runtime, required | `fly.toml`; `docker-compose.yml` locally | The exact public origin, e.g. `https://welltutored.co.uk`. See below. |
-| `PUBLIC_ORIGIN` | runtime, optional | `fly.toml` | The [Public Origin](../GLOSSARY.md#delivery), e.g. `https://welltutored.example`. When set, a request arriving on any other hostname gets a `301` to the same path and query there; `/api/healthz` is exempt, because Fly's health checks do not use the public hostname. It must also appear in `TRUSTED_ORIGINS`, or the server refuses to start. Unset, nothing redirects. |
+| `TRUSTED_ORIGINS` | runtime, required | `fly.toml`; `docker-compose.yml` locally | The exact public origin, such as `https://welltutored.co.uk`. See [`TRUSTED_ORIGINS`](#trusted_origins). |
+| `CORS_ORIGINS` | runtime, optional | not set | An alias for `TRUSTED_ORIGINS`. The two lists are combined. |
+| `PUBLIC_ORIGIN` | runtime, optional | `fly.toml` | The [Public Origin](../GLOSSARY.md#delivery), such as `https://welltutored.co.uk`. When set, a request arriving on any other hostname gets a `301` to the same path and query there; `/api/healthz` is exempt, because Fly's health checks don't use the public hostname. It must also appear in `TRUSTED_ORIGINS`, or the server refuses to start. Unset, nothing redirects. |
 | `PORT` | runtime, required | `docker/Dockerfile` and `fly.toml`; `docker-compose.yml` locally | The image defaults it to `8080`. |
 | `WEB_CLIENT_ROOT` | runtime, required | `docker/Dockerfile` | The directory holding the frontend build; the image sets it to `/app/web`. Leaving it unset makes the server skip serving the frontend entirely, so every page answers 404 while `/api/healthz` stays green. It logs a warning in that state. |
 | `NODE_ENV` | runtime | `docker/Dockerfile` (`production`); the `dev` script locally (`development`) | `development` seeds sample content on start. `production` removes the localhost fallback for an unset `TRUSTED_ORIGINS`, and makes a missing `WEB_CLIENT_ROOT` a warning. `test` is set by the integration tests. |
@@ -20,18 +23,19 @@ set. The API reads its settings through `backend/src/core/config.ts`.
 
 Changing the domain means changing `TRUSTED_ORIGINS` and `PUBLIC_ORIGIN`
 together, after the new hostname has a certificate;
-[first-deploy.md](first-deploy.md#attaching-a-custom-domain) has the order.
+[first-deploy.md](first-deploy.md#attach-a-custom-domain) has the order.
 
 Variables that only the tooling reads are documented where it is used:
 `API_PROXY_TARGET` in [local-docker.md](local-docker.md#how-requests-are-routed),
 `TEST_DATABASE_URL` in [code-checks.md](code-checks.md#api-server), and the `SMOKE_*`
 variables, such as `SMOKE_TIMEOUT_MS` and `SMOKE_TOTAL_TIMEOUT_MS`, in
 [smoke-checks.md](smoke-checks.md). The [Docs Check](../GLOSSARY.md#delivery)
-fails when the code reads a variable by name that this page does not name.
+fails when the code reads a variable by name that this page doesn't name.
 
 ## `TRUSTED_ORIGINS`
 
-`TRUSTED_ORIGINS` is the one that bites. In production nothing infers it, and an
+`TRUSTED_ORIGINS` is the setting most likely to break a Deployment. In
+production nothing infers it, and an
 empty trusted-origin set rejects every credentialed request — including the
 public enquiry POST, which is the main thing visitors do. Set it to the public
 origin, with no trailing path, and update it when the domain changes.
@@ -44,9 +48,9 @@ nothing else.
 
 ## Clerk keys
 
-The public site does not need *working* Clerk keys, but it does need
+The public site doesn't need *working* Clerk keys, but it does need
 `CLERK_SECRET_KEY` to be present — see the table. With a placeholder, the
-directory and enquiry flow both work and `/workspace` simply cannot be
+directory and enquiry flow both work and `/workspace` can't be
 signed into. Pages themselves keep rendering either way, because the Clerk
 middleware is mounted under `/api` only.
 

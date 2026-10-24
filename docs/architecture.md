@@ -8,7 +8,7 @@ One container serves both the React frontend and the Express API from the same
 origin (scheme, host and port), so the browser treats them as one site. Only
 the API talks to the PostgreSQL database, through Drizzle, and a client
 generated from the OpenAPI spec keeps the two sides in step. The application
-is organized around two user-facing surfaces: the public website and the
+is organised around two user-facing surfaces: the public website and the
 private [Workspace](../GLOSSARY.md#the-private-area).
 
 ```mermaid
@@ -63,8 +63,8 @@ the resource library and the enquiry form.
 
 The resource routes (`/resources` and `/resources/:slug`), and every link to
 them, exist only while
-`PUBLIC_RESOURCES_ENABLED` in `src/lib/features.ts` is on. It is off for now,
-so visitors see no resources; tutors still write and publish them in the
+`PUBLIC_RESOURCES_ENABLED` in `frontend/src/lib/features.ts` is on. While it is
+off, visitors see no resources; tutors still write and publish them in the
 Workspace.
 
 Public pages use the shared `Shell` for navigation, footer, policy dialogs, and
@@ -131,6 +131,8 @@ flowchart LR
   class pg external
 ```
 
+Each part of `backend/src` has one job:
+
 - `main.ts` starts the process: seeds illustrative content in development,
   then listens. `app.ts` builds the Express app: the Public Origin redirect,
   CORS, Clerk on `/api`, the trusted-origin check on `/api/workspace`, the
@@ -158,10 +160,12 @@ next to the components they test.
 
 `backend/openapi.yaml` generates both the React Query hooks in
 `frontend/src/client` and the Zod schemas in `backend/src/api/schemas`, which
-keeps client and server contracts aligned. Generated code is not edited by
+keeps client and server contracts aligned. Generated code isn't edited by
 hand.
 
 ## Publishing rules
+
+These rules apply to everything the Workspace publishes:
 
 - A published tutor profile can have a private draft.
 - Public routes read published tutor and resource state.
@@ -179,19 +183,20 @@ public site continues to show the last published profile while a new version is
 being edited, and the draft can be published or discarded as a whole.
 
 [Resources](../GLOSSARY.md#the-public-site) use a single `resources` row with a
-`draft` or `published` status. New or explicitly draft resources do not appear
+`draft` or `published` status. New or explicitly draft resources don't appear
 publicly until published. Editing an already-published resource while keeping
 its status as `published` updates the public resource in place; changing it to
 `draft` removes it from public results while it is being revised. Resources do
-not currently keep a private draft alongside a live published version.
+not keep a private draft alongside a live published version.
 
 ## Bundle size
 
 The Well Tutored Vite build enables Tailwind's production Lightning CSS
-optimization. `frontend/scripts/verify-css-build.mjs` holds a size
+optimisation. `frontend/scripts/verify-css-build.mjs` holds a size
 budget for the primary stylesheet, set about 7% above its size in October 2026
 so that growth is a decision rather than drift. `pnpm run verify` checks it
-after the build. To check it alone, run
+after the build. Run the commands in this section inside the container
+([local-docker.md](local-docker.md)). To check the budget alone, run
 `pnpm --filter @workspace/frontend run build` followed by
 `pnpm --filter @workspace/frontend run check:css-size`; the script prints the
 current size.
@@ -205,12 +210,9 @@ in the entry chunk and in any chunk that imports more than one other. Unlike
 `check:css-size` it has no budget, and nothing runs it in CI: it is for looking
 into a size change by hand.
 
-The commands in this section run inside the container
-([local-docker.md](local-docker.md)).
-
 The remaining global CSS is intentional: Tailwind preflight, theme variables,
 utilities used by both public and authenticated routes, motion states, and
-registered custom properties are shared so route transitions do not flash
-unstyled content. The authenticated route's separate CSS chunk is currently
-negligible; further savings would require splitting shared styles and
+registered custom properties are shared so route transitions don't flash
+unstyled content. The authenticated route's separate CSS chunk is small, and
+further savings would require splitting shared styles and
 reintroducing them during navigation.
