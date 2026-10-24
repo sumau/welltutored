@@ -80,6 +80,55 @@ Deployment has a published Tutor again:
 SMOKE_BASE_URL=https://welltutored.co.uk pnpm smoke:public-site --allow-empty
 ```
 
+### Run against the local dev image
+
+The
+[local dev image](local-docker.md#the-local-dev-image-and-the-local-prod-image)
+at <http://localhost:5173> is the app you develop on. Run the check against it
+before opening a pull request that changes routing, public API responses,
+deployment configuration or the enquiry form
+([CONTRIBUTING.md](../CONTRIBUTING.md#prepare-a-pull-request)). It catches a
+broken page or endpoint before CI does.
+
+With the local stack running (`docker compose up api web`), run:
+
+```sh
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:public-site'
+```
+
+The check runs in its own container, which reaches the `web` service by name
+rather than as `localhost`. The `web` service forwards every `/api` request to
+the `api` service, so the one address checks both the pages and the API. It
+passes on the sample content the API seeds on first boot.
+
+This checks your code on the development servers. Running it
+[against the local prod image](#run-against-the-local-prod-image) also catches
+faults in how the app is built and served.
+
+### Run against the local prod image
+
+The `prod` compose service runs the production image, the
+[local prod image](local-docker.md#the-local-dev-image-and-the-local-prod-image),
+against the local development database, which has seed content:
+
+```
+docker compose up --build prod      # http://localhost:8081
+```
+
+That covers the two things most likely to be wrong — whether the frontend is
+actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
+deploying anything. Run the check against it over the compose network:
+
+```
+docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm smoke:public-site'
+```
+
+It requests every public page with `Accept: text/html`, which is what caught the
+Clerk handshake redirect in
+[ADR-0001](adr/0001-single-origin-deployment.md#consequences). In CI, the
+`ci-smoke` job in `.github/workflows/ci.yml` also runs the two browser checks
+against the image; by hand, this covers only the Public Site Smoke.
+
 ### When it fails
 
 A red Public Site Smoke after a merge means visitors are already seeing the
@@ -131,65 +180,6 @@ A red Domain Smoke after a merge means some visitors may already be reaching a
 broken hostname or a broken sign-in. What to do is in
 [pipeline.md](pipeline.md#post-deploy-validation).
 
-## Timeout controls
-
-Every Smoke reads `SMOKE_TIMEOUT_MS`, which limits each request or browser
-wait. The Public Site Smoke and the Domain Smoke also read
-`SMOKE_TOTAL_TIMEOUT_MS`, which limits the whole check; the browser Smokes
-don't. Both are in milliseconds. Raise them for a target that is slow on
-purpose. The defaults and accepted ranges are in `scripts/smoke/shared.ts`,
-which rejects a value outside them before making any request.
-
-## Run against the local dev image
-
-This runs the Public Site Smoke against the app you develop on, the
-[local dev image](local-docker.md#the-local-dev-image-and-the-local-prod-image)
-at <http://localhost:5173>, instead of the live site. Run it before opening a
-pull request that changes routing, public API responses, deployment
-configuration or the enquiry form
-([CONTRIBUTING.md](../CONTRIBUTING.md#prepare-a-pull-request)). It catches a
-broken page or endpoint before CI does.
-
-With the local stack running (`docker compose up api web`), run:
-
-```sh
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:public-site'
-```
-
-The check runs in its own container, which reaches the `web` service by name
-rather than as `localhost`. The `web` service forwards every `/api` request to
-the `api` service, so the one address checks both the pages and the API. It
-passes on the sample content the API seeds on first boot.
-
-This checks your code on the development servers. Running it
-[against the local prod image](#run-against-the-local-prod-image) also catches
-faults in how the app is built and served.
-
-## Run against the local prod image
-
-The `prod` compose service runs the production image, the
-[local prod image](local-docker.md#the-local-dev-image-and-the-local-prod-image),
-against the local development database, which has seed content:
-
-```
-docker compose up --build prod      # http://localhost:8081
-```
-
-That covers the two things most likely to be wrong — whether the frontend is
-actually served, and whether `TRUSTED_ORIGINS` permits an enquiry — without
-deploying anything. Run the Public Site Smoke against it over the compose
-network:
-
-```
-docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://prod:8080 pnpm smoke:public-site'
-```
-
-It requests every public page with `Accept: text/html`, which is what caught the
-Clerk handshake redirect in
-[ADR-0001](adr/0001-single-origin-deployment.md#consequences). In CI, the
-`ci-smoke` job in `.github/workflows/ci.yml` also runs the two browser checks
-against the image; by hand, this covers only the Public Site Smoke.
-
 ## The Enquiry Smoke
 
 The [Enquiry Smoke](../GLOSSARY.md#delivery) goes through the enquiry form in a
@@ -234,3 +224,12 @@ page and a Playwright trace of the run (console, network and page snapshots).
 To read it, download the artifact from the workflow run's summary page and
 open `trace.zip` at
 [trace.playwright.dev](https://trace.playwright.dev).
+
+## Timeout controls
+
+Every Smoke reads `SMOKE_TIMEOUT_MS`, which limits each request or browser
+wait. The Public Site Smoke and the Domain Smoke also read
+`SMOKE_TOTAL_TIMEOUT_MS`, which limits the whole check; the browser Smokes
+don't. Both are in milliseconds. Raise them for a target that is slow on
+purpose. The defaults and accepted ranges are in `scripts/smoke/shared.ts`,
+which rejects a value outside them before making any request.
