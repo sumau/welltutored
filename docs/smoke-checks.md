@@ -123,16 +123,32 @@ What to do is in [pipeline.md](pipeline.md#post-deploy-validation).
 
 ## Run against the local stack
 
-With the local stack running (`docker compose up api web`), run the development
-smoke through the Vite dev server, which proxies `/api` to the API service, so
-the web application and `/api` are checked together:
+This runs the Launch Smoke against the app you develop on, the one at
+<http://localhost:5173>, instead of the live site. Run it before opening a pull
+request that changes routing, public API responses, deployment configuration or
+the enquiry form ([CONTRIBUTING.md](../CONTRIBUTING.md#prepare-a-pull-request)).
+It catches a broken page or endpoint before CI does.
+
+With the local stack running (`docker compose up api web`), run:
 
 ```sh
 docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:5173 pnpm smoke:launch:dev'
 ```
 
-It runs the Launch Smoke's checks except the Clerk one
-([waivers](#waivers)).
+The check runs in its own container, which reaches the `web` service by name
+rather than as `localhost`. The `web` service forwards every `/api` request to
+the `api` service, so the one address checks both the pages and the API. It
+skips the Clerk check, since the local stack uses the Clerk development
+instance ([waivers](#waivers)).
+
+A pass prints `Launch smoke check passed`, a `✓` line for each check and a `-`
+line for each skipped one. A failure prints `Launch smoke check failed:` with
+the error, and exits non-zero.
+
+This checks your code on the development servers. The
+[Image Smoke](#run-the-image-smoke-by-hand) runs the same check against the
+production image, which also catches faults in how the app is built and
+served.
 
 ## Run the Image Smoke by hand
 
