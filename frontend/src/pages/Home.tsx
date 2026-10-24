@@ -3,19 +3,12 @@ import { useListTutors } from "@/client";
 import { Link } from "wouter";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
-import { TutorCircle } from "@/components/TutorCircle";
-import { intakeDotClasses } from "@/lib/intake";
+import { intakeDotClasses, intakeLabels } from "@/lib/intake";
 import { scrollToTutors } from "@/lib/scroll-to-tutors";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
-
-const intakeLabels = {
-  accepting: "Taking students",
-  limited: "Few spaces left",
-  full: "Full for now",
-} as const;
 
 export default function Home() {
   const { data: tutors, isLoading: tutorsLoading, error: tutorsError, refetch: refetchTutors } = useListTutors({
@@ -59,12 +52,9 @@ export default function Home() {
               {heroTutor.teachingIntro}
             </blockquote>
             <figcaption className="mt-[24px]">
-              <Link href={`/tutors/${heroTutor.slug}`} className="inline-flex items-center gap-[14px] rounded-full pr-2 group" data-testid="hero-tutor-link">
-                <TutorCircle tutor={heroTutor} size={48} />
-                <span className="text-[15px] leading-[1.35]">
-                  <b className="block font-semibold group-hover:underline underline-offset-4">{heroTutor.name}</b>
-                  <span className="text-foreground/80">{heroTutor.subject}</span>
-                </span>
+              <Link href={`/tutors/${heroTutor.slug}`} className="inline-block text-[15px] leading-[1.35] group" data-testid="hero-tutor-link">
+                <b className="block font-semibold group-hover:underline underline-offset-4">{heroTutor.name}</b>
+                <span className="text-foreground/80">{heroTutor.subject}</span>
               </Link>
             </figcaption>
           </figure>
@@ -96,27 +86,29 @@ export default function Home() {
                 <Link
                   href={`/tutors/${tutor.slug}`}
                   key={tutor.id}
-                  className="tutor-wash rounded-[20px] p-[24px] text-left min-h-[300px] h-full flex flex-col border border-transparent hover:border-foreground/25 transition-colors"
+                  className="tutor-wash rounded-[20px] overflow-hidden text-left min-h-[300px] h-full flex flex-col border border-transparent hover:border-foreground/25 transition-colors"
                   style={{ "--tint": tutor.tint } as React.CSSProperties}
                   data-testid={`tutor-card-${tutor.slug}`}
                 >
-                  <div className="flex items-start justify-between gap-[12px] mb-[18px]">
-                    <TutorCircle tutor={tutor} size={56} />
-                    <span
-                      className="inline-flex shrink-0 items-center gap-[7px] rounded-full bg-card px-[11px] py-[6px] text-[13px] font-medium"
-                      aria-label={`Intake: ${intakeLabels[tutor.intake]}`}
-                    >
-                      <span className={`w-[8px] h-[8px] rounded-full ${intakeDotClasses[tutor.intake]}`} aria-hidden="true" />
-                      {intakeLabels[tutor.intake]}
-                    </span>
+                  {/* Her name on her own tint, at full strength. */}
+                  <div className="px-[24px] pt-[22px] pb-[18px]" style={{ backgroundColor: tutor.tint }}>
+                    <h3 className="font-serif text-[26px] leading-[1.1] m-0 mb-[4px]">{tutor.name}</h3>
+                    <span className="block text-[15px] font-semibold">{tutor.subject}</span>
                   </div>
-                  <h3 className="font-serif text-[26px] leading-[1.1] m-0 mb-[4px]">{tutor.name}</h3>
-                  <span className="block text-[15px] font-semibold mb-[14px]">{tutor.subject}</span>
-                  <p className="text-[15px] text-foreground/80 leading-[1.55] mt-0 mb-[20px] flex-1 line-clamp-3">
-                    {tutor.profileSummary}
-                  </p>
-                  <div className="border-t border-foreground/15 pt-[14px] text-[14px] text-foreground/80 mt-auto">
-                    <b className="text-foreground font-semibold">{tutor.university}</b><br />{tutor.qualification}
+                  <div className="px-[24px] pt-[20px] pb-[24px] flex-1 flex flex-col">
+                    <p className="text-[15px] text-foreground/80 leading-[1.55] mt-0 mb-[20px] flex-1 line-clamp-3">
+                      {tutor.profileSummary}
+                    </p>
+                    <div className="border-t border-foreground/15 pt-[14px] text-[14px] text-foreground/80 mt-auto">
+                      <b className="text-foreground font-semibold">{tutor.university}</b><br />{tutor.qualification}
+                      <span
+                        className="flex items-center gap-[8px] mt-[12px] font-medium text-foreground"
+                        aria-label={`Intake: ${intakeLabels[tutor.intake]}`}
+                      >
+                        <span className={`w-[8px] h-[8px] rounded-full ${intakeDotClasses[tutor.intake]}`} aria-hidden="true" />
+                        {intakeLabels[tutor.intake]}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}

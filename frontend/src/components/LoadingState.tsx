@@ -22,10 +22,6 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
               data-testid={`tutor-card-skeleton-${index + 1}`}
               key={index}
             >
-              <div className="flex items-start justify-between gap-3 mb-5">
-                <div className="h-14 w-14 rounded-full skeleton-shimmer" />
-                <div className="h-6 w-20 rounded-full skeleton-shimmer" />
-              </div>
               <div className="space-y-2 mb-5">
                 <div className="h-7 w-40 rounded skeleton-shimmer mb-4" />
                 <div className="h-3 w-full rounded skeleton-shimmer" />
@@ -35,6 +31,7 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
               <div className="border-t border-border pt-[13px] space-y-2">
                 <div className="h-3 w-32 rounded skeleton-shimmer" />
                 <div className="h-3 w-24 rounded skeleton-shimmer" />
+                <div className="h-3 w-28 rounded skeleton-shimmer !mt-4" />
               </div>
             </div>
           ))}

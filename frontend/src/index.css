@@ -188,32 +188,10 @@ body:has(.public-site) {
     outline-offset: 3px;
   }
 
-  /* A tutor's circle: her tint and initial, after the logo's circle and "w". */
-  .tutor-circle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    font-family: var(--app-font-serif);
-    line-height: 1;
-    color: hsl(286 31% 20%);
-    flex-shrink: 0;
-  }
-
   /* A tutor's card wash: a light mix of her tint, light enough for body text. */
   .tutor-wash {
     background-color: color-mix(in srgb, var(--tint) 22%, white);
   }
-}
-
-/* The one load moment: the hero circles settle into place. */
-@keyframes circle-settle {
-  from { opacity: 0; transform: scale(.6); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.circle-settle {
-  animation: circle-settle 640ms cubic-bezier(.34, 1.4, .64, 1) both;
 }
 
 @layer base {

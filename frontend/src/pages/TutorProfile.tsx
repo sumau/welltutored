@@ -8,18 +8,11 @@ import { LoadingState } from "@/components/LoadingState";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import { ResourceTypeLabel } from "@/components/ResourceType";
-import { TutorCircle } from "@/components/TutorCircle";
-import { intakeDotClasses } from "@/lib/intake";
+import { intakeDotClasses, intakeLabels } from "@/lib/intake";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
-
-const intakeDescriptions = {
-  accepting: "Taking new students",
-  limited: "Limited spaces",
-  full: "Not taking new students",
-} as const;
 
 export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
   return tutor.intake === "full" ? (
@@ -182,7 +175,6 @@ export default function TutorProfile() {
       {/* Hero: who she is, beside her approach, after Home's hero */}
       <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[36px] lg:gap-[56px] items-center">
         <div>
-          <TutorCircle tutor={tutor} size={96} className="circle-settle mb-[24px] [--circle-scale:0.75] md:[--circle-scale:1]" />
           <h1 className="font-serif text-[clamp(44px,5vw,68px)] leading-[1.02] mb-[10px]" data-testid="tutor-name">
             {tutor.name}
           </h1>
@@ -191,7 +183,7 @@ export default function TutorProfile() {
           </p>
           <div className="inline-flex items-center gap-[8px] rounded-full bg-secondary px-4 py-2 text-[14px] font-medium mb-[22px]">
             <i className={`w-2 h-2 rounded-full ${intakeDotClasses[tutor.intake]}`} />
-            {intakeDescriptions[tutor.intake]}
+            {intakeLabels[tutor.intake]}
           </div>
           <p className="max-w-[36em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="tutor-intro">
             {tutor.profileSummary}
