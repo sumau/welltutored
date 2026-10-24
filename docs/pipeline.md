@@ -67,9 +67,9 @@ checks, and how to run one by hand, is in [smoke-checks.md](smoke-checks.md).
 | Check | Runs against | When | Covers |
 |---|---|---|---|
 | `verify` | The repository, with a dedicated test database | Every PR | Tests (including `test:smoke`), typecheck, build, docs, CSS budget |
-| [CI Smoke](#the-ci-smoke) (`ci-smoke` job) | A throwaway build of the production image, with a seeded throwaway database and the Clerk development instance | Every PR | The Public Site, Enquiry and Workspace Smokes. A PR from a fork skips the Workspace Smoke |
+| [CI Smoke](#the-ci-smoke) (`ci-smoke` job) | A throwaway build of the production image, with a seeded throwaway database and the Clerk development instance | Every PR | The [Public Site](smoke-checks.md#the-public-site-smoke), [Enquiry](smoke-checks.md#the-enquiry-smoke) and [Workspace](smoke-checks.md#the-workspace-smoke) Smokes. A PR from a fork skips the Workspace Smoke |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s |
-| [Prod Smoke](#post-deploy-validation) (`prod-smoke` job) | `https://welltutored.co.uk`, its other hostnames, and `https://clerk.welltutored.co.uk` | After a [Deploy](#the-deploy-job) | The Public Site, Enquiry and Domain Smokes |
+| [Prod Smoke](#post-deploy-validation) (`prod-smoke` job) | `https://welltutored.co.uk`, its other hostnames, and `https://clerk.welltutored.co.uk` | After a [Deploy](#the-deploy-job) | The [Public Site](smoke-checks.md#the-public-site-smoke), [Enquiry](smoke-checks.md#the-enquiry-smoke) and [Domain](smoke-checks.md#the-domain-smoke) Smokes |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies |
 
 ## Deterministic CI validation
