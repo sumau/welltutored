@@ -144,7 +144,8 @@ follow, with the runner's Google Chrome:
   `+clerk_test` user, which it promotes to owner in the job's database with the
   guarded update from [first-deploy.md](first-deploy.md#owner). It doesn't
   block yet (`continue-on-error`): once it has run reliably for a couple of
-  weeks, it should.
+  weeks, it should. When it fails, the run keeps its screenshot and trace as
+  the `sign-in-smoke-failure` artifact, and the job prints the image's logs.
 
 A failure in the Image Smoke or the Enquiry Smoke fails the job, and so stops
 the deploy. The `ci-smoke` job in `.github/workflows/ci.yml` has each step.

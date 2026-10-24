@@ -1,10 +1,12 @@
 import { SignIn } from "@clerk/react";
 import { ArrowLeft, BookOpenCheck } from "lucide-react";
 import { Link } from "wouter";
+import { useRerenderWhenClerkReady } from "@/app/clerk-ready";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export default function SignInPage() {
+  useRerenderWhenClerkReady();
   const next = new URLSearchParams(window.location.search).get("next");
   const redirectUrl =
     next?.startsWith("/") && !next.startsWith("//") ? next : "/workspace";

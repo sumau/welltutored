@@ -11,6 +11,9 @@ const EMAIL_ENV_KEY = "SMOKE_SIGN_IN_EMAIL";
 const DATABASE_URL_ENV_KEY = "SMOKE_DATABASE_URL";
 // Optional: where to save a screenshot of the page when the check fails.
 const FAILURE_SCREENSHOT_ENV_KEY = "SMOKE_FAILURE_SCREENSHOT";
+// Optional: where to save a Playwright trace (console, network, DOM
+// snapshots) when the check fails. Open it at https://trace.playwright.dev.
+const FAILURE_TRACE_ENV_KEY = "SMOKE_FAILURE_TRACE";
 // Clerk's test mode accepts this code for any +clerk_test address, and sends
 // no email: https://clerk.com/docs/testing/test-emails-and-phones
 const TEST_EMAIL_CODE = "424242";
@@ -208,21 +211,33 @@ async function runSignInSmokeCheck() {
     args: ["--no-sandbox"],
   });
 
-  const page = await browser.newPage();
+  const tracePath = process.env[FAILURE_TRACE_ENV_KEY]?.trim();
+  const context = await browser.newContext();
+  if (tracePath) await context.tracing.start({ screenshots: true, snapshots: true });
+  const page = await context.newPage();
+  // Named in the failure message, since the same wait fails in both sign-ins.
+  let step = "first sign-in";
   try {
     await signIn(page, baseUrl, email, timeoutMs);
     await page.getByText("Awaiting approval").waitFor({ state: "visible", timeout: timeoutMs });
+    step = "sign-out";
     await signOut(page, timeoutMs);
 
+    step = "promotion to owner";
     const tutorSlug = await promoteToOwner(databaseUrl, email);
 
+    step = "second sign-in";
     await signIn(page, baseUrl, email, timeoutMs);
     await page
       .getByText("Manage tutors and review content across the agency.")
       .waitFor({ state: "visible", timeout: timeoutMs });
+    step = "profile edit";
     await editProfile(page, baseUrl, timeoutMs);
+    step = "Resource publish";
     const resourceSlug = await publishResource(page, baseUrl, timeoutMs);
+    step = "hidden Resource check";
     await expectResourceHidden(page, baseUrl, resourceSlug, timeoutMs);
+    if (tracePath) await context.tracing.stop();
 
     console.log(`Sign-in smoke check passed for ${baseUrl.origin}`);
     console.log("  ✓ first sign-in through Clerk shows Awaiting approval");
@@ -232,10 +247,27 @@ async function runSignInSmokeCheck() {
     console.log("  ✓ Resource publishes in the Workspace");
     console.log("  ✓ its public page stays Not Found while Resources are hidden");
   } catch (error) {
+    console.error(`Failed during the ${step}, at ${page.url()}.`);
+    // Whether Clerk finished loading, and whether its cookie says signed in.
+    const clerkState = await page
+      .evaluate(() => {
+        const clerk = (globalThis as { Clerk?: { status?: string; loaded?: boolean } }).Clerk;
+        return `Clerk status ${clerk?.status}, loaded ${clerk?.loaded}`;
+      })
+      .catch((stateError: unknown) => `Clerk state unreadable: ${String(stateError)}`);
+    const clientUat = await context.cookies().then(
+      (cookies) => cookies.find((c) => c.name === "__client_uat")?.value,
+      () => undefined,
+    );
+    console.error(`${clerkState}, __client_uat ${clientUat}.`);
     const screenshotPath = process.env[FAILURE_SCREENSHOT_ENV_KEY]?.trim();
     if (screenshotPath) {
       await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
-      console.error(`Saved the page at ${page.url()} to ${screenshotPath}.`);
+      console.error(`Saved a screenshot to ${screenshotPath}.`);
+    }
+    if (tracePath) {
+      await context.tracing.stop({ path: tracePath }).catch(() => {});
+      console.error(`Saved a trace to ${tracePath}.`);
     }
     throw error;
   } finally {
