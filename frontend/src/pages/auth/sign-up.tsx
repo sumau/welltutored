@@ -1,10 +1,12 @@
 import { SignUp } from "@clerk/react";
 import { ArrowLeft, PenLine } from "lucide-react";
 import { Link } from "wouter";
+import { useRerenderWhenClerkReady } from "@/app/clerk-ready";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export default function SignUpPage() {
+  useRerenderWhenClerkReady();
   return (
     <div className="flex-1 px-6 md:px-8 py-12 md:py-20 bg-secondary/35">
       <div className="max-w-[1020px] mx-auto grid md:grid-cols-[.8fr_1fr] gap-10 md:gap-20 items-center">
