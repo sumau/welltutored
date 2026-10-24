@@ -157,12 +157,12 @@ keys.
    [configuration reference](configuration.md). A `PUBLIC_ORIGIN` that
    `TRUSTED_ORIGINS` doesn't name stops the server from starting.
 
-4. Point the Launch Smoke at this Deployment. The `Launch smoke` step in
+4. Point the Prod Smoke at this Deployment. The `prod-smoke` job in
    `.github/workflows/ci.yml` names the live Deployment's hostnames: set
-   `SMOKE_BASE_URL` to your `*.fly.dev` origin, and remove
+   `SMOKE_BASE_URL` in both its steps to your `*.fly.dev` origin, and remove
    `SMOKE_REDIRECT_FROM` and `SMOKE_CLERK_FRONTEND_API` until you
    [attach a custom domain](#attach-a-custom-domain). Left as they are, the
-   deploy job checks `welltutored.co.uk` instead of your app.
+   job checks `welltutored.co.uk` instead of your app.
 
 5. Merge to `main`, which deploys. To ship a first image before any of this is
    merged, run `fly deploy` from a checkout.
@@ -188,8 +188,9 @@ two lines of `fly.toml`, in that order. The live Deployment is on
    `*.fly.dev` one included, then answers with a `301` to the same path there.
    Only after step 2: a redirect to a hostname without a certificate sends
    every visitor to a browser warning.
-4. **Launch Smoke.** Point the deploy job's `SMOKE_BASE_URL` at the new origin
-   and list the other hostnames in `SMOKE_REDIRECT_FROM`.
+4. **Prod Smoke.** Point the `prod-smoke` job's `SMOKE_BASE_URL`, in both its
+   steps, at the new origin and list the other hostnames in
+   `SMOKE_REDIRECT_FROM`.
 
 `app` in `fly.toml` stays as it is throughout.
 
@@ -235,10 +236,10 @@ Two things behave differently until there is a published
 
 - The directory renders its empty state, and `/api/tutors` returns an empty
   list.
-- `pnpm run smoke:launch` **fails**, and so does the deploy job's Launch smoke
-  step, because it asserts a published Tutor. Run it by hand with
-  `--allow-empty` until there is one
-  ([smoke-checks.md](smoke-checks.md#waivers)).
+- `pnpm run smoke:launch` **fails**, and so does the `prod-smoke` job, because
+  the Launch Smoke asserts a published Tutor and the Enquiry Smoke needs one
+  that accepts enquiries. Run the Launch Smoke by hand with `--allow-empty`
+  until there is one ([smoke-checks.md](smoke-checks.md#waivers)).
 
 ## Owner
 

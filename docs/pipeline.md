@@ -27,7 +27,12 @@ flowchart TB
     merge --> deploy["Deploy<br/>blue-green"]
     deploy --> health["Health Check<br/>on the new machine"]
     health --> live["New version<br/>takes traffic"]
-    live --> launch["Launch Smoke"]
+    subgraph prodJob["prod-smoke job"]
+      launch["Launch Smoke"]
+      prodEnquiry["Enquiry Smoke"]
+    end
+    live --> launch
+    live --> prodEnquiry
     launch -.-> manual["Manual sign-in<br/>after auth changes"]
   end
 
@@ -57,13 +62,14 @@ flowchart TB
   classDef soft fill:#fff7df,stroke:#b7791f,color:#713f12
   classDef event fill:#e9f7ef,stroke:#3b8a5a,color:#14532d
   classDef blank fill:none,stroke:#888,color:#888
-  class verify,image,health,launch,keyGate gate
+  class verify,image,health,launch,prodEnquiry,keyGate gate
   class enquiry,signIn,manual,keySoft soft
   class pr,merge,deploy,live,keyEvent event
   class keyA,keyB,keyC,keyD blank
 
   style pipeline fill:none,stroke:none
   style imageJob fill:none,stroke:#888
+  style prodJob fill:none,stroke:#888
   style legend fill:none,stroke:#888,stroke-dasharray:4
   style legendArrows fill:none,stroke:none
   style legendBoxes fill:none,stroke:none
@@ -73,10 +79,10 @@ flowchart TB
 |---|---|---|---|---|
 | `verify` | The repository, with a dedicated test database | Every PR and `main` | Tests (including `test:smoke`), typecheck, build, docs, CSS budget | `docker compose run --rm test` |
 | [Image Smoke](#the-image-smoke) (`smoke:launch:dev`) | The production image, with a seeded throwaway database | Every PR and `main` | Image starts; health, catalogue, public pages, invalid-enquiry recovery | [By hand](smoke-checks.md#the-image-smoke-by-hand) |
-| [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `image-smoke` job, in the runner's Google Chrome | Every PR and `main`, not blocking yet | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
+| [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke) (`smoke:enquiry`) | The same container in the `image-smoke` job, then `https://welltutored.co.uk` in the `prod-smoke` job, in the runner's Google Chrome | Every PR and `main`, not blocking yet; after a [Deploy](#the-deploy-job), blocking | The enquiry form, by keyboard alone, with the final request intercepted | `smoke:enquiry` with a Chromium ([smoke-checks.md](smoke-checks.md#the-enquiry-smoke)) |
 | [Sign-in Smoke](smoke-checks.md#the-sign-in-smoke) (`smoke:sign-in`) | The same container in the `image-smoke` job, through the Clerk development instance | Every PR and `main`, not blocking yet | Sign-in, [Workspace](../GLOSSARY.md#the-private-area) opens, profile edit saves, [Resource](../GLOSSARY.md#the-public-site) publishes but stays hidden | `smoke:sign-in` against a container built with a `pk_test_` key ([smoke-checks.md](smoke-checks.md#the-sign-in-smoke)) |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s | — (`curl` shows the answer, but gates nothing) |
-| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk` | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
+| [Launch Smoke](#post-deploy-validation) (`smoke:launch`) | `https://welltutored.co.uk`, in the `prod-smoke` job | After a [Deploy](#the-deploy-job) | Published [Tutor](../GLOSSARY.md#the-public-site), pages, enquiry recovery, redirects, certificates, Clerk production instance | [smoke-checks.md](smoke-checks.md#the-launch-smoke) |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies | It is by hand |
 
 ## Deterministic CI validation
@@ -194,8 +200,8 @@ after merging an auth or Clerk change
 The `deploy` job in the same workflow runs only on a push to `main`, and only
 once `verify` and the Image Smoke have passed — `needs: [verify, image-smoke]`
 is what makes a failure in either stop a deploy. It checks out, installs
-`flyctl`, runs `flyctl deploy`, and then runs the launch smoke against the live
-site.
+`flyctl` and runs `flyctl deploy`. The checks against the live site come after
+it, in the [`prod-smoke` job](#post-deploy-validation).
 
 The deploy is [blue-green](#blue-green-deploys), switching only once the new
 machine passes the Health Check.
@@ -213,14 +219,24 @@ It does **not** apply the schema. That is
 
 ## Post-deploy validation
 
-The deploy job finishes by running the
-[Launch Smoke](smoke-checks.md#the-launch-smoke) against the live site, without
-waivers and with `SMOKE_REDIRECT_FROM` set to the Deployment's other
-hostnames. A successful Deploy doesn't mean a usable Deployment, which is why
-it runs at all.
+The `prod-smoke` job runs the [Prod Smoke](../GLOSSARY.md#delivery) once the
+`deploy` job has passed, against the live site. A failure in either of its
+checks fails the run:
 
-**A red Launch smoke on a merge to `main` is a real failure**, and visitors are
-already seeing it. It isn't something to wave through:
+- the [Launch Smoke](smoke-checks.md#the-launch-smoke), without waivers and
+  with `SMOKE_REDIRECT_FROM` set to the Deployment's other hostnames;
+- the [Enquiry Smoke](smoke-checks.md#the-enquiry-smoke), in the runner's
+  Google Chrome. It intercepts the final request, so it never creates a real
+  Enquiry on the Deployment.
+
+A successful Deploy doesn't mean a usable Deployment, which is why it runs at
+all. It is a job of its own, so a failure can be re-run without redeploying,
+and it stays out of the `deploy` job's `concurrency` group, since it changes
+nothing on the Deployment. It isn't a required check, since
+it runs only after a merge.
+
+**A red `prod-smoke` on a merge to `main` is a real failure**, and visitors
+are already seeing it. It isn't something to wave through:
 [roll back](#roll-back-a-deploy), or fix it on `main`.
 
 ## Blue-green deploys
@@ -242,7 +258,7 @@ seconds sit above Neon's wake-from-suspend time and below the check's 5-second
 
 What blue-green does **not** catch: broken pages, a missing Tutor, or code that
 doesn't match the live schema, which still answers `SELECT 1`. Those surface in
-the [Launch Smoke](../GLOSSARY.md#delivery), which runs after the switch,
+the [Prod Smoke](../GLOSSARY.md#delivery), which runs after the switch,
 against the version visitors already see.
 
 ## A failed deploy
@@ -258,8 +274,8 @@ fly machines destroy MACHINE_ID --force
 
 ## Roll back a deploy
 
-A deploy that passes but breaks the site is a red Launch smoke after a green
-`Deploy to Fly`. The new version is live, and nothing rolls it back by itself.
+A deploy that passes but breaks the site is a red `prod-smoke` after a green
+`deploy`. The new version is live, and nothing rolls it back by itself.
 To go back to the previous image, list the releases, then deploy the image of
 the one before the current release:
 

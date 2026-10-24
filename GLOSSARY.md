@@ -100,6 +100,11 @@ database answers. Gates the switch to a new version during a Deploy. Says
 nothing about whether the site is usable; that is the Launch Smoke.
 _Avoid_: Liveness, readiness, ping
 
+**Prod Smoke**:
+The group of Smokes that runs against the live Deployment after each Deploy, on
+the image that ships. A failure there means visitors are already seeing it.
+_Avoid_: Launch Smoke (one of its Smokes), post-deploy check
+
 **Launch Smoke**:
 The check that a Deployment is *usable* — it has a published Tutor, its pages
 render, and the API rejects an invalid Enquiry and keeps answering. While
@@ -121,9 +126,10 @@ development and production Clerk instances are outside it. Not blocking yet.
 _Avoid_: Auth test, login check
 
 **Enquiry Smoke**:
-The check, before merge, that a person can fill in and send the enquiry form in
-a real browser, by keyboard alone. It intercepts the request that would send
-it, so it never creates a real Enquiry. Not blocking yet.
+The check, before merge and again on the Deployment after each Deploy, that a
+person can fill in and send the enquiry form in a real browser, by keyboard
+alone. It intercepts the request that would send it, so it never creates a real
+Enquiry. Not blocking before merge yet.
 _Avoid_: Enquiry browser check, form test
 
 **Docs Check**:
