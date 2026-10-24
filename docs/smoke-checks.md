@@ -156,7 +156,7 @@ It requests every public page with `Accept: text/html`, which is what caught the
 Clerk handshake redirect in
 [ADR-0001](adr/0001-single-origin-deployment.md#consequences). `smoke:enquiry`
 and `smoke:sign-in` need a Chromium these images don't carry, so they run from
-the host. The `image-smoke` job in `.github/workflows/ci.yml` has the steps CI
+the host. The `ci-smoke` job in `.github/workflows/ci.yml` has the steps CI
 takes.
 
 ## The Enquiry Smoke
@@ -177,8 +177,8 @@ executable.
 `SMOKE_CHROMIUM_PATH` is required: `playwright-core` bundles no browser and
 none of this project's images carry one, so this check runs from wherever a
 Chromium already exists. In CI that is the runner's Google Chrome, twice: in
-the `image-smoke` job before merge, against the image
-([pipeline.md](pipeline.md#the-image-smoke)), and in the `prod-smoke` job after
+the `ci-smoke` job before merge, against the image
+([pipeline.md](pipeline.md#the-ci-smoke)), and in the `prod-smoke` job after
 a Deploy, against the Deployment
 ([pipeline.md](pipeline.md#post-deploy-validation)).
 
@@ -205,5 +205,5 @@ Replace `TEST_USER_EMAIL` with the `+clerk_test` address, such as
 `someone+clerk_test@example.com`, and `CHROMIUM_PATH` with the path to a
 Chromium or Google Chrome executable.
 
-The `image-smoke` job in `.github/workflows/ci.yml` prepares that target the
+The `ci-smoke` job in `.github/workflows/ci.yml` prepares that target the
 same way.
