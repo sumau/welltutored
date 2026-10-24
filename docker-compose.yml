@@ -98,7 +98,7 @@ services:
         condition: service_healthy
     command: pnpm --filter @workspace/backend run push
 
-  # CI's verify job. `verify` needs a dedicated TEST_DATABASE_URL and stops at
+  # Runs `pnpm run verify`, the checks of CI's verify job. It needs a dedicated TEST_DATABASE_URL and stops at
   # prepare:integration-database without one; this points it at a second
   # database on the db service.
   #
@@ -107,7 +107,7 @@ services:
   # DATABASE_URL, so integration tests can never mutate application data. Both
   # are set here so that check is exercised rather than trivially satisfied by
   # an absent DATABASE_URL.
-  test:
+  verify:
     <<: *node
     profiles: ["tools"]
     environment:

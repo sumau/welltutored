@@ -50,7 +50,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
 
 ## Before opening a pull request
 
-- `docker compose run --rm test` is green. It runs `pnpm run verify`, the same
+- `docker compose run --rm verify` is green. It runs `pnpm run verify`, the same
   checks as CI's `verify` job ([docs/code-checks.md](docs/code-checks.md)).
   The smokes against the production image run in CI
   ([docs/pipeline.md](docs/pipeline.md)).

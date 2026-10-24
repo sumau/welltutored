@@ -33,10 +33,10 @@ docker compose up api web           # start
 docker compose logs -f api          # follow logs
 docker compose down                 # stop, keeping the database
 docker compose down -v              # stop and discard the database
-docker compose run --rm test        # CI's verify job
+docker compose run --rm verify      # the checks CI runs on every PR
 ```
 
-What the suite runs, and why it needs the `test` service, is in
+What the suite runs, and why it needs the `verify` service, is in
 [code-checks.md](code-checks.md).
 
 The repository is bind-mounted, so edits on the host apply inside the
