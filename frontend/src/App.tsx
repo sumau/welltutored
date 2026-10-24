@@ -6,6 +6,7 @@ import { prefetchPublicTutors } from "@/lib/public-tutor-query";
 import { AppProviders } from "./app/AppProviders";
 import { basePath } from "./app/base-path";
 import { isAuthenticatedPath, routePaths } from "./app/route-map";
+import { ScrollToTop } from "./app/ScrollToTop";
 
 const AuthenticatedApp = lazy(() => import("./app/AuthenticatedApp"));
 const PublicApp = lazy(() => import("./app/PublicApp"));
@@ -23,9 +24,12 @@ function AuthenticatedRouteLoader() {
   }, [location, queryClient]);
 
   return (
-    <Suspense fallback={<LoadingState message="Loading page..." />}>
-      {isAuthenticatedPath(location) ? <AuthenticatedApp /> : <PublicApp />}
-    </Suspense>
+    <>
+      <ScrollToTop />
+      <Suspense fallback={<LoadingState message="Loading page..." />}>
+        {isAuthenticatedPath(location) ? <AuthenticatedApp /> : <PublicApp />}
+      </Suspense>
+    </>
   );
 }
 
