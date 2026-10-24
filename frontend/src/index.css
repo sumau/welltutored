@@ -169,6 +169,11 @@
   --app-font-serif: 'Young Serif', Georgia, serif;
 }
 
+/* The page behind the public site, seen when scrolling past either end. */
+body:has(.public-site) {
+  background-color: hsl(34 100% 99%);
+}
+
 @layer components {
   .public-site h1, .public-site h2, .public-site h3 {
     font-weight: 400;

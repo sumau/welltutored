@@ -23,11 +23,23 @@ function AuthenticatedRouteLoader() {
     }
   }, [location, queryClient]);
 
+  const authenticated = isAuthenticatedPath(location);
+
+  // The public Shell sets the public palette, but it loads with PublicApp, so
+  // dress the public fallback in it too.
+  const fallback = authenticated ? (
+    <LoadingState message="Loading page..." />
+  ) : (
+    <div className="public-site min-h-[100dvh] flex flex-col font-sans bg-background text-foreground">
+      <LoadingState message="Loading page..." />
+    </div>
+  );
+
   return (
     <>
       <ScrollToTop />
-      <Suspense fallback={<LoadingState message="Loading page..." />}>
-        {isAuthenticatedPath(location) ? <AuthenticatedApp /> : <PublicApp />}
+      <Suspense fallback={fallback}>
+        {authenticated ? <AuthenticatedApp /> : <PublicApp />}
       </Suspense>
     </>
   );
