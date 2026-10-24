@@ -26,9 +26,14 @@ Then open <http://localhost:5173>. The API is also reachable directly on
 On first boot the API seeds illustrative tutors and resources, because the
 `dev` script sets `NODE_ENV=development`.
 
-A checkout installed before the container directory became `/app` makes `deps`
-fail, wanting to purge `node_modules`, because the old store path is recorded
-there. Remove them once with `rm -rf node_modules */node_modules`, then run `deps` again.
+If `deps` fails because it wants to purge `node_modules`, the existing install
+recorded a different store path. Remove the installed packages, then run
+`deps` again:
+
+```
+rm -rf node_modules */node_modules
+docker compose run --rm deps
+```
 
 ## Everyday use
 
@@ -59,7 +64,8 @@ docker compose exec api pnpm --filter @welltutored/backend run codegen
 ```
 
 Schema changes are applied the same way as the initial push, with
-`pnpm --filter @welltutored/backend run push` via `docker compose run --rm migrate`.
+`pnpm --filter @welltutored/backend run push`, through
+`docker compose run --rm migrate`.
 
 ## How requests are routed
 
@@ -121,7 +127,7 @@ Three Clerk instances can be in play, and each has its own users:
 | --- | --- | --- |
 | An accountless development application, if `.env` came from `--accountless` | `.env` | Whoever signed up at `localhost`. Not visible in the dashboard. |
 | The development instance of the application you own | GitHub secrets `CLERK_TEST_*` ([pipeline.md](pipeline.md#credentials)) | The [Sign-in Smoke](../GLOSSARY.md#delivery)'s `+clerk_test` user, created in the dashboard |
-| The production instance of the same application | `fly.toml` and Fly secrets ([first-deploy.md](first-deploy.md#flyio)) | [Tutors](../GLOSSARY.md#the-public-site) on `welltutored.co.uk` |
+| The production instance of the same application | `fly.toml` and Fly secrets ([first-deploy.md](first-deploy.md#deploy-to-flyio)) | [Tutors](../GLOSSARY.md#the-public-site) on `welltutored.co.uk` |
 
 A user exists only in the instance it was created in. "Couldn't find your
 account" for an address you know you created usually means the keys name a
@@ -131,35 +137,36 @@ different instance. The publishable key says which one: the part after
 
 ## Sign in to the Workspace
 
-Sign up before trying to sign in. A Clerk application starts with no users, and
-the sign-in form answers an unknown address with "Couldn't find your account",
-which reads like a configuration fault but isn't one. Go to
-<http://localhost:5173/sign-up>.
+A Clerk application starts with no users, and the sign-in form answers an
+unknown address with "Couldn't find your account", which reads like a
+configuration fault but isn't one. So sign up first.
 
-Development instances accept `+clerk_test` subaddresses and never send mail to
-them: register `you+clerk_test@example.com` and enter the fixed verification
-code `424242`. A real address works too, and Clerk emails a genuine code.
+Authenticating isn't the same as having access to the Workspace. On first
+sign-in the API creates a `workspace_accounts` row with the role `pending`,
+which the Workspace refuses. A database created by Compose contains no Owner to
+approve it, so the first account has to be promoted directly.
 
-Authenticating isn't the same as having workspace access. On first sign-in the
-API creates a `workspace_accounts` row with the role `pending`, which the
-workspace boundary refuses. A database created by Compose contains no owner to
-approve it, so the first account has to be promoted directly:
+1. Go to <http://localhost:5173/sign-up> and register. Development instances
+   accept `+clerk_test` subaddresses and never send mail to them: register
+   `you+clerk_test@example.com` and enter the fixed verification code
+   `424242`. A real address works too, and Clerk emails a genuine code.
+2. Promote the account to Owner:
 
-```
-docker compose exec -T db psql -U postgres -d welltutored -c "
-UPDATE workspace_accounts
-   SET role = 'owner', updated_at = NOW()
- WHERE lower(email) = lower('you+clerk_test@example.com')
-   AND role = 'pending'
-   AND NOT EXISTS (SELECT 1 FROM workspace_accounts WHERE role = 'owner')
-RETURNING id, email, role;"
-```
+   ```
+   docker compose exec -T db psql -U postgres -d welltutored -c "
+   UPDATE workspace_accounts
+      SET role = 'owner', updated_at = NOW()
+    WHERE lower(email) = lower('you+clerk_test@example.com')
+      AND role = 'pending'
+      AND NOT EXISTS (SELECT 1 FROM workspace_accounts WHERE role = 'owner')
+   RETURNING id, email, role;"
+   ```
 
-The guards make this safe to repeat: once an owner exists it changes nothing.
-No rows returned means the address matched no pending account. Every later
-account is approved by the owner through the workspace UI instead. The
-production procedure, and the rules any automation of it must keep, are in
-[first-deploy.md](first-deploy.md#owner).
+   The guards make this safe to repeat: after an Owner exists it changes nothing.
+   No rows returned means the address matched no pending account. Every later
+   account is approved by the Owner in the Workspace instead. The
+   production procedure, and the rules any automation of it must keep, are in
+   [first-deploy.md](first-deploy.md#promote-the-first-owner).
 
 ### What survives what
 
@@ -174,7 +181,7 @@ row, then repeat the promotion in
 
 An unclaimed accountless application expires on its own and takes its users
 with it. The database is untouched, and this is the case that looks worse than
-it is: workspace accounts are keyed on the verified email address, not the
+it is: Workspace Accounts are keyed on the verified email address, not the
 Clerk user id. A new Clerk identity presenting an email that already has an
 account resolves to that account and creates no duplicate, which
 `backend/tests/api/routes/workspace.lifecycle.integration.test.ts` asserts. So
@@ -207,4 +214,4 @@ and is worth doing once if this login is meant to last.
   has to share a filesystem with the installed packages so that hardlinking
   works, and node_modules is in the bind mount; a named volume would sit on
   another device and be ignored. It survives `docker compose down -v`, so
-  reinstalls stay fast. Delete the directory to reclaim the space (~500 MB).
+  reinstalls stay fast. Delete the directory to reclaim the space.

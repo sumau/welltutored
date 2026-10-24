@@ -210,7 +210,7 @@ test("reports a link whose anchor matches no heading in its target", () => {
   const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
   const errors = validateLocalLinks(
     [
-      { filePath: "docs/pipeline.md", lineNumber: 1, target: "first-deploy.md#owner" },
+      { filePath: "docs/pipeline.md", lineNumber: 1, target: "first-deploy.md#promote-the-first-owner" },
       { filePath: "docs/pipeline.md", lineNumber: 2, target: "first-deploy.md#no-such-heading" },
       { filePath: "docs/pipeline.md", lineNumber: 3, target: "#no-such-heading" },
       { filePath: "docs/pipeline.md", lineNumber: 4, target: "missing.md#section" },
@@ -268,7 +268,7 @@ test("reports comment references to missing docs and anchors", () => {
     validateCommentReferences(
       [
         { filePath: "fly.toml", lineNumber: 1, reference: "docs/pipeline.md" },
-        { filePath: "fly.toml", lineNumber: 2, reference: "docs/first-deploy.md#owner" },
+        { filePath: "fly.toml", lineNumber: 2, reference: "docs/first-deploy.md#promote-the-first-owner" },
         { filePath: "fly.toml", lineNumber: 3, reference: "docs/deploying.md" },
         { filePath: "fly.toml", lineNumber: 4, reference: "docs/first-deploy.md#the-owner" },
       ],

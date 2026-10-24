@@ -8,16 +8,16 @@ The application reads these variables:
 
 | Variable | When | Set in | Notes |
 | --- | --- | --- | --- |
-| `DATABASE_URL` | runtime, required | `fly secrets`; `docker-compose.yml` locally | Append `?sslmode=require` for a hosted database: `backend/src/core/db.ts` creates a bare `pg` pool with no SSL options of its own. The [Deployment](../GLOSSARY.md#delivery) uses Neon's pooled string ([first-deploy.md](first-deploy.md#database)). |
+| `DATABASE_URL` | runtime, required | `fly secrets`; `docker-compose.yml` locally | Append `?sslmode=require` for a hosted database: `backend/src/core/db.ts` creates a bare `pg` pool with no SSL options of its own. The [Deployment](../GLOSSARY.md#delivery) uses Neon's pooled string ([first-deploy.md](first-deploy.md#create-the-database)). |
 | `TRUSTED_ORIGINS` | runtime, required | `fly.toml`; `docker-compose.yml` locally | The exact public origin, such as `https://welltutored.co.uk`. See [`TRUSTED_ORIGINS`](#trusted_origins). |
 | `CORS_ORIGINS` | runtime, optional | not set | An alias for `TRUSTED_ORIGINS`. The two lists are combined. |
 | `PUBLIC_ORIGIN` | runtime, optional | `fly.toml` | The [Public Origin](../GLOSSARY.md#delivery), such as `https://welltutored.co.uk`. When set, a request arriving on any other hostname gets a `301` to the same path and query there; `/api/healthz` is exempt, because Fly's health checks don't use the public hostname. It must also appear in `TRUSTED_ORIGINS`, or the server refuses to start. Unset, nothing redirects. |
 | `PORT` | runtime, required | `docker/Dockerfile` and `fly.toml`; `docker-compose.yml` locally | The image defaults it to `8080`. |
 | `WEB_CLIENT_ROOT` | runtime, required | `docker/Dockerfile` | The directory holding the frontend build; the image sets it to `/app/web`. Leaving it unset makes the server skip serving the frontend entirely, so every page answers 404 while `/api/healthz` stays green. It logs a warning in that state. |
 | `NODE_ENV` | runtime | `docker/Dockerfile` (`production`); the `dev` script locally (`development`) | `development` seeds sample content on start. `production` removes the localhost fallback for an unset `TRUSTED_ORIGINS`, and makes a missing `WEB_CLIENT_ROOT` a warning. `test` is set by the integration tests. |
-| `CLERK_SECRET_KEY` | runtime, required | `fly secrets`; `.env` locally | Not optional: the Clerk middleware fails every `/api` request with a 500 when it is absent, public endpoints included. A real key enables workspace sign-in; a syntactically valid placeholder (`sk_test_` + 32 characters, as in `.env.example`) is enough to serve the public site. |
+| `CLERK_SECRET_KEY` | runtime, required | `fly secrets`; `.env` locally | Not optional: the Clerk middleware fails every `/api` request with a 500 when it is absent, public endpoints included. A real key enables Workspace sign-in; a syntactically valid placeholder (`sk_test_` + 32 characters, as in `.env.example`) is enough to serve the public site. |
 | `CLERK_PUBLISHABLE_KEY` | runtime | `fly secrets`; `.env` locally | Used by the Clerk middleware. |
-| `VITE_CLERK_PUBLISHABLE_KEY` | **build** | a build argument in `fly.toml`'s `[build.args]`; `.env` locally | Compiled into the browser bundle. Setting it at runtime, as a Fly secret for instance, has no effect ([first-deploy.md](first-deploy.md#flyio)). |
+| `VITE_CLERK_PUBLISHABLE_KEY` | **build** | a build argument in `fly.toml`'s `[build.args]`; `.env` locally | Compiled into the browser bundle. Setting it at runtime, as a Fly secret for instance, has no effect ([first-deploy.md](first-deploy.md#deploy-to-flyio)). |
 | `LOG_LEVEL` | runtime, optional | not set | The server's log level; `info` when unset. |
 | `BASE_PATH` | **build**, optional | not set | The path the frontend is served under, read by `frontend/vite.config.ts`; `/` when unset. |
 
@@ -50,8 +50,8 @@ nothing else.
 
 The public site doesn't need *working* Clerk keys, but it does need
 `CLERK_SECRET_KEY` to be present — see the table. With a placeholder, the
-directory and enquiry flow both work and `/workspace` can't be
-signed into. Pages themselves keep rendering either way, because the Clerk
+directory and enquiry flow both work and nobody can sign in to the
+Workspace. Pages themselves keep rendering either way, because the Clerk
 middleware is mounted under `/api` only.
 
 Which keys work on which hostname is in

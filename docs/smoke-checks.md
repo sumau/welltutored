@@ -15,7 +15,7 @@ run on a machine that has one. In CI that is the runner.
 | Script | Check | Runs against |
 | --- | --- | --- |
 | `smoke:launch` | The [Launch Smoke](#the-launch-smoke) | The live Deployment |
-| `smoke:launch:dev` | The same check with `--dev`, so without the Clerk check | [The local stack](#against-the-local-stack), and the image in [the Image Smoke](#the-image-smoke-by-hand) |
+| `smoke:launch:dev` | The same check with `--dev`, so without the Clerk check | [The local stack](#run-against-the-local-stack), and the image in [the Image Smoke](#run-the-image-smoke-by-hand) |
 | `smoke:enquiry` | [The Enquiry Smoke](#the-enquiry-smoke) | Any of them, from a machine with Chromium |
 | `smoke:sign-in` | [The Sign-in Smoke](#the-sign-in-smoke) | A local image built with Clerk development keys |
 
@@ -40,6 +40,8 @@ domain. It must be a bare origin, and is validated before any request.
 
 ### What it checks
 
+The Launch Smoke checks:
+
 - the API health response at `/api/healthz`;
 - Clerk's `/v1/environment` at `SMOKE_CLERK_FRONTEND_API`, requested directly
   from Clerk, which must answer as a `production` instance — so a broken CNAME,
@@ -63,7 +65,7 @@ treated as healthy.
 
 The command exits non-zero on any failed check.
 
-### Redirecting hostnames
+### Redirect checks
 
 `SMOKE_REDIRECT_FROM` optionally lists the other origins the Deployment answers
 on, separated by commas or spaces. Each one must answer
@@ -77,7 +79,7 @@ SMOKE_BASE_URL=https://welltutored.co.uk \
   pnpm smoke:launch
 ```
 
-The Deployment sends these redirects itself once `PUBLIC_ORIGIN` is set; see
+The Deployment sends these redirects itself when `PUBLIC_ORIGIN` is set; see
 [configuration.md](configuration.md).
 
 ### Waivers
@@ -121,7 +123,7 @@ a value outside them before making any request.
 A red Launch Smoke after a merge means visitors are already seeing the fault.
 What to do is in [pipeline.md](pipeline.md#post-deploy-validation).
 
-## Against the local stack
+## Run against the local stack
 
 With the local stack running (`docker compose up api web`), run the development
 smoke through the Vite dev server, which proxies `/api` to the API service, so
@@ -134,7 +136,7 @@ docker compose run --rm --entrypoint bash api -lc 'SMOKE_BASE_URL=http://web:517
 It runs the Launch Smoke's checks except the Clerk one
 ([waivers](#waivers)).
 
-## The Image Smoke by hand
+## Run the Image Smoke by hand
 
 The `prod` compose service runs the production image against the local
 development database, which has seed content:
@@ -162,8 +164,8 @@ takes.
 ## The Enquiry Smoke
 
 The [Enquiry Smoke](../GLOSSARY.md#delivery) goes through the enquiry form in a
-real browser by keyboard alone. It intercepts the final response, so the
-check never creates a real [Enquiry](../GLOSSARY.md#the-public-site). To run
+real browser by keyboard alone. It intercepts the request that would send the
+form and answers it itself, so the check never creates a real [Enquiry](../GLOSSARY.md#the-public-site). To run
 it:
 
 ```sh
@@ -194,18 +196,93 @@ belong to, which may not be the one CI uses
 optional files help when it fails: `SMOKE_FAILURE_SCREENSHOT` names one for a
 screenshot of the page, and `SMOKE_FAILURE_TRACE` one for a Playwright trace of
 the run (console, network and page snapshots), which
-[trace.playwright.dev](https://trace.playwright.dev) opens. To run it:
+[trace.playwright.dev](https://trace.playwright.dev) opens.
 
-```sh
-SMOKE_BASE_URL=http://localhost:8080 \
-  SMOKE_SIGN_IN_EMAIL=TEST_USER_EMAIL \
-  SMOKE_DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
-  SMOKE_CHROMIUM_PATH=CHROMIUM_PATH pnpm smoke:sign-in
-```
+TODO(verify): these steps are adapted from the `ci-smoke` job in
+`.github/workflows/ci.yml` and haven't been run outside CI.
 
-Replace `TEST_USER_EMAIL` with the `+clerk_test` address, such as
-`someone+clerk_test@example.com`, and `CHROMIUM_PATH` with the path to a
-Chromium or Google Chrome executable.
+Before you begin, you need:
 
-The `ci-smoke` job in `.github/workflows/ci.yml` prepares that target the
-same way.
+- Clerk development keys and a `+clerk_test` user in that instance
+  ([local-docker.md](local-docker.md#clerk)).
+- Node.js, pnpm and Chromium or Google Chrome on the host, as for the
+  [Enquiry Smoke](#the-enquiry-smoke).
+- The local `db` service running (`docker compose up -d db`), and nothing else
+  listening on port 8080, so stop the `api` service.
+
+To run it:
+
+1. Read the development keys into shell variables:
+
+   ```sh
+   read -rsp 'Clerk development publishable key: ' CLERK_TEST_PUBLISHABLE_KEY; echo
+   read -rsp 'Clerk development secret key: ' CLERK_TEST_SECRET_KEY; echo
+   ```
+
+2. Create a fresh database, `image_smoke`, on the `db` service:
+
+   ```sh
+   docker compose exec -T db dropdb -U postgres --if-exists image_smoke
+   docker compose exec -T db createdb -U postgres image_smoke
+   ```
+
+3. Push the schema to it:
+
+   ```sh
+   docker compose run --rm \
+     -e DATABASE_URL=postgres://postgres:postgres@db:5432/image_smoke migrate
+   ```
+
+4. Seed it by starting the API against it in development mode:
+
+   ```sh
+   docker compose run --rm \
+     -e DATABASE_URL=postgres://postgres:postgres@db:5432/image_smoke api
+   ```
+
+   After the log shows `Server listening`, stop it with Ctrl+C.
+
+5. Build the production image with the development publishable key:
+
+   ```sh
+   docker build -f docker/Dockerfile \
+     --build-arg VITE_CLERK_PUBLISHABLE_KEY="$CLERK_TEST_PUBLISHABLE_KEY" \
+     -t welltutored:sign-in .
+   ```
+
+6. Start the image on the host network, so it reaches the database on
+   `localhost` and serves on <http://localhost:8080>:
+
+   ```sh
+   docker run -d --name welltutored-sign-in --network host \
+     -e PORT=8080 \
+     -e DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
+     -e TRUSTED_ORIGINS=http://localhost:8080 \
+     -e CLERK_SECRET_KEY="$CLERK_TEST_SECRET_KEY" \
+     -e CLERK_PUBLISHABLE_KEY="$CLERK_TEST_PUBLISHABLE_KEY" \
+     welltutored:sign-in
+   ```
+
+7. Run the smoke:
+
+   ```sh
+   SMOKE_BASE_URL=http://localhost:8080 \
+     SMOKE_SIGN_IN_EMAIL=TEST_USER_EMAIL \
+     SMOKE_DATABASE_URL=postgres://postgres:postgres@localhost:5432/image_smoke \
+     SMOKE_CHROMIUM_PATH=CHROMIUM_PATH pnpm smoke:sign-in
+   ```
+
+   Replace `TEST_USER_EMAIL` with the `+clerk_test` address, such as
+   `someone+clerk_test@example.com`, and `CHROMIUM_PATH` with the path to a
+   Chromium or Google Chrome executable. Each passing step prints a line
+   starting with `✓`; a failure prints `Sign-in smoke check failed:` and
+   exits non-zero.
+
+8. Remove the container:
+
+   ```sh
+   docker rm -f welltutored-sign-in
+   ```
+
+The check promotes its user to owner, so repeat from step 2 before the next
+run.

@@ -81,7 +81,7 @@ Clerk provides the sign-in and sign-up pages:
 
 Public visitors never load Clerk. `App.tsx` lazy-loads `PublicApp` or
 `AuthenticatedApp` by path, and only the authenticated side brings in Clerk,
-its themes, and the workspace routes. Keep public route modules, shared
+its themes, and the Workspace routes. Keep public route modules, shared
 providers, and route metadata free of Clerk imports, or Clerk lands in the
 public bundle.
 
@@ -91,12 +91,12 @@ wiring is reserved for mobile clients.
 ## Private Workspace
 
 Workspace routes, all under `/workspace`, are protected by Clerk and the
-workspace account boundary. A Tutor edits their own profile and resources and
+Workspace Account check. A Tutor edits their own profile and resources and
 sees their enquiries; the [Owner](../GLOSSARY.md#the-private-area) also manages
 every tutor profile and approves accounts.
 
 `/workspace/articles/new` and `/workspace/articles/:id` remain compatibility
-aliases and redirect to the canonical resource URLs. Workspace accounts are
+aliases and redirect to the canonical resource URLs. Workspace Accounts are
 stored in the `workspace_accounts` table.
 
 ## Forms
@@ -141,13 +141,13 @@ Each part of `backend/src` has one job:
   `api/routes/workspace.ts` splits further. Handlers stay thin: authenticate,
   validate the request against `api/schemas`, call `crud` and `domain`, and
   present the response.
-- `api/deps.ts` — the signed-in workspace account and role checks.
+- `api/deps.ts` — the signed-in Workspace Account and role checks.
 - `api/middleware` — request origin, Public Origin redirect and the API error
   handler.
 - `api/presenters` — database rows to response bodies.
 - `crud` — every database query, one module per area (tutors, resources,
-  enquiries, workspace accounts), including Clerk-to-workspace account
-  provisioning and tutor assignment.
+  enquiries, workspace accounts), including Workspace Account provisioning
+  from Clerk and tutor assignment.
 - `domain` — rules with no database or HTTP in them, such as
   publishability of resources and tutor profiles, names, slugs and accents.
 - `models` — the Drizzle schema, one file per table.
@@ -172,13 +172,13 @@ These rules apply to everything the Workspace publishes:
 - Publishing validates the complete object before changing its status.
 - Discarding a tutor profile draft restores the published profile.
 - Archived tutors must be restored before editing.
-- A tutor account can edit its own resources; an owner can manage all workspace
+- A tutor account can edit its own resources; an Owner can manage all Workspace
   records.
 
 ### Tutor profiles versus resources
 
 [Tutor](../GLOSSARY.md#the-public-site) profiles keep the published profile in
-`tutors` and store workspace edits in `tutor_profile_drafts`. This means the
+`tutors` and store Workspace edits in `tutor_profile_drafts`. This means the
 public site continues to show the last published profile while a new version is
 being edited, and the draft can be published or discarded as a whole.
 

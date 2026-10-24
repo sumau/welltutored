@@ -11,12 +11,11 @@ and merge.
 - **Adding or changing schema:** push to production **before** merging. A
   merge to `main` deploys code that expects the new schema
   ([ADR-0002](adr/0002-schema-by-deliberate-push.md)).
-- **Removing a column or table: not settled yet**
-  ([#110](https://github.com/sumau/welltutored/issues/110)). Push first, and
-  the live code still reads what was dropped until the merge deploys, so merge
-  straight after the push. Merge first, and the merged code must no longer
-  read what is removed; push straight after. Whichever you choose, rehearse the
-  push first ([Rehearse a push on a Neon branch](#rehearse-a-push-on-a-neon-branch)).
+- **Removing a column or table:** merge **first**, then push. The merged code
+  must no longer read what the push removes, so the live code never reads
+  something already dropped. Push after the deploy finishes, and rehearse the
+  push first
+  ([Rehearse a push on a Neon branch](#rehearse-a-push-on-a-neon-branch)).
 
 ## Push the schema
 
