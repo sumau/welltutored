@@ -125,6 +125,12 @@ The Deployment sends these redirects itself when `PUBLIC_ORIGIN` is set; see
 A pass prints `Domain smoke check passed` and a `✓` line for each check. A
 failure prints `Domain smoke check failed:` with the error, and exits non-zero.
 
+### When it fails
+
+A red Domain Smoke after a merge means some visitors may already be reaching a
+broken hostname or a broken sign-in. What to do is in
+[pipeline.md](pipeline.md#post-deploy-validation).
+
 ## Timeout controls
 
 Every Smoke reads `SMOKE_TIMEOUT_MS`, which limits each request or browser
@@ -222,8 +228,9 @@ request from a fork gets no secrets, so it skips the check with a notice.
 
 A pass prints `Workspace smoke check passed` and a `✓` line for each step. A
 failure prints the step it was on and the page's URL, then
-`Workspace smoke check failed:` with the error, and exits non-zero. The run then keeps the `workspace-smoke-failure` artifact,
-with a screenshot of the page and a Playwright trace of the run (console,
-network and page snapshots). To read it, download the artifact from the
-workflow run's summary page and open `trace.zip` at
+`Workspace smoke check failed:` with the error, and exits non-zero. The run
+then keeps the `workspace-smoke-failure` artifact, with a screenshot of the
+page and a Playwright trace of the run (console, network and page snapshots).
+To read it, download the artifact from the workflow run's summary page and
+open `trace.zip` at
 [trace.playwright.dev](https://trace.playwright.dev).

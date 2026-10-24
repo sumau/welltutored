@@ -241,8 +241,8 @@ Two things behave differently until there is a published
 - `pnpm run smoke:public-site` **fails**, and so does the `prod-smoke` job,
   because the Public Site Smoke asserts a published Tutor and the Enquiry Smoke
   needs one that accepts enquiries. Run the Public Site Smoke by hand with
-  `--allow-empty`
-  until there is one ([smoke-checks.md](smoke-checks.md#waivers)).
+  `--allow-empty` until there is one
+  ([smoke-checks.md](smoke-checks.md#waivers)).
 
 ## Promote the first Owner
 

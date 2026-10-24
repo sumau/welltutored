@@ -87,9 +87,9 @@ jobs:
         run: pnpm run verify
 
   # The CI Smoke: the Public Site Smoke (does the production image start and
-  # serve a usable site?), then the browser Smokes against the same container. It builds
-  # docker/Dockerfile itself, so it checks the image's recipe, not the exact
-  # image Fly builds and ships (that one carries the pk_live_ key).
+  # serve a usable site?), then the browser Smokes against the same container.
+  # It builds docker/Dockerfile itself, so it checks the image's recipe, not
+  # the exact image Fly builds and ships (that one carries the pk_live_ key).
   ci-smoke:
     name: ci-smoke
     runs-on: ubuntu-latest

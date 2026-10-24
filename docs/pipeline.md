@@ -175,10 +175,10 @@ is the dedicated test database.
 
 Two checks depend on a live Clerk instance. The Domain Smoke requests the
 production instance's `/v1/environment`, which goes to Clerk directly and needs
-no keys at all. The Workspace Smoke signs in through the development instance, so
-the `ci-smoke` job, and no other, reads three repository secrets from the
-**development** instance of the Clerk application
-in the dashboard, the one whose production instance serves
+no keys at all. The Workspace Smoke signs in through the development instance,
+so the `ci-smoke` job, and no other, reads three repository secrets from the
+**development** instance of the Clerk application in the dashboard, the one
+whose production instance serves
 `welltutored.co.uk`. That isn't necessarily the instance in a local `.env`,
 which may be an accountless application
 ([local-docker.md](local-docker.md#which-clerk-instance-is-which)). The test
@@ -195,9 +195,9 @@ requests don't get repository secrets, so the same three are also set as
 **Dependabot secrets**, and those runs read them. A pull request from a fork
 gets neither: the image builds with an empty publishable key and runs with the
 `.env.example` placeholder secret key, the Public Site Smoke and the Enquiry
-Smoke still pass, and the Workspace Smoke is skipped with a notice. It runs when the
-change is on a branch of this repository. A rotated key has to be updated in
-both places.
+Smoke still pass, and the Workspace Smoke is skipped with a notice. It runs
+when the change is on a branch of this repository. A rotated key has to be
+updated in both places.
 
 What the Workspace Smoke can't cover is the production Clerk instance itself:
 its first-party cookies on `clerk.welltutored.co.uk` and the dashboard

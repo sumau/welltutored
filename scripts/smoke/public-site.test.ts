@@ -324,7 +324,7 @@ for (const totalTimeoutMs of [
   );
 }
 
-test("every mode requires an explicit target", async () => {
+test("requires an explicit target, with or without the waiver", async () => {
   for (const options of [{}, { allowEmpty: true }]) {
     const result = await runSmokeCommand(undefined, options);
 
