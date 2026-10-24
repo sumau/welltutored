@@ -10,7 +10,7 @@ with `tsx`; the web tests also use JSDOM where browser APIs are needed.
 
 The commands on this page run inside the containers: prefix them with
 `docker compose exec api` against a running stack
-([local-docker.md](local-docker.md)). The full suite is:
+([local-docker.md](local-docker.md)). CI's `verify` job is:
 
 ```
 docker compose run --rm test
@@ -58,7 +58,7 @@ pnpm --filter @workspace/backend test
 
 This is the complete API suite used by CI: the in-memory unit checks and the
 database-backed integration tests. Running it directly doesn't provision a
-database; `pnpm run verify` does, through the `test` service.
+database; `pnpm run verify` does, through `prepare:integration-database`.
 
 Run only the non-mutating API checks with:
 

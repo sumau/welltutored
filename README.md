@@ -8,7 +8,7 @@ The public site presents women tutors, their expertise and availability.
 Visitors can open a tutor profile and submit a named-tutor enquiry. Resources
 are hidden from visitors for now
 ([docs/architecture.md](docs/architecture.md)). In the workspace, a tutor edits
-their own profile and resources, and the
+their own profile and resources and sees their enquiries, and the
 [Owner](GLOSSARY.md#the-private-area) also manages every tutor profile and
 approves accounts.
 

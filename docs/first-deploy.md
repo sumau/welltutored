@@ -138,6 +138,9 @@ keys.
      VITE_CLERK_PUBLISHABLE_KEY = "pk_test_..."
 
    [env]
+     # Deleted until you attach a custom domain: left in, it names an origin
+     # TRUSTED_ORIGINS doesn't, and the server won't start.
+     # PUBLIC_ORIGIN = "https://welltutored.co.uk"
      # The hostname `fly apps create` gave you, with the scheme and no trailing
      # slash.
      TRUSTED_ORIGINS = "https://welltutored.fly.dev"
@@ -154,7 +157,14 @@ keys.
    [configuration reference](configuration.md). A `PUBLIC_ORIGIN` that
    `TRUSTED_ORIGINS` doesn't name stops the server from starting.
 
-4. Merge to `main`, which deploys. To ship a first image before any of this is
+4. Point the Launch Smoke at this Deployment. The `Launch smoke` step in
+   `.github/workflows/ci.yml` names the live Deployment's hostnames: set
+   `SMOKE_BASE_URL` to your `*.fly.dev` origin, and remove
+   `SMOKE_REDIRECT_FROM` and `SMOKE_CLERK_FRONTEND_API` until you
+   [attach a custom domain](#attach-a-custom-domain). Left as they are, the
+   deploy job checks `welltutored.co.uk` instead of your app.
+
+5. Merge to `main`, which deploys. To ship a first image before any of this is
    merged, run `fly deploy` from a checkout.
 
 ## Attach a custom domain

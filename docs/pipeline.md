@@ -15,7 +15,6 @@ flowchart TB
     direction LR
     pr["Pull request"] --> verify["verify"]
     subgraph imageJob["image-smoke job"]
-      direction TB
       image["Image Smoke<br/>(development smoke)"]
       enquiry["Enquiry Smoke"]
       signIn["Sign-in Smoke"]
