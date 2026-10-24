@@ -6,7 +6,7 @@ covers how to change it.
 
 ## Merging to `main` ships to production
 
-CI deploys to Fly on every push to `main` and then runs the launch smoke
+CI deploys to Fly on every push to `main` and then runs the Prod Smoke
 against the live site. There is no separate release step, so a merged pull
 request is a shipped one. Everything below follows from that.
 [docs/pipeline.md](docs/pipeline.md) shows every check between a pull

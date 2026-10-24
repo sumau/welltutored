@@ -1,5 +1,6 @@
 # Deterministic repository verification, as defined by `pnpm run verify`,
-# the Image Smoke against the production image, and then the deploy.
+# the Image Smoke against the production image, then the deploy, and then
+# the Prod Smoke against the live site.
 # docs/pipeline.md is the description of what each gate covers and why;
 # this file only supplies the environment they need.
 #
@@ -256,6 +257,20 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
+  # The Prod Smoke: the Smokes that can run against the live Deployment, the
+  # image Fly built with the production key. A job of its own, so a failure
+  # can be re-run without redeploying. It is outside the deploy-welltutored
+  # group: it deploys nothing, and a re-run shouldn't queue behind a deploy.
+  prod-smoke:
+    name: prod-smoke
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7
+
       - uses: pnpm/action-setup@v6
 
       - uses: actions/setup-node@v7
@@ -266,8 +281,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # A Deploy succeeding does not mean the Deployment is usable. The launch
-      # smoke is fetch-based, so no browser is needed here.
+      # A Deploy succeeding does not mean the Deployment is usable.
       #
       # SMOKE_REDIRECT_FROM is every other hostname the Deployment answers on;
       # each must redirect permanently to the Public Origin, so a lapsed
@@ -283,3 +297,10 @@ jobs:
             https://www.welltutored.com
             https://welltutored.fly.dev
         run: pnpm run smoke:launch
+
+      # It intercepts every POST to /api/enquiries, so it never creates a real
+      # Enquiry on the Deployment. The runner image carries Google Chrome.
+      - name: Enquiry smoke
+        env:
+          SMOKE_BASE_URL: https://welltutored.co.uk
+        run: SMOKE_CHROMIUM_PATH="$(command -v google-chrome)" pnpm run smoke:enquiry

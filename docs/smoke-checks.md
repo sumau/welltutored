@@ -98,7 +98,7 @@ reported as skipped rather than silently dropped.
 SMOKE_BASE_URL=http://prod:8080 pnpm smoke:launch:dev
 ```
 
-The Deployment has a published Tutor, so the deploy job in
+The Deployment has a published Tutor, so the `prod-smoke` job in
 `.github/workflows/ci.yml` runs `smoke:launch` with no waiver. `--allow-empty`
 stays for a Deployment rebuilt from an empty database (#48), and has no script
 entry. Pass it through `smoke:launch` until the rebuilt Deployment has a
@@ -176,8 +176,11 @@ executable.
 
 `SMOKE_CHROMIUM_PATH` is required: `playwright-core` bundles no browser and
 none of this project's images carry one, so this check runs from wherever a
-Chromium already exists. In CI that is the runner's Google Chrome, in the Image
-Smoke ([pipeline.md](pipeline.md#the-image-smoke)).
+Chromium already exists. In CI that is the runner's Google Chrome, twice: in
+the `image-smoke` job before merge, against the image
+([pipeline.md](pipeline.md#the-image-smoke)), and in the `prod-smoke` job after
+a Deploy, against the Deployment
+([pipeline.md](pipeline.md#post-deploy-validation)).
 
 ## The Sign-in Smoke
 
