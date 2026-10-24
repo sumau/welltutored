@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { TutorCircle } from "@/components/TutorCircle";
+import { intakeDotClasses } from "@/lib/intake";
 import { scrollToTutors } from "@/lib/scroll-to-tutors";
 import {
   publicTutorQueryOptions,
@@ -14,12 +15,6 @@ const intakeLabels = {
   accepting: "Taking students",
   limited: "Few spaces left",
   full: "Full for now",
-} as const;
-
-const intakeDotClasses = {
-  accepting: "bg-green-600",
-  limited: "bg-amber-500",
-  full: "bg-red-500",
 } as const;
 
 export default function Home() {

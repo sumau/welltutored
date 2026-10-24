@@ -3,7 +3,7 @@ import test from "node:test";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Tutor } from "@/client";
-import { TutorAvailability, TutorBackground, TutorEnquiry, TutorResources } from "./TutorProfile";
+import { backgroundEntries, TutorAvailability, TutorBackground, TutorEnquiry, TutorResources } from "./TutorProfile";
 
 const fullTutor: Tutor = {
   id: 2,
@@ -107,4 +107,20 @@ test("tutor profiles hide published resources while public resources are off", (
   );
 
   assert.equal(markup, "");
+});
+
+test("background entries split their dates from the role", () => {
+  assert.deepEqual(
+    backgroundEntries("Sep 2018 – Present | Maths teacher\nRan the maths club.\n\nJul 2017 | Intern"),
+    [
+      { dates: "Sep 2018 – Present", title: "Maths teacher", detail: "Ran the maths club." },
+      { dates: "Jul 2017", title: "Intern", detail: "" },
+    ],
+  );
+});
+
+test("background entries without dates show as written", () => {
+  assert.deepEqual(backgroundEntries("Taught for ten years\nin two schools."), [
+    { dates: "", title: "", detail: "Taught for ten years\nin two schools." },
+  ]);
 });

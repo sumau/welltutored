@@ -9,6 +9,7 @@ import { EnquiryForm } from "@/components/EnquiryForm";
 import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import { ResourceTypeLabel } from "@/components/ResourceType";
 import { TutorCircle } from "@/components/TutorCircle";
+import { intakeDotClasses } from "@/lib/intake";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
@@ -40,6 +41,18 @@ export function TutorAvailability({ tutor }: { tutor: Tutor }) {
   );
 }
 
+// Experience and Education are free text, one entry per paragraph. An entry
+// whose first line reads "dates | role" shows its dates in their own column;
+// any other entry shows as written.
+export function backgroundEntries(text: string) {
+  return text.trim().split(/\n\s*\n/).map((paragraph) => {
+    const [first, ...rest] = paragraph.split("\n");
+    const match = first.match(/^(.+?)\s+\|\s+(.+)$/);
+    if (!match) return { dates: "", title: "", detail: paragraph };
+    return { dates: match[1], title: match[2], detail: rest.join("\n") };
+  });
+}
+
 export function TutorBackground({ tutor }: { tutor: Tutor }) {
   const rows = [
     { label: "Experience", text: tutor.experience, testId: "tutor-experience" },
@@ -53,8 +66,16 @@ export function TutorBackground({ tutor }: { tutor: Tutor }) {
         {rows.map((row) => (
           <div key={row.label} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-[12px] md:gap-[22px] py-[28px] border-b border-border">
             <h2 className="font-serif text-[22px] leading-[1.2] m-0">{row.label}</h2>
-            <div className="text-muted-foreground text-[16px] leading-[1.7] whitespace-pre-wrap max-w-[42em]" data-testid={row.testId}>
-              {row.text}
+            <div className="grid gap-[20px] max-w-[46em] text-[16px] leading-[1.6]" data-testid={row.testId}>
+              {backgroundEntries(row.text).map((entry, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-[170px_1fr] gap-x-[22px] gap-y-[2px]">
+                  {entry.dates && <span className="text-muted-foreground text-[15px]">{entry.dates}</span>}
+                  <div className={entry.dates ? "" : "sm:col-span-2"}>
+                    {entry.title && <b className="block font-semibold text-foreground">{entry.title}</b>}
+                    {entry.detail && <span className="block text-muted-foreground whitespace-pre-wrap">{entry.detail}</span>}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
@@ -147,7 +168,7 @@ export default function TutorProfile() {
     <main className="flex-1" data-testid={`page-tutor-${tutor.slug}`}>
       {/* Breadcrumb / Nav */}
       <div className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-6 flex justify-between items-center text-[14px] text-muted-foreground font-medium">
-        <Link href="/" className="inline-flex items-center gap-2 rounded-full hover:text-foreground transition-colors" data-testid="link-back">
+        <Link href="/#tutors" className="inline-flex items-center gap-2 rounded-full hover:text-foreground transition-colors" data-testid="link-back">
           <ArrowLeft size={15} /> All tutors
         </Link>
         <div className="hidden sm:flex items-center gap-6">
@@ -169,7 +190,7 @@ export default function TutorProfile() {
             {tutor.subject}
           </p>
           <div className="inline-flex items-center gap-[8px] rounded-full bg-secondary px-4 py-2 text-[14px] font-medium mb-[22px]">
-            <i className={`w-2 h-2 rounded-full ${tutor.intake === 'accepting' ? 'bg-green-600' : tutor.intake === 'limited' ? 'bg-amber-500' : 'bg-red-500'}`} />
+            <i className={`w-2 h-2 rounded-full ${intakeDotClasses[tutor.intake]}`} />
             {intakeDescriptions[tutor.intake]}
           </div>
           <p className="max-w-[36em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="tutor-intro">
@@ -267,8 +288,8 @@ export default function TutorProfile() {
             <ol className="list-none p-0 mt-[28px] grid gap-[12px]">
               {[
                 "Share the student's subject, level and context",
-                `Your enquiry is recorded for ${firstName}`,
-                "Well Tutored keeps an agency copy",
+                `Well Tutored reviews your enquiry for ${firstName}`,
+                "Well Tutored replies to you",
               ].map((step, index) => (
                 <li key={step} className="flex items-center gap-[14px] text-[16px]">
                   <span className="w-[34px] h-[34px] shrink-0 rounded-full bg-primary flex items-center justify-center font-serif text-[16px] pb-0.5" aria-hidden="true">{index + 1}</span>
