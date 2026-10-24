@@ -24,7 +24,7 @@ import {
 test("extracts inline and fenced pnpm commands with source locations", () => {
   const commands = extractDocumentedCommands(
     [
-      "- `pnpm --filter @workspace/backend run dev` — start the API",
+      "- `pnpm --filter @welltutored/backend run dev` — start the API",
       "",
       "```sh",
       "SMOKE_BASE_URL=https://example.test pnpm smoke:launch",
@@ -39,7 +39,7 @@ test("extracts inline and fenced pnpm commands with source locations", () => {
     {
       filePath: "docs/example.md",
       lineNumber: 1,
-      command: "pnpm --filter @workspace/backend run dev",
+      command: "pnpm --filter @welltutored/backend run dev",
     },
     {
       filePath: "docs/example.md",
@@ -58,7 +58,7 @@ test("validates root and filtered workspace scripts", () => {
     {
       filePath: "backend/package.json",
       manifest: {
-        name: "@workspace/backend",
+        name: "@welltutored/backend",
         scripts: { dev: "echo dev" },
       },
     },
@@ -71,7 +71,7 @@ test("validates root and filtered workspace scripts", () => {
         {
           filePath: "README.md",
           lineNumber: 2,
-          command: "pnpm --filter @workspace/backend run dev",
+          command: "pnpm --filter @welltutored/backend run dev",
         },
       ],
       manifests,
@@ -86,7 +86,7 @@ test("reports missing packages and scripts with documentation locations", () => 
       {
         filePath: "docs/example.md",
         lineNumber: 4,
-        command: "pnpm --filter @workspace/missing run dev",
+        command: "pnpm --filter @welltutored/missing run dev",
       },
       {
         filePath: "docs/example.md",
@@ -103,7 +103,7 @@ test("reports missing packages and scripts with documentation locations", () => 
   );
 
   assert.deepEqual(errors, [
-    'docs/example.md:4: "pnpm --filter @workspace/missing run dev" references package "@workspace/missing", but that package was not found.',
+    'docs/example.md:4: "pnpm --filter @welltutored/missing run dev" references package "@welltutored/missing", but that package was not found.',
     'docs/example.md:8: "pnpm run missing" references script "missing" in "package.json", but that script was not found.',
   ]);
 });

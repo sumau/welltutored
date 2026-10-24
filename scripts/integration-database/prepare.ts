@@ -6,7 +6,7 @@ function runSchemaPush(testDatabaseUrl: string): Promise<number> {
     "pnpm",
     [
       "--filter",
-      "@workspace/backend",
+      "@welltutored/backend",
       "exec",
       "drizzle-kit",
       "push",

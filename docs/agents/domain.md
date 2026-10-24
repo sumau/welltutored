@@ -20,7 +20,7 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 
 ## File structure
 
-This is a **single-context** repo: one glossary and one ADR directory at the root, shared by every workspace package.
+This is a **single-context** repo: one glossary and one ADR directory at the root, shared by every package.
 
 ```
 /

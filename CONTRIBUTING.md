@@ -45,7 +45,7 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   Record a decision a reader will question as an ADR in
   [docs/adr/](docs/adr/).
 - After changing `backend/openapi.yaml`, run
-  `pnpm --filter @workspace/backend run codegen`. Never edit the generated
+  `pnpm --filter @welltutored/backend run codegen`. Never edit the generated
   code in `frontend/src/client/generated` or `backend/src/api/schemas` by hand.
 
 ## Before opening a pull request

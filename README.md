@@ -98,11 +98,11 @@ These commands run inside the containers. Prefix them with `docker compose exec 
 against a running service, or see
 [docs/local-docker.md](docs/local-docker.md) for one-off runs.
 
-- `PORT=8080 pnpm --filter @workspace/backend run dev` — run the API server
+- `PORT=8080 pnpm --filter @welltutored/backend run dev` — run the API server
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — docs check + typecheck + build all packages
-- `pnpm --filter @workspace/backend run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/backend run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
+- `pnpm --filter @welltutored/backend run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm --filter @welltutored/backend run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
 
 The test commands are in [docs/code-checks.md](docs/code-checks.md), and the
 smoke checks in [docs/smoke-checks.md](docs/smoke-checks.md).

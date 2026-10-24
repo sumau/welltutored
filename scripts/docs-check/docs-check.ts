@@ -584,7 +584,7 @@ function packageForFilter(
     return manifests.find(
       ({ filePath, manifest }) =>
         filePath === "package.json" ||
-        manifest.name === "workspace" ||
+        manifest.name === "welltutored" ||
         manifest.name === undefined,
     );
   }
