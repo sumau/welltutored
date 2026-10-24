@@ -4,11 +4,14 @@ import { QueryClient } from "@tanstack/react-query";
 import {
   getGetTutorQueryKey,
   getListTutorsQueryKey,
+  getListTutorsQueryOptions,
 } from "@/client";
 import {
   invalidatePublicTutorQueries,
+  prefetchPublicTutors,
   PUBLIC_TUTOR_STALE_TIME_MS,
   publicTutorQueryOptions,
+  publicTutorRequestOptions,
 } from "./public-tutor-query";
 
 test("reuses a fresh tutor result and fetches again after it expires", async () => {
@@ -35,6 +38,31 @@ test("reuses a fresh tutor result and fetches again after it expires", async () 
   });
   await queryClient.fetchQuery(query);
   assert.equal(requestCount, 2);
+
+  queryClient.clear();
+});
+
+test("a page rendering during the prefetch shares its request", async (t) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  let requestCount = 0;
+  t.mock.method(globalThis, "fetch", async () => {
+    requestCount += 1;
+    return new Response("[]", {
+      headers: { "content-type": "application/json" },
+    });
+  });
+
+  const prefetch = prefetchPublicTutors(queryClient);
+  const page = queryClient.fetchQuery(
+    getListTutorsQueryOptions({
+      query: publicTutorQueryOptions,
+      request: publicTutorRequestOptions,
+    }),
+  );
+  await Promise.all([prefetch, page]);
+  assert.equal(requestCount, 1);
 
   queryClient.clear();
 });

@@ -1,6 +1,7 @@
 import {
   getGetTutorQueryKey,
   getListTutorsQueryKey,
+  getListTutorsQueryOptions,
 } from "@/client";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -21,6 +22,19 @@ export const publicTutorQueryOptions = {
 export const publicTutorRequestOptions: RequestInit = {
   cache: "no-cache",
 };
+
+/**
+ * Starts the public tutor list request with the same key and options the
+ * pages use, so a page that renders while it is in flight shares it.
+ */
+export function prefetchPublicTutors(queryClient: QueryClient) {
+  return queryClient.prefetchQuery(
+    getListTutorsQueryOptions({
+      query: publicTutorQueryOptions,
+      request: publicTutorRequestOptions,
+    }),
+  );
+}
 
 export function invalidatePublicTutorQueries(
   queryClient: QueryClient,
