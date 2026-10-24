@@ -37,7 +37,7 @@ development keys.
 To run the same checks as CI's `verify` job, run:
 
 ```
-docker compose run --rm test
+docker compose run --rm verify
 ```
 
 CI also runs smokes against the production image; see

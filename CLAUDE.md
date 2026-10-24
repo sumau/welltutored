@@ -19,7 +19,7 @@ version:
 ```
 docker compose up api web          # http://localhost:5173
 docker compose run --rm migrate    # apply schema changes
-docker compose run --rm test       # CI's verify job
+docker compose run --rm verify     # the checks CI runs on every PR
 ```
 
 So the `pnpm` commands in `README.md` are correct but need a prefix: `docker

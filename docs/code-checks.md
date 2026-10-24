@@ -10,10 +10,10 @@ with `tsx`; the web tests also use JSDOM where browser APIs are needed.
 
 The commands on this page run inside the containers: prefix them with
 `docker compose exec api` against a running stack
-([local-docker.md](local-docker.md)). CI's `verify` job is:
+([local-docker.md](local-docker.md)). To run CI's `verify` job locally:
 
 ```
-docker compose run --rm test
+docker compose run --rm verify
 ```
 
 It runs `verify` against a second database, `welltutored_test`, on the same
@@ -26,7 +26,7 @@ second step:
 Test database unavailable: set TEST_DATABASE_URL to a dedicated PostgreSQL connection before running database-backed integration tests.
 ```
 
-The `test` service supplies the connection. CI does the same, with the
+The `verify` service supplies the connection. CI does the same, with the
 dedicated connection coming from its `postgres:16` service container instead
 ([pipeline.md](pipeline.md#github-actions)). The suite needs no Clerk keys
 ([pipeline.md](pipeline.md#credentials)).
@@ -167,6 +167,6 @@ It also reads the code, skipping tests and generated code, and fails when:
 ## Before a pull request
 
 [CONTRIBUTING.md](../CONTRIBUTING.md#before-opening-a-pull-request) has what
-has to pass: `docker compose run --rm test`, which runs `pnpm run verify`, the
+has to pass: `docker compose run --rm verify`, which runs `pnpm run verify`, the
 same gate CI runs. While working, run the affected package's suite first; it is
 faster.

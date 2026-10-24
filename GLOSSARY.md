@@ -118,6 +118,13 @@ Resource. A successful Deploy doesn't imply a passing Launch Smoke; they assert
 different things.
 _Avoid_: Health check, published smoke
 
+**Verify**:
+The check, before merge, that the repository holds together: its tests pass
+against a dedicated test database, it typechecks and builds, the Docs Check
+passes and the CSS stays within budget. The one check every pull request must
+pass.
+_Avoid_: Test, CI, the build
+
 **Image Smoke**:
 The check, before merge, that the production image starts and serves the site
 against a throwaway database seeded with sample content. It checks the image's

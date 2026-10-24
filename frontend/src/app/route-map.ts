@@ -117,14 +117,14 @@ export function routeMetadataForPath(pathname: string): RouteMetadata {
     return {
       title: "Insights & Resources | Well Tutored",
       description:
-        "Read illustrative guides, revision notes and subject resources from Well Tutored tutors.",
+        "Read guides, revision notes and subject resources from Well Tutored tutors.",
     };
   }
 
   if (PUBLIC_RESOURCES_ENABLED && pathname.startsWith("/resources/")) {
     return {
       title: `${humanizeSlug(pathname.replace("/resources/", ""))} | Well Tutored Resources`,
-      description: "Read an illustrative tutor-written resource from Well Tutored.",
+      description: "Read a tutor-written resource from Well Tutored.",
     };
   }
 
