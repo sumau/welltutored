@@ -22,6 +22,17 @@ export function Shell({
 
   // Links to the tutors open `/#tutors`, which Home scrolls to on arrival.
   // Already on Home, scroll here instead: the pathname doesn't change.
+  // The logo links to Home. Already on Home, the pathname doesn't change, so
+  // nothing would happen: go back to the top instead.
+  const openHome = (event: React.MouseEvent) => {
+    closeMenu();
+    if (location !== "/") return;
+    event.preventDefault();
+    if (window.location.hash) history.replaceState(history.state, "", window.location.pathname + window.location.search);
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  };
+
   const openTutors = (event: React.MouseEvent) => {
     closeMenu();
     if (location !== "/") return;
@@ -33,7 +44,7 @@ export function Shell({
     <div className="public-site min-h-[100dvh] flex flex-col font-sans bg-background text-foreground overflow-x-hidden selection:bg-primary/40 selection:text-foreground">
       {/* Navigation */}
       <nav className="h-[82px] w-full max-w-[1210px] mx-auto px-6 md:px-[30px] flex items-center justify-between relative z-40">
-        <Link href="/" className="flex items-center gap-2.5 font-bold text-[19px] tracking-tight rounded-full" data-testid="nav-home">
+        <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-bold text-[19px] tracking-tight rounded-full" data-testid="nav-home">
           <div className="w-[32px] h-[32px] rounded-full bg-foreground flex items-center justify-center text-background font-serif text-[20px] pb-0.5">
             w
           </div>
@@ -89,7 +100,7 @@ export function Shell({
         <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-[40px] md:gap-[30px] text-[14px]">
           
           <div className="md:col-span-5">
-            <Link href="/" className="flex items-center gap-2.5 font-bold text-[19px] tracking-tight mb-4" data-testid="footer-home">
+            <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-bold text-[19px] tracking-tight mb-4" data-testid="footer-home">
               <div className="w-[32px] h-[32px] rounded-full bg-background flex items-center justify-center text-foreground font-serif text-[20px] pb-0.5">
                 w
               </div>
