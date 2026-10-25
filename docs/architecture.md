@@ -8,8 +8,10 @@ One container, run on Fly.io in production ([pipeline.md](pipeline.md)),
 serves both the React frontend and the Express API from the same origin (see [ADR-0001](adr/0001-single-origin-deployment.md)), so the browser treats them as one site. Only
 the API talks to the PostgreSQL database, through Drizzle. Both the frontend
 and the backend use [code generated from the OpenAPI spec](api-contract.md),
-which keeps the two sides in step. The application is organised
-around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in `frontend/src/app/route-map.ts`.
+which keeps the two sides in step. The API writes its errors to its log,
+which Fly collects and `fly logs` shows. Nothing alerts on them, and errors in
+the browser go nowhere: the page shows a message and logs to the console.
+The application is organised around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in `frontend/src/app/route-map.ts`.
 
 ```mermaid
 flowchart LR
@@ -27,6 +29,7 @@ flowchart LR
   subgraph hosted["Hosted services"]
     clerk["Clerk"]
     db[("PostgreSQL<br/>(Neon in production)")]
+    logs["Fly logs<br/>(read by hand)"]
   end
 
   workspace -- "sign in" --> clerk
@@ -40,9 +43,10 @@ flowchart LR
   public -- "/api/*: public reads,<br/>enquiries" --> api
   workspace -- "/api/*: session cookie" --> api
   api -- "Drizzle" --> db
+  api -. "errors and warnings" .-> logs
 
   class visitor,tutor person
-  class clerk,db external
+  class clerk,db,logs external
 ```
 
 ## Public website
