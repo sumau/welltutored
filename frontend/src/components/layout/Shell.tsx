@@ -67,7 +67,7 @@ export function Shell({
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="md:hidden p-2 -mr-2 text-foreground rounded-full"
+          className="md:hidden p-3 -mr-3 text-foreground rounded-full"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? "Close navigation" : "Open navigation"}
           data-testid="nav-mobile-toggle"
