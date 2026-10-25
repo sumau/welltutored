@@ -18,7 +18,7 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[16px]" aria-hidden="true">
           {Array.from({ length: 3 }, (_, index) => (
             <div
-              className="bg-card rounded-[20px] p-[24px] min-h-[300px] border border-transparent"
+              className="bg-secondary rounded-[4px_16px_16px_4px] p-[24px] pl-[32px] min-h-[300px]"
               data-testid={`tutor-card-skeleton-${index + 1}`}
               key={index}
             >

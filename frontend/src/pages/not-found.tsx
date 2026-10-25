@@ -2,17 +2,17 @@ import { Link } from "wouter";
 
 export default function NotFound() {
   return (
-    <main className="flex-1 flex items-center justify-center px-6 py-24" data-testid="page-not-found">
+    <main className="flex-1 ruled flex items-center justify-center px-[var(--gutter)] py-[108px]" data-testid="page-not-found">
       <div className="max-w-[30em] text-center">
-        <h1 className="font-serif text-[36px] md:text-[44px] leading-[1.1] mb-4">
+        <h1 className="font-serif font-extrabold [font-stretch:112%] tracking-[-0.03em] text-[40px] md:text-[52px] leading-[72px] m-0">
           Page not found
         </h1>
-        <p className="text-muted-foreground text-[17px] leading-[1.6] mb-8">
+        <p className="text-[18px] leading-[36px] m-0 mb-[36px]">
           This page doesn't exist or has moved. The tutors are all on the home page.
         </p>
         <Link
           href="/"
-          className="inline-flex rounded-full bg-foreground text-background text-[15px] font-semibold px-6 py-3.5 hover:bg-foreground/90 transition-colors"
+          className="ink-button text-[17px] px-6 py-3"
         >
           See the tutors
         </Link>

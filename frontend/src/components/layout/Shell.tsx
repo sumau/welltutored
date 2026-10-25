@@ -43,8 +43,9 @@ export function Shell({
   return (
     <div className="public-site min-h-[100dvh] flex flex-col font-sans bg-background text-foreground overflow-x-hidden selection:bg-primary/40 selection:text-foreground">
       {/* Navigation */}
-      <nav className="h-[82px] w-full max-w-[1210px] mx-auto px-6 md:px-[30px] flex items-center justify-between relative z-40">
-        <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-bold text-[19px] tracking-tight rounded-full" data-testid="nav-home">
+      <div className="border-b-2 border-border relative z-40">
+      <nav className="h-[82px] w-full max-w-[1210px] mx-auto px-[var(--gutter)] flex items-center justify-between">
+        <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-serif font-extrabold [font-stretch:108%] text-[20px] tracking-[-0.02em] rounded-full" data-testid="nav-home">
           <div className="w-[32px] h-[32px] rounded-full bg-foreground flex items-center justify-center text-background font-serif text-[20px] pb-0.5">
             w
           </div>
@@ -52,12 +53,12 @@ export function Shell({
         </Link>
         
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-7 text-[14px] font-semibold">
-          <Link href="/#tutors" onClick={openTutors} className="underline-offset-[6px] decoration-2 decoration-primary hover:underline" data-testid="nav-tutors">Meet the tutors</Link>
+        <div className="hidden md:flex items-center gap-7 text-[15px] font-bold">
+          <Link href="/#tutors" onClick={openTutors} className="underline-offset-[6px] decoration-2 hover:underline" data-testid="nav-tutors">Meet the tutors</Link>
           {PUBLIC_RESOURCES_ENABLED && (
-            <Link href="/resources" className="underline-offset-[6px] decoration-2 decoration-primary hover:underline" data-testid="nav-resources">Insights & resources</Link>
+            <Link href="/resources" className="underline-offset-[6px] decoration-2 hover:underline" data-testid="nav-resources">Insights & resources</Link>
           )}
-          <Link href="/enquire" className="rounded-full bg-primary text-primary-foreground px-5 py-2.5 hover:bg-primary-border transition-colors" data-testid="nav-enquire">
+          <Link href="/enquire" className="ink-button text-[15px] px-[18px] py-[9px]" data-testid="nav-enquire">
             Make an enquiry
           </Link>
           <Link href={isSignedIn ? "/workspace" : "/sign-in"} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-[13px] font-medium" data-testid="nav-workspace">
@@ -75,16 +76,17 @@ export function Shell({
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </nav>
+      </div>
 
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
-        <div className="md:hidden absolute top-[82px] left-4 right-4 rounded-[20px] bg-card z-30 px-6 py-6 border border-border flex flex-col gap-4 text-[16px] font-medium" data-testid="nav-mobile-menu">
+        <div className="md:hidden absolute top-[84px] left-4 right-4 rounded-[12px] bg-card z-30 px-6 py-6 border-2 border-foreground flex flex-col gap-4 text-[17px] font-bold" data-testid="nav-mobile-menu">
           <Link href="/#tutors" onClick={openTutors} data-testid="nav-mobile-tutors">Meet the tutors</Link>
           {PUBLIC_RESOURCES_ENABLED && (
             <Link href="/resources" onClick={closeMenu} data-testid="nav-mobile-resources">Insights & resources</Link>
           )}
-          <Link href="/enquire" onClick={closeMenu} className="rounded-full bg-primary text-primary-foreground font-semibold px-5 py-3 w-fit" data-testid="nav-mobile-enquire">Make an enquiry</Link>
-          <Link href={isSignedIn ? "/workspace" : "/sign-in"} onClick={closeMenu} className="text-muted-foreground hover:text-foreground flex items-center gap-2 pt-4 border-t border-border" data-testid="nav-mobile-workspace">
+          <Link href="/enquire" onClick={closeMenu} className="ink-button px-5 py-3 w-fit" data-testid="nav-mobile-enquire">Make an enquiry</Link>
+          <Link href={isSignedIn ? "/workspace" : "/sign-in"} onClick={closeMenu} className="text-muted-foreground font-normal hover:text-foreground flex items-center gap-2 pt-4 border-t border-border" data-testid="nav-mobile-workspace">
             <PenTool size={14} /> {isSignedIn ? "Workspace" : "Workspace sign in"}
           </Link>
         </div>
@@ -96,11 +98,11 @@ export function Shell({
       </div>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background px-6 md:px-[30px] py-[45px] md:py-[60px]" data-testid="footer">
+      <footer className="bg-foreground text-background px-[var(--gutter)] py-[45px] md:py-[60px]" data-testid="footer">
         <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-[40px] md:gap-[30px] text-[14px]">
           
           <div className="md:col-span-5">
-            <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-bold text-[19px] tracking-tight mb-4" data-testid="footer-home">
+            <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-serif font-extrabold [font-stretch:108%] text-[20px] tracking-[-0.02em] mb-4" data-testid="footer-home">
               <div className="w-[32px] h-[32px] rounded-full bg-background flex items-center justify-center text-foreground font-serif text-[20px] pb-0.5">
                 w
               </div>
@@ -148,7 +150,7 @@ export function Shell({
           data-testid={`modal-${policy}`}
         >
           <div 
-            className="bg-card w-full max-w-[530px] rounded-[20px] p-8 md:p-[45px] relative"
+            className="bg-card w-full max-w-[530px] rounded-[14px] border-2 border-foreground p-8 md:p-[45px] relative"
             onClick={e => e.stopPropagation()}
             role="dialog"
           >
@@ -187,7 +189,7 @@ export function Shell({
             </div>
 
             <button 
-              className="mt-8 rounded-full bg-foreground text-background text-[14px] font-semibold px-6 py-3 hover:bg-foreground/90 transition-colors flex items-center gap-2"
+              className="mt-8 ink-button text-[15px] px-6 py-3"
               onClick={() => setPolicy(null)}
             >
               Close <X size={14} />

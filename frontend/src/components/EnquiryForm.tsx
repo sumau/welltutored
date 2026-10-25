@@ -128,7 +128,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
     return (
       <div
         ref={receiptRef}
-        className={`text-center py-10 px-4 ${compact ? 'bg-card rounded-[20px]' : ''}`}
+        className={`text-center py-10 px-4 ${compact ? 'bg-card rounded-[14px] border-2 border-foreground' : ''}`}
         data-testid="enquiry-success"
         role="status"
         aria-live="polite"
@@ -146,7 +146,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
         <button
           type="button"
           onClick={handleReset}
-          className="rounded-full bg-foreground text-background text-[15px] font-semibold px-6 py-3.5 hover:bg-foreground/90 transition-colors inline-flex items-center justify-center gap-2"
+          className="ink-button text-[16px] px-6 py-3"
           data-testid="enquiry-reset"
         >
           Send another enquiry
@@ -156,9 +156,9 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
   }
 
   return (
-    <div className={`${compact ? 'bg-card rounded-[20px] border border-border p-6 md:p-8' : ''}`} id="enquire" data-testid="enquiry-form-container">
+    <div className={`${compact ? 'bg-card rounded-[14px] border-2 border-foreground p-6 md:p-8' : ''}`} id="enquire" data-testid="enquiry-form-container">
       {tutor?.intake === "full" ? (
-        <div className="rounded-[20px] border border-border bg-background p-6 text-[15px] text-muted-foreground leading-[1.6]" data-testid="enquiry-unavailable">
+        <div className="rounded-[14px] border-2 border-foreground bg-background p-6 text-[16px] leading-[1.6]" data-testid="enquiry-unavailable">
           {tutor.name} is not currently accepting enquiries. Please choose another tutor or check back later.
         </div>
       ) : (
@@ -200,7 +200,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               type="text"
               autoComplete="name"
               ref={(element) => { fieldRefs.current.name = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground focus:border-foreground outline-none transition-colors"
+              className="field"
               placeholder="e.g. Eleanor James"
               value={form.name}
               onChange={e => update("name", e.target.value)}
@@ -209,7 +209,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               aria-describedby={showError("name") ? "enquiry-parent-name-error" : undefined}
               data-testid="input-parent-name"
             />
-            {showError("name") && <span id="enquiry-parent-name-error" className="font-normal text-destructive" role="alert">{errors.name}</span>}
+            {showError("name") && <span id="enquiry-parent-name-error" className="font-bold text-destructive" role="alert">{errors.name}</span>}
           </label>
           <label htmlFor="enquiry-parent-email" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
             Email address *
@@ -219,7 +219,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               type="email"
               autoComplete="email"
               ref={(element) => { fieldRefs.current.email = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground focus:border-foreground outline-none transition-colors"
+              className="field"
               placeholder="you@example.com"
               value={form.email}
               onChange={e => update("email", e.target.value)}
@@ -228,7 +228,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               aria-describedby={showError("email") ? "enquiry-parent-email-error" : undefined}
               data-testid="input-parent-email"
             />
-            {showError("email") && <span id="enquiry-parent-email-error" className="font-normal text-destructive" role="alert">{errors.email}</span>}
+            {showError("email") && <span id="enquiry-parent-email-error" className="font-bold text-destructive" role="alert">{errors.email}</span>}
           </label>
         </div>
 
@@ -240,7 +240,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               id="enquiry-tutor"
               name="tutorSlug"
               ref={(element) => { fieldRefs.current.tutorSlug = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground focus:border-foreground outline-none transition-colors appearance-none"
+              className="field appearance-none"
               value={form.tutorSlug}
               onChange={e => update("tutorSlug", e.target.value)}
               onBlur={() => markTouched("tutorSlug")}
@@ -253,7 +253,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
                 <option key={t.slug} value={t.slug}>{t.name} ({t.subject})</option>
               ))}
             </select>
-            {showError("tutorSlug") && <span id="enquiry-tutor-error" className="font-normal text-destructive" role="alert">{errors.tutorSlug}</span>}
+            {showError("tutorSlug") && <span id="enquiry-tutor-error" className="font-bold text-destructive" role="alert">{errors.tutorSlug}</span>}
           </label>
         )}
 
@@ -267,7 +267,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               type="text"
               autoComplete="section-student name"
               ref={(element) => { fieldRefs.current.studentName = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground focus:border-foreground outline-none transition-colors"
+              className="field"
               placeholder="First name"
               value={form.studentName}
               onChange={e => update("studentName", e.target.value)}
@@ -276,7 +276,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               aria-describedby={showError("studentName") ? "enquiry-student-name-error" : undefined}
               data-testid="input-student-name"
             />
-            {showError("studentName") && <span id="enquiry-student-name-error" className="font-normal text-destructive" role="alert">{errors.studentName}</span>}
+            {showError("studentName") && <span id="enquiry-student-name-error" className="font-bold text-destructive" role="alert">{errors.studentName}</span>}
           </label>
           <label htmlFor="enquiry-student-age" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
             Student's age *
@@ -284,7 +284,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               id="enquiry-student-age"
               name="studentAge"
               ref={(element) => { fieldRefs.current.studentAge = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground focus:border-foreground outline-none transition-colors appearance-none"
+              className="field appearance-none"
               value={form.studentAge}
               onChange={e => update("studentAge", e.target.value)}
               onBlur={() => markTouched("studentAge")}
@@ -298,7 +298,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               <option value="16-17">16–17</option>
               <option value="18+">18+</option>
             </select>
-            {showError("studentAge") && <span id="enquiry-student-age-error" className="font-normal text-destructive" role="alert">{errors.studentAge}</span>}
+            {showError("studentAge") && <span id="enquiry-student-age-error" className="font-bold text-destructive" role="alert">{errors.studentAge}</span>}
           </label>
         </div>
 
@@ -310,7 +310,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
             type="text"
             autoComplete="off"
             ref={(element) => { fieldRefs.current.subjectLevel = element; }}
-            className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground focus:border-foreground outline-none transition-colors"
+            className="field"
             placeholder="e.g. GCSE English Literature"
             value={form.subjectLevel}
             onChange={e => update("subjectLevel", e.target.value)}
@@ -319,7 +319,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
             aria-describedby={showError("subjectLevel") ? "enquiry-subject-level-error" : undefined}
             data-testid="input-subject-level"
           />
-          {showError("subjectLevel") && <span id="enquiry-subject-level-error" className="font-normal text-destructive" role="alert">{errors.subjectLevel}</span>}
+          {showError("subjectLevel") && <span id="enquiry-subject-level-error" className="font-bold text-destructive" role="alert">{errors.subjectLevel}</span>}
         </label>
 
         <label htmlFor="enquiry-message" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
@@ -330,7 +330,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
             autoComplete="off"
             ref={(element) => { fieldRefs.current.message = element; }}
             rows={4}
-            className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground focus:border-foreground outline-none transition-colors resize-none"
+            className="field resize-none"
             placeholder="A little about what the student is working on, and what support might feel useful... (min 10 characters)"
             value={form.message}
             onChange={e => update("message", e.target.value)}
@@ -339,11 +339,11 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
             aria-describedby={showError("message") ? "enquiry-message-error" : undefined}
             data-testid="input-message"
           />
-          {showError("message") && <span id="enquiry-message-error" className="font-normal text-destructive" role="alert">{errors.message}</span>}
+          {showError("message") && <span id="enquiry-message-error" className="font-bold text-destructive" role="alert">{errors.message}</span>}
         </label>
 
         {submitError && (
-          <p className="rounded-[10px] border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-[14px] text-destructive" role="alert" data-testid="error-enquiry-submit">
+          <p className="rounded-[8px] border-2 border-destructive px-3.5 py-2.5 text-[15px] font-bold text-destructive" role="alert" data-testid="error-enquiry-submit">
             {submitError}
           </p>
         )}
@@ -356,7 +356,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
           type="submit"
           ref={submitButtonRef}
           disabled={!isComplete || isSubmitting || createEnquiry.isPending}
-          className="mt-2 rounded-full bg-primary text-primary-foreground text-[16px] font-semibold px-7 py-4 hover:bg-primary-border transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-2 ink-button text-[17px] px-7 py-[14px] disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="button-submit-enquiry"
         >
           {isSubmitting ? 'Sending...' : 'Send enquiry'}
