@@ -37,15 +37,21 @@ flowchart LR
 
   classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
   class clerk,db external
+```
 
+```mermaid
+flowchart LR
   subgraph key["Key"]
-    keyPerson(["Person"])
-    keyHosted["Hosted service<br/>outside the container"]
-    keyFrom["A"] -- "runtime request" --> keyTo["B"]
-    keyPerson ~~~ keyHosted ~~~ keyFrom
+    person(["Person"])
+    hosted["Hosted service<br/>outside the container"]
+    from["A"] -- "runtime request" --> to["B"]
+    person ~~~ hosted ~~~ from
   end
-  class keyPerson person
-  class keyHosted external
+
+  classDef person fill:#fde68a,stroke:#b45309,stroke-width:2px,color:#1f2937
+  classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
+  class person person
+  class hosted external
 ```
 
 Serving everything from one origin is
