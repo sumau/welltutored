@@ -86,8 +86,8 @@ export function Shell({
       </div>
 
       {/* Footer */}
-      <footer className="ruled border-t-2 border-foreground text-foreground px-[var(--gutter)] pt-[36px] pb-[36px]" data-testid="footer">
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-x-[30px] gap-y-[36px] text-[15px] leading-[36px]">
+      <footer className="border-t-2 border-foreground text-foreground px-[var(--gutter)] pt-[36px] pb-[36px]" data-testid="footer">
+        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-x-[30px] gap-y-[36px] text-[15px] leading-[1.6]">
           
           <div className="md:col-span-5">
             <Link href="/" onClick={openHome} className="flex items-center gap-2.5 h-[36px] font-serif font-extrabold [font-stretch:108%] text-[20px] tracking-[-0.02em]" data-testid="footer-home">
@@ -96,19 +96,19 @@ export function Shell({
               </div>
               well tutored
             </Link>
-            <p className="text-muted-foreground m-0 max-w-[300px]">
+            <p className="text-muted-foreground leading-[1.6] m-0 mt-[8px] max-w-[300px]">
               Personalised tutoring from women with deep subject expertise.
             </p>
           </div>
           
-          <div className="md:col-span-3 flex flex-col items-start font-bold">
+          <div className="md:col-span-3 flex flex-col gap-[8px] items-start font-bold">
             {PUBLIC_RESOURCES_ENABLED && (
               <Link href="/resources" className="underline-offset-4 hover:underline" data-testid="footer-resources">Insights & resources</Link>
             )}
             <Link href="/enquire" className="underline-offset-4 hover:underline" data-testid="footer-enquire">Make an enquiry</Link>
           </div>
 
-          <div className="md:col-span-4 flex flex-col items-start font-bold">
+          <div className="md:col-span-4 flex flex-col gap-[8px] items-start font-bold">
             <button onClick={() => setPolicy("safeguarding")} className="underline-offset-4 hover:underline flex items-center gap-2" data-testid="footer-safeguarding">
                Safeguarding
             </button>

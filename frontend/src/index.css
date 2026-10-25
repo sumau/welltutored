@@ -133,8 +133,8 @@
   --sidebar-ring: 15 62% 59%;
 }
 
-/* The public site, "The Exercise Book": white feint-ruled paper, navy biro
-   ink, a red margin, and each tutor's own tint as an exercise-book cover.
+/* The public site, "The Exercise Book": a plain white page in navy biro
+   ink, with each tutor's own tint as an exercise-book cover.
    Scoped to the public Shell. */
 .public-site {
   --background: 0 0% 100%;
@@ -163,9 +163,9 @@
   --accent-foreground: 231 36% 18%;
   --accent-border: 217 55% 86%;
 
-  /* Red belongs to the margin and the numbers written in it. Errors are a
-     dark amber, so a mistake never reads as part of the page. */
-  --margin-red: 6 65% 46%;
+  /* The teacher's red pen numbers the steps. Errors are a dark amber, so a
+     mistake never reads as part of the page. */
+  --pen-red: 6 65% 46%;
   --destructive: 28 90% 30%;
   --destructive-foreground: 0 0% 100%;
   --destructive-border: 28 90% 26%;
@@ -176,18 +176,11 @@
   --app-font-sans: 'Atkinson Hyperlegible', sans-serif;
   --app-font-serif: 'Archivo', sans-serif;
 
-  /* The page's rules sit every --rule, each --rule-at below the top of its
-     line, where text of 16-22px set in 36px lines has its baseline. The
-     margin sits just left of the content column, which is 1150px wide with
-     a --gutter each side. From md the gutter leaves room for a number
-     written left of the margin. */
-  --rule: 36px;
-  --rule-at: 26px;
+  /* The content column is 1150px wide with a --gutter each side. */
   --gutter: 24px;
-  --margin-x: calc(max(var(--gutter), (100% - 1150px) / 2) - 12px);
 }
 @media (min-width: 768px) {
-  .public-site { --gutter: 56px; }
+  .public-site { --gutter: 30px; }
 }
 
 /* The page behind the public site, seen when scrolling past either end. */
@@ -214,23 +207,11 @@ body:has(.public-site) {
     color: hsl(var(--foreground));
   }
 
-  /* Feint-ruled paper with the red margin line. Each full-width section
-     rules its own page from its top, so a section whose spacing keeps to
-     multiples of --rule has its text sitting on the rules. */
-  .ruled {
-    background-image:
-      linear-gradient(to right, transparent calc(var(--margin-x) - 1px), hsl(var(--margin-red) / 0.75) calc(var(--margin-x) - 1px), hsl(var(--margin-red) / 0.75) calc(var(--margin-x) + 1px), transparent calc(var(--margin-x) + 1px)),
-      repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule-at) - 1px), hsl(var(--border)) calc(var(--rule-at) - 1px) var(--rule-at), transparent var(--rule-at) var(--rule));
-  }
-
-  /* A number written in the margin, left of the red line. */
-  .margin-number {
+  /* A step number in the teacher's red pen. */
+  .step-number {
     font-family: var(--app-font-serif);
     font-weight: 800;
-    color: hsl(var(--margin-red));
-  }
-  @media (min-width: 768px) {
-    .margin-number { position: absolute; right: calc(100% + 24px); }
+    color: hsl(var(--pen-red));
   }
 
   /* An exercise book: board cover in the tutor's tint, darker spine on the
@@ -316,28 +297,29 @@ body:has(.public-site) {
   .ink-button-outline { background: hsl(var(--card)); color: hsl(var(--foreground)); }
   .ink-button-outline:hover { background: hsl(var(--secondary)); border-color: hsl(var(--foreground)); }
 
-  /* A form field is a line to write on: its underline lies on the page's
-     rule, and a longer answer is written across the page's own rules. */
+  /* A form field is a line to write on; a longer answer gets a box. */
   .field {
     display: block;
     width: 100%;
-    height: var(--rule-at);
-    margin-bottom: calc(var(--rule) - var(--rule-at));
+    height: 40px;
     padding: 0 2px;
     border: 0;
     border-bottom: 2px solid hsl(var(--foreground));
     border-radius: 0;
     background: transparent;
     font-size: 18px;
-    line-height: calc(var(--rule-at) - 2px);
+    line-height: 1.4;
     font-weight: 400;
     color: hsl(var(--foreground));
   }
   textarea.field {
-    height: calc(var(--rule) * 3 + var(--rule-at));
-    line-height: var(--rule);
-    padding-top: 0;
-    resize: none;
+    height: auto;
+    min-height: 140px;
+    padding: 10px 12px;
+    border: 2px solid hsl(var(--foreground));
+    border-radius: 10px;
+    line-height: 1.6;
+    resize: vertical;
   }
   select.field {
     appearance: none;
@@ -346,6 +328,7 @@ body:has(.public-site) {
   }
   .field::placeholder { color: hsl(var(--muted-foreground) / 0.8); }
   .field[aria-invalid="true"] { border-bottom-color: hsl(var(--destructive)); }
+  textarea.field[aria-invalid="true"] { border-color: hsl(var(--destructive)); }
 
   /* Intake as a rubber stamp; the fill steps down as places run out. */
   .stamp {

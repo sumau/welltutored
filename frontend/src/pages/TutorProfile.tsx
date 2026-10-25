@@ -16,7 +16,7 @@ import {
 
 export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
   return tutor.intake === "full" ? (
-    <p className="m-0 text-[18px] leading-[36px]" data-testid="tutor-enquiry-unavailable">
+    <p className="m-0 text-[18px] leading-[1.6]" data-testid="tutor-enquiry-unavailable">
       {tutor.name} is not currently accepting enquiries. Please check back later or choose another tutor.
     </p>
   ) : (
@@ -54,12 +54,12 @@ export function TutorBackground({ tutor }: { tutor: Tutor }) {
   if (rows.length === 0) return null;
 
   return (
-    <section className="ruled px-[var(--gutter)]" id="background">
-      <div className="max-w-[1150px] mx-auto pt-[36px] pb-[36px] grid gap-[36px]">
+    <section className="px-[var(--gutter)]" id="background">
+      <div className="max-w-[1150px] mx-auto pt-[40px] pb-[40px] grid gap-[40px]">
         {rows.map((row) => (
           <div key={row.label} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-[22px]">
-            <h2 className="font-serif text-[24px] leading-[36px] m-0">{row.label}</h2>
-            <div className="grid gap-[36px] max-w-[46em] text-[16px] leading-[36px]" data-testid={row.testId}>
+            <h2 className="font-serif text-[24px] leading-[1.25] m-0 mb-[12px] md:mb-0">{row.label}</h2>
+            <div className="grid gap-[24px] max-w-[46em] text-[16px] leading-[1.6]" data-testid={row.testId}>
               {backgroundEntries(row.text).map((entry, index) => (
                 <div key={index} className="grid grid-cols-1 sm:grid-cols-[170px_1fr] gap-x-[22px]">
                   {entry.dates && <span className="text-muted-foreground">{entry.dates}</span>}
@@ -159,10 +159,10 @@ export default function TutorProfile() {
 
   return (
     <main className="flex-1" data-testid={`page-tutor-${tutor.slug}`}>
-      {/* Her exercise book beside her approach, written on the page */}
-      <section className="ruled px-[var(--gutter)]">
+      {/* Her exercise book beside her approach */}
+      <section className="px-[var(--gutter)]">
         <div className="max-w-[1150px] mx-auto pt-[36px] pb-[72px]">
-          <div className="flex justify-between items-center text-[15px] font-bold leading-[36px]">
+          <div className="flex justify-between items-center text-[15px] font-bold leading-[1.6]">
             <Link href="/#tutors" className="inline-flex items-center gap-2 rounded-full underline-offset-[6px] decoration-2 hover:underline" data-testid="link-back">
               <ArrowLeft size={15} /> All tutors
             </Link>
@@ -192,14 +192,14 @@ export default function TutorProfile() {
             </div>
             <div>
               <figure className="m-0">
-                <blockquote className="font-serif font-semibold text-[22px] md:text-[28px] leading-[36px] tracking-[-0.01em] m-0">
+                <blockquote className="font-serif font-semibold text-[22px] md:text-[28px] leading-[1.1] tracking-[-0.01em] m-0">
                   {tutor.teachingIntro}
                 </blockquote>
-                <figcaption className="text-[16px] leading-[36px] font-bold">
+                <figcaption className="text-[16px] leading-[1.6] font-bold mt-[12px]">
                   {firstName} on her approach
                 </figcaption>
               </figure>
-              <p className="max-w-[36em] text-[18px] md:text-[20px] leading-[36px] m-0 mt-[36px] text-muted-foreground" data-testid="tutor-intro">
+              <p className="max-w-[36em] text-[18px] md:text-[20px] leading-[1.6] m-0 mt-[36px] text-muted-foreground" data-testid="tutor-intro">
                 {tutor.profileSummary}
               </p>
             </div>
@@ -208,16 +208,16 @@ export default function TutorProfile() {
       </section>
 
       {/* About */}
-      <section className="ruled px-[var(--gutter)]" id="about">
-        <div className="max-w-[1150px] mx-auto pt-[36px] pb-[36px] grid grid-cols-1 md:grid-cols-2 gap-[36px] md:gap-[86px]">
+      <section className="px-[var(--gutter)]" id="about">
+        <div className="max-w-[1150px] mx-auto pt-[64px] md:pt-[80px] pb-[40px] grid grid-cols-1 md:grid-cols-2 gap-[36px] md:gap-[86px]">
           <div>
-            <h2 className="relative top-[13px] md:top-[12px] font-serif text-[36px] md:text-[40px] leading-[72px] m-0">About {firstName}</h2>
-            <div className="text-[18px] leading-[36px] max-w-[34em] whitespace-pre-wrap" data-testid="tutor-bio">
+            <h2 className="font-serif text-[32px] md:text-[40px] leading-[1.1] m-0 mb-[16px]">About {firstName}</h2>
+            <div className="text-[18px] leading-[1.6] max-w-[34em] whitespace-pre-wrap" data-testid="tutor-bio">
               {tutor.bio}
             </div>
           </div>
 
-          <div className="md:pt-[72px]">
+          <div className="md:pt-[60px]">
             <div className="book-label">
               <div className="book-label-row">
                 <span className="book-label-caption">University</span>
@@ -245,17 +245,17 @@ export default function TutorProfile() {
 
       <TutorBackground tutor={tutor} />
 
-      {/* Learning with her, written on the page */}
-      <section className="ruled px-[var(--gutter)]">
-        <div className="max-w-[1150px] mx-auto pt-[36px] pb-[36px]">
-          <h2 className="relative top-[13px] md:top-[12px] font-serif text-[36px] md:text-[40px] leading-[72px] m-0 mb-[36px]">
+      {/* Learning with her */}
+      <section className="px-[var(--gutter)]">
+        <div className="max-w-[1150px] mx-auto pt-[40px] pb-[72px] md:pb-[88px]">
+          <h2 className="font-serif text-[32px] md:text-[40px] leading-[1.1] m-0 mb-[28px]">
             Learning with {firstName}
           </h2>
-          <dl className="grid gap-[36px] m-0 max-w-[60em]">
+          <dl className="grid gap-[28px] m-0 max-w-[60em]">
             {tutor.teachingPoints.map((point, index) => (
               <div key={`${point.title}-${index}`} className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-x-[22px]">
-                <dt className="font-serif font-bold text-[20px] leading-[36px]">{point.title}</dt>
-                <dd className="text-[18px] leading-[36px] m-0">{point.body}</dd>
+                <dt className="font-serif font-bold text-[20px] leading-[1.4] mb-[6px] md:mb-0">{point.title}</dt>
+                <dd className="text-[18px] leading-[1.6] m-0">{point.body}</dd>
               </div>
             ))}
           </dl>
@@ -265,23 +265,23 @@ export default function TutorProfile() {
       <TutorResources tutor={tutor} />
 
       {/* Enquire */}
-      <section className="ruled px-[var(--gutter)]">
+      <section className="px-[var(--gutter)]">
         <div className="max-w-[1150px] mx-auto pt-[72px] pb-[108px] grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-[36px] md:gap-[72px] items-start">
           <div>
-            <h2 className="relative top-[14px] md:top-[12px] font-serif text-[32px] md:text-[40px] leading-[72px] m-0">
+            <h2 className="font-serif text-[32px] md:text-[40px] leading-[1.1] m-0 mb-[16px]">
               Ask about lessons with {firstName}
             </h2>
-            <p className="text-[18px] leading-[36px] max-w-[30em] m-0">
+            <p className="text-[18px] leading-[1.6] max-w-[30em] m-0">
               Tell us a little about the student and what would help. Well Tutored delivers your enquiry securely to the team for review. Tutor email addresses are never published.
             </p>
-            <ol className="list-none p-0 m-0 mt-[36px] grid">
+            <ol className="list-none p-0 m-0 mt-[28px] grid gap-[10px]">
               {[
                 "Share the student's subject, level and context",
                 `Well Tutored reviews your enquiry for ${firstName}`,
                 "Well Tutored replies to you",
               ].map((step, index) => (
-                <li key={step} className="relative flex gap-[14px] md:block text-[18px] leading-[36px]">
-                  <span className="margin-number text-[20px] leading-[36px]" aria-hidden="true">{index + 1}</span>
+                <li key={step} className="flex gap-[14px] text-[18px] leading-[1.6]">
+                  <span className="step-number text-[20px] leading-[1.6]" aria-hidden="true">{index + 1}</span>
                   {step}
                 </li>
               ))}

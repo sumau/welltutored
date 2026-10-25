@@ -51,7 +51,7 @@ export function IntakeStamp({ tutor, className = "" }: { tutor: Tutor; className
 }
 
 // A tutor as an exercise book in her tint, opening her profile, with her
-// summary written on the page beneath it. Each book rests at its own slight
+// summary beneath it. Each book rests at its own slight
 // angle and straightens when pointed at. A long label makes the cover taller.
 const REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
 
@@ -69,7 +69,7 @@ export function TutorBook({ tutor, index }: { tutor: Tutor; index: number }) {
           <IntakeStamp tutor={tutor} />
         </span>
       </Link>
-      <p className="text-[16px] leading-[36px] m-0 px-[4px] h-[108px] line-clamp-3">{tutor.profileSummary}</p>
+      <p className="text-[16px] leading-[1.6] m-0 mt-[14px] px-[4px] line-clamp-3">{tutor.profileSummary}</p>
     </>
   );
 }
