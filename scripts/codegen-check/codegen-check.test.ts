@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { diffTrees, readTree, writeTree, type Tree } from "./check.js";
+import { diffTrees, readTree, writeTree, type Tree } from "./codegen-check.js";
 
 const tree = (files: Record<string, string>): Tree =>
   new Map(Object.entries(files).map(([path, text]) => [path, Buffer.from(text)]));

@@ -14,7 +14,7 @@
     "smoke:workspace": "tsx ./smoke/workspace-browser.ts",
     "test:smoke": "tsx --test ./smoke/public-site.test.ts ./smoke/domain.test.ts",
     "test:docs": "tsx --test ./docs-check/docs-check.test.ts",
-    "test:codegen-check": "tsx --test ./codegen-check/check.test.ts",
+    "test:codegen-check": "tsx --test ./codegen-check/codegen-check.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
