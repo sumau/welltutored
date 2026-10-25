@@ -27,7 +27,12 @@ flowchart LR
       workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
     end
 
-    workspace -- "sign in" --> clerk["Clerk<br/>(hosted)"]
+    subgraph hosted["Hosted services"]
+      clerk["Clerk"]
+      db[("PostgreSQL<br/>(Neon in production)")]
+    end
+
+    workspace -- "sign in" --> clerk
 
     subgraph container["Container: one origin"]
       static["Frontend build<br/>(static files)"]
@@ -37,7 +42,7 @@ flowchart LR
     browser -- "page loads" --> static
     public -- "public reads, enquiries" --> api
     workspace -- "session cookie" --> api
-    api -- "Drizzle" --> db[("PostgreSQL<br/>(Neon in production)")]
+    api -- "Drizzle" --> db
   end
 
   subgraph key["Key"]
