@@ -137,6 +137,9 @@ export function TutorResources({ tutor }: { tutor: Tutor }) {
   );
 }
 
+// Her teaching points rest at alternating slight angles, like Home's notes.
+const POINT_REST = ["-1.5deg", "1deg", "-0.5deg"];
+
 export default function TutorProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { data: tutor, isLoading, error, refetch } = useGetTutor(slug as string, {
@@ -172,27 +175,28 @@ export default function TutorProfile() {
         </div>
       </div>
 
-      {/* Hero: who she is, beside her approach, after Home's hero */}
-      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[36px] lg:gap-[56px] items-center">
-        <div>
-          <h1 className="font-serif text-[clamp(44px,5vw,68px)] leading-[1.02] mb-[10px]" data-testid="tutor-name">
-            {tutor.name}
-          </h1>
-          <p className="text-[19px] font-semibold mb-[18px]" data-testid="tutor-subject-kicker">
-            {tutor.subject}
-          </p>
-          <div className={`inline-flex items-center gap-[8px] rounded-full px-[14px] py-[6px] text-[15px] font-semibold mb-[22px] ${intakePillClasses[tutor.intake]}`}>
-            <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
-            {intakeLabels[tutor.intake]}
-          </div>
-          <p className="max-w-[36em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="tutor-intro">
-            {tutor.profileSummary}
-          </p>
-        </div>
-        <figure
-          className="border-l-[10px] pl-[28px] md:pl-[40px] py-[8px] m-0"
-          style={{ borderColor: tutor.tint }}
+      {/* Hero: her note card from Home, larger, beside her approach */}
+      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[40px] lg:gap-[64px] items-center">
+        <div
+          className="note-card w-full max-w-[580px] px-[26px] md:px-[34px] pt-[26px] md:pt-[32px] pb-[24px] md:pb-[30px]"
+          style={{ "--tint": tutor.tint, "--rest": "-1.5deg" } as React.CSSProperties}
         >
+          <div className="note-card-head flex items-start justify-between gap-[14px] pb-[14px]">
+            <h1 className="m-0 text-[clamp(40px,4.6vw,60px)] leading-[0.98] tracking-[-0.04em] font-bold" data-testid="tutor-name">
+              {tutor.name}
+            </h1>
+            <span className={`shrink-0 inline-flex items-center gap-[8px] rounded-full h-[30px] px-[13px] text-[15px] font-semibold leading-none mt-[6px] ${intakePillClasses[tutor.intake]}`}>
+              <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
+              {intakeLabels[tutor.intake]}
+            </span>
+          </div>
+          <div className="note-card-body text-[17px] [--rule:30px]">
+            <p className="m-0 text-[19px] font-bold" data-testid="tutor-subject-kicker">{tutor.subject}</p>
+            <p className="m-0">{tutor.university}, {tutor.qualification}</p>
+            <p className="m-0 mt-[30px] max-w-[36em]" data-testid="tutor-intro">{tutor.profileSummary}</p>
+          </div>
+        </div>
+        <figure className="m-0">
           <blockquote className="font-serif text-[22px] md:text-[26px] leading-[1.35] m-0 text-foreground">
             {tutor.teachingIntro}
           </blockquote>
@@ -240,19 +244,23 @@ export default function TutorProfile() {
 
       <TutorBackground tutor={tutor} />
 
-      {/* Teaching Style, on her own tint as on her card */}
+      {/* Teaching Style: white notes on her own tint, as beside Home's hero */}
       <section className="px-6 md:px-[30px] py-[60px] md:py-[88px]" style={{ backgroundColor: tutor.tint }}>
         <div className="max-w-[1150px] mx-auto">
           <h2 className="font-serif font-bold tracking-[-0.03em] text-[clamp(32px,3.8vw,48px)] leading-[1.05] m-0 mb-[36px]">
             Learning with {firstName}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
             {tutor.teachingPoints.map((point, index) => (
-              <article key={`${point.title}-${index}`} className="bg-card rounded-[20px] p-[24px]">
-                <h3 className="font-serif font-semibold text-[22px] leading-[1.2] mb-[10px]">
+              <article
+                key={`${point.title}-${index}`}
+                className="note-card px-[22px] pt-[20px] pb-[18px]"
+                style={{ "--tint": "hsl(var(--card))", "--rest": POINT_REST[index % POINT_REST.length] } as React.CSSProperties}
+              >
+                <h3 className="note-card-head font-serif font-bold text-[22px] leading-[1.2] tracking-[-0.02em] m-0 pb-[10px]">
                   {point.title}
                 </h3>
-                <p className="text-[16px] leading-[1.6] text-muted-foreground m-0">
+                <p className="note-card-body text-[16px] m-0">
                   {point.body}
                 </p>
               </article>
