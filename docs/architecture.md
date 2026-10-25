@@ -4,12 +4,29 @@ For whoever needs to know how the code fits together: routes, authentication,
 API boundaries and publishing rules. Why the less obvious decisions were made is
 in [adr/](adr/).
 
+## Overview
+
+The application has two user-facing surfaces: the public website and the
+private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in
+`frontend/src/app/route-map.ts`.
+
 One container serves both the React frontend and the Express API from the same
-origin (see [ADR-0001](adr/0001-single-origin-deployment.md)), so the browser treats them as one site. Only
-the API talks to the PostgreSQL database, through Drizzle. Both the frontend
-and the backend use [code generated from the OpenAPI spec](api-contract.md),
-which keeps the two sides in step. The application is organised
-around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in `frontend/src/app/route-map.ts`.
+origin, so the browser treats them as one site
+([ADR-0001](adr/0001-single-origin-deployment.md)). In production it runs on
+Fly.io ([pipeline.md](pipeline.md)). Only the API talks to the PostgreSQL
+database, through Drizzle. Both the frontend and the backend use
+[code generated from the OpenAPI spec](api-contract.md), which keeps the two
+sides in step.
+
+Nothing alerts on errors. The API writes its errors to its log, which Fly
+collects and `flyctl logs` shows. Errors in the browser go nowhere: a failed
+request shows a message on the page, and only a crash caught by the error
+boundary is also logged to the browser console.
+
+### Runtime: where a request goes
+
+In this diagram, each solid arrow is a request, pointing from whoever sends
+it; the reply comes back along the same arrow.
 
 ```mermaid
 flowchart LR
@@ -27,23 +44,29 @@ flowchart LR
   subgraph hosted["Hosted services"]
     clerk["Clerk"]
     db[("PostgreSQL<br/>(Neon in production)")]
+    logs["Fly logs<br/>(read by hand)"]
   end
 
   workspace -- "sign in" --> clerk
 
-  subgraph container["Container: one origin"]
+  subgraph container["Container: one origin<br/>(Fly.io in production)"]
     static["Frontend build<br/>(static files)"]
     api["Express API under /api<br/>clerkMiddleware, Zod validation"]
   end
 
-  browser -- "page loads" --> static
-  public -- "public reads, enquiries" --> api
-  workspace -- "session cookie" --> api
+  public -- "/api/*: public reads,<br/>enquiries" --> api
+  workspace -- "/api/*: session cookie" --> api
+  browser -- "every other path:<br/>page loads" --> static
   api -- "Drizzle" --> db
+  api -. "errors and warnings" .-> logs
 
   class visitor,tutor person
-  class clerk,db external
+  class clerk,db,logs external
 ```
+
+Two things answer before either box. A request on any host other than the
+[Public Origin](../GLOSSARY.md#delivery) gets a 301 to it, and an unknown
+`/api` path gets a JSON 404 rather than the frontend's page.
 
 ## Public website
 
@@ -69,19 +92,36 @@ Clerk provides the sign-in and sign-up pages:
 - `/sign-in` — sign-in flow (including Clerk's nested flow paths)
 - `/sign-up` — sign-up flow (including Clerk's nested flow paths)
 
-Public visitors never load Clerk. `App.tsx` lazy-loads `PublicApp` or
-`AuthenticatedApp` by path, and only the authenticated side brings in Clerk,
-its themes, and the Workspace routes. Keep public route modules, shared
+Public visitors never load Clerk. `App.tsx` reads the path with
+[Wouter](https://github.com/molefrog/wouter), the browser-side router, and
+lazy-loads `PublicApp` or `AuthenticatedApp` to match. Only the authenticated
+side brings in Clerk, its themes, and the Workspace routes. Keep public route modules, shared
 providers, and route metadata free of Clerk imports, or Clerk lands in the
 public bundle.
 
 Browser API requests use Clerk's same-origin session cookies; bearer-token
 wiring is reserved for mobile clients.
 
+The server reads the session on every `/api` request, public or private:
+`clerkMiddleware` in `backend/src/app.ts` reads it, and each handler decides
+whether it needs one. A Workspace request is turned away at the first of these
+checks it fails:
+
+- `requireTrustedMutationOrigin`, in `app.ts` on `/api/workspace`, returns a
+  403 before any handler runs for a change (anything but `GET`, `HEAD` or
+  `OPTIONS`) sent from another site.
+- `requireWorkspaceAccount` in `backend/src/api/deps.ts`, which every
+  Workspace handler calls, returns a 401 with no session and a 403 for an
+  account without a verified email address.
+- The handler then calls one role check: `requireApproved` returns a 403 for
+  an account still awaiting approval, and `requireOwner` a 403 for anyone but
+  the Owner. `/api/workspace/me` calls neither, so an account awaiting
+  approval can still load the Workspace and see that it is waiting.
+
 ## Private Workspace
 
-Workspace routes, all under `/workspace`, are protected by Clerk and the
-Workspace Account check. A Tutor edits their own profile and resources and
+Workspace routes, all under `/workspace`, are protected by the checks in
+[Authentication](#authentication). A Tutor edits their own profile and resources and
 sees their enquiries; the [Owner](../GLOSSARY.md#the-private-area) also manages
 every tutor profile and approves accounts.
 
@@ -89,19 +129,14 @@ every tutor profile and approves accounts.
 aliases and redirect to the canonical resource URLs. Workspace Accounts are
 stored in the `workspace_accounts` table.
 
-## Forms
-
-A form that must submit once guards itself with a synchronous ref as well as
-the mutation's pending state, as `submissionInFlight` does in `EnquiryForm`.
-Keyboard activation can fire a second submit before React renders the first
-one as pending, so the pending flag alone lets a duplicate through.
-
 ## Backend layout
 
 The backend follows the shape of the
 [full-stack FastAPI template](https://github.com/fastapi/full-stack-fastapi-template),
-in TypeScript. Each folder in `backend/src` has one job, and a request passes
-through them in one direction:
+in TypeScript. A request passes through the folders in `backend/src` in one
+direction.
+
+### Inside the API: one request through `backend/src`
 
 ```mermaid
 flowchart LR
@@ -121,12 +156,17 @@ flowchart LR
   class pg external
 ```
 
+A typical Workspace request goes from `app.ts` to its handler in
+`api/routes`, which checks the account with `api/deps.ts` and then queries
+through `crud` and `core/db.ts`.
+
 Each part of `backend/src` has one job:
 
-- `main.ts` starts the process: seeds illustrative content in development,
-  then listens. `app.ts` builds the Express app: the Public Origin redirect,
-  CORS, Clerk on `/api`, the trusted-origin check on `/api/workspace`, the
-  routes, then the frontend build and the error handler.
+- `main.ts` — starts the process: seeds illustrative content in development,
+  then listens.
+- `app.ts` — builds the Express app: the Public Origin redirect, CORS, Clerk
+  on `/api`, the trusted-origin check on `/api/workspace`, the routes, then the
+  frontend build and the error handler.
 - `api/routes` — one router per area, which `api/routes/index.ts` mounts and
   `api/routes/workspace.ts` splits further. Handlers stay thin: authenticate,
   validate the request against `api/schemas`, call `crud` and `domain`, and
@@ -135,6 +175,8 @@ Each part of `backend/src` has one job:
 - `api/middleware` — request origin, Public Origin redirect and the API error
   handler.
 - `api/presenters` — database rows to response bodies.
+- `api/public-cache.ts` — the `Cache-Control` header for public tutor
+  responses.
 - `crud` — every database query, one module per area (tutors, resources,
   enquiries, workspace accounts), including Workspace Account provisioning
   from Clerk and tutor assignment.
@@ -176,31 +218,3 @@ publicly until published. Editing an already-published resource while keeping
 its status as `published` updates the public resource in place; changing it to
 `draft` removes it from public results while it is being revised. Resources do
 not keep a private draft alongside a live published version.
-
-## Bundle size
-
-The Well Tutored Vite build enables Tailwind's production Lightning CSS
-optimisation. `frontend/scripts/verify-css-build.mjs` holds a size
-budget for the primary stylesheet, set about 7% above its size in October 2026
-so that growth is a decision rather than drift. `pnpm run verify` checks it
-after the build. Run the commands in this section inside the container
-([local-docker.md](local-docker.md)). To check the budget alone, run
-`pnpm --filter @welltutored/frontend run build` followed by
-`pnpm --filter @welltutored/frontend run check:css-size`; the script prints the
-current size.
-
-For the JavaScript, run
-`pnpm --filter @welltutored/frontend run report:bundle-size`. It builds the
-frontend, then reads the chunk report that a plugin in
-`frontend/vite.config.ts` writes on every build, and prints each chunk's raw
-and gzip size, marked as entry or lazy, followed by the twenty largest modules
-in the entry chunk and in any chunk that imports more than one other. Unlike
-`check:css-size` it has no budget, and nothing runs it in CI: it is for looking
-into a size change by hand.
-
-The remaining global CSS is intentional: Tailwind preflight, theme variables,
-utilities used by both public and authenticated routes, motion states, and
-registered custom properties are shared so route transitions don't flash
-unstyled content. The authenticated route's separate CSS chunk is small, and
-further savings would require splitting shared styles and
-reintroducing them during navigation.
