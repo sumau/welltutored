@@ -193,7 +193,7 @@ export default function TutorProfile() {
           </p>
         </div>
         <figure
-          className="note-card w-full max-w-[580px] m-0 px-[26px] md:px-[34px] pt-[24px] md:pt-[30px] pb-[24px] md:pb-[30px]"
+          className="note-card w-full max-w-[460px] lg:justify-self-center m-0 px-[26px] md:px-[34px] pt-[24px] md:pt-[30px] pb-[24px] md:pb-[30px]"
           style={{ "--tint": tutor.tint, "--rest": "1.5deg" } as React.CSSProperties}
         >
           <figcaption className="note-card-head text-[clamp(26px,2.6vw,32px)] leading-[1.1] tracking-[-0.03em] font-bold pb-[12px]">
