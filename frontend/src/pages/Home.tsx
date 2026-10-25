@@ -16,9 +16,9 @@ const CARD_REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
 // Three notes beside the hero, in colours no tutor's card leads with. On
 // wider screens they fan out across the box; left and top place each one.
 const HERO_NOTES = [
-  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", tint: "#9DBB83", r: "-4deg", left: "0%", top: "2%" },
-  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", tint: "#8EA8CE", r: "3deg", left: "50%", top: "8%" },
-  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", tint: "#D8B267", r: "-1.5deg", left: "22%", top: "50%" },
+  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", tint: "#9DBB83", r: "-5deg", left: "0%", top: "7%" },
+  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", tint: "#8EA8CE", r: "4deg", left: "47%", top: "0%" },
+  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", tint: "#D8B267", r: "-2deg", left: "24%", top: "48%" },
 ];
 
 export default function Home() {
@@ -46,15 +46,15 @@ export default function Home() {
             Helping young women grow, flourish and thrive.
           </p>
         </div>
-        <ul className="note-fan list-none m-0 p-0 w-full max-w-[500px] lg:max-w-[540px] lg:justify-self-end" aria-label="How we work" data-testid="hero-notes">
+        <ul className="note-fan list-none m-0 p-0 w-full max-w-[400px] lg:max-w-[420px] lg:justify-self-center" aria-label="How we work" data-testid="hero-notes">
           {HERO_NOTES.map((note, index) => (
             <li
               key={note.title}
-              className="note-card px-[22px] pt-[20px] pb-[16px]"
+              className="note-card px-[18px] pt-[16px] pb-[14px]"
               style={{ "--tint": note.tint, "--rest": note.r, "--delay": `${index * 90}ms`, left: note.left, top: note.top } as React.CSSProperties}
             >
-              <b className="note-card-head block text-[22px] leading-[1.15] tracking-[-0.02em] pb-[10px]">{note.title}</b>
-              <p className="note-card-body m-0 text-[18px] [--rule:30px]">{note.text}</p>
+              <b className="note-card-head block text-[20px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
+              <p className="note-card-body m-0 text-[17px] [--rule:28px]">{note.text}</p>
             </li>
           ))}
         </ul>

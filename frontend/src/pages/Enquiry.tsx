@@ -48,7 +48,7 @@ export default function Enquiry() {
         <div className="max-w-[1150px] mx-auto">
           <nav aria-label="Breadcrumb" className="mb-[36px]">
             <ol className="flex items-center gap-2 text-[14px] font-medium text-muted-foreground">
-              <li><Link href="/" className="rounded-full hover:text-foreground transition-colors" data-testid="enquiry-back-link">Back to the tutors</Link></li>
+              <li><Link href="/#tutors" className="rounded-full hover:text-foreground transition-colors" data-testid="enquiry-back-link">Back to the tutors</Link></li>
               <li aria-hidden="true">/</li>
               <li aria-current="page" className="text-foreground">Enquiry</li>
             </ol>
