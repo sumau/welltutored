@@ -57,12 +57,12 @@ export default function Home() {
               onRetry={refetchTutors}
             />
           ) : (
-            <ul className="list-none m-0 p-0 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px]" data-testid="tutor-grid">
+            <ul className="list-none m-0 p-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px] md:max-w-[908px] xl:max-w-none" data-testid="tutor-grid">
               {(tutors || []).map((tutor, index) => (
                 <li key={tutor.id} className="flex">
                   <Link
                     href={`/tutors/${tutor.slug}`}
-                    className="note-card flex flex-col w-full sm:aspect-[3/2] sm:max-w-[560px] lg:max-w-none px-[26px] pt-[24px] pb-[20px]"
+                    className="note-card flex flex-col w-full sm:aspect-square sm:max-w-[440px] md:max-w-none px-[26px] pt-[24px] pb-[20px]"
                     style={{ "--tint": tutor.tint, "--rest": CARD_REST[index % CARD_REST.length] } as React.CSSProperties}
                     data-testid={`tutor-card-${tutor.slug}`}
                   >
@@ -78,7 +78,7 @@ export default function Home() {
                     <div className="note-card-body flex-1 text-[16px]">
                       <b className="block text-[18px] font-bold">{tutor.subject}</b>
                       <span className="block">{tutor.university}, {tutor.qualification}</span>
-                      <p className="m-0 mt-[28px] line-clamp-2">{tutor.profileSummary}</p>
+                      <p className="m-0 mt-[28px] line-clamp-5">{tutor.profileSummary}</p>
                     </div>
                   </Link>
                 </li>
