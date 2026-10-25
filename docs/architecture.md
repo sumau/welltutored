@@ -37,11 +37,18 @@ flowchart LR
 
   classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
   class clerk,db external
+
+  subgraph key["Key"]
+    keyPerson(["Person"])
+    keyHosted["Hosted service<br/>outside the container"]
+    keyFrom["A"] -- "runtime request" --> keyTo["B"]
+    keyPerson ~~~ keyHosted ~~~ keyFrom
+  end
+  class keyPerson person
+  class keyHosted external
 ```
 
-Amber shapes are people, grey boxes are hosted services outside the
-container, and arrows are runtime requests. Serving everything from one origin
-is
+Serving everything from one origin is
 [ADR-0001](adr/0001-single-origin-deployment.md).
 
 Every route is defined in `frontend/src/app/route-map.ts`.
