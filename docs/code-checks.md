@@ -2,7 +2,7 @@
 
 For whoever writes a test or reads a red `verify`: the checks that run against
 the repository before a merge — the test suites, typecheck, build,
-Docs Check and API codegen check that `pnpm run verify` runs — and how to write a test. Checks against
+Docs Check, API codegen check and CSS size budget that `pnpm run verify` runs — and how to write a test. Checks against
 a running site are in [smoke-checks.md](smoke-checks.md).
 
 Most tests run on Node's built-in `node:test` runner through `tsx`; the web
@@ -193,6 +193,26 @@ pnpm --filter @welltutored/scripts run api-codegen
 then commit the result. The check puts the folders back as they were
 afterwards, so it never edits files itself. An Orval upgrade that changes the
 output's formatting trips it too; regenerate in the upgrade's pull request.
+
+## Bundle size
+
+`frontend/scripts/verify-css-build.mjs` holds a size budget for the primary
+stylesheet, set about 7% above its size in October 2026 so that growth is a
+decision rather than drift. `pnpm run verify` checks it after the build. To
+check the budget alone, run
+`pnpm --filter @welltutored/frontend run build` followed by
+`pnpm --filter @welltutored/frontend run check:css-size`; the script prints the
+current size. Why the shared CSS is the size it is is in
+[architecture.md](architecture.md#bundle-size).
+
+For the JavaScript, run
+`pnpm --filter @welltutored/frontend run report:bundle-size`. It builds the
+frontend, then reads the chunk report that a plugin in
+`frontend/vite.config.ts` writes on every build, and prints each chunk's raw
+and gzip size, marked as entry or lazy, followed by the twenty largest modules
+in the entry chunk and in any chunk that imports more than one other. Unlike
+`check:css-size` it has no budget, and nothing runs it in CI: it is for looking
+into a size change by hand.
 
 ## Before a pull request
 

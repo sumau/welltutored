@@ -1,8 +1,8 @@
 # The API contract
 
 For whoever adds or changes an API endpoint: where the contract between the
-frontend and the backend is written down, what is generated from it, and the
-steps for changing it.
+frontend and the backend is written down, what is generated from it, how forms
+use it, and the steps for changing it.
 
 ## Spec-first
 
@@ -54,11 +54,22 @@ regenerate, and typecheck fails wherever code still expects the old shape.
 The generated code is committed and never edited by hand, and nothing reads
 the spec at runtime, so builds and deploys don't run Orval.
 
-The Workspace forms are the exception. `resource-editor.tsx` and `profile.tsx`
-in `frontend/src/pages/workspace`, and `TutorFormDialog.tsx`, validate with
-Zod schemas written by hand, so their rules can drift from the spec. That
-check only gives quicker feedback; the server's check against the generated
-schemas is the one that counts.
+## Forms
+
+The Workspace forms don't use the generated schemas. They validate with Zod
+schemas written by hand, so their rules can drift from the spec: each form
+whose file imports `zod` does this, currently
+`frontend/src/pages/workspace/resource-editor.tsx`,
+`frontend/src/pages/workspace/profile.tsx` and
+`frontend/src/components/workspace/TutorFormDialog.tsx`. That check only gives
+quicker feedback; the server's check against the generated schemas is the one
+that counts.
+
+A form that must submit once guards itself with a synchronous ref as well as
+the mutation's pending state, as `submissionInFlight` does in
+`frontend/src/components/EnquiryForm.tsx`. Keyboard activation can fire a
+second submit before React renders the first one as pending, so the pending
+flag alone lets a duplicate through.
 
 ## Why the generator lives in `scripts`
 
