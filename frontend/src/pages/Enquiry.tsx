@@ -72,14 +72,14 @@ export default function Enquiry() {
       <section className="px-6 md:px-[30px] py-[40px] md:py-[64px]" aria-labelledby="enquiry-form-title">
         <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[0.82fr_1.18fr] gap-[40px] md:gap-[72px] items-start">
           <div className="grid gap-[24px]">
-            <ol className="list-none p-0 m-0 grid gap-[12px]">
+            <ol className="list-none p-0 m-0 grid gap-[16px]">
               {[
                 "Choose the tutor whose subject experience feels like the right fit.",
                 "Share the student's age, subject, level and current context.",
                 "Well Tutored reviews the enquiry and helps arrange the next step.",
               ].map((step, index) => (
-                <li key={step} className="flex gap-[14px] rounded-[20px] bg-secondary px-[18px] py-[16px] text-[16px] leading-[1.5]">
-                  <span className="w-[34px] h-[34px] shrink-0 rounded-full bg-primary flex items-center justify-center font-serif text-[16px] pb-0.5" aria-hidden="true">{index + 1}</span>
+                <li key={step} className="flex items-center gap-[14px] text-[16px] leading-[1.5]">
+                  <span className="w-[34px] h-[34px] shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold text-[16px]" aria-hidden="true">{index + 1}</span>
                   {step}
                 </li>
               ))}
