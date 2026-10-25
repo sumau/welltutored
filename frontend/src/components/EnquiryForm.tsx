@@ -166,20 +166,17 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
       {compact ? (
         <div className="mb-6">
           <h3 className="font-serif text-[26px] md:text-[30px] mb-2 text-foreground">Make an enquiry</h3>
-          <p className="text-muted-foreground text-[15px] leading-[1.5]">
-            {tutor
-              ? "We’ll record your enquiry securely and keep your details private."
-              : "Tell us which tutor you are interested in. We’ll record your enquiry securely and keep your details private."}
-          </p>
+          {!tutor && (
+            <p className="text-muted-foreground text-[15px] leading-[1.5]">
+              Tell us which tutor you are interested in.
+            </p>
+          )}
         </div>
       ) : (
         <div className="mb-8">
-           <h2 id={compact ? undefined : "enquiry-form-title"} className="font-serif text-[32px] md:text-[40px] leading-[1.08] mb-3 text-foreground">
+           <h2 id={compact ? undefined : "enquiry-form-title"} className="font-serif text-[32px] md:text-[40px] leading-[1.08] text-foreground">
             Ask about {tutor ? tutor.name.split(' ')[0] : 'a tutor'}
           </h2>
-          <p className="text-muted-foreground text-[16px] leading-[1.6]">
-            {tutor ? `${tutor.name} is selected.` : 'Select a tutor.'}
-          </p>
         </div>
       )}
 
@@ -191,7 +188,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
         aria-describedby="enquiry-form-instructions"
       >
         <p id="enquiry-form-instructions" className="text-[14px] text-muted-foreground leading-[1.5]">
-          Fields marked with an asterisk are required. We will use these details only to respond to this enquiry.
+          Fields marked with an asterisk are required.
         </p>
         {/* Parent Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
