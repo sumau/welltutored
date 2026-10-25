@@ -4,16 +4,25 @@ For whoever needs to know how the code fits together: routes, authentication,
 API boundaries and publishing rules. Why the less obvious decisions were made is
 in [adr/](adr/).
 
-One container, run on Fly.io in production ([pipeline.md](pipeline.md)),
-serves both the React frontend and the Express API from the same origin (see [ADR-0001](adr/0001-single-origin-deployment.md)), so the browser treats them as one site. Only
-the API talks to the PostgreSQL database, through Drizzle. Both the frontend
-and the backend use [code generated from the OpenAPI spec](api-contract.md),
-which keeps the two sides in step. The API writes its errors to its log,
-which Fly collects and `fly logs` shows. Nothing alerts on them, and errors in
-the browser go nowhere: the page shows a message and logs to the console.
-The application is organised around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in `frontend/src/app/route-map.ts`.
+## Overview
 
-## Runtime: where a request goes
+One container, run on Fly.io in production ([pipeline.md](pipeline.md)),
+serves both the React frontend and the Express API from the same origin (see
+[ADR-0001](adr/0001-single-origin-deployment.md)), so the browser treats them
+as one site. Only the API talks to the PostgreSQL database, through Drizzle.
+Both the frontend and the backend use
+[code generated from the OpenAPI spec](api-contract.md), which keeps the two
+sides in step. The API writes its errors to its log, which Fly collects and
+`fly logs` shows. Nothing alerts on them, and errors in the browser go nowhere:
+the page shows a message and logs to the console. The application is organised
+around two user-facing surfaces: the public website and the private
+[Workspace](../GLOSSARY.md#the-private-area). Routes are defined in
+`frontend/src/app/route-map.ts`.
+
+In the diagram below, each solid arrow is a request, pointing from whoever
+sends it; the reply comes back along the same arrow.
+
+### Runtime: where a request goes
 
 ```mermaid
 flowchart LR
