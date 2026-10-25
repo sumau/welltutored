@@ -221,6 +221,14 @@ body:has(.public-site) {
     }
     .note-fan > .note-card:hover { z-index: 1; }
   }
+  /* A plain sheet of the same paper, for forms: square-cut and shadowed
+     like a note, but straight and unruled so fields stay easy to fill in. */
+  .paper-sheet {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 3px;
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.1), 0 16px 30px -18px hsl(var(--foreground) / 0.45);
+  }
   /* Text in the body sits on the rules: every line is one rule tall. */
   .note-card-body {
     line-height: var(--rule);

@@ -8,9 +8,10 @@ interface EnquiryFormProps {
   tutor?: Tutor;
   tutors?: Tutor[];
   compact?: boolean;
+  onTutorChange?: (slug: string) => void;
 }
 
-export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryFormProps) {
+export function EnquiryForm({ tutor, tutors = [], compact = false, onTutorChange }: EnquiryFormProps) {
   const createEnquiry = useCreateEnquiry();
   const [receipt, setReceipt] = useState<EnquiryReceipt | null>(null);
   const [submitError, setSubmitError] = useState("");
@@ -32,6 +33,11 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
     subjectLevel: "",
     message: ""
   });
+
+  // Tell the page which tutor is chosen, so it can show her card.
+  useEffect(() => {
+    onTutorChange?.(form.tutorSlug);
+  }, [form.tutorSlug, onTutorChange]);
 
   const update = (key: keyof typeof form, value: string) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -128,7 +134,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
     return (
       <div
         ref={receiptRef}
-        className={`text-center py-10 px-4 ${compact ? 'bg-card rounded-[20px]' : ''}`}
+        className={`text-center py-10 px-4 ${compact ? 'paper-sheet' : ''}`}
         data-testid="enquiry-success"
         role="status"
         aria-live="polite"
@@ -156,7 +162,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
   }
 
   return (
-    <div className={`${compact ? 'bg-card rounded-[20px] border border-border p-6 md:p-8' : ''}`} id="enquire" data-testid="enquiry-form-container">
+    <div className={`${compact ? 'paper-sheet p-6 md:p-8' : ''}`} id="enquire" data-testid="enquiry-form-container">
       {tutor?.intake === "full" ? (
         <div className="rounded-[20px] border border-border bg-background p-6 text-[15px] text-muted-foreground leading-[1.6]" data-testid="enquiry-unavailable">
           {tutor.name} is not currently accepting enquiries. Please choose another tutor or check back later.

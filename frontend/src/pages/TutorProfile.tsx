@@ -16,7 +16,7 @@ import {
 
 export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
   return tutor.intake === "full" ? (
-    <div className="bg-card rounded-[20px] p-8 text-[15px] text-muted-foreground leading-[1.6]" data-testid="tutor-enquiry-unavailable">
+    <div className="paper-sheet p-8 text-[15px] text-muted-foreground leading-[1.6]" data-testid="tutor-enquiry-unavailable">
       {tutor.name} is not currently accepting enquiries. Please check back later or choose another tutor.
     </div>
   ) : (

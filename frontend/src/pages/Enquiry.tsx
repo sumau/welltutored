@@ -1,9 +1,11 @@
+import * as React from "react";
 import { useListTutors } from "@/client";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
+import { TutorCard } from "@/components/TutorCard";
 import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import {
   publicTutorQueryOptions,
@@ -20,6 +22,7 @@ export default function Enquiry() {
     query: publicTutorQueryOptions,
     request: publicTutorRequestOptions,
   });
+  const [chosenSlug, setChosenSlug] = React.useState("");
 
   if (isLoading) return <LoadingState message="Loading enquiry form..." />;
   if (error) {
@@ -32,6 +35,7 @@ export default function Enquiry() {
   }
 
   const contactableTutors = tutors?.filter((tutor) => tutor.intake !== "full") ?? [];
+  const chosenTutor = contactableTutors.find((tutor) => tutor.slug === chosenSlug);
 
   if (!contactableTutors.length) {
     return (
@@ -84,6 +88,16 @@ export default function Enquiry() {
                 </li>
               ))}
             </ol>
+            {/* Her card once she's chosen, so it's clear who the enquiry is for */}
+            {chosenTutor && (
+              <TutorCard
+                key={chosenTutor.slug}
+                tutor={chosenTutor}
+                rest="-1.5deg"
+                className="hidden md:flex mt-[24px] max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
+                testId="enquiry-tutor-card"
+              />
+            )}
             {PUBLIC_RESOURCES_ENABLED && (
               <Link
                 href="/resources"
@@ -95,8 +109,8 @@ export default function Enquiry() {
             )}
           </div>
 
-          <div className="bg-card rounded-[20px] border border-border p-6 md:p-10">
-            <EnquiryForm tutors={contactableTutors} />
+          <div className="paper-sheet p-6 md:p-10">
+            <EnquiryForm tutors={contactableTutors} onTutorChange={setChosenSlug} />
           </div>
         </div>
       </section>

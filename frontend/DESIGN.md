@@ -235,17 +235,17 @@ card below `md`. The body never goes narrower than 320px.
 
 ## Elevation & Depth
 
-Note cards are the only things with depth: a 1px contact line and a soft
+Note cards and paper sheets are the only things with depth: a 1px contact line and a soft
 shadow below (`0 16px 30px -18px`, 45% indigo), deepening on hover. Buttons,
 fields, sections and dialogs stay flat; dialogs separate themselves with a
 60% indigo scrim.
 
-**The Paper Only Rule.** A shadow means a note card. Anything else that needs
+**The Paper Only Rule.** A shadow means paper: a note card or a sheet. Anything else that needs
 to stand out gets a block of colour or more space.
 
 ## Shapes
 
-Note cards have 3px corners, like cut card. Dialogs and the mobile menu card
+Note cards and paper sheets have 3px corners, like cut card. Dialogs and the mobile menu card
 keep 20px corners, fields 10px, and buttons, badges and the logo disc are full
 pills or circles.
 Borders are 1px hairlines; intake pills use 1.5px so all three states are the
@@ -296,6 +296,15 @@ White note cards with a 1px Hairline edge, for Well Tutored's own words:
 On a tutor's profile, her approach is a note card in her tint, headed
 "Her name's approach", beside her name, subject, intake and summary.
 
+### Enquiry card
+On the enquiry page, once a tutor is chosen in the form, her tutor card
+appears under the steps, so it's clear who the enquiry is for. It is
+hidden below `md` and isn't a link, so the form isn't left by accident.
+
+### Paper sheet
+Forms sit on `.paper-sheet`: white, a Hairline edge, 3px corners and the note
+card shadow, but straight and unruled, so fields stay easy to fill in.
+
 ### Inputs / Fields
 - **Style:** white field, 1px Field Line border, 10px corners, 12px × 14px
   padding, 16px text. Labels sit above in 14px semibold.
@@ -342,6 +351,6 @@ except where they preview a tutor's tint.
   represent Well Tutored.
 - **Don't** add marketplace UI: search bars, filters, star ratings or
   price-sorted grids.
-- **Don't** add shadows outside note cards, gradients or a brand accent
+- **Don't** add shadows outside paper, gradients or a brand accent
   colour to public pages.
 - **Don't** use a tint as text colour or as a pale wash.
