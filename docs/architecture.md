@@ -4,8 +4,8 @@ For whoever needs to know how the code fits together: routes, authentication,
 API boundaries and publishing rules. Why the less obvious decisions were made is
 in [adr/](adr/).
 
-One container serves both the React frontend and the Express API from the same
-origin (see [ADR-0001](adr/0001-single-origin-deployment.md)), so the browser treats them as one site. Only
+One container, run on Fly.io in production ([pipeline.md](pipeline.md)),
+serves both the React frontend and the Express API from the same origin (see [ADR-0001](adr/0001-single-origin-deployment.md)), so the browser treats them as one site. Only
 the API talks to the PostgreSQL database, through Drizzle. Both the frontend
 and the backend use [code generated from the OpenAPI spec](api-contract.md),
 which keeps the two sides in step. The application is organised
@@ -31,7 +31,7 @@ flowchart LR
 
   workspace -- "sign in" --> clerk
 
-  subgraph container["Container: one origin"]
+  subgraph container["Container: one origin<br/>(Fly.io in production)"]
     static["Frontend build<br/>(static files)"]
     api["Express API under /api<br/>clerkMiddleware, Zod validation"]
   end
