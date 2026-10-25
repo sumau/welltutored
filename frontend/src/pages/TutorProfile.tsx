@@ -175,34 +175,33 @@ export default function TutorProfile() {
         </div>
       </div>
 
-      {/* Hero: her note card from Home, larger, beside her approach */}
-      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[40px] lg:gap-[64px] items-center">
-        <div
-          className="note-card w-full max-w-[580px] px-[26px] md:px-[34px] pt-[26px] md:pt-[32px] pb-[24px] md:pb-[30px]"
-          style={{ "--tint": tutor.tint, "--rest": "-1.5deg" } as React.CSSProperties}
-        >
-          <div className="note-card-head flex items-start justify-between gap-[14px] pb-[14px]">
-            <h1 className="m-0 text-[clamp(40px,4.6vw,60px)] leading-[0.98] tracking-[-0.04em] font-bold" data-testid="tutor-name">
-              {tutor.name}
-            </h1>
-            <span className={`shrink-0 inline-flex items-center gap-[8px] rounded-full h-[30px] px-[13px] text-[15px] font-semibold leading-none mt-[6px] ${intakePillClasses[tutor.intake]}`}>
-              <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
-              {intakeLabels[tutor.intake]}
-            </span>
+      {/* Hero: who she is, beside her approach on a note card in her tint */}
+      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[40px] lg:gap-[56px] items-center">
+        <div>
+          <h1 className="font-serif text-[clamp(44px,5vw,68px)] leading-[1.02] mb-[10px]" data-testid="tutor-name">
+            {tutor.name}
+          </h1>
+          <p className="text-[19px] font-semibold mb-[18px]" data-testid="tutor-subject-kicker">
+            {tutor.subject}
+          </p>
+          <div className={`inline-flex items-center gap-[8px] rounded-full px-[14px] py-[6px] text-[15px] font-semibold mb-[22px] ${intakePillClasses[tutor.intake]}`}>
+            <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
+            {intakeLabels[tutor.intake]}
           </div>
-          <div className="note-card-body text-[17px] [--rule:30px]">
-            <p className="m-0 text-[19px] font-bold" data-testid="tutor-subject-kicker">{tutor.subject}</p>
-            <p className="m-0">{tutor.university}, {tutor.qualification}</p>
-            <p className="m-0 mt-[30px] max-w-[36em]" data-testid="tutor-intro">{tutor.profileSummary}</p>
-          </div>
+          <p className="max-w-[36em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="tutor-intro">
+            {tutor.profileSummary}
+          </p>
         </div>
-        <figure className="m-0">
-          <blockquote className="font-serif text-[22px] md:text-[26px] leading-[1.35] m-0 text-foreground">
+        <figure
+          className="note-card w-full max-w-[580px] m-0 px-[26px] md:px-[34px] pt-[24px] md:pt-[30px] pb-[24px] md:pb-[30px]"
+          style={{ "--tint": tutor.tint, "--rest": "1.5deg" } as React.CSSProperties}
+        >
+          <figcaption className="note-card-head text-[clamp(26px,2.6vw,32px)] leading-[1.1] tracking-[-0.03em] font-bold pb-[12px]">
+            {firstName}'s approach
+          </figcaption>
+          <blockquote className="note-card-body text-[20px] md:text-[22px] [--rule:34px] m-0">
             {tutor.teachingIntro}
           </blockquote>
-          <figcaption className="text-[15px] text-foreground/80 mt-[24px] font-semibold">
-            {firstName} on her approach
-          </figcaption>
         </figure>
       </section>
 
