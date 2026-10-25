@@ -10,6 +10,14 @@ import {
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
+// A tutor's intake as a pill. The fill steps down with availability, so it
+// reads the same on every tint: solid, then white, then only an outline.
+const intakePillClasses = {
+  accepting: "bg-foreground text-background",
+  limited: "bg-white text-foreground",
+  full: "border-[1.5px] border-foreground/50 text-foreground/80",
+} as const;
+
 export default function Home() {
   const { data: tutors, isLoading: tutorsLoading, error: tutorsError, refetch: refetchTutors } = useListTutors({
     query: publicTutorQueryOptions,
@@ -62,8 +70,13 @@ export default function Home() {
                     <b className="block text-[19px] font-bold leading-[1.3] mb-[6px]">{tutor.subject}</b>
                     <span className="text-[16px] leading-[1.45]">{tutor.university}, {tutor.qualification}</span>
                     <p className="text-[16px] leading-[1.5] m-0 mt-[16px] pt-[16px] border-t border-foreground/20 line-clamp-3">{tutor.profileSummary}</p>
-                    <span className="flex justify-between gap-[16px] mt-auto pt-[24px] text-[16px] font-semibold" aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
-                      {intakeLabels[tutor.intake]}
+                    <span className="flex items-center justify-between gap-[16px] mt-auto pt-[24px] text-[16px] font-semibold">
+                      <span className={`inline-flex items-center gap-[8px] rounded-full px-[12px] py-[5px] text-[15px] ${intakePillClasses[tutor.intake]}`} aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
+                        {tutor.intake !== "full" && (
+                          <span className={`w-[8px] h-[8px] rounded-full ${tutor.intake === "accepting" ? "bg-[#5EE08A]" : "bg-[#F2A93B]"}`} aria-hidden="true" />
+                        )}
+                        {intakeLabels[tutor.intake]}
+                      </span>
                       <span className="underline underline-offset-4 decoration-2 group-hover:decoration-[3px]" aria-hidden="true">Her profile</span>
                     </span>
                   </Link>
