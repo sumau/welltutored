@@ -1,6 +1,6 @@
 ---
 name: Well Tutored
-description: Women tutors for young women, each in her own colour.
+description: Women tutors for young women, each on a note card in her own colour.
 colors:
   school-indigo: "hsl(247 44% 21%)"
   school-indigo-lift: "hsl(247 44% 34%)"
@@ -58,11 +58,13 @@ typography:
     fontWeight: 600
     lineHeight: 1.4
 rounded:
+  note: "3px"
   field: "10px"
-  card: "20px"
+  panel: "20px"
   pill: "9999px"
 spacing:
-  card-gap: "16px"
+  rule: "28px"
+  card-gap: "28px"
   gutter: "24px"
   gutter-wide: "30px"
   card-pad: "26px"
@@ -80,8 +82,13 @@ components:
   tutor-card:
     backgroundColor: "{colors.tint-blue}"
     textColor: "{colors.school-indigo}"
-    rounded: "{rounded.card}"
-    padding: "30px"
+    rounded: "{rounded.note}"
+    padding: "24px 26px 20px"
+  paper-note:
+    backgroundColor: "{colors.page-white}"
+    textColor: "{colors.school-indigo}"
+    rounded: "{rounded.note}"
+    padding: "14px 16px"
   intake-pill-accepting:
     backgroundColor: "{colors.school-indigo}"
     textColor: "{colors.page-white}"
@@ -107,18 +114,19 @@ Components.
 
 ## Overview
 
-**Creative North Star: "The Named Women"**
+**Creative North Star: "The Named Women, on note cards"**
 
-The tutors are the design. Each one appears as her name, set big and bold, on
-a band of her own colour, with nothing between her and the reader. The page
-around her is white and written in one dark indigo, so the only colour on
-screen belongs to the women. There are no photographs of students, crests or
-decorative illustration. A visitor remembers each tutor by her colour, not a
-brand palette.
+The tutors are the design. Each one appears as a ruled note card in her own
+colour, her name set big and bold above a heavier rule, laid on the page at a
+slight angle as if on a desk. The page around her is white and written in one
+dark indigo, so the only colour on screen belongs to the women. Well Tutored's
+own words go on plain white paper notes. There are no photographs of students,
+crests or decorative illustration. A visitor remembers each tutor by her
+colour, not a brand palette.
 
 The voice is plain and grown-up, for a parent and a teenage girl reading the
-same screen. Type is large and tight, shapes are soft and generously rounded,
-and fills are solid. The result is friendly without being cute and serious
+same screen. Type is large and tight, cards are nearly square-cornered paper
+with faint ruled lines, and buttons and badges are soft pills. The result is friendly without being cute and serious
 without being stuffy. Density is low: a few tutors, a few steps, a lot of
 white.
 
@@ -130,7 +138,9 @@ and marketplace UI (search bars, filters, star ratings, price-sorted grids).
 - One ink colour, School Indigo, for all text, buttons and the footer.
 - Colour comes only from each tutor's own tint, at full strength.
 - Big, bold, tightly tracked sans headings in a single family.
-- Flat surfaces, soft 20px cards, pill-shaped buttons and badges.
+- Note cards: 3px corners, ruled lines, a soft paper shadow, a slight resting
+  tilt that straightens on hover.
+- Pill-shaped buttons and badges; everything else is flat.
 - Low density and generous white space.
 
 ## Colors
@@ -172,8 +182,11 @@ is a tutor's tint. No brand accent, no gradient, no coloured section
 backgrounds that aren't hers.
 
 **The Full Strength Rule.** A tint is used at full strength as a background,
-never as a faint wash or a text colour. Hover lightens it (75% tint, 25%
-white) so the indigo text keeps its contrast.
+never as a faint wash or a text colour.
+
+**The White Paper Rule.** A note that speaks for Well Tutored rather than one
+tutor (the hero notes, a tutor's teaching points) is white, never a tint. A
+tint on it would read as that tutor's.
 
 ## Typography
 
@@ -184,10 +197,10 @@ white) so the indigo text keeps its contrast.
 for names and the hero, 600 for section headings and labels, 400 for reading.
 
 ### Hierarchy
-- **Display** (700, clamp 46–108px, 0.92, -0.04em): the Home hero headline
+- **Display** (700, clamp 46–92px, 0.92, -0.04em): the Home hero headline
   only.
-- **Tutor name** (700, clamp 36–46px, 0.95, -0.04em): a tutor's name on her
-  card and profile. The largest thing in any card.
+- **Tutor name** (700, clamp 30–36px on her card, 1.0, -0.04em; clamp 44–68px
+  on her profile): the largest thing on her card.
 - **Headline** (600, clamp 32–48px, 1.05, -0.03em): section headings ("Meet
   the tutors", "How an enquiry works").
 - **Lead** (500, clamp 20–26px, 1.35): the hero's supporting line, capped at
@@ -212,26 +225,29 @@ Content sits in a centred column: 1210px for the nav, hero and profile, 1150px
 for section content. Gutters are 24px on small screens and 30px from `md`
 (768px). Sections breathe with 56px of vertical padding, 80px from `md`.
 
-The tutor grid is one column, two from `sm` (640px) and three from `xl`
-(1280px), with 16px gaps. The hero is one column, splitting into a 1.35 : 1
-headline-and-lead pair from `lg` (1024px), aligned to the bottom, with a faint
-2px rule (15% indigo) between them. Desktop nav links collapse into a rounded dropdown
+The tutor grid is one column, two from `md` (768px, capped at 908px wide) and
+three from `xl` (1280px), with 28px column and 36px row gaps. Cards are square
+from `sm` and grow if her text needs more room. The Home hero is the headline
+with its lead beneath, beside a row of three paper notes from `lg` (1024px),
+1 : 1.1. Below `lg` the notes sit under the headline; below `sm` (640px) they
+stack. Desktop nav links collapse into a rounded dropdown
 card below `md`. The body never goes narrower than 320px.
 
 ## Elevation & Depth
 
-The public site is flat. There are no shadows on cards, buttons or dialogs.
-Depth comes from colour blocks: a tinted card on white, a white section
-against a Mist band, the full-bleed indigo footer. Dialogs separate
-themselves with a 60% indigo scrim, not a shadow.
+Note cards are the only things with depth: a 1px contact line and a soft
+shadow below (`0 16px 30px -18px`, 45% indigo), deepening on hover. Buttons,
+fields, sections and dialogs stay flat; dialogs separate themselves with a
+60% indigo scrim.
 
-**The Flat Colour Rule.** If something needs to stand out, give it a block of
-colour or more space, never a drop shadow.
+**The Paper Only Rule.** A shadow means a note card. Anything else that needs
+to stand out gets a block of colour or more space.
 
 ## Shapes
 
-The form language is soft and round. Cards and dialogs have 20px corners,
-fields 10px, and buttons, badges and the logo disc are full pills or circles.
+Note cards have 3px corners, like cut card. Dialogs and the mobile menu card
+keep 20px corners, fields 10px, and buttons, badges and the logo disc are full
+pills or circles.
 Borders are 1px hairlines; intake pills use 1.5px so all three states are the
 same height. Section dividers are straight rules: 1px hairlines, or 2px
 indigo above each enquiry step.
@@ -253,15 +269,32 @@ indigo above each enquiry step.
   only for "Full for now". A green or amber dot leads the first two.
 - **Rule:** the fill carries the meaning, so it reads the same on any tint.
 
-### Tutor card (signature)
-- **Corner Style:** 20px.
-- **Background:** the tutor's tint at full strength.
-- **Content:** her name (Tutor name style), subject (bold title), university
-  and qualification, a three-line summary under a 20% indigo rule, and her
-  intake pill pinned to the bottom.
-- **Internal Padding:** 26px, 30px from `md`.
-- **Hover / Focus:** the tint lightens by a quarter over 200ms. Nothing lifts
-  or moves.
+### Note card (signature)
+The one card on the public site, in `.note-card` in `src/index.css`.
+- **Shape:** 3px corners, the soft paper shadow, resting at a slight angle
+  (between -1.5° and 1.5°, set per card with `--rest`).
+- **Head:** the title above a 2px rule at 55% indigo (`.note-card-head`).
+- **Body:** text sits on faint ruled lines (16% indigo) every 28px; each line
+  of text is one rule tall (`.note-card-body`, `--rule` to change the
+  spacing).
+- **Hover / Focus:** lifts 6px and straightens over 320ms.
+
+### Tutor card
+- **Background:** the tutor's tint.
+- **Content:** her name with her intake pill beside it, then on the rules her
+  subject, university and qualification, and her summary (up to five lines).
+- **Shape:** square from `sm`. It links to her profile.
+
+### Paper notes
+White note cards with a 1px Hairline edge, for Well Tutored's own words:
+- **Home hero:** three notes ("Small and hand-picked", "How we teach",
+  "Helping young women grow") side by side, overlapping only at their edges,
+  dealt in once on arrival.
+- **Profile, "Learning with":** her teaching points, on her tint section.
+
+### Approach card
+On a tutor's profile, her approach is a note card in her tint, headed
+"Her name's approach", beside her name, subject, intake and summary.
 
 ### Inputs / Fields
 - **Style:** white field, 1px Field Line border, 10px corners, 12px × 14px
@@ -297,7 +330,7 @@ except where they preview a tutor's tint.
 - **Do** set tutors' names large and bold; the name is the headline of her
   card.
 - **Do** use School Indigo for every piece of text and every primary button.
-- **Do** keep public surfaces flat and separate them with colour or space.
+- **Do** use the note card for any card, and keep every other surface flat.
 - **Do** keep public headings in Instrument Sans, bold and tightly tracked.
 
 ### Don't:
@@ -309,6 +342,6 @@ except where they preview a tutor's tint.
   represent Well Tutored.
 - **Don't** add marketplace UI: search bars, filters, star ratings or
   price-sorted grids.
-- **Don't** add drop shadows, gradients or a brand accent colour to public
-  pages.
+- **Don't** add shadows outside note cards, gradients or a brand accent
+  colour to public pages.
 - **Don't** use a tint as text colour or as a pale wash.
