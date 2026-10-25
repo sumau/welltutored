@@ -10,6 +10,9 @@ import {
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
+// Each note card rests at its own slight angle, as if laid on a desk.
+const CARD_REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
+
 export default function Home() {
   const { data: tutors, isLoading: tutorsLoading, error: tutorsError, refetch: refetchTutors } = useListTutors({
     query: publicTutorQueryOptions,
@@ -54,27 +57,29 @@ export default function Home() {
               onRetry={refetchTutors}
             />
           ) : (
-            <ul className="list-none m-0 p-0 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[16px]" data-testid="tutor-grid">
-              {(tutors || []).map((tutor) => (
-                <li key={tutor.id}>
+            <ul className="list-none m-0 p-0 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px]" data-testid="tutor-grid">
+              {(tutors || []).map((tutor, index) => (
+                <li key={tutor.id} className="flex">
                   <Link
                     href={`/tutors/${tutor.slug}`}
-                    className="tutor-band flex flex-col h-full rounded-[20px] p-[26px] md:p-[30px]"
-                    style={{ "--tint": tutor.tint } as React.CSSProperties}
+                    className="note-card flex flex-col w-full sm:aspect-[3/2] sm:max-w-[560px] lg:max-w-none px-[26px] pt-[24px] pb-[20px]"
+                    style={{ "--tint": tutor.tint, "--rest": CARD_REST[index % CARD_REST.length] } as React.CSSProperties}
                     data-testid={`tutor-card-${tutor.slug}`}
                   >
-                    <h3 className="m-0 text-[clamp(36px,3.6vw,46px)] leading-[0.95] tracking-[-0.04em] font-bold mb-[14px]">
-                      {tutor.name}
-                    </h3>
-                    <b className="block text-[19px] font-bold leading-[1.35] mb-[6px]">{tutor.subject}</b>
-                    <span className="text-[16px] leading-[1.45]">{tutor.university}, {tutor.qualification}</span>
-                    <p className="text-[16px] leading-[1.5] m-0 mt-[16px] pt-[16px] border-t border-foreground/20 line-clamp-3">{tutor.profileSummary}</p>
-                    <span className="flex mt-auto pt-[24px] text-[16px] font-semibold">
-                      <span className={`inline-flex items-center gap-[8px] rounded-full px-[12px] py-[6px] text-[15px] ${intakePillClasses[tutor.intake]}`} aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
+                    <div className="note-card-head flex items-start justify-between gap-[12px] pb-[12px]">
+                      <h3 className="m-0 text-[clamp(30px,2.6vw,36px)] leading-[1] tracking-[-0.04em] font-bold">
+                        {tutor.name}
+                      </h3>
+                      <span className={`shrink-0 inline-flex items-center gap-[8px] rounded-full h-[28px] px-[12px] text-[15px] font-semibold leading-none mt-[2px] ${intakePillClasses[tutor.intake]}`} aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
                         <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
                         {intakeLabels[tutor.intake]}
                       </span>
-                    </span>
+                    </div>
+                    <div className="note-card-body flex-1 text-[16px]">
+                      <b className="block text-[18px] font-bold">{tutor.subject}</b>
+                      <span className="block">{tutor.university}, {tutor.qualification}</span>
+                      <p className="m-0 mt-[28px] line-clamp-2">{tutor.profileSummary}</p>
+                    </div>
                   </Link>
                 </li>
               ))}

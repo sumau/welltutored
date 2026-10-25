@@ -188,15 +188,33 @@ body:has(.public-site) {
     outline-offset: 3px;
   }
 
-  /* A tutor's band: her tint at full strength, a shade lighter on hover, so
-     the dark text keeps its contrast. */
-  .tutor-band {
+  /* A tutor's note card: her tint at full strength, nearly square corners,
+     faint ruled lines every 28px under a heavier rule beneath her name. Each
+     card rests at its own slight angle and lifts straight when pointed at. */
+  .note-card {
+    --rule: 28px;
     background-color: var(--tint);
-    transition: background-color 200ms ease-out;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.1), 0 16px 30px -18px hsl(var(--foreground) / 0.45);
+    transform: rotate(var(--rest, 0deg));
+    transition: transform 320ms cubic-bezier(.16, 1, .3, 1), box-shadow 320ms cubic-bezier(.16, 1, .3, 1);
   }
-  .tutor-band:hover,
-  .tutor-band:focus-visible {
-    background-color: color-mix(in srgb, var(--tint) 75%, white);
+  .note-card:hover,
+  .note-card:focus-visible {
+    transform: translateY(-6px) rotate(0deg);
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.1), 0 26px 40px -20px hsl(var(--foreground) / 0.5);
+  }
+  .note-card-head {
+    border-bottom: 2px solid hsl(var(--foreground) / 0.55);
+  }
+  /* Text in the body sits on the rules: every line is one rule tall. */
+  .note-card-body {
+    line-height: var(--rule);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(var(--rule) - 1px),
+      hsl(var(--foreground) / 0.16) calc(var(--rule) - 1px) var(--rule)
+    );
   }
 }
 
@@ -216,29 +234,9 @@ body:has(.public-site) {
   }
 }
 
-@layer utilities {
-  .editorial-rule {
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--border)) 72%);
-    height: 1px;
-  }
-
-  .lift-on-hover {
-    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
-  }
-
-  .lift-on-hover:hover {
-    transform: translateY(-4px);
-  }
-}
-
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes soft-pulse {
-  0%, 100% { opacity: .55; }
-  50% { opacity: 1; }
 }
 
 .page-reveal {

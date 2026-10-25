@@ -15,10 +15,10 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
         aria-live="polite"
         aria-busy="true"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[16px]" aria-hidden="true">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px]" aria-hidden="true">
           {Array.from({ length: 3 }, (_, index) => (
             <div
-              className="bg-card rounded-[20px] p-[24px] min-h-[300px] border border-transparent"
+              className="bg-card rounded-[3px] p-[24px] min-h-[300px] sm:min-h-0 sm:aspect-[3/2] sm:max-w-[560px] lg:max-w-none border border-transparent"
               data-testid={`tutor-card-skeleton-${index + 1}`}
               key={index}
             >
