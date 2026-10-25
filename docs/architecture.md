@@ -5,53 +5,56 @@ API boundaries and publishing rules. Why the less obvious decisions were made is
 in [adr/](adr/).
 
 One container serves both the React frontend and the Express API from the same
-origin (scheme, host and port), so the browser treats them as one site. Only
+origin (see [ADR-0001](adr/0001-single-origin-deployment.md)), so the browser treats them as one site. Only
 the API talks to the PostgreSQL database, through Drizzle. Both the frontend
 and the backend use [code generated from the OpenAPI spec](api-contract.md),
 which keeps the two sides in step. The application is organised
-around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area).
+around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in `frontend/src/app/route-map.ts`.
 
 ```mermaid
 flowchart LR
-  visitor(["👤 Visitor"]) --> public
-  tutor(["👤 Tutor or owner"]) --> workspace
   classDef person fill:#fde68a,stroke:#b45309,stroke-width:2px,color:#1f2937
-  class visitor,tutor person
-
-  subgraph browser["Browser: React app"]
-    public["Public website<br/>(never loads Clerk)"]
-    workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
-  end
-
-  workspace -- "sign in" --> clerk["Clerk<br/>(hosted)"]
-
-  subgraph container["Container: one origin"]
-    static["Frontend build<br/>(static files)"]
-    api["Express API under /api<br/>clerkMiddleware, Zod validation"]
-  end
-
-  browser -- "page loads" --> static
-  public -- "public reads, enquiries" --> api
-  workspace -- "session cookie" --> api
-  api -- "Drizzle" --> db[("PostgreSQL<br/>(Neon in production)")]
-
   classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
-  class clerk,db external
+  classDef hidden fill:none,stroke:none
+
+  subgraph system[" "]
+    direction LR
+    visitor(["👤 Visitor"]) --> public
+    tutor(["👤 Tutor/owner"]) --> workspace
+
+    subgraph browser["Browser: React app"]
+      public["Public website<br/>(never loads Clerk)"]
+      workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
+    end
+
+    workspace -- "sign in" --> clerk["Clerk<br/>(hosted)"]
+
+    subgraph container["Container: one origin"]
+      static["Frontend build<br/>(static files)"]
+      api["Express API under /api<br/>clerkMiddleware, Zod validation"]
+    end
+
+    browser -- "page loads" --> static
+    public -- "public reads, enquiries" --> api
+    workspace -- "session cookie" --> api
+    api -- "Drizzle" --> db[("PostgreSQL<br/>(Neon in production)")]
+  end
 
   subgraph key["Key"]
+    direction LR
     keyPerson(["Person"])
     keyHosted["Hosted service"]
-    keyFrom[" "] -- "runtime request" --> keyTo[" "]
+    subgraph keyArrow[" "]
+      keyFrom[" "] -- "runtime request" --> keyTo[" "]
+    end
   end
-  class keyPerson person
-  class keyHosted external
-  key ~~~ visitor
+
+  key ~~~ system
+
+  class visitor,tutor,keyPerson person
+  class clerk,db,keyHosted external
+  class system,keyArrow hidden
 ```
-
-Serving everything from one origin is
-[ADR-0001](adr/0001-single-origin-deployment.md).
-
-Every route is defined in `frontend/src/app/route-map.ts`.
 
 ## Public website
 
