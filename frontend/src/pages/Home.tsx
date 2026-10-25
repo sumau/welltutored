@@ -77,36 +77,30 @@ export default function Home() {
       </section>
 
       {/* How an enquiry works */}
-      <section className="px-6 md:px-[30px] py-[64px] md:py-[96px]" aria-labelledby="home-enquiry-title">
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-[40px] md:gap-[80px] items-start">
-          <div>
-            <h2 id="home-enquiry-title" className="text-[clamp(38px,5vw,64px)] leading-[0.92] tracking-[-0.04em] font-bold m-0 mb-[20px]">
+      <section className="bg-card border-t border-border px-6 md:px-[30px] py-[56px] md:py-[80px]" aria-labelledby="home-enquiry-title">
+        <div className="max-w-[1150px] mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-[24px] mb-[40px]">
+            <h2 id="home-enquiry-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0">
               How an enquiry works
             </h2>
-            <p className="text-muted-foreground max-w-[30em] leading-[1.55] text-[18px] mb-[28px]">
-              Choose a tutor, then tell us a little about the student and the support that would help. Well Tutored records the enquiry securely and replies to you.
-            </p>
             <Link
               href="/enquire"
-              className="rounded-full bg-primary text-primary-foreground text-[17px] font-bold px-8 py-4 hover:bg-primary-border transition-colors inline-flex"
+              className="rounded-full bg-primary text-primary-foreground text-[17px] font-semibold px-6 py-3.5 hover:bg-primary-border transition-colors inline-flex w-fit"
               data-testid="button-home-enquire"
             >
               Make an enquiry
             </Link>
-            <p className="text-muted-foreground text-[14px] leading-[1.5] mt-4 mb-0">
-              Your details are shared only for this enquiry and its record.
-            </p>
           </div>
-
-          <ol className="list-none p-0 m-0 grid gap-[28px]">
+          <ol className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-3 gap-[28px] md:gap-[40px]">
             {[
-              "Choose a tutor from the list above",
-              "Tell us the subject and school level",
-              "Well Tutored reviews your enquiry and replies",
-            ].map((step, index) => (
-              <li key={step} className="grid grid-cols-[56px_1fr] items-baseline text-[20px] leading-[1.35] font-medium">
-                <span className="text-[44px] leading-none font-bold tracking-[-0.04em]" aria-hidden="true">{index + 1}</span>
-                {step}
+              ["Choose a tutor", "Pick from the list above. Her profile shows how she teaches."],
+              ["Tell us about the student", "The subject, the school level, and what would help."],
+              ["We reply", "Well Tutored reviews the enquiry and gets back to you."],
+            ].map(([title, text], index) => (
+              <li key={title} className="border-t-2 border-foreground pt-[18px]">
+                <span className="block text-[15px] text-muted-foreground mb-[6px]">Step {index + 1}</span>
+                <b className="block text-[20px] font-semibold mb-[6px]">{title}</b>
+                <span className="text-muted-foreground text-[16px] leading-[1.55]">{text}</span>
               </li>
             ))}
           </ol>
