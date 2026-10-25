@@ -54,34 +54,23 @@ regenerate, and typecheck fails wherever code still expects the old shape.
 The generated code is committed and never edited by hand, and nothing reads
 the spec at runtime, so builds and deploys don't run Orval.
 
-## Forms
+For example, this part of the spec, trimmed, describes the enquiry endpoint:
 
-The Workspace forms don't use the generated schemas. They validate with Zod
-schemas written by hand, so their rules can drift from the spec: each form
-whose file imports `zod` does this, currently
-`frontend/src/pages/workspace/resource-editor.tsx`,
-`frontend/src/pages/workspace/profile.tsx` and
-`frontend/src/components/workspace/TutorFormDialog.tsx`. That check only gives
-quicker feedback; the server's check against the generated schemas is the one
-that counts.
+```yaml
+/enquiries:
+  post:
+    operationId: createEnquiry
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/EnquiryInput"
+```
 
-A form that must submit once guards itself with a synchronous ref as well as
-the mutation's pending state, as `submissionInFlight` does in
-`frontend/src/components/EnquiryForm.tsx`. Keyboard activation can fire a
-second submit before React renders the first one as pending, so the pending
-flag alone lets a duplicate through.
-
-## Why the generator lives in `scripts`
-
-Orval writes into both apps, so it belongs to neither. Its config,
-`scripts/api-codegen/orval.config.ts`, sits in the tooling package next to
-[the API codegen check](code-checks.md#the-api-codegen-check). The generated
-code stays inside each app, because each app imports, builds and deploys it,
-and `scripts` never ships. The spec stays in `backend`, because it is edited
-alongside the handlers.
-
-Where the config says `workspace`, that is Orval's word for an output folder,
-not the [Workspace](../GLOSSARY.md#the-private-area).
+From `operationId: createEnquiry`, Orval generates `useCreateEnquiry` and
+`CreateEnquiryBody`. `frontend/src/components/EnquiryForm.tsx` sends an
+enquiry with the hook, and the handler in `backend/src/api/routes/enquiries.ts`
+checks the request with the schema.
 
 ## Change an endpoint
 
@@ -96,8 +85,49 @@ Run the commands inside the container: prefix them with
    ```
 
 3. Fix what typecheck reports, then update the handler in
-   `backend/src/api/routes` and the components that call the hook.
+   `backend/src/api/routes` and the components that call the hook. If a form
+   for the endpoint validates with hand-written Zod (see [Forms](#forms)),
+   update its schema to match: typecheck can't see a changed rule such as a
+   new `maxLength`.
 4. Commit the spec, the generated code and the hand-written changes together.
 
 If you skip step 2, [the API codegen check](code-checks.md#the-api-codegen-check)
 fails `verify` and names the command to run.
+
+## Forms
+
+A form sends what someone typed to the API through a **mutation**: React
+Query's name for a hook that changes data, such as `useCreateEnquiry`, as
+opposed to one that only reads, such as `useListResources`.
+
+The Workspace forms also check what was typed before sending it, with Zod
+schemas written by hand rather than the generated ones:
+
+- `frontend/src/pages/workspace/resource-editor.tsx`: a tutor writes or edits
+  a resource.
+- `frontend/src/pages/workspace/profile.tsx`: a tutor edits their profile.
+- `frontend/src/components/workspace/TutorFormDialog.tsx`: the Owner creates a
+  draft tutor profile.
+
+A form that does this imports `zod`, which is how to find a new one. Its rules
+can drift from the spec, and the form's check only gives quicker feedback: the
+server's check against the generated schemas is the one that counts.
+
+A form that must submit once guards itself with a ref as well as the
+mutation's pending state, as `submissionInFlight` does in
+`frontend/src/components/EnquiryForm.tsx`. A ref changes the moment it is set,
+while the pending state changes only when React next redraws the form.
+Keyboard activation can fire a second submit before that redraw, so the
+pending state alone lets a duplicate through.
+
+## Why the generator lives in `scripts`
+
+Orval writes into both apps, so it belongs to neither. Its config,
+`scripts/api-codegen/orval.config.ts`, sits in the tooling package next to
+[the API codegen check](code-checks.md#the-api-codegen-check). The generated
+code stays inside each app, because each app imports, builds and deploys it,
+and `scripts` never ships. The spec stays in `backend`, because it is edited
+alongside the handlers.
+
+Where the config says `workspace`, that is Orval's word for an output folder,
+not the [Workspace](../GLOSSARY.md#the-private-area).
