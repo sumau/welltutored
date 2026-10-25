@@ -197,11 +197,6 @@ body:has(.public-site) {
   .tutor-band:focus-visible {
     background-color: color-mix(in srgb, var(--tint) 82%, black);
   }
-
-  /* A tutor's card wash: a light mix of her tint, light enough for body text. */
-  .tutor-wash {
-    background-color: color-mix(in srgb, var(--tint) 22%, white);
-  }
 }
 
 @layer base {

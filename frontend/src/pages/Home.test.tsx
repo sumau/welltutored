@@ -117,7 +117,7 @@ test("renders the homepage structure and a localized tutor loading state immedia
   });
   const rendered = await renderHome(async () => request);
 
-  assert.equal(rendered.container.querySelector("[data-testid=hero-title]")?.textContent, "Women tutors for girls at GCSE and A-level.");
+  assert.equal(rendered.container.querySelector("[data-testid=hero-title]")?.textContent, "Find the tutor who gets it.");
   assert.ok(rendered.container.querySelector("[data-testid=button-home-enquire]"));
   assert.ok(rendered.container.querySelector("[data-testid=tutor-loading-state]"));
   assert.equal(rendered.container.querySelector("[data-testid=loading-state]"), null);
@@ -202,24 +202,6 @@ test("keeps the homepage visible and offers retry when tutors fail to load", asy
   assert.ok(rendered.container.querySelector("[data-testid=error-state]"));
   assert.equal(rendered.container.querySelector("[data-testid=tutor-grid]"), null);
   assert.equal(rendered.container.querySelector("[data-testid=button-retry]")?.textContent?.trim(), "Try again");
-
-  await cleanupHome(rendered);
-});
-test("the hero shows the approach of a tutor who can take a student", async () => {
-  const full: Tutor = { ...tutor, id: 2, slug: "beth-jones", name: "Beth Jones", intake: "full", teachingIntro: "Beth's approach." };
-  const rendered = await renderHome(async () =>
-    new Response(JSON.stringify([full, tutor]), {
-      headers: { "content-type": "application/json" },
-    }),
-  );
-
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 25));
-  });
-
-  const hero = rendered.container.querySelector("[data-testid=hero-tutor]");
-  assert.match(hero?.textContent ?? "", /Clear explanations and practical guidance\./);
-  assert.equal(hero?.querySelector("[data-testid=hero-tutor-link]")?.getAttribute("href"), "/tutors/alice-smith");
 
   await cleanupHome(rendered);
 });
