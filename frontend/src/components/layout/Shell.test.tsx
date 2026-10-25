@@ -13,7 +13,7 @@ test("the public shell links nowhere near resources while public resources are o
     </Router>,
   );
 
-  assert.match(markup, /data-testid="nav-tutors"/);
+  assert.match(markup, /data-testid="nav-enquire"/);
   assert.doesNotMatch(markup, /href="\/resources"/);
   assert.doesNotMatch(markup, /data-testid="nav-resources"/);
   assert.doesNotMatch(markup, /data-testid="footer-resources"/);

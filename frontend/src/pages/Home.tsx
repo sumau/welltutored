@@ -1,10 +1,9 @@
 import * as React from "react";
-import { useListTutors, type Tutor } from "@/client";
+import { useListTutors } from "@/client";
 import { Link } from "wouter";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
-import { BookLabel, TutorBook } from "@/components/TutorBook";
-import { scrollToTutors } from "@/lib/scroll-to-tutors";
+import { BookFan, TutorBook } from "@/components/TutorBook";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
@@ -16,38 +15,41 @@ export default function Home() {
     request: publicTutorRequestOptions,
   });
 
-  // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
-  // loaded, so the grid has its full height.
+  // Older links to the tutors open `/#tutors`. Jump there once the tutors have
+  // loaded, so the grid has its full height, and move focus with it.
   React.useEffect(() => {
     if (tutorsLoading || window.location.hash !== "#tutors") return;
-    scrollToTutors("auto");
+    const target = document.getElementById("tutors");
+    target?.scrollIntoView({ behavior: "auto" });
+    target?.focus({ preventScroll: true });
   }, [tutorsLoading]);
 
   return (
     <main className="flex-1" data-testid="page-home">
-      {/* Hero: the headline written on the rules, beside a stack of the tutors' books */}
+      {/* Hero: the belief written on the rules, beside a stack of the tutors' books */}
       <section aria-labelledby="home-hero-title" className="ruled px-[var(--gutter)]" id="top">
-        <div className="max-w-[1210px] mx-auto pt-[36px] md:pt-[72px] pb-[36px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[36px] lg:gap-[48px] items-start">
+        <div className="max-w-[1150px] mx-auto pt-[36px] md:pt-[72px] pb-[36px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-[36px] lg:gap-[48px] items-start">
           <div>
-            <h1 id="home-hero-title" className="relative top-[8px] md:top-[14px] xl:top-[22px] font-serif font-extrabold [font-stretch:112%] text-[52px] leading-[72px] md:text-[88px] md:leading-[108px] xl:text-[116px] xl:leading-[144px] tracking-[-0.04em] m-0" data-testid="hero-title">
-              Learn to love learning.
+            <h1 id="home-hero-title" className="relative -top-[4px] md:top-[5px] xl:top-[2px] font-serif font-extrabold [font-stretch:112%] text-[34px] leading-[36px] md:text-[60px] md:leading-[72px] xl:text-[68px] tracking-[-0.04em] m-0" data-testid="hero-title">
+              The right tutor can change how she feels about learning.
             </h1>
-            <p className="text-[20px] md:text-[24px] leading-[36px] m-0 mt-[36px] max-w-[22em]" data-testid="hero-copy">
-              Helping young women grow, flourish and thrive.
+            <p className="text-[20px] md:text-[22px] leading-[36px] m-0 mt-[36px] max-w-[26em]" data-testid="hero-copy">
+              Well Tutored introduces young women to women tutors with deep expertise in their subjects. Lessons are online, so she can be anywhere in the UK.
             </p>
           </div>
-          {tutors && tutors.length > 0 && <BookFan tutors={tutors} />}
+          {/* On phones the tutors follow straight after, so the stack is left out */}
+          {tutors && <BookFan tutors={tutors} className="hidden sm:block w-full max-w-[520px] lg:max-w-none" />}
         </div>
       </section>
 
-      {/* Tutors, one book each, under a heading the nav's link scrolls to */}
+      {/* Tutors, one book each. Older links land here at `/#tutors`. */}
       <section className="ruled px-[var(--gutter)] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
         <div className="max-w-[1150px] mx-auto pt-[36px] pb-[72px]">
-          <h2 id="home-tutors-title" className="relative top-[13px] md:top-[9px] font-serif text-[36px] md:text-[48px] leading-[72px] m-0">
-            Meet the tutors
+          <h2 id="home-tutors-title" className="relative top-0 md:top-[9px] font-serif text-[28px] leading-[36px] md:text-[48px] md:leading-[72px] m-0">
+            Women who teach what they know
           </h2>
-          <p className="text-muted-foreground text-[18px] leading-[36px] m-0 mb-[36px]">
-            Personalised tutoring from women with deep subject expertise.
+          <p className="text-[18px] leading-[36px] m-0 mb-[36px] max-w-[40em]">
+            Every Well Tutored tutor is a woman with deep expertise in her subject, a role model as well as a teacher. We're a small, hand-picked group, and a person reads every enquiry and replies.
           </p>
           {tutorsLoading ? (
             <LoadingState variant="tutor-grid" message="Loading tutors..." />
@@ -59,7 +61,7 @@ export default function Home() {
           ) : (
             <ul className="list-none m-0 p-0 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px]" data-testid="tutor-grid">
               {(tutors || []).map((tutor, index) => (
-                <li key={tutor.id}>
+                <li key={tutor.id} className="flex flex-col">
                   <TutorBook tutor={tutor} index={index} />
                 </li>
               ))}
@@ -68,10 +70,22 @@ export default function Home() {
         </div>
       </section>
 
+      {/* What we look for: the belief as what we choose tutors for */}
+      <section className="ruled px-[var(--gutter)]" aria-labelledby="home-belief-title">
+        <div className="max-w-[1150px] mx-auto pt-[36px] pb-[72px]">
+          <h2 id="home-belief-title" className="relative top-0 md:top-[9px] font-serif text-[28px] leading-[36px] md:text-[48px] md:leading-[72px] m-0">
+            What we look for in a tutor
+          </h2>
+          <p className="text-[20px] md:text-[22px] leading-[36px] m-0 max-w-[34em]" data-testid="home-belief">
+            We believe the right tutor can change how a young woman feels about learning. So we look for tutors who build her confidence, make her curious about the world, and show her what she's capable of.
+          </p>
+        </div>
+      </section>
+
       {/* How an enquiry works: the steps numbered in the margin */}
       <section className="ruled px-[var(--gutter)]" aria-labelledby="home-enquiry-title">
         <div className="max-w-[1150px] mx-auto pt-[36px] pb-[108px]">
-          <h2 id="home-enquiry-title" className="relative top-[13px] md:top-[9px] font-serif text-[36px] md:text-[48px] leading-[72px] m-0 mb-[36px]">
+          <h2 id="home-enquiry-title" className="relative top-0 md:top-[9px] font-serif text-[28px] leading-[36px] md:text-[48px] md:leading-[72px] m-0 mb-[36px]">
             How an enquiry works
           </h2>
           <ol className="list-none p-0 m-0 grid gap-[36px] max-w-[40em]">
@@ -99,38 +113,5 @@ export default function Home() {
         </div>
       </section>
     </main>
-  );
-}
-
-// The hero's stack: up to three tutors' books, fanned out on the desk.
-const FAN = [
-  { left: "0%", y: "48px", r: "-6deg" },
-  { left: "28%", y: "0px", r: "-1deg" },
-  { left: "56%", y: "88px", r: "5deg" },
-]
-
-function BookFan({ tutors }: { tutors: Tutor[] }) {
-  return (
-    <nav aria-label="Tutors" className="book-fan relative h-[340px] sm:h-[460px] xl:h-[560px]">
-      {tutors.slice(0, FAN.length).map((tutor, index) => (
-        <Link
-          key={tutor.id}
-          href={`/tutors/${tutor.slug}`}
-          className="book w-[44%] aspect-[7/10] p-[10px] pl-[22px] pt-[30px] sm:p-[16px] sm:pl-[28px] sm:pt-[48px] text-[13px] sm:text-[15px] xl:text-[17px] [&_.book-label]:px-[10px] sm:[&_.book-label]:px-[14px]"
-          style={{
-            "--tint": tutor.tint,
-            "--x": "0px",
-            "--y": FAN[index].y,
-            "--r": FAN[index].r,
-            "--delay": `${index * 90}ms`,
-            left: FAN[index].left,
-            zIndex: index,
-          } as React.CSSProperties}
-          data-testid={`hero-book-${tutor.slug}`}
-        >
-          <BookLabel tutor={tutor} nameAs="span" studied={false} nameClassName="block text-[clamp(17px,2vw,28px)] leading-[1.05]" />
-        </Link>
-      ))}
-    </nav>
   );
 }

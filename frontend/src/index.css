@@ -163,10 +163,12 @@
   --accent-foreground: 231 36% 18%;
   --accent-border: 217 55% 86%;
 
-  /* The teacher's red pen: the margin, margin numbers and corrections. */
-  --destructive: 6 65% 46%;
+  /* Red belongs to the margin and the numbers written in it. Errors are a
+     dark amber, so a mistake never reads as part of the page. */
+  --margin-red: 6 65% 46%;
+  --destructive: 28 90% 30%;
   --destructive-foreground: 0 0% 100%;
-  --destructive-border: 6 65% 40%;
+  --destructive-border: 28 90% 26%;
 
   --input: 231 20% 60%;
   --ring: 231 36% 18%;
@@ -176,15 +178,16 @@
 
   /* The page's rules sit every --rule, each --rule-at below the top of its
      line, where text of 16-22px set in 36px lines has its baseline. The
-     margin sits just left of the content column, which is 1210px wide with
-     a --gutter each side. */
+     margin sits just left of the content column, which is 1150px wide with
+     a --gutter each side. From md the gutter leaves room for a number
+     written left of the margin. */
   --rule: 36px;
   --rule-at: 26px;
   --gutter: 24px;
-  --margin-x: calc(max(0px, (100% - 1210px) / 2) + var(--gutter) - 12px);
+  --margin-x: calc(max(var(--gutter), (100% - 1150px) / 2) - 12px);
 }
 @media (min-width: 768px) {
-  .public-site { --gutter: 30px; }
+  .public-site { --gutter: 56px; }
 }
 
 /* The page behind the public site, seen when scrolling past either end. */
@@ -216,7 +219,7 @@ body:has(.public-site) {
      multiples of --rule has its text sitting on the rules. */
   .ruled {
     background-image:
-      linear-gradient(to right, transparent calc(var(--margin-x) - 1px), hsl(var(--destructive) / 0.75) calc(var(--margin-x) - 1px), hsl(var(--destructive) / 0.75) calc(var(--margin-x) + 1px), transparent calc(var(--margin-x) + 1px)),
+      linear-gradient(to right, transparent calc(var(--margin-x) - 1px), hsl(var(--margin-red) / 0.75) calc(var(--margin-x) - 1px), hsl(var(--margin-red) / 0.75) calc(var(--margin-x) + 1px), transparent calc(var(--margin-x) + 1px)),
       repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule-at) - 1px), hsl(var(--border)) calc(var(--rule-at) - 1px) var(--rule-at), transparent var(--rule-at) var(--rule));
   }
 
@@ -224,7 +227,7 @@ body:has(.public-site) {
   .margin-number {
     font-family: var(--app-font-serif);
     font-weight: 800;
-    color: hsl(var(--destructive));
+    color: hsl(var(--margin-red));
   }
   @media (min-width: 768px) {
     .margin-number { position: absolute; right: calc(100% + 24px); }
@@ -277,7 +280,13 @@ body:has(.public-site) {
   }
 
   /* The hero's stack: books fan out once on arrival, then straighten and
-     lift when pointed at or focused. */
+     lift when pointed at or focused. The box takes its height from its
+     width, and each book's drop (--y) is a share of its own height, so the
+     stack fits at every width. */
+  .book-fan {
+    position: relative;
+    aspect-ratio: 6 / 5;
+  }
   .book-fan > .book {
     position: absolute;
     transform: translate(var(--x), var(--y)) rotate(var(--r));

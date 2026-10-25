@@ -55,7 +55,7 @@ export function TutorBackground({ tutor }: { tutor: Tutor }) {
 
   return (
     <section className="ruled px-[var(--gutter)]" id="background">
-      <div className="max-w-[1210px] mx-auto pt-[36px] pb-[36px] grid gap-[36px]">
+      <div className="max-w-[1150px] mx-auto pt-[36px] pb-[36px] grid gap-[36px]">
         {rows.map((row) => (
           <div key={row.label} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-[22px]">
             <h2 className="font-serif text-[24px] leading-[36px] m-0">{row.label}</h2>
@@ -161,7 +161,7 @@ export default function TutorProfile() {
     <main className="flex-1" data-testid={`page-tutor-${tutor.slug}`}>
       {/* Her exercise book beside her approach, written on the page */}
       <section className="ruled px-[var(--gutter)]">
-        <div className="max-w-[1210px] mx-auto pt-[36px] pb-[72px]">
+        <div className="max-w-[1150px] mx-auto pt-[36px] pb-[72px]">
           <div className="flex justify-between items-center text-[15px] font-bold leading-[36px]">
             <Link href="/#tutors" className="inline-flex items-center gap-2 rounded-full underline-offset-[6px] decoration-2 hover:underline" data-testid="link-back">
               <ArrowLeft size={15} /> All tutors
@@ -209,7 +209,7 @@ export default function TutorProfile() {
 
       {/* About */}
       <section className="ruled px-[var(--gutter)]" id="about">
-        <div className="max-w-[1210px] mx-auto pt-[36px] pb-[36px] grid grid-cols-1 md:grid-cols-2 gap-[36px] md:gap-[86px]">
+        <div className="max-w-[1150px] mx-auto pt-[36px] pb-[36px] grid grid-cols-1 md:grid-cols-2 gap-[36px] md:gap-[86px]">
           <div>
             <h2 className="relative top-[13px] md:top-[12px] font-serif text-[36px] md:text-[40px] leading-[72px] m-0">About {firstName}</h2>
             <div className="text-[18px] leading-[36px] max-w-[34em] whitespace-pre-wrap" data-testid="tutor-bio">
@@ -247,7 +247,7 @@ export default function TutorProfile() {
 
       {/* Learning with her, written on the page */}
       <section className="ruled px-[var(--gutter)]">
-        <div className="max-w-[1210px] mx-auto pt-[36px] pb-[36px]">
+        <div className="max-w-[1150px] mx-auto pt-[36px] pb-[36px]">
           <h2 className="relative top-[13px] md:top-[12px] font-serif text-[36px] md:text-[40px] leading-[72px] m-0 mb-[36px]">
             Learning with {firstName}
           </h2>

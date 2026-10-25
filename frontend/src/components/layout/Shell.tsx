@@ -4,7 +4,6 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, ShieldCheck, PenTool } from "lucide-react";
 import { useState } from "react";
 import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
-import { scrollToTutors } from "@/lib/scroll-to-tutors";
 
 export function Shell({
   children,
@@ -20,8 +19,6 @@ export function Shell({
 
   const closeMenu = () => setMenuOpen(false);
 
-  // Links to the tutors open `/#tutors`, which Home scrolls to on arrival.
-  // Already on Home, scroll here instead: the pathname doesn't change.
   // The logo links to Home. Already on Home, the pathname doesn't change, so
   // nothing would happen: go back to the top instead.
   const openHome = (event: React.MouseEvent) => {
@@ -33,18 +30,11 @@ export function Shell({
     window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   };
 
-  const openTutors = (event: React.MouseEvent) => {
-    closeMenu();
-    if (location !== "/") return;
-    event.preventDefault();
-    scrollToTutors();
-  };
-
   return (
     <div className="public-site min-h-[100dvh] flex flex-col font-sans bg-background text-foreground overflow-x-hidden selection:bg-primary/40 selection:text-foreground">
       {/* Navigation */}
       <div className="border-b-2 border-border relative z-40">
-      <nav className="h-[82px] w-full max-w-[1210px] mx-auto px-[var(--gutter)] flex items-center justify-between">
+      <nav className="h-[82px] w-full max-w-[calc(1150px+var(--gutter)*2)] mx-auto px-[var(--gutter)] flex items-center justify-between">
         <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-serif font-extrabold [font-stretch:108%] text-[20px] tracking-[-0.02em] rounded-full" data-testid="nav-home">
           <div className="w-[32px] h-[32px] rounded-full bg-foreground flex items-center justify-center text-background font-serif text-[20px] pb-0.5">
             w
@@ -54,7 +44,6 @@ export function Shell({
         
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-7 text-[15px] font-bold">
-          <Link href="/#tutors" onClick={openTutors} className="underline-offset-[6px] decoration-2 hover:underline" data-testid="nav-tutors">Meet the tutors</Link>
           {PUBLIC_RESOURCES_ENABLED && (
             <Link href="/resources" className="underline-offset-[6px] decoration-2 hover:underline" data-testid="nav-resources">Insights & resources</Link>
           )}
@@ -81,7 +70,6 @@ export function Shell({
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
         <div className="md:hidden absolute top-[84px] left-4 right-4 rounded-[12px] bg-card z-30 px-6 py-6 border-2 border-foreground flex flex-col gap-4 text-[17px] font-bold" data-testid="nav-mobile-menu">
-          <Link href="/#tutors" onClick={openTutors} data-testid="nav-mobile-tutors">Meet the tutors</Link>
           {PUBLIC_RESOURCES_ENABLED && (
             <Link href="/resources" onClick={closeMenu} data-testid="nav-mobile-resources">Insights & resources</Link>
           )}
@@ -114,7 +102,6 @@ export function Shell({
           </div>
           
           <div className="md:col-span-3 flex flex-col items-start font-bold">
-            <Link href="/#tutors" onClick={openTutors} className="underline-offset-4 hover:underline" data-testid="footer-tutors">Meet the tutors</Link>
             {PUBLIC_RESOURCES_ENABLED && (
               <Link href="/resources" className="underline-offset-4 hover:underline" data-testid="footer-resources">Insights & resources</Link>
             )}
