@@ -6,8 +6,9 @@ in [adr/](adr/).
 
 One container serves both the React frontend and the Express API from the same
 origin (scheme, host and port), so the browser treats them as one site. Only
-the API talks to the PostgreSQL database, through Drizzle, and a client
-generated from the OpenAPI spec keeps the two sides in step. The application
+the API talks to the PostgreSQL database, through Drizzle, and
+[a client generated from the OpenAPI spec](api-contract.md) keeps the two
+sides in step. The application
 is organised around two user-facing surfaces: the public website and the
 private [Workspace](../GLOSSARY.md#the-private-area).
 
@@ -35,22 +36,13 @@ flowchart LR
   workspace -- "session cookie" --> api
   api -- "Drizzle" --> db[("PostgreSQL<br/>(Neon in production)")]
 
-  spec["backend/openapi.yaml"] -. "codegen" .-> hooks["React Query hooks<br/>(frontend/src/client)"]
-  spec -. "codegen" .-> zod["Zod schemas<br/>(backend/src/api/schemas)"]
-  hooks -. "used by" .-> browser
-  zod -. "used by" .-> api
-
   classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
-  classDef buildtime fill:#f9fafb,stroke:#9ca3af,stroke-dasharray:5 5,color:#4b5563
   class clerk,db external
-  class spec,hooks,zod buildtime
 ```
 
-Amber shapes are people, grey boxes are hosted services outside the container,
-and dashed boxes are build-time code rather than running parts. Solid arrows
-are runtime requests. Dotted arrows are code generated from
-`backend/openapi.yaml`, which keeps the client and server agreeing on one
-contract. Serving everything from one origin is
+Amber shapes are people, grey boxes are hosted services outside the
+container, and arrows are runtime requests. Serving everything from one origin
+is
 [ADR-0001](adr/0001-single-origin-deployment.md).
 
 Every route is defined in `frontend/src/app/route-map.ts`.
@@ -158,10 +150,8 @@ Each part of `backend/src` has one job:
 Backend tests live in `backend/tests`, mirroring `src`. Frontend tests sit
 next to the components they test.
 
-`backend/openapi.yaml` generates both the React Query hooks in
-`frontend/src/client` and the Zod schemas in `backend/src/api/schemas`, which
-keeps client and server contracts aligned. Generated code isn't edited by
-hand.
+The Zod schemas in `api/schemas` are generated from `backend/openapi.yaml`,
+as [api-contract.md](api-contract.md) explains.
 
 ## Publishing rules
 

@@ -54,6 +54,7 @@ opening a pull request. Each task has one doc to start from:
 | Make and ship a change | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Write or fix a test | [docs/code-checks.md](docs/code-checks.md) |
 | Understand a red check | [docs/pipeline.md](docs/pipeline.md) says which check it is; [docs/code-checks.md](docs/code-checks.md) or [docs/smoke-checks.md](docs/smoke-checks.md) explains it |
+| Change the API | [docs/api-contract.md](docs/api-contract.md) |
 | Change the schema | [CONTRIBUTING.md](CONTRIBUTING.md#schema-changes)'s Schema changes, then [docs/schema-changes.md](docs/schema-changes.md) |
 | Undo a bad deploy | [docs/pipeline.md](docs/pipeline.md#roll-back-a-deploy)'s Roll back a deploy |
 | Change a setting or the domain | [docs/configuration.md](docs/configuration.md) |
@@ -69,7 +70,7 @@ The project is built with:
 - API: Express 5
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
+- API codegen: Orval, from a hand-written OpenAPI spec ([docs/api-contract.md](docs/api-contract.md))
 - Build: esbuild (ESM bundle)
 
 ## Layout
@@ -87,7 +88,7 @@ The project is built with:
 | `backend/src/models` | Drizzle/PostgreSQL schema |
 | `backend/src/core` | Settings, database pool, logging, health check |
 | `backend/tests` | Backend tests, mirroring `backend/src` |
-| `scripts` | Smoke checks, the Docs Check and integration-database tooling, a folder each |
+| `scripts` | Smoke checks, the Docs Check, the API code generator and its check, and integration-database tooling, a folder each |
 
 What each backend folder is for is in
 [docs/architecture.md](docs/architecture.md#backend-layout).
@@ -101,7 +102,7 @@ against a running service, or see
 - `PORT=8080 pnpm --filter @welltutored/backend run dev` — run the API server
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — docs check + typecheck + build all packages
-- `pnpm --filter @welltutored/backend run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm --filter @welltutored/scripts run api-codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec ([docs/api-contract.md](docs/api-contract.md))
 - `pnpm --filter @welltutored/backend run push` — apply schema changes, deliberately and by hand ([ADR-0002](docs/adr/0002-schema-by-deliberate-push.md))
 
 The test commands are in [docs/code-checks.md](docs/code-checks.md), and the

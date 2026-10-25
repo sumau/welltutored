@@ -57,10 +57,10 @@ docker compose restart api
 ```
 
 After changing `backend/openapi.yaml`, regenerate the client inside the
-container, then restart:
+container ([api-contract.md](api-contract.md)), then restart:
 
 ```
-docker compose exec api pnpm --filter @welltutored/backend run codegen
+docker compose exec api pnpm --filter @welltutored/scripts run api-codegen
 ```
 
 Schema changes are applied the same way as the initial push, with
