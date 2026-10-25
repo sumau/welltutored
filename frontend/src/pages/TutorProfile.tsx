@@ -8,7 +8,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import { ResourceTypeLabel } from "@/components/ResourceType";
-import { intakeDotClasses, intakeLabels } from "@/lib/intake";
+import { intakeLabels, intakePillClasses, intakePillDotClasses } from "@/lib/intake";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
@@ -181,8 +181,8 @@ export default function TutorProfile() {
           <p className="text-[19px] font-semibold mb-[18px]" data-testid="tutor-subject-kicker">
             {tutor.subject}
           </p>
-          <div className="inline-flex items-center gap-[8px] rounded-full bg-secondary px-4 py-2 text-[14px] font-medium mb-[22px]">
-            <i className={`w-2 h-2 rounded-full ${intakeDotClasses[tutor.intake]}`} />
+          <div className={`inline-flex items-center gap-[8px] rounded-full px-[14px] py-[6px] text-[15px] font-semibold mb-[22px] ${intakePillClasses[tutor.intake]}`}>
+            <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
             {intakeLabels[tutor.intake]}
           </div>
           <p className="max-w-[36em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="tutor-intro">
@@ -190,8 +190,8 @@ export default function TutorProfile() {
           </p>
         </div>
         <figure
-          className="tutor-wash rounded-[28px] px-[28px] md:px-[40px] py-[32px] md:py-[40px] m-0"
-          style={{ "--tint": tutor.tint } as React.CSSProperties}
+          className="border-l-[10px] pl-[28px] md:pl-[40px] py-[8px] m-0"
+          style={{ borderColor: tutor.tint }}
         >
           <blockquote className="font-serif text-[22px] md:text-[26px] leading-[1.35] m-0 text-foreground">
             {tutor.teachingIntro}
