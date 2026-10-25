@@ -38,10 +38,10 @@ export default function Home() {
       <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-[40px] lg:gap-[56px] lg:items-center" id="top">
         <div>
           <h1 id="home-hero-title" className="text-[clamp(46px,6.6vw,92px)] leading-[0.92] tracking-[-0.04em] font-bold m-0" data-testid="hero-title">
-            Learn to love learning.
+            Female tutors for young women.
           </h1>
           <p className="text-[clamp(20px,1.9vw,26px)] leading-[1.35] font-medium m-0 mt-[24px] max-w-[22em] [text-wrap:balance]" data-testid="hero-copy">
-            Helping young women grow, flourish and thrive.
+            Helping them grow, flourish and thrive.
           </p>
         </div>
         <ul className="note-fan list-none m-0 p-0 w-full max-w-[620px] lg:justify-self-end" aria-label="How we work" data-testid="hero-notes">
@@ -66,7 +66,7 @@ export default function Home() {
               Meet the tutors
             </h2>
             <p className="text-muted-foreground text-[18px] leading-[1.5] m-0">
-              Personalised tutoring from women with deep subject expertise.
+              Brilliant women who know their subjects and how to teach them.
             </p>
           </div>
           {tutorsLoading ? (
