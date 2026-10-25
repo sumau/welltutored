@@ -1,8 +1,8 @@
 # Code checks
 
 For whoever writes a test or reads a red `verify`: the checks that run against
-the repository before a merge — the test suites, typecheck, build and docs
-check, Docs Check and API codegen check that `pnpm run verify` runs — and how to write a test. Checks against
+the repository before a merge — the test suites, typecheck, build,
+Docs Check and API codegen check that `pnpm run verify` runs — and how to write a test. Checks against
 a running site are in [smoke-checks.md](smoke-checks.md).
 
 Most tests run on Node's built-in `node:test` runner through `tsx`; the web

@@ -25,8 +25,8 @@ handler a second time in that library's terms, so this project is spec-first.
 
 - **Zod schemas**, in `backend/src/api/schemas/generated`. [Zod](https://zod.dev/)
   is a library for checking at runtime that a value has the expected shape.
-  Each handler parses its request with these schemas and rejects one the
-  spec doesn't allow, and parses its response with them before sending it.
+  Handlers parse their requests with these schemas and reject one the spec
+  doesn't allow, and parse their responses with them before sending them.
   The enquiry handler in `backend/src/api/routes/enquiries.ts`, for example,
   uses `CreateEnquiryBody` and `CreateEnquiryResponse`.
 - **React Query hooks**, in `frontend/src/client/generated`.
