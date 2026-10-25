@@ -36,9 +36,9 @@ flowchart LR
     api["Express API under /api<br/>clerkMiddleware, Zod validation"]
   end
 
-  browser -- "page loads" --> static
-  public -- "public reads, enquiries" --> api
-  workspace -- "session cookie" --> api
+  browser -- "every other path:<br/>page loads" --> static
+  public -- "/api/*: public reads,<br/>enquiries" --> api
+  workspace -- "/api/*: session cookie" --> api
   api -- "Drizzle" --> db
 
   class visitor,tutor person
@@ -77,6 +77,14 @@ public bundle.
 
 Browser API requests use Clerk's same-origin session cookies; bearer-token
 wiring is reserved for mobile clients.
+
+The server checks the session on every `/api` request, public or private:
+`clerkMiddleware` in `backend/src/app.ts` reads it, and the handler decides
+whether it needs one. Workspace handlers call `requireWorkspaceAccount` in
+`backend/src/api/deps.ts`, which returns a 401 with no session and a 403 for
+an account without a verified email address. `requireApproved` then returns a
+403 for an account still awaiting approval, and `requireOwner` a 403 for
+anyone but the Owner.
 
 ## Private Workspace
 
@@ -121,6 +129,9 @@ flowchart LR
   class pg external
 ```
 
+A typical Workspace request takes the main path through it: `app.ts` →
+`api/routes` → `api/deps.ts` → `crud` → PostgreSQL.
+
 Each part of `backend/src` has one job:
 
 - `main.ts` starts the process: seeds illustrative content in development,
@@ -150,6 +161,27 @@ next to the components they test.
 
 The Zod schemas in `api/schemas` are generated from `backend/openapi.yaml`,
 as [api-contract.md](api-contract.md) explains.
+
+## Build
+
+The generated code is committed, so the image build never runs Orval.
+`docker/Dockerfile` builds both apps in its `build` stage, then copies only
+their output into the `runtime` stage: `backend/dist`, a bundle with its
+dependencies inside, and the frontend build as `./web`, which `app.ts` serves
+for every path outside `/api`.
+
+```mermaid
+flowchart LR
+  spec["backend/openapi.yaml"] -- "Orval, by hand" --> generated["Generated code<br/>(committed)"]
+  generated --> build
+
+  subgraph image["docker/Dockerfile"]
+    build["build stage<br/>install, build both apps"]
+    runtime["runtime stage<br/>no node_modules"]
+    build -- "backend/dist → ./dist" --> runtime
+    build -- "frontend build → ./web" --> runtime
+  end
+```
 
 ## Publishing rules
 

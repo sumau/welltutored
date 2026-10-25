@@ -54,6 +54,12 @@ regenerate, and typecheck fails wherever code still expects the old shape.
 The generated code is committed and never edited by hand, and nothing reads
 the spec at runtime, so builds and deploys don't run Orval.
 
+The Workspace forms are the exception. `resource-editor.tsx` and `profile.tsx`
+in `frontend/src/pages/workspace`, and `TutorFormDialog.tsx`, validate with
+Zod schemas written by hand, so their rules can drift from the spec. That
+check only gives quicker feedback; the server's check against the generated
+schemas is the one that counts.
+
 ## Why the generator lives in `scripts`
 
 Orval writes into both apps, so it belongs to neither. Its config,
