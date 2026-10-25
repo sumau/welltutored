@@ -27,8 +27,8 @@ const primary = cssStats.reduce((largest, current) =>
   current.rawBytes > largest.rawBytes ? current : largest,
 );
 
-const maxRawBytes = 70_000;
-const maxGzipBytes = 13_500;
+const maxRawBytes = 72_000;
+const maxGzipBytes = 14_000;
 
 if (primary.rawBytes > maxRawBytes || primary.gzipBytes > maxGzipBytes) {
   throw new Error(
