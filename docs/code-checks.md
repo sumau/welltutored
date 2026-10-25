@@ -196,14 +196,21 @@ output's formatting trips it too; regenerate in the upgrade's pull request.
 
 ## Bundle size
 
+The Well Tutored Vite build enables Tailwind's production Lightning CSS
+optimisation. The remaining global CSS is intentional: Tailwind preflight,
+theme variables, utilities used by both public and authenticated routes,
+motion states, and registered custom properties are shared so route
+transitions don't flash unstyled content. The authenticated route's separate
+CSS chunk is small, and further savings would require splitting shared styles
+and reintroducing them during navigation.
+
 `frontend/scripts/verify-css-build.mjs` holds a size budget for the primary
 stylesheet, set about 7% above its size in October 2026 so that growth is a
 decision rather than drift. `pnpm run verify` checks it after the build. To
 check the budget alone, run
 `pnpm --filter @welltutored/frontend run build` followed by
 `pnpm --filter @welltutored/frontend run check:css-size`; the script prints the
-current size. Why the shared CSS is the size it is is in
-[architecture.md](architecture.md#bundle-size).
+current size.
 
 For the JavaScript, run
 `pnpm --filter @welltutored/frontend run report:bundle-size`. It builds the

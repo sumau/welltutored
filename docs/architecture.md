@@ -217,16 +217,3 @@ publicly until published. Editing an already-published resource while keeping
 its status as `published` updates the public resource in place; changing it to
 `draft` removes it from public results while it is being revised. Resources do
 not keep a private draft alongside a live published version.
-
-## Bundle size
-
-The Well Tutored Vite build enables Tailwind's production Lightning CSS
-optimisation. The remaining global CSS is intentional:
-Tailwind preflight, theme variables, utilities used by both public and
-authenticated routes, motion states, and registered custom properties are
-shared so route transitions don't flash unstyled content. The authenticated
-route's separate CSS chunk is small, and further savings would require
-splitting shared styles and reintroducing them during navigation.
-
-The stylesheet's size budget and the JavaScript chunk report are in
-[code-checks.md](code-checks.md#bundle-size).
