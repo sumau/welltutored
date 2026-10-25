@@ -13,12 +13,13 @@ import {
 // Each note card rests at its own slight angle, as if laid on a desk.
 const CARD_REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
 
-// Three notes beside the hero, in colours no tutor's card leads with. On
-// wider screens they fan out across the box; left and top place each one.
+// Three notes beside the hero, on plain white paper: each colour belongs to
+// one tutor, so the notes take none. On wider screens left and top place
+// each one in the row.
 const HERO_NOTES = [
-  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", tint: "#9DBB83", r: "-3deg", left: "0%", top: "4%" },
-  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", tint: "#8EA8CE", r: "2deg", left: "33%", top: "0%" },
-  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", tint: "#D8B267", r: "-1.5deg", left: "66%", top: "6%" },
+  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", r: "-3deg", left: "0%", top: "4%" },
+  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", r: "2deg", left: "33%", top: "0%" },
+  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", r: "-1.5deg", left: "66%", top: "6%" },
 ];
 
 export default function Home() {
@@ -50,8 +51,8 @@ export default function Home() {
           {HERO_NOTES.map((note, index) => (
             <li
               key={note.title}
-              className="note-card px-[16px] pt-[14px] pb-[14px]"
-              style={{ "--tint": note.tint, "--rest": note.r, "--delay": `${index * 90}ms`, left: note.left, top: note.top } as React.CSSProperties}
+              className="note-card border border-border px-[16px] pt-[14px] pb-[14px]"
+              style={{ "--tint": "hsl(var(--card))", "--rest": note.r, "--delay": `${index * 90}ms`, left: note.left, top: note.top } as React.CSSProperties}
             >
               <b className="note-card-head block text-[18px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
               <p className="note-card-body m-0 text-[16px] [--rule:26px]">{note.text}</p>
