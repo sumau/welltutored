@@ -14,6 +14,9 @@ the browser go nowhere: the page shows a message and logs to the console.
 The application is organised around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in `frontend/src/app/route-map.ts`.
 
 ```mermaid
+---
+title: "Runtime: where a request goes"
+---
 flowchart LR
   classDef person fill:#fde68a,stroke:#b45309,stroke-width:2px,color:#1f2937
   classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
