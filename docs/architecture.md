@@ -166,27 +166,6 @@ next to the components they test.
 The Zod schemas in `api/schemas` are generated from `backend/openapi.yaml`,
 as [api-contract.md](api-contract.md) explains.
 
-## Build
-
-The generated code is committed, so the image build never runs Orval.
-`docker/Dockerfile` builds both apps in its `build` stage, then copies only
-their output into the `runtime` stage: `backend/dist`, a bundle with its
-dependencies inside, and the frontend build as `./web`, which `app.ts` serves
-for every path outside `/api`.
-
-```mermaid
-flowchart LR
-  spec["backend/openapi.yaml"] -- "Orval, by hand" --> generated["Generated code<br/>(committed)"]
-  generated --> build
-
-  subgraph image["docker/Dockerfile"]
-    build["build stage<br/>install, build both apps"]
-    runtime["runtime stage<br/>no node_modules"]
-    build -- "backend/dist → ./dist" --> runtime
-    build -- "frontend build → ./web" --> runtime
-  end
-```
-
 ## Publishing rules
 
 These rules apply to everything the Workspace publishes:
