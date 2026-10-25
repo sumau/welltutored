@@ -69,7 +69,7 @@ The project is built with:
 - pnpm workspaces, Node.js 24, TypeScript 7.0
 - Frontend: React 19, Vite 8, Wouter (routing), React Query
 - UI: Tailwind CSS 4, Radix UI primitives in `frontend/src/components/ui`
-- Sign-in: Clerk, in both the frontend and the API
+- Authentication: Clerk, in both the frontend and the API
 - API: Express 5
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
