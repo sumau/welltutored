@@ -3,7 +3,7 @@ import { useListTutors } from "@/client";
 import { Link } from "wouter";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
-import { intakeDotClasses, intakeLabels } from "@/lib/intake";
+import { intakeLabels } from "@/lib/intake";
 import { scrollToTutors } from "@/lib/scroll-to-tutors";
 import {
   publicTutorQueryOptions,
@@ -16,13 +16,6 @@ export default function Home() {
     request: publicTutorRequestOptions,
   });
 
-  // The hero shows one tutor's approach, a different one on each visit,
-  // chosen from those who can take a student.
-  const [heroPick] = React.useState(() => Math.random());
-  const open = (tutors || []).filter((tutor) => tutor.intake !== "full");
-  const heroPool = open.length > 0 ? open : tutors || [];
-  const heroTutor = heroPool[Math.floor(heroPick * heroPool.length)];
-
   // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
   // loaded, so the grid has its full height.
   React.useEffect(() => {
@@ -33,104 +26,70 @@ export default function Home() {
   return (
     <main className="flex-1" data-testid="page-home">
       {/* Hero */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[36px] lg:gap-[56px] items-center" id="top">
-        <div>
-          <h1 id="home-hero-title" className="font-serif text-[clamp(42px,5vw,68px)] leading-[1.02] mb-[24px] max-w-[14ch]" data-testid="hero-title">
-            Women tutors for girls at GCSE and A-level.
-          </h1>
-          <p className="max-w-[34em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="hero-copy">
-            Thoughtful one-to-one support from women with deep knowledge of their subject. Choose the tutor who feels right and send her an enquiry.
-          </p>
-        </div>
-        {heroTutor && (
-          <figure
-            className="tutor-wash rounded-[28px] px-[28px] md:px-[40px] py-[32px] md:py-[40px] m-0"
-            style={{ "--tint": heroTutor.tint } as React.CSSProperties}
-            data-testid="hero-tutor"
-          >
-            <blockquote className="font-serif text-[22px] md:text-[26px] leading-[1.35] m-0 text-foreground">
-              {heroTutor.teachingIntro}
-            </blockquote>
-            <figcaption className="mt-[24px]">
-              <Link href={`/tutors/${heroTutor.slug}`} className="inline-block text-[15px] leading-[1.35] group" data-testid="hero-tutor-link">
-                <b className="block font-semibold group-hover:underline underline-offset-4">{heroTutor.name}</b>
-                <span className="text-foreground/80">{heroTutor.subject}</span>
-              </Link>
-            </figcaption>
-          </figure>
-        )}
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px]" id="top">
+        <h1 id="home-hero-title" className="text-[clamp(46px,8.4vw,124px)] leading-[0.92] tracking-[-0.045em] font-extrabold m-0 mb-[32px] max-w-[12ch]" style={{ fontVariationSettings: '"opsz" 96' }} data-testid="hero-title">
+          Find the tutor who gets it.
+        </h1>
+        <p className="max-w-[32em] text-[20px] leading-[1.5] m-0 font-[350]" data-testid="hero-copy">
+          Women tutors for girls at GCSE and A-level, one to one. Each of them knows her subject deeply and teaches it her own way.
+        </p>
       </section>
 
-      {/* Tutors */}
-      <section className="bg-secondary px-6 md:px-[30px] py-[64px] md:py-[88px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
-        <div className="max-w-[1150px] mx-auto">
-          <div className="mb-[40px] max-w-[640px]">
-            <h2 id="home-tutors-title" className="font-serif text-[clamp(34px,4vw,48px)] leading-[1.08] m-0 mb-[14px]">
-              Meet the tutors
-            </h2>
-            <p className="text-muted-foreground text-[17px] leading-[1.6] m-0">
-              Their subjects, where they studied, and what a lesson with each of them is like.
-            </p>
-          </div>
-
-          {tutorsLoading ? (
-            <LoadingState variant="tutor-grid" message="Loading tutors..." />
-          ) : tutorsError ? (
+      {/* Tutors, one band each */}
+      <section className="focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
+        <h2 id="home-tutors-title" className="sr-only">The tutors</h2>
+        {tutorsLoading ? (
+          <div className="max-w-[1210px] mx-auto px-6 md:px-[30px]"><LoadingState variant="tutor-grid" message="Loading tutors..." /></div>
+        ) : tutorsError ? (
+          <div className="max-w-[1210px] mx-auto px-6 md:px-[30px]">
             <ErrorState
               message="We couldn't load the tutor profiles. Please try again."
               onRetry={refetchTutors}
             />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[16px]" data-testid="tutor-grid">
-              {(tutors || []).map((tutor) => (
+          </div>
+        ) : (
+          <ul className="list-none m-0 p-0" data-testid="tutor-grid">
+            {(tutors || []).map((tutor) => (
+              <li key={tutor.id}>
                 <Link
                   href={`/tutors/${tutor.slug}`}
-                  key={tutor.id}
-                  className="tutor-wash rounded-[20px] overflow-hidden text-left min-h-[300px] h-full flex flex-col border border-transparent hover:border-foreground/25 transition-colors"
+                  className="tutor-band group block px-6 md:px-[30px] py-[32px] md:py-[44px]"
                   style={{ "--tint": tutor.tint } as React.CSSProperties}
                   data-testid={`tutor-card-${tutor.slug}`}
                 >
-                  {/* Her name on her own tint, at full strength. */}
-                  <div className="px-[24px] pt-[22px] pb-[18px]" style={{ backgroundColor: tutor.tint }}>
-                    <h3 className="font-serif text-[26px] leading-[1.1] m-0 mb-[4px]">{tutor.name}</h3>
-                    <span className="block text-[15px] font-semibold">{tutor.subject}</span>
-                  </div>
-                  <div className="px-[24px] pt-[20px] pb-[24px] flex-1 flex flex-col">
-                    <p className="text-[15px] text-foreground/80 leading-[1.55] mt-0 mb-[20px] flex-1 line-clamp-3">
-                      {tutor.profileSummary}
-                    </p>
-                    <div className="border-t border-foreground/15 pt-[14px] text-[14px] text-foreground/80 mt-auto">
-                      <b className="text-foreground font-semibold">{tutor.university}</b><br />{tutor.qualification}
-                      <span
-                        className="flex items-center gap-[8px] mt-[12px] font-medium text-foreground"
-                        aria-label={`Intake: ${intakeLabels[tutor.intake]}`}
-                      >
-                        <span className={`w-[8px] h-[8px] rounded-full ${intakeDotClasses[tutor.intake]}`} aria-hidden="true" />
+                  <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-[16px] md:gap-[48px] md:items-end">
+                    <h3 className="m-0 text-[clamp(44px,6.6vw,96px)] leading-[0.92] tracking-[-0.04em] font-extrabold" style={{ fontVariationSettings: '"opsz" 96' }}>
+                      {tutor.name}
+                    </h3>
+                    <div className="text-[17px] leading-[1.45]">
+                      <b className="block text-[21px] font-bold mb-[6px]">{tutor.subject}</b>
+                      {tutor.university}, {tutor.qualification}
+                      <span className="flex justify-between gap-[16px] mt-[14px] font-semibold" aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
                         {intakeLabels[tutor.intake]}
+                        <span className="underline underline-offset-4 decoration-2 group-hover:decoration-[3px]" aria-hidden="true">Her profile</span>
                       </span>
                     </div>
                   </div>
                 </Link>
-              ))}
-            </div>
-          )}
-
-        </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* How an enquiry works */}
-      <section className="px-6 md:px-[30px] py-[64px] md:py-[88px]" aria-labelledby="home-enquiry-title">
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-[40px] md:gap-[80px] items-start">
+      <section className="px-6 md:px-[30px] py-[64px] md:py-[96px]" aria-labelledby="home-enquiry-title">
+        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-[40px] md:gap-[80px] items-start">
           <div>
-            <h2 id="home-enquiry-title" className="font-serif text-[clamp(34px,4vw,48px)] leading-[1.08] m-0 mb-[18px]">
+            <h2 id="home-enquiry-title" className="text-[clamp(38px,5vw,64px)] leading-[0.98] tracking-[-0.035em] font-extrabold m-0 mb-[20px]">
               How an enquiry works
             </h2>
-            <p className="text-muted-foreground max-w-[30em] leading-[1.6] text-[17px] mb-[28px]">
+            <p className="text-muted-foreground max-w-[30em] leading-[1.55] text-[18px] mb-[28px]">
               Choose a tutor, then tell us a little about the student and the support that would help. Well Tutored records the enquiry securely and replies to you.
             </p>
             <Link
               href="/enquire"
-              className="rounded-full bg-primary text-primary-foreground text-[16px] font-semibold px-7 py-4 hover:bg-primary-border transition-colors inline-flex"
+              className="rounded-full bg-primary text-primary-foreground text-[17px] font-bold px-8 py-4 hover:bg-primary-border transition-colors inline-flex"
               data-testid="button-home-enquire"
             >
               Make an enquiry
@@ -140,14 +99,14 @@ export default function Home() {
             </p>
           </div>
 
-          <ol className="list-none p-0 m-0 grid gap-[14px]">
+          <ol className="list-none p-0 m-0 grid gap-[28px]">
             {[
-              "Choose a tutor from the profiles above",
+              "Choose a tutor from the list above",
               "Tell us the subject and school level",
               "Well Tutored reviews your enquiry and replies",
             ].map((step, index) => (
-              <li key={step} className="flex items-center gap-[16px] rounded-[20px] bg-secondary px-[20px] py-[18px] text-[17px]">
-                <span className="w-[40px] h-[40px] shrink-0 rounded-full bg-primary flex items-center justify-center font-serif text-[19px] pb-0.5" aria-hidden="true">{index + 1}</span>
+              <li key={step} className="grid grid-cols-[56px_1fr] items-baseline text-[20px] leading-[1.35] font-medium">
+                <span className="text-[44px] leading-none font-extrabold tracking-[-0.04em]" aria-hidden="true">{index + 1}</span>
                 {step}
               </li>
             ))}

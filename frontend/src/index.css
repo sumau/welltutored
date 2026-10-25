@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&family=Young+Serif&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Figtree:wght@400;500;600;700&family=Young+Serif&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -133,45 +133,45 @@
   --sidebar-ring: 15 62% 59%;
 }
 
-/* The public site: paper, plum and marigold, with each tutor's own tint.
-   Scoped to the public Shell so the Workspace keeps the palette above. */
+/* The public site, prototype "Colour bands": white and indigo ink, with
+   each tutor's own tint at full strength. Scoped to the public Shell. */
 .public-site {
-  --background: 34 100% 99%;
-  --foreground: 286 31% 20%;
+  --background: 0 0% 100%;
+  --foreground: 247 44% 21%;
   --card: 0 0% 100%;
-  --card-foreground: 286 31% 20%;
-  --border: 14 42% 86%;
-  --card-border: 14 42% 86%;
+  --card-foreground: 247 44% 21%;
+  --border: 248 18% 87%;
+  --card-border: 248 18% 87%;
   --popover: 0 0% 100%;
-  --popover-foreground: 286 31% 20%;
-  --popover-border: 14 42% 86%;
+  --popover-foreground: 247 44% 21%;
+  --popover-border: 248 18% 87%;
 
-  --primary: 39 87% 59%;
-  --primary-foreground: 286 31% 20%;
-  --primary-border: 39 80% 52%;
+  --primary: 247 44% 21%;
+  --primary-foreground: 0 0% 100%;
+  --primary-border: 247 44% 14%;
 
-  --secondary: 14 58% 93%;
-  --secondary-foreground: 286 31% 20%;
-  --secondary-border: 14 42% 86%;
+  --secondary: 250 22% 95%;
+  --secondary-foreground: 247 44% 21%;
+  --secondary-border: 248 18% 87%;
 
-  --muted: 14 58% 93%;
-  --muted-foreground: 289 13% 40%;
-  --muted-border: 14 42% 86%;
+  --muted: 250 22% 95%;
+  --muted-foreground: 247 12% 40%;
+  --muted-border: 248 18% 87%;
 
-  --accent: 14 58% 93%;
-  --accent-foreground: 286 31% 20%;
-  --accent-border: 14 42% 86%;
+  --accent: 250 22% 95%;
+  --accent-foreground: 247 44% 21%;
+  --accent-border: 248 18% 87%;
 
-  --input: 14 30% 78%;
-  --ring: 286 31% 20%;
+  --input: 248 18% 75%;
+  --ring: 247 44% 21%;
 
-  --app-font-sans: 'Figtree', sans-serif;
-  --app-font-serif: 'Young Serif', Georgia, serif;
+  --app-font-sans: 'Bricolage Grotesque', sans-serif;
+  --app-font-serif: 'Bricolage Grotesque', sans-serif;
 }
 
 /* The page behind the public site, seen when scrolling past either end. */
 body:has(.public-site) {
-  background-color: hsl(34 100% 99%);
+  background-color: hsl(0 0% 100%);
 }
 
 @layer components {
@@ -186,6 +186,16 @@ body:has(.public-site) {
   .public-site :focus-visible:not([tabindex="-1"]) {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 3px;
+  }
+
+  /* A tutor's band: her tint at full strength, a shade deeper on hover. */
+  .tutor-band {
+    background-color: var(--tint);
+    transition: background-color 200ms ease-out;
+  }
+  .tutor-band:hover,
+  .tutor-band:focus-visible {
+    background-color: color-mix(in srgb, var(--tint) 82%, black);
   }
 
   /* A tutor's card wash: a light mix of her tint, light enough for body text. */
