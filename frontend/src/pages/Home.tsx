@@ -31,7 +31,7 @@ export default function Home() {
           Learn to love learning.
         </h1>
         <p className="lg:border-l-2 lg:border-foreground/15 lg:pl-[32px] text-[clamp(20px,1.9vw,26px)] leading-[1.35] font-medium m-0 lg:mb-[10px] max-w-[22em]" data-testid="hero-copy">
-          Helping girls grow, flourish and thrive at GCSE and A-level.
+          Helping young women grow, flourish and thrive.
         </p>
       </section>
 
@@ -43,7 +43,7 @@ export default function Home() {
               Meet the tutors
             </h2>
             <p className="text-muted-foreground text-[18px] leading-[1.5] m-0">
-              Personalised tutoring from women with deep subject expertise.
+              Personalised secondary school tutoring from women with deep subject expertise.
             </p>
           </div>
           {tutorsLoading ? (
