@@ -188,14 +188,15 @@ body:has(.public-site) {
     outline-offset: 3px;
   }
 
-  /* A tutor's band: her tint at full strength, a shade deeper on hover. */
+  /* A tutor's band: her tint at full strength, a shade lighter on hover, so
+     the dark text keeps its contrast. */
   .tutor-band {
     background-color: var(--tint);
     transition: background-color 200ms ease-out;
   }
   .tutor-band:hover,
   .tutor-band:focus-visible {
-    background-color: color-mix(in srgb, var(--tint) 82%, black);
+    background-color: color-mix(in srgb, var(--tint) 75%, white);
   }
 }
 
