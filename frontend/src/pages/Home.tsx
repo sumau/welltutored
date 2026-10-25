@@ -35,10 +35,17 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Tutors, one card each */}
+      {/* Tutors, one card each, under a heading the nav's link scrolls to */}
       <section className="px-6 md:px-[30px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
         <div className="max-w-[1150px] mx-auto">
-          <h2 id="home-tutors-title" className="sr-only">The tutors</h2>
+          <div className="mb-[28px]">
+            <h2 id="home-tutors-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[8px]">
+              Meet the tutors
+            </h2>
+            <p className="text-muted-foreground text-[18px] leading-[1.5] m-0">
+              Choose the one who feels right, and send her an enquiry.
+            </p>
+          </div>
           {tutorsLoading ? (
             <LoadingState variant="tutor-grid" message="Loading tutors..." />
           ) : tutorsError ? (
