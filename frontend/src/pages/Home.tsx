@@ -27,10 +27,10 @@ export default function Home() {
     <main className="flex-1" data-testid="page-home">
       {/* Hero */}
       <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px]" id="top">
-        <h1 id="home-hero-title" className="text-[clamp(46px,8.4vw,124px)] leading-[0.92] tracking-[-0.045em] font-extrabold m-0 mb-[32px] max-w-[12ch]" style={{ fontVariationSettings: '"opsz" 96' }} data-testid="hero-title">
+        <h1 id="home-hero-title" className="text-[clamp(46px,8.4vw,124px)] leading-[0.92] tracking-[-0.045em] font-bold m-0 mb-[32px] max-w-[12ch]" data-testid="hero-title">
           Find the tutor who gets it.
         </h1>
-        <p className="max-w-[32em] text-[20px] leading-[1.5] m-0 font-[350]" data-testid="hero-copy">
+        <p className="max-w-[32em] text-[20px] leading-[1.5] m-0 font-normal" data-testid="hero-copy">
           Women tutors for girls at GCSE and A-level, one to one. Each of them knows her subject deeply and teaches it her own way.
         </p>
       </section>
@@ -58,7 +58,7 @@ export default function Home() {
                   data-testid={`tutor-card-${tutor.slug}`}
                 >
                   <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-[16px] md:gap-[48px] md:items-end">
-                    <h3 className="m-0 text-[clamp(44px,6.6vw,96px)] leading-[0.92] tracking-[-0.04em] font-extrabold" style={{ fontVariationSettings: '"opsz" 96' }}>
+                    <h3 className="m-0 text-[clamp(44px,6.6vw,96px)] leading-[0.92] tracking-[-0.04em] font-bold">
                       {tutor.name}
                     </h3>
                     <div className="text-[17px] leading-[1.45]">
@@ -81,7 +81,7 @@ export default function Home() {
       <section className="px-6 md:px-[30px] py-[64px] md:py-[96px]" aria-labelledby="home-enquiry-title">
         <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-[40px] md:gap-[80px] items-start">
           <div>
-            <h2 id="home-enquiry-title" className="text-[clamp(38px,5vw,64px)] leading-[0.98] tracking-[-0.035em] font-extrabold m-0 mb-[20px]">
+            <h2 id="home-enquiry-title" className="text-[clamp(38px,5vw,64px)] leading-[0.98] tracking-[-0.035em] font-bold m-0 mb-[20px]">
               How an enquiry works
             </h2>
             <p className="text-muted-foreground max-w-[30em] leading-[1.55] text-[18px] mb-[28px]">
@@ -106,7 +106,7 @@ export default function Home() {
               "Well Tutored reviews your enquiry and replies",
             ].map((step, index) => (
               <li key={step} className="grid grid-cols-[56px_1fr] items-baseline text-[20px] leading-[1.35] font-medium">
-                <span className="text-[44px] leading-none font-extrabold tracking-[-0.04em]" aria-hidden="true">{index + 1}</span>
+                <span className="text-[44px] leading-none font-bold tracking-[-0.04em]" aria-hidden="true">{index + 1}</span>
                 {step}
               </li>
             ))}
