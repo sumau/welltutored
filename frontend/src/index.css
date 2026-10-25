@@ -176,8 +176,8 @@ body:has(.public-site) {
 
 @layer components {
   .public-site h1, .public-site h2, .public-site h3 {
-    font-weight: 400;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     text-wrap: balance;
   }
 

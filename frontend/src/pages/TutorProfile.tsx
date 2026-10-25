@@ -240,16 +240,16 @@ export default function TutorProfile() {
 
       <TutorBackground tutor={tutor} />
 
-      {/* Teaching Style */}
-      <section className="bg-secondary px-6 md:px-[30px] py-[60px] md:py-[88px]">
+      {/* Teaching Style, on her own tint as on her card */}
+      <section className="px-6 md:px-[30px] py-[60px] md:py-[88px]" style={{ backgroundColor: tutor.tint }}>
         <div className="max-w-[1150px] mx-auto">
-          <h2 className="font-serif text-[clamp(30px,3.4vw,40px)] leading-[1.1] m-0 mb-[36px]">
+          <h2 className="font-serif font-bold tracking-[-0.03em] text-[clamp(32px,3.8vw,48px)] leading-[1.05] m-0 mb-[36px]">
             Learning with {firstName}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
             {tutor.teachingPoints.map((point, index) => (
               <article key={`${point.title}-${index}`} className="bg-card rounded-[20px] p-[24px]">
-                <h3 className="font-serif text-[22px] leading-[1.2] mb-[10px]">
+                <h3 className="font-serif font-semibold text-[22px] leading-[1.2] mb-[10px]">
                   {point.title}
                 </h3>
                 <p className="text-[16px] leading-[1.6] text-muted-foreground m-0">
@@ -280,7 +280,7 @@ export default function TutorProfile() {
                 "Well Tutored replies to you",
               ].map((step, index) => (
                 <li key={step} className="flex items-center gap-[14px] text-[16px]">
-                  <span className="w-[34px] h-[34px] shrink-0 rounded-full bg-primary flex items-center justify-center font-serif text-[16px] pb-0.5" aria-hidden="true">{index + 1}</span>
+                  <span className="w-[34px] h-[34px] shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold text-[16px]" aria-hidden="true">{index + 1}</span>
                   {step}
                 </li>
               ))}
