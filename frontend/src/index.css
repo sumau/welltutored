@@ -174,9 +174,12 @@
   --app-font-sans: 'Atkinson Hyperlegible', sans-serif;
   --app-font-serif: 'Archivo', sans-serif;
 
-  /* The page's rules sit every --rule; the margin sits just left of the
-     content column, which is 1210px wide with a --gutter each side. */
+  /* The page's rules sit every --rule, each --rule-at below the top of its
+     line, where text of 16-22px set in 36px lines has its baseline. The
+     margin sits just left of the content column, which is 1210px wide with
+     a --gutter each side. */
   --rule: 36px;
+  --rule-at: 26px;
   --gutter: 24px;
   --margin-x: calc(max(0px, (100% - 1210px) / 2) + var(--gutter) - 12px);
 }
@@ -208,11 +211,13 @@ body:has(.public-site) {
     color: hsl(var(--foreground));
   }
 
-  /* Feint-ruled paper with the red margin line. */
+  /* Feint-ruled paper with the red margin line. Each full-width section
+     rules its own page from its top, so a section whose spacing keeps to
+     multiples of --rule has its text sitting on the rules. */
   .ruled {
     background-image:
       linear-gradient(to right, transparent calc(var(--margin-x) - 1px), hsl(var(--destructive) / 0.75) calc(var(--margin-x) - 1px), hsl(var(--destructive) / 0.75) calc(var(--margin-x) + 1px), transparent calc(var(--margin-x) + 1px)),
-      repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule) - 1px), hsl(var(--border)) calc(var(--rule) - 1px) var(--rule));
+      repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule-at) - 1px), hsl(var(--border)) calc(var(--rule-at) - 1px) var(--rule-at), transparent var(--rule-at) var(--rule));
   }
 
   /* A number written in the margin, left of the red line. */
@@ -242,8 +247,10 @@ body:has(.public-site) {
     border-radius: 4px 0 0 4px;
     background: color-mix(in srgb, var(--tint) 74%, black);
   }
+  /* A book at rest lies a little askew on the desk. */
+  .book { transform: rotate(var(--rest, 0deg)); }
   a.book:hover, a.book:focus-visible {
-    transform: translateY(-6px);
+    transform: translateY(-6px) rotate(0deg);
     box-shadow: 0 1px 0 hsl(var(--foreground) / 0.12), 0 28px 40px -20px hsl(var(--foreground) / 0.5);
   }
 
@@ -300,20 +307,36 @@ body:has(.public-site) {
   .ink-button-outline { background: hsl(var(--card)); color: hsl(var(--foreground)); }
   .ink-button-outline:hover { background: hsl(var(--secondary)); border-color: hsl(var(--foreground)); }
 
-  /* A form field, boxed like the cover label. */
+  /* A form field is a line to write on: its underline lies on the page's
+     rule, and a longer answer is written across the page's own rules. */
   .field {
-    border-radius: 8px;
-    border: 1.5px solid hsl(var(--input));
-    background: hsl(var(--card));
-    padding: 12px 14px;
-    font-size: 16px;
+    display: block;
+    width: 100%;
+    height: var(--rule-at);
+    margin-bottom: calc(var(--rule) - var(--rule-at));
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 2px solid hsl(var(--foreground));
+    border-radius: 0;
+    background: transparent;
+    font-size: 18px;
+    line-height: calc(var(--rule-at) - 2px);
     font-weight: 400;
     color: hsl(var(--foreground));
-    outline: none;
-    transition: border-color 150ms ease, box-shadow 150ms ease;
   }
-  .field:focus { border-color: hsl(var(--foreground)); box-shadow: 0 0 0 1px hsl(var(--foreground)); }
-  .field[aria-invalid="true"] { border-color: hsl(var(--destructive)); }
+  textarea.field {
+    height: calc(var(--rule) * 3 + var(--rule-at));
+    line-height: var(--rule);
+    padding-top: 0;
+    resize: none;
+  }
+  select.field {
+    appearance: none;
+    padding-right: 24px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%231E2340' stroke-width='2'%3E%3Cpath d='m1 1.5 5 5 5-5'/%3E%3C/svg%3E") no-repeat right 4px center;
+  }
+  .field::placeholder { color: hsl(var(--muted-foreground) / 0.8); }
+  .field[aria-invalid="true"] { border-bottom-color: hsl(var(--destructive)); }
 
   /* Intake as a rubber stamp; the fill steps down as places run out. */
   .stamp {

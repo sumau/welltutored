@@ -50,20 +50,26 @@ export function IntakeStamp({ tutor, className = "" }: { tutor: Tutor; className
   );
 }
 
-// A tutor as an exercise book in her tint, opening her profile.
-export function TutorBook({ tutor }: { tutor: Tutor }) {
+// A tutor as an exercise book in her tint, opening her profile, with her
+// summary written on the page beneath it. Each book rests at its own slight
+// angle and straightens when pointed at.
+const REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
+
+export function TutorBook({ tutor, index }: { tutor: Tutor; index: number }) {
   return (
-    <Link
-      href={`/tutors/${tutor.slug}`}
-      className="book flex flex-col h-full p-[20px] pl-[32px] pt-[26px] md:pt-[30px]"
-      style={{ "--tint": tutor.tint } as React.CSSProperties}
-      data-testid={`tutor-card-${tutor.slug}`}
-    >
-      <BookLabel tutor={tutor} nameClassName="text-[clamp(30px,3vw,38px)] leading-[1]" />
-      <p className="text-[16px] leading-[1.5] m-0 mt-[20px] px-[4px] line-clamp-3">{tutor.profileSummary}</p>
-      <span className="flex mt-auto pt-[22px] px-[4px]">
-        <IntakeStamp tutor={tutor} />
-      </span>
-    </Link>
+    <>
+      <Link
+        href={`/tutors/${tutor.slug}`}
+        className="book flex flex-col h-[468px] sm:h-[504px] p-[20px] pl-[34px] pt-[36px]"
+        style={{ "--tint": tutor.tint, "--rest": REST[index % REST.length] } as React.CSSProperties}
+        data-testid={`tutor-card-${tutor.slug}`}
+      >
+        <BookLabel tutor={tutor} nameClassName="text-[clamp(30px,3vw,38px)] leading-[1]" />
+        <span className="flex mt-auto px-[4px]">
+          <IntakeStamp tutor={tutor} />
+        </span>
+      </Link>
+      <p className="text-[16px] leading-[36px] m-0 px-[4px] h-[108px] line-clamp-3">{tutor.profileSummary}</p>
+    </>
   );
 }

@@ -98,22 +98,22 @@ export function Shell({
       </div>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background px-[var(--gutter)] py-[45px] md:py-[60px]" data-testid="footer">
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-[40px] md:gap-[30px] text-[14px]">
+      <footer className="ruled border-t-2 border-foreground text-foreground px-[var(--gutter)] pt-[36px] pb-[36px]" data-testid="footer">
+        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-x-[30px] gap-y-[36px] text-[15px] leading-[36px]">
           
           <div className="md:col-span-5">
-            <Link href="/" onClick={openHome} className="flex items-center gap-2.5 font-serif font-extrabold [font-stretch:108%] text-[20px] tracking-[-0.02em] mb-4" data-testid="footer-home">
-              <div className="w-[32px] h-[32px] rounded-full bg-background flex items-center justify-center text-foreground font-serif text-[20px] pb-0.5">
+            <Link href="/" onClick={openHome} className="flex items-center gap-2.5 h-[36px] font-serif font-extrabold [font-stretch:108%] text-[20px] tracking-[-0.02em]" data-testid="footer-home">
+              <div className="w-[32px] h-[32px] rounded-full bg-foreground flex items-center justify-center text-background font-serif text-[20px] pb-0.5">
                 w
               </div>
               well tutored
             </Link>
-            <p className="text-background/80 leading-[1.65] max-w-[300px]">
+            <p className="text-muted-foreground m-0 max-w-[300px]">
               Personalised tutoring from women with deep subject expertise.
             </p>
           </div>
           
-          <div className="md:col-span-3 flex flex-col gap-3 items-start text-background/90">
+          <div className="md:col-span-3 flex flex-col items-start font-bold">
             <Link href="/#tutors" onClick={openTutors} className="underline-offset-4 hover:underline" data-testid="footer-tutors">Meet the tutors</Link>
             {PUBLIC_RESOURCES_ENABLED && (
               <Link href="/resources" className="underline-offset-4 hover:underline" data-testid="footer-resources">Insights & resources</Link>
@@ -121,7 +121,7 @@ export function Shell({
             <Link href="/enquire" className="underline-offset-4 hover:underline" data-testid="footer-enquire">Make an enquiry</Link>
           </div>
 
-          <div className="md:col-span-4 flex flex-col gap-3 items-start text-background/90">
+          <div className="md:col-span-4 flex flex-col items-start font-bold">
             <button onClick={() => setPolicy("safeguarding")} className="underline-offset-4 hover:underline flex items-center gap-2" data-testid="footer-safeguarding">
                Safeguarding
             </button>
@@ -129,13 +129,13 @@ export function Shell({
                Privacy & cookies
             </button>
             {isSignedIn && (
-              <Link href="/workspace" className="underline-offset-4 hover:underline mt-2 text-background/70">
+              <Link href="/workspace" className="underline-offset-4 hover:underline font-normal text-muted-foreground">
                 Workspace
               </Link>
             )}
           </div>
 
-          <div className="col-span-1 md:col-span-12 mt-4 md:mt-8 pt-5 border-t border-background/20 text-[12px] text-background/70 flex flex-col sm:flex-row justify-between gap-4">
+          <div className="col-span-1 md:col-span-12 text-[13px] text-muted-foreground flex flex-col sm:flex-row justify-between gap-4">
             <span>© {new Date().getFullYear()} Well Tutored</span>
           </div>
 

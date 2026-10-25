@@ -128,25 +128,25 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
     return (
       <div
         ref={receiptRef}
-        className={`text-center py-10 px-4 ${compact ? 'bg-card rounded-[14px] border-2 border-foreground' : ''}`}
+        className="text-left"
         data-testid="enquiry-success"
         role="status"
         aria-live="polite"
         tabIndex={-1}
       >
-        <div className={`w-[50px] h-[50px] ${receipt.deliveryStatus === "delivered" ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"} rounded-full flex items-center justify-center mx-auto mb-6`}>
-          <Check size={24} />
-        </div>
-        <h2 className="font-serif text-[30px] md:text-[36px] leading-[1.15] mb-4">
+        <span className={`flex w-[36px] h-[36px] ${receipt.deliveryStatus === "delivered" ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"} rounded-full items-center justify-center`}>
+          <Check size={20} />
+        </span>
+        <h2 className="font-serif text-[26px] md:text-[30px] leading-[36px] m-0 mt-[36px]">
           {receipt.deliveryStatus === "delivered" ? "Enquiry delivered to Well Tutored" : receipt.deliveryStatus === "failed" ? `Enquiry recorded for ${receipt.tutorName}, delivery needs attention` : `Enquiry recorded for ${receipt.tutorName}`}
         </h2>
-        <p className="text-muted-foreground text-[16px] leading-[1.6] max-w-[360px] mx-auto mb-8">
+        <p className="text-[18px] leading-[36px] max-w-[30em] m-0 mt-[36px] mb-[36px]">
           {receipt.message}
         </p>
         <button
           type="button"
           onClick={handleReset}
-          className="ink-button text-[16px] px-6 py-3"
+          className="ink-button h-[48px] text-[16px] px-6"
           data-testid="enquiry-reset"
         >
           Send another enquiry
@@ -156,25 +156,25 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
   }
 
   return (
-    <div className={`${compact ? 'bg-card rounded-[14px] border-2 border-foreground p-6 md:p-8' : ''}`} id="enquire" data-testid="enquiry-form-container">
+    <div id="enquire" data-testid="enquiry-form-container">
       {tutor?.intake === "full" ? (
-        <div className="rounded-[14px] border-2 border-foreground bg-background p-6 text-[16px] leading-[1.6]" data-testid="enquiry-unavailable">
+        <div className="text-[18px] leading-[36px]" data-testid="enquiry-unavailable">
           {tutor.name} is not currently accepting enquiries. Please choose another tutor or check back later.
         </div>
       ) : (
       <>
       {compact ? (
-        <div className="mb-6">
-          <h3 className="font-serif text-[26px] md:text-[30px] mb-2 text-foreground">Make an enquiry</h3>
+        <div>
+          <h3 className="relative md:-top-[3px] font-serif text-[26px] md:text-[30px] leading-[36px] m-0 text-foreground">Make an enquiry</h3>
           {!tutor && (
-            <p className="text-muted-foreground text-[15px] leading-[1.5]">
+            <p className="text-muted-foreground text-[16px] leading-[36px] m-0">
               Tell us which tutor you are interested in.
             </p>
           )}
         </div>
       ) : (
-        <div className="mb-8">
-           <h2 id={compact ? undefined : "enquiry-form-title"} className="font-serif text-[32px] md:text-[40px] leading-[1.08] text-foreground">
+        <div>
+           <h2 id={compact ? undefined : "enquiry-form-title"} className="relative -top-[4px] md:-top-[6px] font-serif text-[32px] md:text-[40px] leading-[36px] m-0 text-foreground">
             Ask about {tutor ? tutor.name.split(' ')[0] : 'a tutor'}
           </h2>
         </div>
@@ -182,17 +182,17 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-4"
+        className="flex flex-col"
         data-testid="enquiry-form"
         noValidate
         aria-describedby="enquiry-form-instructions"
       >
-        <p id="enquiry-form-instructions" className="text-[14px] text-muted-foreground leading-[1.5]">
+        <p id="enquiry-form-instructions" className="text-[15px] text-muted-foreground leading-[36px] m-0">
           Fields marked with an asterisk are required.
         </p>
         {/* Parent Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label htmlFor="enquiry-parent-name" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-[24px]">
+          <label htmlFor="enquiry-parent-name" className="flex flex-col text-[15px] leading-[36px] font-bold text-foreground">
             Parent or guardian name *
             <input 
               id="enquiry-parent-name"
@@ -209,9 +209,9 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               aria-describedby={showError("name") ? "enquiry-parent-name-error" : undefined}
               data-testid="input-parent-name"
             />
-            {showError("name") && <span id="enquiry-parent-name-error" className="font-bold text-destructive" role="alert">{errors.name}</span>}
+            {showError("name") && <span id="enquiry-parent-name-error" className="font-bold text-destructive leading-[36px]" role="alert">{errors.name}</span>}
           </label>
-          <label htmlFor="enquiry-parent-email" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+          <label htmlFor="enquiry-parent-email" className="flex flex-col text-[15px] leading-[36px] font-bold text-foreground">
             Email address *
             <input 
               id="enquiry-parent-email"
@@ -228,13 +228,13 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               aria-describedby={showError("email") ? "enquiry-parent-email-error" : undefined}
               data-testid="input-parent-email"
             />
-            {showError("email") && <span id="enquiry-parent-email-error" className="font-bold text-destructive" role="alert">{errors.email}</span>}
+            {showError("email") && <span id="enquiry-parent-email-error" className="font-bold text-destructive leading-[36px]" role="alert">{errors.email}</span>}
           </label>
         </div>
 
         {/* Tutor Selection (if not pre-selected) */}
         {!tutor && tutors.length > 0 && (
-          <label htmlFor="enquiry-tutor" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+          <label htmlFor="enquiry-tutor" className="flex flex-col text-[15px] leading-[36px] font-bold text-foreground">
             Tutor you are interested in *
             <select
               id="enquiry-tutor"
@@ -253,13 +253,13 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
                 <option key={t.slug} value={t.slug}>{t.name} ({t.subject})</option>
               ))}
             </select>
-            {showError("tutorSlug") && <span id="enquiry-tutor-error" className="font-bold text-destructive" role="alert">{errors.tutorSlug}</span>}
+            {showError("tutorSlug") && <span id="enquiry-tutor-error" className="font-bold text-destructive leading-[36px]" role="alert">{errors.tutorSlug}</span>}
           </label>
         )}
 
         {/* Student Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label htmlFor="enquiry-student-name" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-[24px]">
+          <label htmlFor="enquiry-student-name" className="flex flex-col text-[15px] leading-[36px] font-bold text-foreground">
             Student's name *
             <input 
               id="enquiry-student-name"
@@ -276,9 +276,9 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               aria-describedby={showError("studentName") ? "enquiry-student-name-error" : undefined}
               data-testid="input-student-name"
             />
-            {showError("studentName") && <span id="enquiry-student-name-error" className="font-bold text-destructive" role="alert">{errors.studentName}</span>}
+            {showError("studentName") && <span id="enquiry-student-name-error" className="font-bold text-destructive leading-[36px]" role="alert">{errors.studentName}</span>}
           </label>
-          <label htmlFor="enquiry-student-age" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+          <label htmlFor="enquiry-student-age" className="flex flex-col text-[15px] leading-[36px] font-bold text-foreground">
             Student's age *
             <select
               id="enquiry-student-age"
@@ -298,11 +298,11 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
               <option value="16-17">16–17</option>
               <option value="18+">18+</option>
             </select>
-            {showError("studentAge") && <span id="enquiry-student-age-error" className="font-bold text-destructive" role="alert">{errors.studentAge}</span>}
+            {showError("studentAge") && <span id="enquiry-student-age-error" className="font-bold text-destructive leading-[36px]" role="alert">{errors.studentAge}</span>}
           </label>
         </div>
 
-        <label htmlFor="enquiry-subject-level" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+        <label htmlFor="enquiry-subject-level" className="flex flex-col text-[15px] leading-[36px] font-bold text-foreground">
           Subject and level *
           <input 
             id="enquiry-subject-level"
@@ -319,10 +319,10 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
             aria-describedby={showError("subjectLevel") ? "enquiry-subject-level-error" : undefined}
             data-testid="input-subject-level"
           />
-          {showError("subjectLevel") && <span id="enquiry-subject-level-error" className="font-bold text-destructive" role="alert">{errors.subjectLevel}</span>}
+          {showError("subjectLevel") && <span id="enquiry-subject-level-error" className="font-bold text-destructive leading-[36px]" role="alert">{errors.subjectLevel}</span>}
         </label>
 
-        <label htmlFor="enquiry-message" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+        <label htmlFor="enquiry-message" className="flex flex-col text-[15px] leading-[36px] font-bold text-foreground">
           What would you like the tutor to know? *
           <textarea 
             id="enquiry-message"
@@ -339,11 +339,11 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
             aria-describedby={showError("message") ? "enquiry-message-error" : undefined}
             data-testid="input-message"
           />
-          {showError("message") && <span id="enquiry-message-error" className="font-bold text-destructive" role="alert">{errors.message}</span>}
+          {showError("message") && <span id="enquiry-message-error" className="font-bold text-destructive leading-[36px]" role="alert">{errors.message}</span>}
         </label>
 
         {submitError && (
-          <p className="rounded-[8px] border-2 border-destructive px-3.5 py-2.5 text-[15px] font-bold text-destructive" role="alert" data-testid="error-enquiry-submit">
+          <p className="m-0 text-[16px] leading-[36px] font-bold text-destructive" role="alert" data-testid="error-enquiry-submit">
             {submitError}
           </p>
         )}
@@ -356,14 +356,14 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
           type="submit"
           ref={submitButtonRef}
           disabled={!isComplete || isSubmitting || createEnquiry.isPending}
-          className="mt-2 ink-button text-[17px] px-7 py-[14px] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-[12px] mb-[12px] h-[48px] self-start ink-button text-[17px] px-7 disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="button-submit-enquiry"
         >
           {isSubmitting ? 'Sending...' : 'Send enquiry'}
         </button>
 
-        <div className="mt-4 pt-4 border-t border-border flex items-start gap-3 text-[14px] text-muted-foreground leading-[1.5]">
-          <ShieldCheck size={18} className="text-foreground shrink-0" />
+        <div className="flex items-start gap-3 text-[15px] text-muted-foreground leading-[36px]">
+          <ShieldCheck size={18} className="text-foreground shrink-0 mt-[9px]" />
           <p>
             Safeguarding note: enquiries for under-18s should come from a parent or guardian. No tutor email addresses are published, and your details are shared only to make an introduction.
           </p>

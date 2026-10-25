@@ -16,9 +16,9 @@ import {
 
 export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
   return tutor.intake === "full" ? (
-    <div className="bg-card rounded-[14px] border-2 border-foreground p-8 text-[16px] leading-[1.6]" data-testid="tutor-enquiry-unavailable">
+    <p className="m-0 text-[18px] leading-[36px]" data-testid="tutor-enquiry-unavailable">
       {tutor.name} is not currently accepting enquiries. Please check back later or choose another tutor.
-    </div>
+    </p>
   ) : (
     <EnquiryForm tutor={tutor} compact={true} />
   );
@@ -54,15 +54,15 @@ export function TutorBackground({ tutor }: { tutor: Tutor }) {
   if (rows.length === 0) return null;
 
   return (
-    <section className="px-[var(--gutter)] max-w-[1210px] mx-auto mb-[72px]" id="background">
-      <div className="border-t border-border">
+    <section className="ruled px-[var(--gutter)]" id="background">
+      <div className="max-w-[1210px] mx-auto pt-[36px] pb-[36px] grid gap-[36px]">
         {rows.map((row) => (
-          <div key={row.label} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-[12px] md:gap-[22px] py-[28px] border-b border-border">
+          <div key={row.label} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-x-[22px]">
             <h2 className="font-serif text-[24px] leading-[36px] m-0">{row.label}</h2>
-            <div className="grid gap-[20px] max-w-[46em] text-[16px] leading-[1.6]" data-testid={row.testId}>
+            <div className="grid gap-[36px] max-w-[46em] text-[16px] leading-[36px]" data-testid={row.testId}>
               {backgroundEntries(row.text).map((entry, index) => (
-                <div key={index} className="grid grid-cols-1 sm:grid-cols-[170px_1fr] gap-x-[22px] gap-y-[2px]">
-                  {entry.dates && <span className="text-muted-foreground text-[15px]">{entry.dates}</span>}
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-[170px_1fr] gap-x-[22px]">
+                  {entry.dates && <span className="text-muted-foreground">{entry.dates}</span>}
                   <div className={entry.dates ? "" : "sm:col-span-2"}>
                     {entry.title && <b className="block font-semibold text-foreground">{entry.title}</b>}
                     {entry.detail && <span className="block text-muted-foreground whitespace-pre-wrap">{entry.detail}</span>}
@@ -158,60 +158,60 @@ export default function TutorProfile() {
   const firstName = tutor.name.split(' ')[0];
 
   return (
-    <main className="flex-1 ruled" data-testid={`page-tutor-${tutor.slug}`}>
-      {/* Back to the tutors, and jumps within her page */}
-      <div className="max-w-[1210px] mx-auto px-[var(--gutter)] pt-[18px] flex justify-between items-center text-[15px] font-bold">
-        <Link href="/#tutors" className="inline-flex items-center gap-2 rounded-full underline-offset-[6px] decoration-2 hover:underline" data-testid="link-back">
-          <ArrowLeft size={15} /> All tutors
-        </Link>
-        <div className="hidden sm:flex items-center gap-6 text-muted-foreground">
-          <button onClick={() => jumpTo('about')} className="hover:text-foreground">About {firstName}</button>
-          {PUBLIC_RESOURCES_ENABLED && tutor.resources.length > 0 && (
-            <button onClick={() => jumpTo('resources')} className="hover:text-foreground">Her resources</button>
-          )}
-        </div>
-      </div>
+    <main className="flex-1" data-testid={`page-tutor-${tutor.slug}`}>
+      {/* Her exercise book beside her approach, written on the page */}
+      <section className="ruled px-[var(--gutter)]">
+        <div className="max-w-[1210px] mx-auto pt-[36px] pb-[72px]">
+          <div className="flex justify-between items-center text-[15px] font-bold leading-[36px]">
+            <Link href="/#tutors" className="inline-flex items-center gap-2 rounded-full underline-offset-[6px] decoration-2 hover:underline" data-testid="link-back">
+              <ArrowLeft size={15} /> All tutors
+            </Link>
+            <div className="hidden sm:flex items-center gap-6 text-muted-foreground">
+              <button onClick={() => jumpTo('about')} className="hover:text-foreground">About {firstName}</button>
+              {PUBLIC_RESOURCES_ENABLED && tutor.resources.length > 0 && (
+                <button onClick={() => jumpTo('resources')} className="hover:text-foreground">Her resources</button>
+              )}
+            </div>
+          </div>
 
-      {/* Her exercise book: the label on the cover, beside her approach */}
-      <section className="max-w-[1210px] mx-auto px-[var(--gutter)] pt-[36px] pb-[36px]">
-        <div
-          className="book grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-[32px] lg:gap-[56px] items-center p-[20px] pl-[32px] py-[28px] md:p-[40px] md:pl-[56px]"
-          style={{ "--tint": tutor.tint } as React.CSSProperties}
-        >
-          <div className="grid gap-[20px] justify-items-start">
-            <div className="w-full max-w-[560px]">
+          <div className="mt-[36px] grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] gap-x-[64px] gap-y-[72px] items-start">
+            <div
+              className="book flex flex-col w-full max-w-[400px] h-[468px] md:h-[540px] p-[22px] pl-[36px] pt-[48px]"
+              style={{ "--tint": tutor.tint, "--rest": "-1deg" } as React.CSSProperties}
+            >
               <BookLabel
                 tutor={tutor}
                 nameAs="h1"
-                nameClassName="text-[clamp(40px,5vw,64px)] leading-[1]"
+                nameClassName="text-[clamp(34px,4vw,44px)] leading-[1.05]"
                 nameTestId="tutor-name"
                 subjectTestId="tutor-subject-kicker"
               />
+              <span className="flex mt-auto px-[4px]">
+                <IntakeStamp tutor={tutor} className="text-[16px] px-[12px] py-[5px]" />
+              </span>
             </div>
-            <IntakeStamp tutor={tutor} className="text-[16px] px-[12px] py-[5px]" />
+            <div>
+              <figure className="m-0">
+                <blockquote className="font-serif font-semibold text-[22px] md:text-[28px] leading-[36px] tracking-[-0.01em] m-0">
+                  {tutor.teachingIntro}
+                </blockquote>
+                <figcaption className="text-[16px] leading-[36px] font-bold">
+                  {firstName} on her approach
+                </figcaption>
+              </figure>
+              <p className="max-w-[36em] text-[18px] md:text-[20px] leading-[36px] m-0 mt-[36px] text-muted-foreground" data-testid="tutor-intro">
+                {tutor.profileSummary}
+              </p>
+            </div>
           </div>
-          <figure className="m-0">
-            <blockquote className="font-serif font-semibold text-[22px] md:text-[28px] leading-[1.35] tracking-[-0.01em] m-0">
-              {tutor.teachingIntro}
-            </blockquote>
-            <figcaption className="text-[16px] mt-[20px] font-bold">
-              {firstName} on her approach
-            </figcaption>
-          </figure>
         </div>
       </section>
 
-      <section className="max-w-[1210px] mx-auto px-[var(--gutter)] pb-[36px]">
-        <p className="max-w-[36em] text-[20px] md:text-[22px] leading-[36px] m-0" data-testid="tutor-intro">
-          {tutor.profileSummary}
-        </p>
-      </section>
-
       {/* About */}
-      <section className="px-[var(--gutter)] max-w-[1210px] mx-auto pt-[36px] mb-[72px]" id="about">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[36px] md:gap-[86px]">
+      <section className="ruled px-[var(--gutter)]" id="about">
+        <div className="max-w-[1210px] mx-auto pt-[36px] pb-[36px] grid grid-cols-1 md:grid-cols-2 gap-[36px] md:gap-[86px]">
           <div>
-            <h2 className="font-serif text-[clamp(30px,3.4vw,40px)] leading-[72px] m-0">About {firstName}</h2>
+            <h2 className="relative top-[13px] md:top-[12px] font-serif text-[36px] md:text-[40px] leading-[72px] m-0">About {firstName}</h2>
             <div className="text-[18px] leading-[36px] max-w-[34em] whitespace-pre-wrap" data-testid="tutor-bio">
               {tutor.bio}
             </div>
@@ -245,40 +245,36 @@ export default function TutorProfile() {
 
       <TutorBackground tutor={tutor} />
 
-      {/* Learning with her, on her own tint */}
-      <section className="px-[var(--gutter)] py-[72px]" style={{ backgroundColor: tutor.tint }}>
-        <div className="max-w-[1150px] mx-auto">
-          <h2 className="font-serif text-[clamp(32px,3.8vw,48px)] leading-[1.1] m-0 mb-[36px]">
+      {/* Learning with her, written on the page */}
+      <section className="ruled px-[var(--gutter)]">
+        <div className="max-w-[1210px] mx-auto pt-[36px] pb-[36px]">
+          <h2 className="relative top-[13px] md:top-[12px] font-serif text-[36px] md:text-[40px] leading-[72px] m-0 mb-[36px]">
             Learning with {firstName}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px]">
+          <dl className="grid gap-[36px] m-0 max-w-[60em]">
             {tutor.teachingPoints.map((point, index) => (
-              <article key={`${point.title}-${index}`} className="book-label p-[22px]">
-                <h3 className="font-serif text-[22px] leading-[1.2] mb-[10px]">
-                  {point.title}
-                </h3>
-                <p className="text-[16px] leading-[1.6] m-0">
-                  {point.body}
-                </p>
-              </article>
+              <div key={`${point.title}-${index}`} className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-x-[22px]">
+                <dt className="font-serif font-bold text-[20px] leading-[36px]">{point.title}</dt>
+                <dd className="text-[18px] leading-[36px] m-0">{point.body}</dd>
+              </div>
             ))}
-          </div>
+          </dl>
         </div>
       </section>
 
       <TutorResources tutor={tutor} />
 
       {/* Enquire */}
-      <section className="px-[var(--gutter)] py-[72px]">
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-[36px] md:gap-[72px] items-start">
+      <section className="ruled px-[var(--gutter)]">
+        <div className="max-w-[1150px] mx-auto pt-[72px] pb-[108px] grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-[36px] md:gap-[72px] items-start">
           <div>
-            <h2 className="font-serif text-[clamp(34px,4vw,48px)] leading-[1.1] m-0 mb-[18px]">
+            <h2 className="relative top-[14px] md:top-[12px] font-serif text-[32px] md:text-[40px] leading-[72px] m-0">
               Ask about lessons with {firstName}
             </h2>
             <p className="text-[18px] leading-[36px] max-w-[30em] m-0">
               Tell us a little about the student and what would help. Well Tutored delivers your enquiry securely to the team for review. Tutor email addresses are never published.
             </p>
-            <ol className="list-none p-0 m-0 mt-[36px] grid gap-[12px]">
+            <ol className="list-none p-0 m-0 mt-[36px] grid">
               {[
                 "Share the student's subject, level and context",
                 `Well Tutored reviews your enquiry for ${firstName}`,
