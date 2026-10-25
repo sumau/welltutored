@@ -16,9 +16,9 @@ const CARD_REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
 // Three notes beside the hero, in colours no tutor's card leads with. On
 // wider screens they fan out across the box; left and top place each one.
 const HERO_NOTES = [
-  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", tint: "#9DBB83", r: "-5deg", left: "0%", top: "7%" },
-  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", tint: "#8EA8CE", r: "4deg", left: "47%", top: "0%" },
-  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", tint: "#D8B267", r: "-2deg", left: "24%", top: "48%" },
+  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", tint: "#9DBB83", r: "-3deg", left: "0%", top: "4%" },
+  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", tint: "#8EA8CE", r: "2deg", left: "33%", top: "0%" },
+  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", tint: "#D8B267", r: "-1.5deg", left: "66%", top: "6%" },
 ];
 
 export default function Home() {
@@ -37,24 +37,24 @@ export default function Home() {
   return (
     <main className="flex-1" data-testid="page-home">
       {/* Hero: the headline and who it's for, beside three notes on how we work */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-[40px] lg:gap-[56px] lg:items-center" id="top">
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-[40px] lg:gap-[56px] lg:items-center" id="top">
         <div>
           <h1 id="home-hero-title" className="text-[clamp(46px,6.6vw,92px)] leading-[0.92] tracking-[-0.04em] font-bold m-0" data-testid="hero-title">
             Learn to love learning.
           </h1>
-          <p className="text-[clamp(20px,1.9vw,26px)] leading-[1.35] font-medium m-0 mt-[24px] max-w-[22em]" data-testid="hero-copy">
+          <p className="text-[clamp(20px,1.9vw,26px)] leading-[1.35] font-medium m-0 mt-[24px] max-w-[22em] [text-wrap:balance]" data-testid="hero-copy">
             Helping young women grow, flourish and thrive.
           </p>
         </div>
-        <ul className="note-fan list-none m-0 p-0 w-full max-w-[400px] lg:max-w-[420px] lg:justify-self-center" aria-label="How we work" data-testid="hero-notes">
+        <ul className="note-fan list-none m-0 p-0 w-full max-w-[620px] lg:justify-self-end" aria-label="How we work" data-testid="hero-notes">
           {HERO_NOTES.map((note, index) => (
             <li
               key={note.title}
-              className="note-card px-[18px] pt-[16px] pb-[14px]"
+              className="note-card px-[16px] pt-[14px] pb-[14px]"
               style={{ "--tint": note.tint, "--rest": note.r, "--delay": `${index * 90}ms`, left: note.left, top: note.top } as React.CSSProperties}
             >
-              <b className="note-card-head block text-[20px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
-              <p className="note-card-body m-0 text-[17px] [--rule:28px]">{note.text}</p>
+              <b className="note-card-head block text-[18px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
+              <p className="note-card-body m-0 text-[16px] [--rule:26px]">{note.text}</p>
             </li>
           ))}
         </ul>
