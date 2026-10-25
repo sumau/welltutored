@@ -2,7 +2,7 @@
 
 For whoever writes a test or reads a red `verify`: the checks that run against
 the repository before a merge — the test suites, typecheck, build and docs
-check that `pnpm run verify` runs — and how to write a test. Checks against
+check, docs check and codegen check that `pnpm run verify` runs — and how to write a test. Checks against
 a running site are in [smoke-checks.md](smoke-checks.md).
 
 Most tests run on Node's built-in `node:test` runner through `tsx`; the web
@@ -126,11 +126,12 @@ its JSX transform, so when adding a web test:
 
 ### Repository scripts
 
-The script package has three test suites, all run by `verify`:
+The script package has four test suites, all run by `verify`:
 
 ```sh
 pnpm --filter @welltutored/scripts run test:smoke
 pnpm --filter @welltutored/scripts run test:docs
+pnpm --filter @welltutored/scripts run test:codegen-check
 pnpm --filter @welltutored/scripts run test:integration-database
 ```
 
@@ -138,7 +139,8 @@ The smoke-check tests validate the logic of the scripts in
 [smoke-checks.md](smoke-checks.md), without a running site: target selection,
 the waiver flags in both directions, redirect protection, timeout handling, and
 healthy responses against a local fixture. The documentation tests cover
-[the Docs Check](#the-docs-check). The integration-database check tests ensure
+[the Docs Check](#the-docs-check), and the codegen-check tests cover how
+[the codegen check](#the-codegen-check) compares folders. The integration-database check tests ensure
 that integration tests require a dedicated `TEST_DATABASE_URL` distinct from
 `DATABASE_URL`.
 
@@ -165,6 +167,30 @@ It also reads the code, skipping tests and generated code, and fails when:
   [configuration.md](configuration.md) doesn't name;
 - a code, config or workflow comment names a doc, or a doc's heading, that
   doesn't exist.
+
+## The codegen check
+
+`backend/openapi.yaml` is written by hand, and Orval generates the React Query
+hooks in `frontend/src/client/generated` and the Zod schemas in
+`backend/src/api/schemas/generated` from it. `verify` runs
+
+```sh
+pnpm --filter @welltutored/scripts run codegen:check
+```
+
+which regenerates both folders and fails if the result differs from the
+files in the working tree, listing each file that changed, appeared or
+disappeared. It catches a spec change that nothing compiles against yet, such
+as a new `maxLength` or a field made required, which typecheck can't. The fix
+is the command the failure names:
+
+```sh
+pnpm --filter @welltutored/backend run codegen
+```
+
+then commit the result. The check puts the folders back as they were
+afterwards, so it never edits files itself. An Orval upgrade that changes the
+output's formatting trips it too; regenerate in the upgrade's pull request.
 
 ## Before a pull request
 
