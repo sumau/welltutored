@@ -107,7 +107,7 @@ export function Shell({
               well tutored
             </Link>
             <p className="text-background/80 leading-[1.65] max-w-[300px]">
-              Women tutors supporting female secondary and A-level students.
+              Personalised tutoring from women with deep subject expertise.
             </p>
           </div>
           

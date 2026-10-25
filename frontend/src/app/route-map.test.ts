@@ -45,19 +45,19 @@ test("keeps page metadata aligned with public and workspace routes", () => {
   const expectedMetadata = [
     {
       path: "/",
-      title: "Well Tutored | Women tutors for secondary and A-level students",
+      title: "Well Tutored | Learn to love learning",
       description:
-        "Browse women tutors and submit a named-tutor enquiry.",
+        "Personalised tutoring from women with deep subject expertise. Browse the tutors and send a named-tutor enquiry.",
     },
     {
       path: "/resources",
-      title: "Well Tutored | Women tutors for secondary and A-level students",
-      description: "Browse women tutors and submit a named-tutor enquiry.",
+      title: "Well Tutored | Learn to love learning",
+      description: "Personalised tutoring from women with deep subject expertise. Browse the tutors and send a named-tutor enquiry.",
     },
     {
       path: "/resources/essay-planning",
-      title: "Well Tutored | Women tutors for secondary and A-level students",
-      description: "Browse women tutors and submit a named-tutor enquiry.",
+      title: "Well Tutored | Learn to love learning",
+      description: "Personalised tutoring from women with deep subject expertise. Browse the tutors and send a named-tutor enquiry.",
     },
     {
       path: "/tutors/alice-smith",

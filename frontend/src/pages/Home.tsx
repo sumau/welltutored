@@ -43,7 +43,7 @@ export default function Home() {
               Meet the tutors
             </h2>
             <p className="text-muted-foreground text-[18px] leading-[1.5] m-0">
-              Personalised secondary school tutoring from women with deep subject expertise.
+              Personalised tutoring from women with deep subject expertise.
             </p>
           </div>
           {tutorsLoading ? (

@@ -100,9 +100,9 @@ export type RouteMetadata = {
 };
 
 const defaultRouteMetadata: RouteMetadata = {
-  title: "Well Tutored | Women tutors for secondary and A-level students",
+  title: "Well Tutored | Learn to love learning",
   description:
-    "Browse women tutors and submit a named-tutor enquiry.",
+    "Personalised tutoring from women with deep subject expertise. Browse the tutors and send a named-tutor enquiry.",
 };
 
 function humanizeSlug(value: string) {
