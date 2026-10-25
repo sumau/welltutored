@@ -1,5 +1,5 @@
 import { useListTutors } from "@/client";
-import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { ErrorState } from "@/components/ErrorState";
@@ -84,13 +84,6 @@ export default function Enquiry() {
                 </li>
               ))}
             </ol>
-            <div className="flex gap-[12px] text-muted-foreground text-[15px] leading-[1.6]">
-              <ShieldCheck size={20} className="text-foreground shrink-0 mt-[2px]" />
-              <p className="m-0">
-                No tutor email addresses are published. Your enquiry is shared
-                only for the purpose of making an introduction.
-              </p>
-            </div>
             {PUBLIC_RESOURCES_ENABLED && (
               <Link
                 href="/resources"

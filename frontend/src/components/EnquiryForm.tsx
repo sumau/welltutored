@@ -178,7 +178,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
             Ask about {tutor ? tutor.name.split(' ')[0] : 'a tutor'}
           </h2>
           <p className="text-muted-foreground text-[16px] leading-[1.6]">
-            {tutor ? `${tutor.name} is selected.` : 'Select a tutor.'} For students under 18, please provide a parent or guardian's details.
+            {tutor ? `${tutor.name} is selected.` : 'Select a tutor.'}
           </p>
         </div>
       )}
@@ -368,7 +368,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false }: EnquiryForm
         <div className="mt-4 pt-4 border-t border-border flex items-start gap-3 text-[14px] text-muted-foreground leading-[1.5]">
           <ShieldCheck size={18} className="text-foreground shrink-0" />
           <p>
-            Safeguarding note: enquiries for under-18s should come from a parent or guardian. Your details are shared securely and only for this enquiry and its record.
+            Safeguarding note: enquiries for under-18s should come from a parent or guardian. No tutor email addresses are published, and your details are shared only to make an introduction.
           </p>
         </div>
       </form>
