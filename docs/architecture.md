@@ -92,9 +92,10 @@ Clerk provides the sign-in and sign-up pages:
 - `/sign-in` — sign-in flow (including Clerk's nested flow paths)
 - `/sign-up` — sign-up flow (including Clerk's nested flow paths)
 
-Public visitors never load Clerk. `App.tsx` lazy-loads `PublicApp` or
-`AuthenticatedApp` by path, and only the authenticated side brings in Clerk,
-its themes, and the Workspace routes. Keep public route modules, shared
+Public visitors never load Clerk. `App.tsx` reads the path with
+[Wouter](https://github.com/molefrog/wouter), the browser-side router, and
+lazy-loads `PublicApp` or `AuthenticatedApp` to match. Only the authenticated
+side brings in Clerk, its themes, and the Workspace routes. Keep public route modules, shared
 providers, and route metadata free of Clerk imports, or Clerk lands in the
 public bundle.
 
