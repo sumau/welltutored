@@ -13,10 +13,9 @@ which Fly collects and `fly logs` shows. Nothing alerts on them, and errors in
 the browser go nowhere: the page shows a message and logs to the console.
 The application is organised around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area). Routes are defined in `frontend/src/app/route-map.ts`.
 
+## Runtime: where a request goes
+
 ```mermaid
----
-title: "Runtime: where a request goes"
----
 flowchart LR
   classDef person fill:#fde68a,stroke:#b45309,stroke-width:2px,color:#1f2937
   classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
@@ -116,7 +115,9 @@ one as pending, so the pending flag alone lets a duplicate through.
 The backend follows the shape of the
 [full-stack FastAPI template](https://github.com/fastapi/full-stack-fastapi-template),
 in TypeScript. Each folder in `backend/src` has one job, and a request passes
-through them in one direction:
+through them in one direction.
+
+### Inside the API: one request through `backend/src`
 
 ```mermaid
 flowchart LR
