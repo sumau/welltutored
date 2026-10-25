@@ -15,50 +15,34 @@ around two user-facing surfaces: the public website and the private [Workspace](
 flowchart LR
   classDef person fill:#fde68a,stroke:#b45309,stroke-width:2px,color:#1f2937
   classDef external fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#1f2937
-  classDef hidden fill:none,stroke:none
 
-  subgraph system[" "]
-    direction LR
-    visitor(["👤 Visitor"]) --> public
-    tutor(["👤 Tutor/owner"]) --> workspace
+  visitor(["👤 Visitor"]) --> public
+  tutor(["👤 Tutor/owner"]) --> workspace
 
-    subgraph browser["Browser: React app"]
-      public["Public website<br/>(never loads Clerk)"]
-      workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
-    end
-
-    subgraph hosted["Hosted services"]
-      clerk["Clerk"]
-      db[("PostgreSQL<br/>(Neon in production)")]
-    end
-
-    workspace -- "sign in" --> clerk
-
-    subgraph container["Container: one origin"]
-      static["Frontend build<br/>(static files)"]
-      api["Express API under /api<br/>clerkMiddleware, Zod validation"]
-    end
-
-    browser -- "page loads" --> static
-    public -- "public reads, enquiries" --> api
-    workspace -- "session cookie" --> api
-    api -- "Drizzle" --> db
+  subgraph browser["Browser: React app"]
+    public["Public website<br/>(never loads Clerk)"]
+    workspace["Private Workspace<br/>(lazy-loaded with Clerk)"]
   end
 
-  subgraph key["Key"]
-    direction LR
-    keyPerson(["Person"])
-    keyHosted["Hosted service"]
-    subgraph keyArrow[" "]
-      keyFrom[" "] -- "runtime request" --> keyTo[" "]
-    end
+  subgraph hosted["Hosted services"]
+    clerk["Clerk"]
+    db[("PostgreSQL<br/>(Neon in production)")]
   end
 
-  key ~~~ system
+  workspace -- "sign in" --> clerk
 
-  class visitor,tutor,keyPerson person
-  class clerk,db,keyHosted external
-  class system,keyArrow hidden
+  subgraph container["Container: one origin"]
+    static["Frontend build<br/>(static files)"]
+    api["Express API under /api<br/>clerkMiddleware, Zod validation"]
+  end
+
+  browser -- "page loads" --> static
+  public -- "public reads, enquiries" --> api
+  workspace -- "session cookie" --> api
+  api -- "Drizzle" --> db
+
+  class visitor,tutor person
+  class clerk,db external
 ```
 
 ## Public website
