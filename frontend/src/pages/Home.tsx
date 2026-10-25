@@ -1,90 +1,93 @@
 import * as React from "react";
 import { useListTutors } from "@/client";
-import { Link } from "wouter";
-import { ErrorState } from "@/components/ErrorState";
-import { LoadingState } from "@/components/LoadingState";
-import { intakeLabels, intakePillClasses, intakePillDotClasses } from "@/lib/intake";
-import { scrollToTutors } from "@/lib/scroll-to-tutors";
+import { Link, useLocation } from "wouter";
+import { ArrowRight } from "lucide-react";
+import { BookFan } from "@/components/TutorBook";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
+const beliefs = [
+  ["She finds her confidence.", "Working one to one with someone who believes she can, she starts to believe it too."],
+  ["She becomes curious about the world.", "A tutor who loves her subject shows her why it matters beyond the exam."],
+  ["She discovers what she's capable of.", "Often it's more than she thought."],
+];
+
 export default function Home() {
-  const { data: tutors, isLoading: tutorsLoading, error: tutorsError, refetch: refetchTutors } = useListTutors({
+  const { data: tutors } = useListTutors({
     query: publicTutorQueryOptions,
     request: publicTutorRequestOptions,
   });
+  const [, setLocation] = useLocation();
 
-  // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
-  // loaded, so the grid has its full height.
+  // The tutors used to be a section of Home at `/#tutors`; send old links to
+  // their own page.
   React.useEffect(() => {
-    if (tutorsLoading || window.location.hash !== "#tutors") return;
-    scrollToTutors("auto");
-  }, [tutorsLoading]);
+    if (window.location.hash === "#tutors") setLocation("/tutors", { replace: true });
+  }, [setLocation]);
 
   return (
     <main className="flex-1" data-testid="page-home">
-      {/* Hero: the headline, beside who it's for */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-[28px] lg:gap-[64px] lg:items-end" id="top">
-        <h1 id="home-hero-title" className="text-[clamp(46px,7vw,108px)] leading-[0.92] tracking-[-0.04em] font-bold m-0" data-testid="hero-title">
-          Learn to love learning.
+      {/* Hero: the belief, beside who Well Tutored is */}
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[56px] md:pb-[96px] grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-[28px] lg:gap-[64px] lg:items-end" id="top">
+        <h1 id="home-hero-title" className="text-[clamp(44px,6.4vw,96px)] leading-[0.95] tracking-[-0.04em] font-bold m-0" data-testid="hero-title">
+          The right tutor changes how she feels about learning.
         </h1>
         <p className="lg:border-l-2 lg:border-foreground/15 lg:pl-[32px] text-[clamp(20px,1.9vw,26px)] leading-[1.35] font-medium m-0 lg:mb-[10px] max-w-[22em]" data-testid="hero-copy">
-          Helping young women grow, flourish and thrive.
+          Well Tutored introduces young women to women tutors with deep expertise in their subjects. Lessons are online, so she can be anywhere in the UK.
         </p>
       </section>
 
-      {/* Tutors, one card each, under a heading the nav's link scrolls to */}
-      <section className="px-6 md:px-[30px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
-        <div className="max-w-[1150px] mx-auto">
-          <div className="mb-[28px]">
-            <h2 id="home-tutors-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[8px]">
-              Meet the tutors
+      {/* What we believe: what the right tutor changes, one line at a time */}
+      <section className="px-6 md:px-[30px] pb-[56px] md:pb-[96px]" aria-labelledby="home-belief-title">
+        <div className="max-w-[1150px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.6fr] gap-[32px] lg:gap-[64px]">
+          <div>
+            <h2 id="home-belief-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[16px]">
+              What we believe
             </h2>
-            <p className="text-muted-foreground text-[18px] leading-[1.5] m-0">
-              Personalised tutoring from women with deep subject expertise.
+            <p className="text-[19px] leading-[1.5] text-muted-foreground m-0 max-w-[24em]">
+              A good tutor teaches the subject. The right tutor changes how a student sees herself.
             </p>
           </div>
-          {tutorsLoading ? (
-            <LoadingState variant="tutor-grid" message="Loading tutors..." />
-          ) : tutorsError ? (
-            <ErrorState
-              message="We couldn't load the tutor profiles. Please try again."
-              onRetry={refetchTutors}
-            />
-          ) : (
-            <ul className="list-none m-0 p-0 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[16px]" data-testid="tutor-grid">
-              {(tutors || []).map((tutor) => (
-                <li key={tutor.id}>
-                  <Link
-                    href={`/tutors/${tutor.slug}`}
-                    className="tutor-band flex flex-col h-full rounded-[20px] p-[26px] md:p-[30px]"
-                    style={{ "--tint": tutor.tint } as React.CSSProperties}
-                    data-testid={`tutor-card-${tutor.slug}`}
-                  >
-                    <h3 className="m-0 text-[clamp(36px,3.6vw,46px)] leading-[0.95] tracking-[-0.04em] font-bold mb-[14px]">
-                      {tutor.name}
-                    </h3>
-                    <b className="block text-[19px] font-bold leading-[1.35] mb-[6px]">{tutor.subject}</b>
-                    <span className="text-[16px] leading-[1.45]">{tutor.university}, {tutor.qualification}</span>
-                    <p className="text-[16px] leading-[1.5] m-0 mt-[16px] pt-[16px] border-t border-foreground/20 line-clamp-3">{tutor.profileSummary}</p>
-                    <span className="flex mt-auto pt-[24px] text-[16px] font-semibold">
-                      <span className={`inline-flex items-center gap-[8px] rounded-full px-[12px] py-[6px] text-[15px] ${intakePillClasses[tutor.intake]}`} aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
-                        <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
-                        {intakeLabels[tutor.intake]}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+          <ul className="list-none p-0 m-0 grid gap-[32px] md:gap-[40px]">
+            {beliefs.map(([title, text]) => (
+              <li key={title} className="border-t-2 border-foreground pt-[18px]">
+                <b className="block text-[clamp(26px,2.8vw,36px)] leading-[1.1] tracking-[-0.03em] font-bold mb-[10px] [text-wrap:balance]">{title}</b>
+                <span className="block text-muted-foreground text-[18px] leading-[1.5] max-w-[34em]">{text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Who teaches, beside a few of the tutors' books */}
+      <section className="bg-secondary px-6 md:px-[30px] py-[56px] md:py-[96px] overflow-hidden" aria-labelledby="home-tutors-title">
+        <div className="max-w-[1150px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.15fr] gap-[40px] lg:gap-[64px] lg:items-center">
+          <div>
+            <h2 id="home-tutors-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[16px]">
+              Women who teach what they know
+            </h2>
+            <p className="text-[18px] leading-[1.55] m-0 mb-[28px] max-w-[30em]">
+              Every Well Tutored tutor is a woman with deep expertise in her subject, a role model as well as a teacher. We're a small, hand-picked group, and a person reads every enquiry and replies.
+            </p>
+            <Link
+              href="/tutors"
+              className="rounded-full bg-primary text-primary-foreground text-[17px] font-semibold px-6 py-3.5 hover:bg-primary-border transition-colors inline-flex items-center gap-2 w-fit"
+              data-testid="button-home-tutors"
+            >
+              Meet the tutors <ArrowRight size={18} aria-hidden="true" />
+            </Link>
+          </div>
+          {/* Holds its height while the tutors load, and stays empty if they don't */}
+          <div className="h-[340px] sm:h-[460px] xl:h-[540px]">
+            {tutors && <BookFan tutors={tutors} />}
+          </div>
         </div>
       </section>
 
       {/* How an enquiry works */}
-      <section className="bg-card border-t border-border px-6 md:px-[30px] py-[56px] md:py-[80px]" aria-labelledby="home-enquiry-title">
+      <section className="px-6 md:px-[30px] py-[56px] md:py-[80px]" aria-labelledby="home-enquiry-title">
         <div className="max-w-[1150px] mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-[24px] mb-[40px]">
             <h2 id="home-enquiry-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0">
@@ -100,7 +103,7 @@ export default function Home() {
           </div>
           <ol className="list-none p-0 m-0 grid grid-cols-1 md:grid-cols-3 gap-[28px] md:gap-[40px]">
             {[
-              ["Choose a tutor", "Pick from the list above. Her profile shows how she teaches."],
+              ["Choose a tutor", "Pick a tutor. Her profile shows how she teaches."],
               ["Tell us about the student", "The subject, the school level, and what would help."],
               ["We reply", "Well Tutored reviews the enquiry and gets back to you."],
             ].map(([title, text], index) => (

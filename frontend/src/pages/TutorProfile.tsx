@@ -161,7 +161,7 @@ export default function TutorProfile() {
     <main className="flex-1" data-testid={`page-tutor-${tutor.slug}`}>
       {/* Breadcrumb / Nav */}
       <div className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-6 flex justify-between items-center text-[14px] text-muted-foreground font-medium">
-        <Link href="/#tutors" className="inline-flex items-center gap-2 rounded-full hover:text-foreground transition-colors" data-testid="link-back">
+        <Link href="/tutors" className="inline-flex items-center gap-2 rounded-full hover:text-foreground transition-colors" data-testid="link-back">
           <ArrowLeft size={15} /> All tutors
         </Link>
         <div className="hidden sm:flex items-center gap-6">

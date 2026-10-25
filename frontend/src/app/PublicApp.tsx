@@ -8,6 +8,7 @@ import { RouteMeta } from "./RouteMeta";
 import { routePaths } from "./route-map";
 
 const Home = lazy(() => import("@/pages/Home"));
+const Tutors = lazy(() => import("@/pages/Tutors"));
 const TutorProfile = lazy(() => import("@/pages/TutorProfile"));
 const Resources = lazy(() => import("@/pages/Resources"));
 const ResourceDetail = lazy(() => import("@/pages/ResourceDetail"));
@@ -25,6 +26,7 @@ export function PublicRoutes() {
         <Suspense fallback={<RouteLoading />}>
           <Switch>
             <Route path={routePaths.public.home} component={Home} />
+            <Route path={routePaths.public.tutors} component={Tutors} />
             <Route path={routePaths.public.tutorProfile} component={TutorProfile} />
             {PUBLIC_RESOURCES_ENABLED && (
               <Route path={routePaths.public.resources} component={Resources} />

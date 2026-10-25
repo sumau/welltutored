@@ -5,7 +5,8 @@ import { useLocation } from "wouter";
 // previous page's scroll. Reset it after a link or redirect opens a new
 // pathname, but leave back and forward to the browser: those fire `popstate`,
 // not the `pushState`/`replaceState` events wouter dispatches. A link to an
-// anchor on a new page (`/#tutors`) is left to that page to scroll to.
+// anchor on a new page (`/tutors/alice#resources`) is left to that page to
+// scroll to.
 export function ScrollToTop() {
   const [location] = useLocation();
   const pushedPath = useRef<string | null>(null);

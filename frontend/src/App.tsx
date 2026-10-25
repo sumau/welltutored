@@ -15,10 +15,10 @@ function AuthenticatedRouteLoader() {
   const [location] = useLocation();
   const queryClient = useQueryClient();
 
-  // Home's tutor cards would otherwise wait for the PublicApp and Home chunks
-  // to download before their request starts.
+  // Home's and the Tutors page's books would otherwise wait for the
+  // PublicApp and page chunks to download before their request starts.
   useEffect(() => {
-    if (location === routePaths.public.home) {
+    if (location === routePaths.public.home || location === routePaths.public.tutors) {
       void prefetchPublicTutors(queryClient);
     }
   }, [location, queryClient]);

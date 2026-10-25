@@ -3,6 +3,7 @@ import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 export const routePaths = {
   public: {
     home: "/",
+    tutors: "/tutors",
     tutorProfile: "/tutors/:slug",
     resources: "/resources",
     resourceDetail: "/resources/:slug",
@@ -30,6 +31,7 @@ const resourcePages: readonly string[] = ["Resources", "ResourceDetail"];
 
 export const publicRouteDefinitions = [
   { path: routePaths.public.home, page: "Home" },
+  { path: routePaths.public.tutors, page: "Tutors" },
   { path: routePaths.public.tutorProfile, page: "TutorProfile" },
   { path: routePaths.public.resources, page: "Resources" },
   { path: routePaths.public.resourceDetail, page: "ResourceDetail" },
@@ -125,6 +127,14 @@ export function routeMetadataForPath(pathname: string): RouteMetadata {
     return {
       title: `${humanizeSlug(pathname.replace("/resources/", ""))} | Well Tutored Resources`,
       description: "Read a tutor-written resource from Well Tutored.",
+    };
+  }
+
+  if (pathname === routePaths.public.tutors) {
+    return {
+      title: "Meet the Tutors | Well Tutored",
+      description:
+        "Women tutors with deep subject expertise. Read each tutor's profile and send a named-tutor enquiry.",
     };
   }
 

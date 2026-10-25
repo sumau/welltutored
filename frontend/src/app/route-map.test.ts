@@ -17,12 +17,14 @@ test("keeps public pages on their expected route map", () => {
     publicRouteDefinitions.map(({ path, page }) => [path, page]),
     [
       ["/", "Home"],
+      ["/tutors", "Tutors"],
       ["/tutors/:slug", "TutorProfile"],
       ["/enquire", "Enquiry"],
     ],
   );
 
   assert.deepEqual(resolveRoute("/"), { kind: "page", page: "Home" });
+  assert.deepEqual(resolveRoute("/tutors"), { kind: "page", page: "Tutors" });
   assert.deepEqual(resolveRoute("/tutors/alice"), {
     kind: "page",
     page: "TutorProfile",
@@ -58,6 +60,12 @@ test("keeps page metadata aligned with public and workspace routes", () => {
       path: "/resources/essay-planning",
       title: "Well Tutored | Learn to love learning",
       description: "Personalised tutoring from women with deep subject expertise. Browse the tutors and send a named-tutor enquiry.",
+    },
+    {
+      path: "/tutors",
+      title: "Meet the Tutors | Well Tutored",
+      description:
+        "Women tutors with deep subject expertise. Read each tutor's profile and send a named-tutor enquiry.",
     },
     {
       path: "/tutors/alice-smith",
