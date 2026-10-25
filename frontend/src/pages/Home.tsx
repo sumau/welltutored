@@ -35,46 +35,43 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Tutors, one band each */}
-      <section className="focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
-        <h2 id="home-tutors-title" className="sr-only">The tutors</h2>
-        {tutorsLoading ? (
-          <div className="max-w-[1210px] mx-auto px-6 md:px-[30px]"><LoadingState variant="tutor-grid" message="Loading tutors..." /></div>
-        ) : tutorsError ? (
-          <div className="max-w-[1210px] mx-auto px-6 md:px-[30px]">
+      {/* Tutors, one card each */}
+      <section className="px-6 md:px-[30px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
+        <div className="max-w-[1150px] mx-auto">
+          <h2 id="home-tutors-title" className="sr-only">The tutors</h2>
+          {tutorsLoading ? (
+            <LoadingState variant="tutor-grid" message="Loading tutors..." />
+          ) : tutorsError ? (
             <ErrorState
               message="We couldn't load the tutor profiles. Please try again."
               onRetry={refetchTutors}
             />
-          </div>
-        ) : (
-          <ul className="list-none m-0 p-0" data-testid="tutor-grid">
-            {(tutors || []).map((tutor) => (
-              <li key={tutor.id}>
-                <Link
-                  href={`/tutors/${tutor.slug}`}
-                  className="tutor-band group block px-6 md:px-[30px] py-[32px] md:py-[44px]"
-                  style={{ "--tint": tutor.tint } as React.CSSProperties}
-                  data-testid={`tutor-card-${tutor.slug}`}
-                >
-                  <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-[16px] md:gap-[48px] md:items-end">
-                    <h3 className="m-0 text-[clamp(44px,6.6vw,96px)] leading-[0.92] tracking-[-0.04em] font-bold">
+          ) : (
+            <ul className="list-none m-0 p-0 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[16px]" data-testid="tutor-grid">
+              {(tutors || []).map((tutor) => (
+                <li key={tutor.id}>
+                  <Link
+                    href={`/tutors/${tutor.slug}`}
+                    className="tutor-band group flex flex-col h-full rounded-[16px] p-[26px] md:p-[30px]"
+                    style={{ "--tint": tutor.tint } as React.CSSProperties}
+                    data-testid={`tutor-card-${tutor.slug}`}
+                  >
+                    <h3 className="m-0 text-[clamp(36px,3.6vw,46px)] leading-[0.95] tracking-[-0.04em] font-bold mb-[14px]">
                       {tutor.name}
                     </h3>
-                    <div className="text-[17px] leading-[1.45]">
-                      <b className="block text-[21px] font-bold mb-[6px]">{tutor.subject}</b>
-                      {tutor.university}, {tutor.qualification}
-                      <span className="flex justify-between gap-[16px] mt-[14px] font-semibold" aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
-                        {intakeLabels[tutor.intake]}
-                        <span className="underline underline-offset-4 decoration-2 group-hover:decoration-[3px]" aria-hidden="true">Her profile</span>
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+                    <b className="block text-[19px] font-bold leading-[1.3] mb-[6px]">{tutor.subject}</b>
+                    <span className="text-[16px] leading-[1.45]">{tutor.university}, {tutor.qualification}</span>
+                    <p className="text-[16px] leading-[1.5] m-0 mt-[16px] pt-[16px] border-t border-foreground/20 line-clamp-3">{tutor.profileSummary}</p>
+                    <span className="flex justify-between gap-[16px] mt-auto pt-[24px] text-[16px] font-semibold" aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
+                      {intakeLabels[tutor.intake]}
+                      <span className="underline underline-offset-4 decoration-2 group-hover:decoration-[3px]" aria-hidden="true">Her profile</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
       {/* How an enquiry works */}
