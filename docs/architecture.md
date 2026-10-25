@@ -6,9 +6,9 @@ in [adr/](adr/).
 
 One container serves both the React frontend and the Express API from the same
 origin (scheme, host and port), so the browser treats them as one site. Only
-the API talks to the PostgreSQL database, through Drizzle, and
-[code generated from the OpenAPI spec](api-contract.md), for both the frontend
-and the backend, keeps the two sides in step. The application is organised
+the API talks to the PostgreSQL database, through Drizzle. Both the frontend
+and the backend use [code generated from the OpenAPI spec](api-contract.md),
+which keeps the two sides in step. The application is organised
 around two user-facing surfaces: the public website and the private [Workspace](../GLOSSARY.md#the-private-area).
 
 ```mermaid
