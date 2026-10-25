@@ -61,43 +61,50 @@ export function diffTrees(committed: Tree, regenerated: Tree): Difference[] {
   return differences;
 }
 
-const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const here = dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = resolve(here, "..", "..");
+const configPath = resolve(here, "orval.config.ts");
 
-// The output folders in backend/orval.config.ts.
-const generatedFolders = [
-  "frontend/src/client/generated",
-  "backend/src/api/schemas/generated",
-].map((folder) => resolve(repositoryRoot, folder));
+// The folder each output in the config writes: its target inside its workspace.
+export function outputFolders(config: Record<string, unknown>): string[] {
+  return Object.entries(config).map(([name, project]) => {
+    const output = (project as { output?: { workspace?: string; target?: string } }).output;
+    if (!output?.workspace || !output.target) {
+      throw new Error(`API codegen check: output "${name}" needs a workspace and a target.`);
+    }
+    return resolve(output.workspace, output.target);
+  });
+}
 
 function runOrval(): Promise<number> {
-  const child = spawn(
-    "pnpm",
-    ["--filter", "@welltutored/backend", "exec", "orval", "--config", "./orval.config.ts"],
-    { stdio: ["ignore", "ignore", "inherit"] },
-  );
+  const child = spawn("pnpm", ["exec", "orval", "--config", configPath], {
+    cwd: here,
+    stdio: ["ignore", "ignore", "inherit"],
+  });
 
   return new Promise((resolve) => {
     child.once("error", (error) => {
-      console.error(`Codegen check could not run Orval: ${error.message}`);
+      console.error(`API codegen check could not run Orval: ${error.message}`);
       resolve(1);
     });
     child.once("exit", (code, signal) => {
-      if (signal) console.error(`Codegen check: Orval stopped by ${signal}.`);
+      if (signal) console.error(`API codegen check: Orval stopped by ${signal}.`);
       resolve(signal ? 1 : (code ?? 1));
     });
   });
 }
 
 async function main(): Promise<void> {
+  const { default: config } = await import(configPath);
   const committed = new Map<string, Tree>(
-    generatedFolders.map((folder) => [folder, readTree(folder)]),
+    outputFolders(config).map((folder) => [folder, readTree(folder)]),
   );
 
   const differences: string[] = [];
   try {
     const exitCode = await runOrval();
     if (exitCode !== 0) {
-      console.error("Codegen check: Orval failed on backend/openapi.yaml.");
+      console.error("API codegen check: Orval failed on backend/openapi.yaml.");
       process.exitCode = exitCode;
       return;
     }
@@ -115,7 +122,7 @@ async function main(): Promise<void> {
       [
         "Generated API code doesn't match backend/openapi.yaml:",
         ...differences,
-        "Run `pnpm --filter @welltutored/backend run codegen` and commit the result.",
+        "Run `pnpm --filter @welltutored/scripts run api-codegen` and commit the result.",
       ].join("\n"),
     );
     process.exitCode = 1;

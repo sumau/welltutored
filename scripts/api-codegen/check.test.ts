@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { diffTrees, readTree, writeTree, type Tree } from "./codegen-check.js";
+import { diffTrees, outputFolders, readTree, writeTree, type Tree } from "./check.js";
 
 const tree = (files: Record<string, string>): Tree =>
   new Map(Object.entries(files).map(([path, text]) => [path, Buffer.from(text)]));
@@ -27,11 +27,11 @@ test("reports changed, added and removed files in path order", () => {
 });
 
 test("a missing folder reads as empty", () => {
-  assert.equal(readTree(join(tmpdir(), "welltutored-codegen-check-missing")).size, 0);
+  assert.equal(readTree(join(tmpdir(), "welltutored-api-codegen-missing")).size, 0);
 });
 
 test("writeTree replaces a folder with exactly the snapshot", () => {
-  const root = mkdtempSync(join(tmpdir(), "welltutored-codegen-check-"));
+  const root = mkdtempSync(join(tmpdir(), "welltutored-api-codegen-"));
   try {
     const folder = join(root, "generated");
     const snapshot = tree({ "api.ts": "one", "types/user.ts": "two" });
@@ -41,4 +41,18 @@ test("writeTree replaces a folder with exactly the snapshot", () => {
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("each output's folder is its target inside its workspace", () => {
+  assert.deepEqual(
+    outputFolders({
+      client: { output: { workspace: "/repo/frontend/src/client", target: "generated" } },
+      zod: { output: { workspace: "/repo/backend/src/api/schemas", target: "generated" } },
+    }),
+    ["/repo/frontend/src/client/generated", "/repo/backend/src/api/schemas/generated"],
+  );
+});
+
+test("an output without a workspace and target is an error", () => {
+  assert.throws(() => outputFolders({ client: { output: { target: "generated" } } }), /"client"/);
 });

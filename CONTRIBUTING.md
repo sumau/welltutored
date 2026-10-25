@@ -45,10 +45,9 @@ Everything runs in containers; there is no host Node, pnpm or PostgreSQL. See
   Record a decision a reader will question as an ADR in
   [docs/adr/](docs/adr/).
 - After changing `backend/openapi.yaml`, run
-  `pnpm --filter @welltutored/backend run codegen` and commit its output;
-  [the codegen check](docs/code-checks.md#the-codegen-check) fails `verify`
-  otherwise. Never edit the generated code in `frontend/src/client/generated`
-  or `backend/src/api/schemas` by hand.
+  `pnpm --filter @welltutored/scripts run api-codegen` and commit its output,
+  as [docs/api-contract.md](docs/api-contract.md#change-an-endpoint) says.
+  Never edit generated code by hand.
 
 ## Prepare a pull request
 

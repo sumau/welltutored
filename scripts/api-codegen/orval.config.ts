@@ -1,12 +1,16 @@
+// Generates the React Query hooks in frontend/src/client/generated and the Zod
+// schemas in backend/src/api/schemas/generated from backend/openapi.yaml. Why it
+// lives here, and how to change the API, is in docs/api-contract.md.
 import { defineConfig, InputTransformerFn } from "orval";
 import path from "path";
 
-const apiClientReactSrc = path.resolve(__dirname, "..", "frontend", "src", "client");
-const apiZodSrc = path.resolve(__dirname, "src", "api", "schemas");
+const repositoryRoot = path.resolve(import.meta.dirname, "..", "..");
+const spec = path.resolve(repositoryRoot, "backend", "openapi.yaml");
+const apiClientReactSrc = path.resolve(repositoryRoot, "frontend", "src", "client");
+const apiZodSrc = path.resolve(repositoryRoot, "backend", "src", "api", "schemas");
 
 // Our exports make assumptions about the title of the API being "Api" (i.e. generated output is `api.ts`).
 const titleTransformer: InputTransformerFn = (config) => {
-  config.info ??= {};
   config.info.title = "Api";
 
   return config;
@@ -15,19 +19,20 @@ const titleTransformer: InputTransformerFn = (config) => {
 export default defineConfig({
   "api-client-react": {
     input: {
-      target: "./openapi.yaml",
+      target: spec,
       override: {
         transformer: titleTransformer,
       },
     },
     output: {
+      // Orval's word for the folder the output goes in, not the Workspace in
+      // GLOSSARY.md. The output itself is `target` inside it.
       workspace: apiClientReactSrc,
       target: "generated",
       client: "react-query",
       mode: "split",
       baseUrl: "/api",
       clean: true,
-      prettier: true,
       override: {
         query: {
           version: 5,
@@ -44,7 +49,7 @@ export default defineConfig({
   },
   zod: {
     input: {
-      target: "./openapi.yaml",
+      target: spec,
       override: {
         transformer: titleTransformer,
       },
@@ -56,7 +61,6 @@ export default defineConfig({
       schemas: { path: "generated/types", type: "typescript" },
       mode: "split",
       clean: true,
-      prettier: true,
       override: {
         zod: {
           coerce: {
