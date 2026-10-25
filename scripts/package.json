@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "codegen:check": "tsx ./codegen-check/codegen-check.ts",
     "docs:check": "tsx ./docs-check/docs-check.ts",
     "prepare:integration-database": "tsx ./integration-database/prepare.ts",
     "test:integration-database": "tsx --test ./integration-database/check.test.ts",
@@ -13,6 +14,7 @@
     "smoke:workspace": "tsx ./smoke/workspace-browser.ts",
     "test:smoke": "tsx --test ./smoke/public-site.test.ts ./smoke/domain.test.ts",
     "test:docs": "tsx --test ./docs-check/docs-check.test.ts",
+    "test:codegen-check": "tsx --test ./codegen-check/codegen-check.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
