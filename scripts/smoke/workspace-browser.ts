@@ -196,7 +196,7 @@ async function publishResource(page: Page, baseUrl: URL, timeoutMs: number) {
 // Not Found. Invert this under #61.
 async function expectResourceHidden(page: Page, baseUrl: URL, slug: string, timeoutMs: number) {
   await page.goto(new URL(`/resources/${slug}`, baseUrl).href);
-  await page.getByText("404 Page Not Found").waitFor({ state: "visible", timeout: timeoutMs });
+  await page.locator("[data-testid=page-not-found]").waitFor({ state: "visible", timeout: timeoutMs });
 }
 
 async function runWorkspaceSmokeCheck() {

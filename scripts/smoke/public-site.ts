@@ -87,7 +87,7 @@ async function checkPublicPage(
       `${path}: expected HTML content, received "${data.contentType || "none"}".`,
     );
   }
-  if (!/<title>Well Tutored<\/title>/i.test(data.body)) {
+  if (!/<title>Well Tutored\b[^<]*<\/title>/i.test(data.body)) {
     throw new SmokeCheckError(
       `${path}: response did not contain the Well Tutored document.`,
     );

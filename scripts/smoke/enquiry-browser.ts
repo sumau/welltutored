@@ -159,7 +159,7 @@ async function runTutorProfileSmokeCheck(
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(
     new URL(
-      `/tutors/${encodeURIComponent(tutor.slug)}#enquire`,
+      `/tutors/${encodeURIComponent(tutor.slug)}`,
       baseUrl,
     ).toString(),
     {
@@ -167,14 +167,21 @@ async function runTutorProfileSmokeCheck(
       timeout: timeoutMs,
     },
   );
+
+  // The profile has no form of its own: its button opens /enquire with her
+  // already chosen.
+  const profileButton = page.locator("[data-testid=button-profile-enquire]");
+  await profileButton.waitFor({ state: "visible", timeout: timeoutMs });
+  await profileButton.focus();
+  await page.keyboard.press("Enter");
   await page.locator("[data-testid=enquiry-form]").waitFor({
     state: "visible",
     timeout: timeoutMs,
   });
 
-  if (await page.locator("#enquiry-tutor").count() !== 0) {
+  if (await page.locator("#enquiry-tutor").inputValue() !== tutor.slug) {
     throw new BrowserSmokeCheckError(
-      "The tutor profile enquiry unexpectedly rendered a tutor selector.",
+      "The tutor profile's enquiry button did not open the form with her chosen.",
     );
   }
 
@@ -182,6 +189,7 @@ async function runTutorProfileSmokeCheck(
   await fillFocused(page, "Eleanor James");
   await tabTo(page, "enquiry-parent-email");
   await fillFocused(page, "eleanor@example.com");
+  await tabTo(page, "enquiry-tutor");
   await tabTo(page, "enquiry-student-name");
   await fillFocused(page, "Maya");
   await tabTo(page, "enquiry-student-age");
@@ -218,7 +226,7 @@ async function runTutorProfileSmokeCheck(
 
   await page.goto(
     new URL(
-      `/tutors/${encodeURIComponent(fullTutor.slug)}#enquire`,
+      `/tutors/${encodeURIComponent(fullTutor.slug)}`,
       baseUrl,
     ).toString(),
     {

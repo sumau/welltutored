@@ -1,3 +1,15 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The header's logo disc: a bold Instrument Sans "w" (as an outline, since
+       a favicon can't load web fonts) in white on School Indigo. On a dark
+       browser theme it swaps, like the footer's. -->
+  <style>
+    .disc { fill: #231E4D; }
+    .w { fill: #FFFFFF; }
+    @media (prefers-color-scheme: dark) {
+      .disc { fill: #FFFFFF; }
+      .w { fill: #231E4D; }
+    }
+  </style>
+  <circle class="disc" cx="16" cy="16" r="16"/>
+  <path class="w" transform="translate(16 16) scale(0.027 -0.027) translate(-408 -255)" d="M166 0 10 510H168L246 154H242L340 510H480L579 154H575L652 510H806L650 0H506L406 355H410L310 0Z"/>
 </svg>

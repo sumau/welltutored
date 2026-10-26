@@ -237,7 +237,7 @@ test("a valid enquiry is saved and delivered", async () => {
   assert.equal(response.status, 201);
   assert.equal(body.tutorName, tutorName);
   assert.equal(body.deliveryStatus, "delivered");
-  assert.equal(body.message, "Your enquiry has been delivered to the Well Tutored team.");
+  assert.equal(body.message, `Your enquiry has been delivered to ${tutorName}.`);
 
   const row = await storedEnquiry(body.id);
   assert.equal(row.tutorId, tutorId);
@@ -265,7 +265,7 @@ test("an enquiry stays pending when even the failure can't be recorded", async (
 
   assert.equal(response.status, 201);
   assert.equal(body.deliveryStatus, "pending");
-  assert.match(body.message, /waiting for staff delivery/);
+  assert.match(body.message, /waiting to be delivered to/);
   assert.equal((await storedEnquiry(body.id)).deliveryStatus, "pending");
 });
 

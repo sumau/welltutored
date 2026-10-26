@@ -1,4 +1,5 @@
 import * as React from "react";
+import { CARD_REST } from "@/components/TutorCard";
 
 interface LoadingStateProps {
   message?: string;
@@ -15,34 +16,28 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
         aria-live="polite"
         aria-busy="true"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[14px]" aria-hidden="true">
+        {/* Blank note cards laid out like Home's tutor grid, so the real
+            cards land where these were. */}
+        <div className="flex flex-wrap justify-center gap-[28px]" aria-hidden="true">
           {Array.from({ length: 3 }, (_, index) => (
             <div
-              className="bg-card p-[24px] min-h-[285px] border border-transparent"
+              className="note-card flex flex-col w-full sm:max-w-[440px] md:max-w-none md:w-[calc((100%-28px)/2)] xl:w-[calc((100%-56px)/3)] min-h-[240px] px-[20px] pt-[20px] pb-[14px]"
+              style={{ "--tint": "hsl(var(--muted))", "--rest": CARD_REST[index] } as React.CSSProperties}
               data-testid={`tutor-card-skeleton-${index + 1}`}
               key={index}
             >
-              <div className="flex items-start justify-between gap-3 mb-5">
-                <div className="space-y-2">
-                  <div className="h-3 w-20 rounded-full skeleton-shimmer" />
-                  <div className="h-7 w-36 rounded skeleton-shimmer" />
-                </div>
-                <div className="h-6 w-20 rounded-full skeleton-shimmer" />
+              <div className="note-card-head pb-[10px]">
+                <div className="h-[30px] w-48 rounded-[3px] skeleton-shimmer" />
               </div>
-              <div className="space-y-2 mb-5">
-                <div className="h-3 w-full rounded skeleton-shimmer" />
-                <div className="h-3 w-11/12 rounded skeleton-shimmer" />
-                <div className="h-3 w-4/5 rounded skeleton-shimmer" />
-              </div>
-              <div className="border-t border-border pt-[13px] space-y-2">
-                <div className="h-3 w-32 rounded skeleton-shimmer" />
-                <div className="h-3 w-24 rounded skeleton-shimmer" />
+              <div className="note-card-body flex-1 [--rule:26px] pt-[8px] space-y-[14px]">
+                <div className="h-3 w-40 rounded-[3px] skeleton-shimmer" />
+                <div className="h-3 w-56 rounded-[3px] skeleton-shimmer" />
               </div>
             </div>
           ))}
         </div>
         <p
-          className="text-muted-foreground text-[12px] uppercase tracking-[0.16em] font-semibold"
+          className="text-muted-foreground text-[14px] font-medium"
           data-testid="loading-message"
         >
           {message}
@@ -67,8 +62,8 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
             <div className="h-3 w-4/5 rounded skeleton-shimmer" />
           </div>
         </div>
-        <div className="editorial-rule mb-8" />
-        <p className="text-muted-foreground text-[12px] uppercase tracking-[0.16em] font-semibold" data-testid="loading-message">{message}</p>
+        <div className="h-px bg-border mb-8" />
+        <p className="text-muted-foreground text-[14px] font-medium" data-testid="loading-message">{message}</p>
       </div>
     </div>
   );

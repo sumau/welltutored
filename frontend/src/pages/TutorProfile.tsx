@@ -5,38 +5,73 @@ import { Link } from "wouter";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
-import { EnquiryForm } from "@/components/EnquiryForm";
+import { CARD_REST } from "@/components/TutorCard";
+import { EmptyPage } from "@/pages/not-found";
 import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import { ResourceTypeLabel } from "@/components/ResourceType";
+import { intakeLabels, intakePillDotClasses } from "@/lib/intake";
 import {
   publicTutorQueryOptions,
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
-const intakeDescriptions = {
-  accepting: "Taking new students",
-  limited: "Limited spaces",
-  full: "Not taking new students",
-} as const;
-
+// The end of her profile: a way on to the enquiry form, which lives only on
+// /enquire, or word that she is full.
 export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
-  return tutor.intake === "full" ? (
-    <div className="bg-card p-8 text-sm text-muted-foreground leading-[1.6]" data-testid="tutor-enquiry-unavailable">
-      {tutor.name} is not currently accepting enquiries. Please check back later or choose another tutor.
-    </div>
-  ) : (
-    <EnquiryForm tutor={tutor} compact={true} />
+  const firstName = tutor.name.split(' ')[0];
+  const isFull = tutor.intake === "full";
+  // Laid out like Home's "How an enquiry works": the way on sits level with
+  // the heading. On a phone it follows the line under the heading, so the
+  // line isn't stranded below the button.
+  return (
+    <section className="px-6 md:px-[30px] py-[56px] md:py-[80px]" id="enquire">
+      <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] md:items-end gap-x-[24px]" data-testid={isFull ? "tutor-enquiry-unavailable" : undefined}>
+        <h2 className="font-serif font-semibold text-[clamp(32px,4vw,48px)] leading-[1.05] m-0 mb-[18px] md:mb-0">
+          {isFull ? `${firstName} is full for now` : `Ask about lessons with ${firstName}`}
+        </h2>
+        <p className="m-0 md:mt-[18px] md:row-start-2 max-w-[40em] text-muted-foreground text-[17px] leading-[1.6] [text-wrap:pretty]">
+          {isFull
+            ? `${tutor.name} is not currently accepting enquiries. Please check back later or choose another tutor.`
+            : `Tell us a little about the student. ${firstName} reads every enquiry and replies herself.`}
+        </p>
+        {isFull ? (
+          <Link href="/" className="mt-[24px] md:mt-0 md:col-start-2 md:row-start-1 inline-flex items-center gap-2 text-[17px] font-semibold text-foreground underline-offset-4 hover:underline w-fit" data-testid="tutor-enquiry-other-tutors">
+            See the other tutors <ArrowRight size={16} />
+          </Link>
+        ) : (
+          <Link
+            href={`/enquire?tutor=${tutor.slug}`}
+            className="mt-[24px] md:mt-0 md:col-start-2 md:row-start-1 rounded-full bg-primary text-primary-foreground text-[17px] font-semibold px-6 py-3.5 hover:bg-primary-border transition-colors inline-flex w-fit"
+            data-testid="tutor-enquiry-link"
+          >
+            Make an enquiry
+          </Link>
+        )}
+      </div>
+    </section>
   );
 }
 
 export function TutorAvailability({ tutor }: { tutor: Tutor }) {
   if (!tutor.availability) return null;
   return (
-    <div className="grid grid-cols-[125px_1fr] gap-[22px] py-[17px] border-b border-border text-[13px] leading-[1.55]" data-testid="tutor-availability">
-      <b className="font-bold text-foreground">Availability</b>
+    <div className="grid grid-cols-[130px_1fr] gap-[22px] py-[17px] border-b border-border text-[15px] leading-[1.55]" data-testid="tutor-availability">
+      <b className="font-semibold text-foreground">Availability</b>
       <span className="text-muted-foreground">{tutor.availability}</span>
     </div>
   );
+}
+
+// Experience and Education are free text, one entry per paragraph. An entry
+// whose first line reads "dates | role" shows its dates in their own column;
+// any other entry shows as written.
+export function backgroundEntries(text: string) {
+  return text.trim().split(/\n\s*\n/).map((paragraph) => {
+    const [first, ...rest] = paragraph.split("\n");
+    const match = first.match(/^(.+?)\s+\|\s+(.+)$/);
+    if (!match) return { dates: "", title: "", detail: paragraph };
+    return { dates: match[1], title: match[2], detail: rest.join("\n") };
+  });
 }
 
 export function TutorBackground({ tutor }: { tutor: Tutor }) {
@@ -51,9 +86,17 @@ export function TutorBackground({ tutor }: { tutor: Tutor }) {
       <div className="border-t border-border">
         {rows.map((row) => (
           <div key={row.label} className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-[12px] md:gap-[22px] py-[28px] border-b border-border">
-            <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary md:pt-[3px]">{row.label}</span>
-            <div className="text-muted-foreground text-[13px] leading-[1.7] whitespace-pre-wrap max-w-[760px]" data-testid={row.testId}>
-              {row.text}
+            <h2 className="font-serif text-[22px] leading-[1.2] m-0">{row.label}</h2>
+            <div className="grid gap-[20px] max-w-[46em] text-[16px] leading-[1.6]" data-testid={row.testId}>
+              {backgroundEntries(row.text).map((entry, index) => (
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-[170px_1fr] gap-x-[22px] gap-y-[2px]">
+                  {entry.dates && <span className="text-muted-foreground text-[15px]">{entry.dates}</span>}
+                  <div className={entry.dates ? "" : "sm:col-span-2"}>
+                    {entry.title && <b className="block font-semibold text-foreground">{entry.title}</b>}
+                    {entry.detail && <span className="block text-muted-foreground whitespace-pre-wrap">{entry.detail}</span>}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
@@ -138,93 +181,106 @@ export default function TutorProfile() {
   };
 
   if (isLoading) return <LoadingState message="Loading profile..." />;
-  if (error || !tutor) return <ErrorState message="Could not find this tutor." onRetry={refetch} />;
+  // A link to a tutor who isn't listed is a missing page, not a failed load.
+  if (error?.status === 404) {
+    return (
+      <EmptyPage
+        title="We couldn't find that tutor"
+        message="She may no longer be listed. The tutors who are listed are all on the home page."
+      />
+    );
+  }
+  if (error || !tutor) return <ErrorState message="Could not load this tutor's profile." onRetry={refetch} />;
 
   const firstName = tutor.name.split(' ')[0];
+  const isFull = tutor.intake === "full";
 
   return (
     <main className="flex-1" data-testid={`page-tutor-${tutor.slug}`}>
       {/* Breadcrumb / Nav */}
-      <div className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-6 flex justify-between items-center text-[11px] text-muted-foreground font-medium">
-        <Link href="/" className="inline-flex items-center gap-2 hover:text-primary transition-colors" data-testid="link-back">
-          <ArrowLeft size={13} /> All tutors
+      <div className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-6 flex justify-between items-center text-[14px] text-muted-foreground font-medium">
+        <Link href="/" className="inline-flex items-center gap-2 rounded-full hover:text-foreground transition-colors" data-testid="link-back">
+          <ArrowLeft size={15} /> All tutors
         </Link>
         <div className="hidden sm:flex items-center gap-6">
-          <button onClick={() => jumpTo('about')} className="hover:text-primary">About {firstName}</button>
           {PUBLIC_RESOURCES_ENABLED && tutor.resources.length > 0 && (
-            <button onClick={() => jumpTo('resources')} className="hover:text-primary">Her resources</button>
+            <button onClick={() => jumpTo('resources')} className="hover:text-foreground">Her resources</button>
           )}
         </div>
       </div>
 
-      {/* Hero */}
-      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] py-[40px] md:py-[60px] grid grid-cols-1 md:grid-cols-[1.2fr_0.8fr] gap-[40px] md:gap-[80px] items-end border-b border-border mb-12">
+      {/* Hero: who she is, beside her approach on a note card in her tint */}
+      <section className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[36px] md:pt-[56px] pb-[56px] md:pb-[72px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[40px] lg:gap-[56px] items-center">
         <div>
-          <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary mb-4" data-testid="tutor-subject-kicker">
-            {tutor.subject}
-          </span>
-          <h1 className="font-serif text-[clamp(55px,7vw,94px)] leading-[0.9] tracking-tight mb-[26px]" data-testid="tutor-name">
-            {firstName}<br /><em>{tutor.name.split(' ').slice(1).join(' ')}.</em>
+          <h1 className="font-serif text-[clamp(44px,5vw,68px)] leading-[1.02] mb-[10px]" data-testid="tutor-name">
+            {tutor.name}
           </h1>
-          <p className="max-w-[650px] text-muted-foreground text-[16px] leading-[1.65]" data-testid="tutor-intro">
+          <p className="text-[19px] font-semibold mb-[18px]" data-testid="tutor-subject-kicker">
+            {tutor.subject}
+          </p>
+          {/* A status line, not a pill, so it isn't mistaken for the button below. */}
+          <p className="flex items-center gap-[8px] text-[15px] font-semibold text-foreground m-0 mb-[22px]" data-testid="tutor-intake">
+            <span className={`w-[9px] h-[9px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
+            {intakeLabels[tutor.intake]}
+          </p>
+          <p className="max-w-[36em] text-muted-foreground text-[18px] leading-[1.6] m-0" data-testid="tutor-intro">
             {tutor.profileSummary}
           </p>
+          {/* The same form as the header's "Make an enquiry", with her chosen. */}
+          {!isFull && (
+            <Link
+              href={`/enquire?tutor=${tutor.slug}`}
+              className="mt-[28px] rounded-full bg-primary text-primary-foreground text-[17px] font-semibold px-6 py-3.5 hover:bg-primary-border transition-colors inline-flex w-fit"
+              data-testid="button-profile-enquire"
+            >
+              Ask about lessons with {firstName}
+            </Link>
+          )}
         </div>
-        
-        <aside className="relative p-[30px] min-h-[295px] flex flex-col justify-between" style={{ backgroundColor: tutor.tint }}>
-          <div>
-            <div className="inline-flex items-center gap-[7px] rounded-full bg-card text-foreground px-3 py-2 text-[10px] font-bold border border-border shadow-sm">
-              <i className={`w-2 h-2 rounded-full ${tutor.intake === 'accepting' ? 'bg-green-600' : tutor.intake === 'limited' ? 'bg-amber-500' : 'bg-red-500'}`} />
-              {intakeDescriptions[tutor.intake]}
-            </div>
-          </div>
-          <div>
-            <blockquote className="font-serif font-medium text-[20px] md:text-[22px] leading-[1.25] tracking-tight mt-[28px] max-w-[310px] text-foreground">
-              {tutor.teachingIntro}
-            </blockquote>
-            <div className="text-[11px] text-foreground/70 mt-[18px] font-semibold">
-              {firstName}'s approach
-            </div>
-          </div>
-        </aside>
+        <figure
+          className="note-card w-full max-w-[460px] lg:justify-self-center m-0 px-[26px] md:px-[34px] pt-[24px] md:pt-[30px] pb-[24px] md:pb-[30px]"
+          style={{ "--tint": tutor.tint, "--rest": "1.5deg" } as React.CSSProperties}
+        >
+          <figcaption className="note-card-head text-[clamp(26px,2.6vw,32px)] leading-[1.1] tracking-[-0.03em] font-bold pb-[12px]">
+            {firstName}'s approach
+          </figcaption>
+          <blockquote className="note-card-body text-[20px] md:text-[22px] [--rule:34px] m-0">
+            {tutor.teachingIntro}
+          </blockquote>
+        </figure>
       </section>
 
       {/* About */}
-      <section className="px-6 md:px-[30px] max-w-[1210px] mx-auto mb-[80px]" id="about">
+      <section className="px-6 md:px-[30px] max-w-[1210px] mx-auto mb-[64px]" id="about">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[40px] md:gap-[86px]">
           <div>
-            <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary mb-4">A little about {firstName}</span>
-            <div className="text-muted-foreground text-[14px] leading-[1.7] max-w-[490px] space-y-4 whitespace-pre-wrap" data-testid="tutor-bio">
+            <h2 className="font-serif text-[clamp(30px,3.4vw,40px)] leading-[1.1] mb-[18px]">About {firstName}</h2>
+            <div className="text-muted-foreground text-[17px] leading-[1.7] max-w-[34em] space-y-4 whitespace-pre-wrap" data-testid="tutor-bio">
               {tutor.bio}
             </div>
           </div>
-          
+
           <div>
-            <div className="border-t border-border mt-8 md:mt-0">
-              <div className="grid grid-cols-[125px_1fr] gap-[22px] py-[17px] border-b border-border text-[13px] leading-[1.55]">
-                <b className="font-bold text-foreground">University</b>
+            <div className="border-t border-border mt-2 md:mt-[6px]">
+              <div className="grid grid-cols-[130px_1fr] gap-[22px] py-[17px] border-b border-border text-[15px] leading-[1.55]">
+                <b className="font-semibold text-foreground">University</b>
                 <span className="text-muted-foreground">{tutor.university}</span>
               </div>
-              <div className="grid grid-cols-[125px_1fr] gap-[22px] py-[17px] border-b border-border text-[13px] leading-[1.55]">
-                <b className="font-bold text-foreground">Qualification</b>
+              <div className="grid grid-cols-[130px_1fr] gap-[22px] py-[17px] border-b border-border text-[15px] leading-[1.55]">
+                <b className="font-semibold text-foreground">Qualification</b>
                 <span className="text-muted-foreground">{tutor.qualification}</span>
               </div>
-              <div className="grid grid-cols-[125px_1fr] gap-[22px] py-[17px] border-b border-border text-[13px] leading-[1.55]">
-                <b className="font-bold text-foreground">Session rate</b>
-                <span className="text-muted-foreground">Illustrative rate · £{tutor.rate} per 60-minute session</span>
+              <div className="grid grid-cols-[130px_1fr] gap-[22px] py-[17px] border-b border-border text-[15px] leading-[1.55]">
+                <b className="font-semibold text-foreground">Session rate</b>
+                <span className="text-muted-foreground">Illustrative rate: £{tutor.rate} per 60-minute session</span>
               </div>
+              {tutor.support && (
+                <div className="grid grid-cols-[130px_1fr] gap-[22px] py-[17px] border-b border-border text-[15px] leading-[1.55]">
+                  <b className="font-semibold text-foreground">Support</b>
+                  <span className="text-muted-foreground">{tutor.support}</span>
+                </div>
+              )}
               <TutorAvailability tutor={tutor} />
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px] mt-[28px]">
-              <div className="bg-card p-[20px] min-h-[92px] border border-border">
-                <strong className="font-serif text-[22px] block mb-2 font-medium">Core Subject</strong>
-                <span className="text-[11px] text-muted-foreground">{tutor.subject}</span>
-              </div>
-              <div className="bg-card p-[20px] min-h-[92px] border border-border">
-                <strong className="font-serif text-[22px] block mb-2 font-medium">Support</strong>
-                <span className="text-[11px] text-muted-foreground">{tutor.support}</span>
-              </div>
             </div>
           </div>
         </div>
@@ -232,20 +288,23 @@ export default function TutorProfile() {
 
       <TutorBackground tutor={tutor} />
 
-      {/* Teaching Style */}
-      <section className="bg-foreground text-background px-6 md:px-[30px] py-[60px] md:py-[88px]">
+      {/* Teaching Style: straight white notes on her own tint, like Home's */}
+      <section className="px-6 md:px-[30px] py-[60px] md:py-[88px]" style={{ backgroundColor: tutor.tint }}>
         <div className="max-w-[1150px] mx-auto">
-          <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary mb-4">What it's like to learn with her</span>
-          <h2 className="font-serif text-[clamp(43px,5vw,67px)] leading-[0.91] tracking-tight m-0 mb-6">
-            Her way of<br /><em>teaching.</em>
+          <h2 className="font-serif font-bold tracking-[-0.03em] text-[clamp(32px,3.8vw,48px)] leading-[1.05] m-0 mb-[36px]">
+            Learning with {firstName}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[25px] md:gap-[30px] mt-[40px] pt-[20px] border-t border-[#635950]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
             {tutor.teachingPoints.map((point, index) => (
-              <article key={`${point.title}-${index}`}>
-                <b className="block text-[#E7C5B5] font-serif font-medium text-[25px] mb-[12px]">
-                  {String(index + 1).padStart(2, "0")} · {point.title}
-                </b>
-                <p className="text-[12px] leading-[1.6] text-[#CEC1B4] m-0">
+              <article
+                key={`${point.title}-${index}`}
+                className="note-card px-[22px] pt-[20px] pb-[18px]"
+                style={{ "--tint": "hsl(var(--card))", "--rest": CARD_REST[index % CARD_REST.length] } as React.CSSProperties}
+              >
+                <h3 className="note-card-head font-serif font-bold text-[22px] leading-[1.2] tracking-[-0.02em] m-0 pb-[10px]">
+                  {point.title}
+                </h3>
+                <p className="note-card-body text-[16px] m-0">
                   {point.body}
                 </p>
               </article>
@@ -256,36 +315,7 @@ export default function TutorProfile() {
 
       <TutorResources tutor={tutor} />
 
-      {/* Enquire */}
-      <section className="bg-foreground text-background px-6 md:px-[30px] py-[60px] md:py-[88px]">
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-[40px] md:gap-[75px] items-start">
-          <div>
-            <span className="block uppercase tracking-[0.17em] text-[10px] font-bold text-primary mb-4">Direct enquiry</span>
-            <h2 className="font-serif text-[clamp(43px,5vw,67px)] leading-[0.91] tracking-tight m-0 mb-[25px]">
-              Could {firstName}<br /><em>be your person?</em>
-            </h2>
-            <p className="text-[#CEC1B4] text-[14px] leading-[1.7]">
-              Tell us a little about the student and what would help. Well Tutored securely delivers your named-tutor enquiry to the team for review. We never publish or expose tutor email addresses.
-            </p>
-            <div className="mt-[31px] grid gap-[13px]">
-              <div className="flex items-center gap-[11px] text-[12px] text-[#E5D8CD]">
-                <i className="not-italic w-[25px] h-[25px] border border-[#81766D] rounded-full flex items-center justify-center font-serif text-[13px] text-primary pb-0.5">1</i>
-                Share the student's subject, level and context
-              </div>
-              <div className="flex items-center gap-[11px] text-[12px] text-[#E5D8CD]">
-                <i className="not-italic w-[25px] h-[25px] border border-[#81766D] rounded-full flex items-center justify-center font-serif text-[13px] text-primary pb-0.5">2</i>
-                Your enquiry is recorded for {firstName}
-              </div>
-              <div className="flex items-center gap-[11px] text-[12px] text-[#E5D8CD]">
-                <i className="not-italic w-[25px] h-[25px] border border-[#81766D] rounded-full flex items-center justify-center font-serif text-[13px] text-primary pb-0.5">3</i>
-                Well Tutored keeps an agency copy
-              </div>
-            </div>
-          </div>
-          
-          <TutorEnquiry tutor={tutor} />
-        </div>
-      </section>
+      <TutorEnquiry tutor={tutor} />
     </main>
   );
 }

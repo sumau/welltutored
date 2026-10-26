@@ -41,6 +41,7 @@ type RenderedForm = {
 type RenderFormOptions = {
   tutor?: Tutor;
   tutors?: Tutor[];
+  onDirtyChange?: (dirty: boolean) => void;
 };
 
 function installDom() {
@@ -98,6 +99,7 @@ async function renderForm(options: RenderFormOptions = {}): Promise<RenderedForm
         <EnquiryForm
           tutor={Object.prototype.hasOwnProperty.call(options, "tutor") ? options.tutor : tutor}
           tutors={options.tutors}
+          onDirtyChange={options.onDirtyChange}
         />
       </QueryClientProvider>,
     );
@@ -182,6 +184,9 @@ test("empty submission focuses the first invalid field and exposes its error", a
   const rendered = await renderForm();
   const form = rendered.container.querySelector<HTMLFormElement>("[data-testid=enquiry-form]")!;
   const name = rendered.container.querySelector<HTMLInputElement>("#enquiry-parent-name")!;
+
+  const submitButton = rendered.container.querySelector<HTMLButtonElement>("[data-testid=button-submit-enquiry]")!;
+  assert.equal(submitButton.disabled, false);
 
   await act(async () => {
     submitForm(form);
@@ -328,7 +333,7 @@ test("keyboard users can complete an enquiry, recover validation focus, and reac
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry sent to Alice Smith/);
     assert.match(receipt.textContent ?? "", /Your enquiry has been sent securely\./);
 
     const resetButton = rendered.container.querySelector<HTMLButtonElement>("[data-testid=enquiry-reset]")!;
@@ -376,7 +381,7 @@ test("repeated Enter presses send one enquiry while the request is pending", asy
 
     assert.equal(requestCount, 1);
     assert.equal(submitButton.disabled, true);
-    assert.equal(submitButton.textContent?.includes("Submitting..."), true);
+    assert.equal(submitButton.textContent?.includes("Sending..."), true);
 
     await act(async () => {
       resolveFetch?.(new Response(
@@ -475,7 +480,7 @@ test("a failed submission keeps an announced form error and a successful retry f
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry sent to Alice Smith/);
     assert.match(receipt.textContent ?? "", /Your enquiry has been sent securely\./);
   } finally {
     globalThis.fetch = originalFetch;
@@ -544,7 +549,7 @@ test("a dropped connection keeps the enquiry details and supports a keyboard ret
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry sent to Alice Smith/);
   } finally {
     globalThis.fetch = originalFetch;
     await cleanupForm(rendered);
@@ -589,10 +594,46 @@ test("a successful receipt receives focus and announces the delivery outcome", a
     assert.equal(document.activeElement, receipt);
     assert.equal(receipt.getAttribute("role"), "status");
     assert.equal(receipt.getAttribute("aria-live"), "polite");
-    assert.match(receipt.textContent ?? "", /Message delivered/);
+    assert.match(receipt.textContent ?? "", /Enquiry sent to Alice Smith/);
     assert.match(receipt.textContent ?? "", /Your enquiry has been sent securely\./);
   } finally {
     globalThis.fetch = originalFetch;
+    await cleanupForm(rendered);
+  }
+});
+test("the safeguarding note under the form opens the Safeguarding dialog", async () => {
+  const rendered = await renderForm();
+  const { onOpenPolicy } = await import("@/lib/policy-dialog");
+  const opened: string[] = [];
+  const stopListening = onOpenPolicy((policy) => opened.push(policy));
+
+  try {
+    await act(async () => {
+      rendered.container.querySelector<HTMLButtonElement>("[data-testid=safeguarding-link]")!.click();
+    });
+    assert.deepEqual(opened, ["safeguarding"]);
+  } finally {
+    stopListening();
+    await cleanupForm(rendered);
+  }
+});
+
+test("the form reports when something has been typed, so the page can warn before leaving", async () => {
+  const reports: boolean[] = [];
+  const rendered = await renderForm({ onDirtyChange: (dirty) => reports.push(dirty) });
+
+  try {
+    assert.equal(reports.at(-1), false);
+    const message = rendered.container.querySelector<HTMLTextAreaElement>("#enquiry-message")!;
+    await act(async () => {
+      setFieldValue(message, "Help with essays");
+    });
+    assert.equal(reports.at(-1), true);
+    await act(async () => {
+      setFieldValue(message, "");
+    });
+    assert.equal(reports.at(-1), false);
+  } finally {
     await cleanupForm(rendered);
   }
 });
