@@ -192,7 +192,7 @@ export function Shell({
                   <p>Well Tutored is designed for female secondary and A-level students. Enquiries involving under-18s should include a parent or guardian's contact details.</p>
                   <div className="mt-6 pt-5 border-t border-border text-[14px]">
                     <strong className="text-foreground block mb-1">Professional boundaries</strong>
-                    Tutors communicate through agreed professional channels. Student information is not displayed publicly, and the agency keeps oversight of tutor enquiries and introductions.
+                    For now, tutors contact families through their own channels, such as email or phone, agreed with the parent or guardian first. Tutors' email addresses are never published, student information is not displayed publicly, and the agency keeps oversight of tutor enquiries and introductions.
                   </div>
                 </>
               ) : (
