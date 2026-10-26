@@ -34,9 +34,9 @@ export default function Home() {
     <main className="flex-1" data-testid="page-home">
       {/* Hero: the tutors themselves, under one short line on who they are.
           "Back to the tutors" links scroll here. */}
-      <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
+      <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] [@media(min-width:1280px)_and_(max-height:760px)]:pt-[24px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
         <div className="max-w-[1150px] mx-auto">
-          <div className="mb-[32px] md:mb-[44px]">
+          <div className="mb-[32px] md:mb-[40px] [@media(min-width:1280px)_and_(max-height:760px)]:mb-[30px]">
             <h1 id="home-hero-title" className="text-[clamp(38px,5vw,68px)] leading-[0.95] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
               Female tutors for young women.
             </h1>
@@ -52,14 +52,14 @@ export default function Home() {
               onRetry={refetchTutors}
             />
           ) : (
-            <ul className="list-none m-0 p-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px] md:max-w-[908px] xl:max-w-none" aria-label="The tutors" data-testid="tutor-grid">
+            <ul className="list-none m-0 p-0 grid auto-rows-fr grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[28px] md:max-w-[908px] xl:max-w-none" aria-label="The tutors" data-testid="tutor-grid">
               {(tutors || []).map((tutor, index) => (
                 <li key={tutor.id} className="deal-in flex" style={{ "--delay": `${index * 90}ms` } as React.CSSProperties}>
                   <TutorCard
                     tutor={tutor}
                     rest={CARD_REST[index % CARD_REST.length]}
                     href={`/tutors/${tutor.slug}`}
-                    className="w-full sm:aspect-square sm:max-w-[440px] md:max-w-none"
+                    className="w-full sm:max-w-[440px] md:max-w-none"
                     testId={`tutor-card-${tutor.slug}`}
                   />
                 </li>

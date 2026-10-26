@@ -27,9 +27,9 @@ typography:
     letterSpacing: "-0.04em"
   tutor-name:
     fontFamily: "Instrument Sans, sans-serif"
-    fontSize: "clamp(36px, 3.6vw, 46px)"
+    fontSize: "clamp(26px, 2.2vw, 30px)"
     fontWeight: 700
-    lineHeight: 0.95
+    lineHeight: 1
     letterSpacing: "-0.04em"
   headline:
     fontFamily: "Instrument Sans, sans-serif"
@@ -200,7 +200,7 @@ for names and the hero, 600 for section headings and labels, 400 for reading.
 ### Hierarchy
 - **Display** (700, clamp 38–68px, 0.95, -0.04em): the Home headline only,
   kept to one line on desktop so the tutor cards below it lead.
-- **Tutor name** (700, clamp 30–36px on her card, 1.0, -0.04em; clamp 44–68px
+- **Tutor name** (700, clamp 26–30px on her card, on one line, 1.0, -0.04em; clamp 44–68px
   on her profile): the largest thing on her card.
 - **Headline** (600, clamp 32–48px, 1.05, -0.03em): section headings ("How
   an enquiry works").
@@ -226,12 +226,14 @@ for section content. Gutters are 24px on small screens and 30px from `md`
 (768px). Sections breathe with 56px of vertical padding, 80px from `md`.
 
 The tutor grid is one column, two from `md` (768px, capped at 908px wide) and
-three from `xl` (1280px), with 28px column and 36px row gaps. Cards are square
-from `sm` and grow if her text needs more room.
+three from `xl` (1280px), with 28px gaps. Cards are landscape and all the same
+height, about 240px, so two rows of three fit under the headline on a laptop
+window 800px tall or more (1440×900 screens and up). On a desktop screen under 760px tall the hero's
+padding tightens to keep them there.
 
 The Home hero is the tutors: a one-line headline and its lead, then the tutor
 grid straight away, so the first cards show in the first screen at every
-width. The three paper notes come after the grid, stacked like the tutor cards
+width and six show whole on most laptops. The three paper notes come after the grid, stacked like the tutor cards
 below `md`, then side by side as 3:2 landscape notes that fill the same
 width as the tutor grid (908px from `md`, the full 1150px from `xl`). Desktop
 nav links collapse into a rounded dropdown card below `md`. The body never goes narrower than 320px.
@@ -287,9 +289,15 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 
 ### Tutor card
 - **Background:** the tutor's tint.
-- **Content:** her name with her intake pill beside it, then on the rules her
-  subject, university and qualification, and her summary (up to five lines).
-- **Shape:** square from `sm`. It links to her profile.
+- **Content:** a fixed set of rules (26px apart), so every card is the same
+  height: her name, her subject, and her university and qualification in
+  smaller 13.5px type, one line each and cut short with an ellipsis if
+  longer (the full text shows on hover); a blank rule; then three lines of
+  her summary. The profile has the rest.
+- **Intake:** her intake pill is stuck on the card's top edge at the right,
+  half on and half off, like a label. The unfilled "Full for now" pill takes
+  her tint there.
+- **Shape:** landscape, all cards the same height. It links to her profile.
 - **Arrival:** on Home the cards are dealt onto the page once, 90ms apart
   (`.deal-in`).
 
