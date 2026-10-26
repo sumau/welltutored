@@ -293,8 +293,8 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 ### Paper notes
 White note cards with a 1px Hairline edge, for Well Tutored's own words:
 - **Home:** three notes ("Small and hand-picked", "How we teach",
-  "Helping young women grow") after the tutors, square and ruled to the
-  bottom.
+  "Helping young women grow") after the tutors under the headline "About
+  our agency", square and ruled to the bottom.
 - **Profile, "Learning with":** her teaching points, on her tint section.
 
 ### Approach card

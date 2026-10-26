@@ -69,10 +69,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Three notes on how we work, on plain white paper: each colour
+      {/* About our agency: three notes on plain white paper. Each colour
           belongs to one tutor, so the notes take none. */}
-      <section className="px-6 md:px-[30px] pb-[56px] md:pb-[80px]" aria-label="How we work">
+      <section className="px-6 md:px-[30px] pb-[56px] md:pb-[80px]" aria-labelledby="home-about-title">
         <div className="max-w-[1150px] mx-auto">
+          <h2 id="home-about-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[28px] md:mb-[36px]">
+            About our agency
+          </h2>
           <ul className="note-row list-none m-0 p-0 max-w-[908px]" data-testid="notes">
             {NOTES.map((note) => (
               <li
