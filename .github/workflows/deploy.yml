@@ -1,5 +1,6 @@
-# Runs on every merge to main: the deploy, then the Prod Smoke against the
-# live site, and beside them a job that refills the caches pull requests read.
+# Runs on every merge to main that changes more than Markdown: the deploy,
+# then the Prod Smoke against the live site, and beside them a job that
+# refills the caches pull requests read.
 # The checks ran on the pull request (ci.yml), and the main ruleset merges one
 # only once it contains the latest main, so the merged tree is the tested one.
 # docs/pipeline.md is the description of what each job covers and why.
@@ -8,6 +9,11 @@ name: Deploy
 on:
   push:
     branches: [main]
+    # Nothing in the app or the image reads Markdown, so a docs-only merge
+    # would redeploy the same site. Unlike ci.yml, nothing here is a required
+    # check, so the whole workflow can be skipped.
+    paths-ignore:
+      - '**.md'
 
 permissions:
   contents: read

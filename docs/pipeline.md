@@ -90,8 +90,8 @@ It runs the integration tests against a dedicated `TEST_DATABASE_URL`, never
 [.github/workflows/ci.yml](../.github/workflows/ci.yml) runs this same gate,
 and the [CI Smoke](#the-ci-smoke), on every pull request, and only there.
 [.github/workflows/deploy.yml](../.github/workflows/deploy.yml) runs on every
-merge to `main`: the [deploy](#the-deploy-job), then the
-[Prod Smoke](#post-deploy-validation).
+merge to `main` that changes more than Markdown files: the
+[deploy](#the-deploy-job), then the [Prod Smoke](#post-deploy-validation).
 
 The checks don't run again on `main`, and don't need to: the `main` ruleset
 requires branches to be up to date before merging, so a pull request merges
@@ -210,8 +210,9 @@ after merging an auth or Clerk change
 ## The deploy job
 
 The `deploy` job in `.github/workflows/deploy.yml` runs on every merge to
-`main`. A failure in `verify` or `ci-smoke` stops a deploy by stopping the
-merge, since both are required checks. It checks out, installs
+`main` that changes more than Markdown files; a docs-only merge leaves the
+live site as it was. A failure in `verify` or `ci-smoke` stops a deploy by
+stopping the merge, since both are required checks. It checks out, installs
 `flyctl` and runs `flyctl deploy`. The checks against the live site come after
 it, in the [`prod-smoke` job](#post-deploy-validation).
 
