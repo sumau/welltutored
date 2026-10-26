@@ -68,12 +68,12 @@ export default function Enquiry() {
           the form level with the heading on the right. */}
       <section className="px-6 md:px-[30px] pt-6 pb-[40px] md:pb-[64px]" aria-labelledby="enquiry-title">
         <div className="max-w-[1150px] mx-auto">
-          <Link href="/" className="mb-[44px] md:mb-[60px] inline-flex items-center gap-2 rounded-full text-[14px] font-medium text-muted-foreground hover:text-foreground transition-colors" data-testid="enquiry-back-link">
+          <Link href="/" className="mb-[32px] md:mb-[36px] inline-flex items-center gap-2 rounded-full text-[14px] font-medium text-muted-foreground hover:text-foreground transition-colors" data-testid="enquiry-back-link">
             <ArrowLeft size={15} /> All tutors
           </Link>
         </div>
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] gap-[40px] lg:gap-[72px] items-start">
-          <div className="grid gap-[24px]">
+        <div className="max-w-[1150px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-[40px] lg:gap-[64px] items-start">
+          <div className="flex flex-col gap-[24px] lg:gap-[16px] lg:self-stretch">
             <h1
               id="enquiry-title"
               className="font-serif text-[clamp(34px,4vw,48px)] leading-[1.08] m-0"
@@ -81,9 +81,9 @@ export default function Enquiry() {
             >
               Make an enquiry
             </h1>
-            <EnquiryStepList steps={enquirySteps("enquire", chosenTutor?.firstName)} />
+            <EnquiryStepList steps={enquirySteps("enquire", chosenTutor?.firstName)} className="lg:gap-[12px] lg:mb-[12px]" />
             {/* Her card once she's chosen, so it's clear who the enquiry is
-                for. It links back to her profile. */}
+                for, its foot level with the form's. It links back to her profile. */}
             {chosenTutor && (
               <TutorCard
                 key={chosenTutor.slug}
@@ -92,8 +92,8 @@ export default function Enquiry() {
                 onClick={(event) => {
                   if (formDirty && !window.confirm(LEAVE_WARNING)) event.preventDefault();
                 }}
-                rest="-1.5deg"
-                className="hidden lg:flex mt-[24px] max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
+                rest="1.5deg"
+                className="hidden lg:flex lg:mt-auto max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
                 testId="enquiry-tutor-card"
               />
             )}
@@ -108,7 +108,7 @@ export default function Enquiry() {
             )}
           </div>
 
-          <div className="paper-sheet p-6 md:p-10">
+          <div className="paper-sheet p-6 md:p-8">
             <EnquiryForm
               tutors={contactableTutors}
               initialTutorSlug={chosenTutor ? chosenSlug : ""}

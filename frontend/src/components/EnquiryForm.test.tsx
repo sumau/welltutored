@@ -244,9 +244,9 @@ test("keyboard users can complete an enquiry, recover validation focus, and reac
     "enquiry-parent-name",
     "enquiry-parent-email",
     "enquiry-tutor",
+    "enquiry-subject-level",
     "enquiry-student-name",
     "enquiry-student-age",
-    "enquiry-subject-level",
     "enquiry-message",
     "button-submit-enquiry",
   ];
@@ -257,9 +257,9 @@ test("keyboard users can complete an enquiry, recover validation focus, and reac
     "Eleanor James",
     "eleanor@example.com",
     "alice-smith",
+    "GCSE English Literature",
     "Maya",
     "13-15",
-    "GCSE English Literature",
     "Maya would benefit from essay planning support.",
   ];
   const originalFetch = globalThis.fetch;
@@ -633,6 +633,32 @@ test("the form reports when something has been typed, so the page can warn befor
       setFieldValue(message, "");
     });
     assert.equal(reports.at(-1), false);
+  } finally {
+    await cleanupForm(rendered);
+  }
+});
+
+test("the message starts as a note to the chosen tutor and follows the tutor until edited", async () => {
+  const reports: boolean[] = [];
+  const rendered = await renderForm({ onDirtyChange: (dirty) => reports.push(dirty) });
+
+  try {
+    const message = rendered.container.querySelector<HTMLTextAreaElement>("#enquiry-message")!;
+    const tutorSelect = rendered.container.querySelector<HTMLSelectElement>("#enquiry-tutor")!;
+    assert.match(message.value, /^Hi Alice,\n/);
+    assert.equal(reports.at(-1), false);
+
+    await act(async () => {
+      setFieldValue(tutorSelect, "");
+    });
+    assert.match(message.value, /^Hi there,\n/);
+
+    await act(async () => {
+      setFieldValue(message, "Help with essays");
+      setFieldValue(tutorSelect, tutor.slug);
+    });
+    assert.equal(message.value, "Help with essays");
+    assert.equal(reports.at(-1), true);
   } finally {
     await cleanupForm(rendered);
   }

@@ -190,6 +190,8 @@ async function runTutorProfileSmokeCheck(
   await tabTo(page, "enquiry-parent-email");
   await fillFocused(page, "eleanor@example.com");
   await tabTo(page, "enquiry-tutor");
+  await tabTo(page, "enquiry-subject-level");
+  await fillFocused(page, "GCSE English Literature");
   await tabTo(page, "enquiry-student-name");
   await fillFocused(page, "Maya");
   await tabTo(page, "enquiry-student-age");
@@ -202,9 +204,9 @@ async function runTutorProfileSmokeCheck(
       "Keyboard selection did not choose the student's age on the tutor profile.",
     );
   }
-  await tabTo(page, "enquiry-subject-level");
-  await fillFocused(page, "GCSE English Literature");
   await tabTo(page, "enquiry-message");
+  // Replace the note the message starts with.
+  await page.keyboard.press("Control+A");
   await fillFocused(page, "Maya would benefit from essay planning support.");
   await tabTo(page, "button-submit-enquiry");
 
@@ -328,6 +330,8 @@ async function runBrowserSmokeCheck() {
         "Keyboard selection did not choose the available tutor.",
       );
     }
+    await tabTo(page, "enquiry-subject-level");
+    await fillFocused(page, "GCSE English Literature");
     await tabTo(page, "enquiry-student-name");
     await fillFocused(page, "Maya");
     await tabTo(page, "enquiry-student-age");
@@ -340,9 +344,9 @@ async function runBrowserSmokeCheck() {
         "Keyboard selection did not choose the student's age.",
       );
     }
-    await tabTo(page, "enquiry-subject-level");
-    await fillFocused(page, "GCSE English Literature");
     await tabTo(page, "enquiry-message");
+    // Replace the note the message starts with.
+    await page.keyboard.press("Control+A");
     await fillFocused(page, "Maya would benefit from essay planning support.");
 
     await page.keyboard.press("Tab");
@@ -365,9 +369,9 @@ async function runBrowserSmokeCheck() {
     await page.keyboard.press("Control+A");
     await fillFocused(page, "eleanor@example.com");
     await tabTo(page, "enquiry-tutor");
+    await tabTo(page, "enquiry-subject-level");
     await tabTo(page, "enquiry-student-name");
     await tabTo(page, "enquiry-student-age");
-    await tabTo(page, "enquiry-subject-level");
     await tabTo(page, "enquiry-message");
     await page.keyboard.press("Tab");
     await expectActive(page, "button-submit-enquiry");
@@ -402,9 +406,9 @@ async function runBrowserSmokeCheck() {
       ["enquiry-parent-name", "Eleanor James"],
       ["enquiry-parent-email", "eleanor@example.com"],
       ["enquiry-tutor", await page.locator("#enquiry-tutor").inputValue()],
+      ["enquiry-subject-level", "GCSE English Literature"],
       ["enquiry-student-name", "Maya"],
       ["enquiry-student-age", "13-15"],
-      ["enquiry-subject-level", "GCSE English Literature"],
       ["enquiry-message", "Maya would benefit from essay planning support."],
     ] as const) {
       if (await page.locator(`#${fieldId}`).inputValue() !== expectedValue) {

@@ -32,49 +32,59 @@ export default function Home() {
 
   return (
     <main className="flex-1" data-testid="page-home">
-      {/* Hero: the tutors themselves, under the tagline and a line on who they are.
+      {/* Hero: the headline and tagline in the first box of the tutors' grid.
           "Back to the tutors" links scroll here. */}
-      <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] [@media(min-width:1280px)_and_(max-height:760px)]:pt-[24px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
+      <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] [@media(min-width:1280px)_and_(max-height:760px)]:pt-[24px] pb-[56px] md:pb-[30px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
         <div className="max-w-[1150px] mx-auto">
-          {/* The tagline, with a small note on who the tutors are at the right,
-              its last line on the tagline's baseline. */}
-          <div className="mb-[32px] md:mb-[60px] [@media(min-width:1280px)_and_(max-height:760px)]:mb-[30px] grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_23rem] md:[align-items:last_baseline] md:gap-x-[48px]">
-            <h1 id="home-hero-title" className="text-[clamp(42px,5.2vw,72px)] leading-[0.95] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
-              Tutors to look up to.
-            </h1>
-            <p className="text-[15px] leading-[1.5] m-0 text-foreground/80 [text-wrap:pretty] md:text-right" data-testid="hero-copy">
-              <strong className="block font-semibold text-foreground [text-wrap:balance]">Tutoring to help young women grow.</strong>
-              From a select community of women who{" "}<br className="hidden md:inline" />know their subjects and how to teach them.
-            </p>
+          {/* From md, one grid of two columns, three from lg: the headline
+              and tagline take the first box and the tutors the rest, each
+              row as tall as its tallest card, so five tutors fill three rows
+              of two or two rows of three. */}
+          <div className="md:grid md:grid-cols-2 md:gap-x-[28px] md:gap-y-[44px] lg:grid-cols-3 lg:gap-x-[32px]">
+            <div className="max-w-[34rem] mb-[32px] md:mb-0">
+              <h1 id="home-hero-title" className="text-[clamp(42px,5.2vw,72px)] md:text-[clamp(48px,6.4vw,64px)] lg:text-[clamp(50px,4.6vw,68px)] leading-[0.95] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
+                Tutors to look up to.
+              </h1>
+              <p className="text-[18px] leading-[1.5] mt-[20px] mb-0 text-foreground/80 [text-wrap:pretty]" data-testid="hero-copy">
+                {/* Its own line except between lg and xl, where the narrow
+                    first box would break it after "young". */}
+                <strong className="block lg:inline xl:block font-semibold text-foreground">Tutoring to help young women grow,</strong>{" "}
+                from a select community of women who{" "}<br className="hidden xl:inline" />know their subjects and how to teach them.
+              </p>
+            </div>
+            <h2 className="sr-only">The tutors</h2>
+            {tutorsLoading ? (
+              <LoadingState variant="tutor-grid" message="Loading tutors..." />
+            ) : tutorsError ? (
+              <div className="lg:col-span-2">
+                <ErrorState
+                  message="We couldn't load the tutor profiles. Please try again."
+                  onRetry={refetchTutors}
+                />
+              </div>
+            ) : listedTutors.length === 0 ? (
+              <p className="lg:col-span-2 text-[17px] text-muted-foreground m-0" data-testid="tutor-grid-empty">
+                No tutors are listed just now. Please check back soon.
+              </p>
+            ) : (
+              // One centred column below md; from md the cards are the
+              // grid's own boxes. `role="list"` keeps it a list for Safari,
+              // which drops the role of a list that has no box.
+              <ul role="list" className="list-none m-0 p-0 flex flex-wrap justify-center gap-[28px] md:contents" aria-label="The tutors" data-testid="tutor-grid">
+                {listedTutors.map((tutor, index) => (
+                  <li key={tutor.id} className="deal-in flex w-full sm:max-w-[440px] md:max-w-none md:w-auto" style={{ "--delay": `${index * 90}ms` } as React.CSSProperties}>
+                    <TutorCard
+                      tutor={tutor}
+                      rest={CARD_REST[index % CARD_REST.length]}
+                      href={`/tutors/${tutor.slug}`}
+                      className="w-full"
+                      testId={`tutor-card-${tutor.slug}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          <h2 className="sr-only">The tutors</h2>
-          {tutorsLoading ? (
-            <LoadingState variant="tutor-grid" message="Loading tutors..." />
-          ) : tutorsError ? (
-            <ErrorState
-              message="We couldn't load the tutor profiles. Please try again."
-              onRetry={refetchTutors}
-            />
-          ) : listedTutors.length === 0 ? (
-            <p className="text-[17px] text-muted-foreground m-0" data-testid="tutor-grid-empty">
-              No tutors are listed just now. Please check back soon.
-            </p>
-          ) : (
-            // Centred rows, so five tutors sit as three and two, not with a gap.
-            <ul className="list-none m-0 p-0 flex flex-wrap justify-center gap-[28px]" aria-label="The tutors" data-testid="tutor-grid">
-              {listedTutors.map((tutor, index) => (
-                <li key={tutor.id} className="deal-in flex w-full sm:max-w-[440px] md:max-w-none md:w-[calc((100%-28px)/2)] xl:w-[calc((100%-56px)/3)]" style={{ "--delay": `${index * 90}ms` } as React.CSSProperties}>
-                  <TutorCard
-                    tutor={tutor}
-                    rest={CARD_REST[index % CARD_REST.length]}
-                    href={`/tutors/${tutor.slug}`}
-                    className="w-full"
-                    testId={`tutor-card-${tutor.slug}`}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       </section>
 
