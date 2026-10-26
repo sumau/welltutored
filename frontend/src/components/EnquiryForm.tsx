@@ -15,6 +15,13 @@ interface EnquiryFormProps {
   onDirtyChange?: (dirty: boolean) => void;
 }
 
+// The message starts as a short note to the chosen tutor, ready to send or
+// to change, and follows the tutor until it is edited.
+function startingMessage(tutors: Tutor[], tutorSlug: string) {
+  const firstName = tutors.find((tutor) => tutor.slug === tutorSlug)?.firstName;
+  return `Hi ${firstName || "there"},\nI'd like to find out more about lessons with you and how you work.`;
+}
+
 export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange, onDirtyChange }: EnquiryFormProps) {
   const createEnquiry = useCreateEnquiry();
   const [receipt, setReceipt] = useState<EnquiryReceipt | null>(null);
@@ -35,7 +42,7 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
     studentName: "",
     studentAge: "",
     subjectLevel: "",
-    message: ""
+    message: startingMessage(tutors, initialTutorSlug)
   });
 
   // Tell the page which tutor is chosen, so it can show her card.
@@ -43,14 +50,21 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
     onTutorChange?.(form.tutorSlug);
   }, [form.tutorSlug, onTutorChange]);
 
-  const isDirty = !receipt && [form.name, form.email, form.studentName, form.studentAge, form.subjectLevel, form.message]
-    .some((value) => value.trim() !== "");
+  const messageEdited = form.message.trim() !== "" && form.message !== startingMessage(tutors, form.tutorSlug);
+  const isDirty = !receipt && ([form.name, form.email, form.studentName, form.studentAge, form.subjectLevel]
+    .some((value) => value.trim() !== "") || messageEdited);
   useEffect(() => {
     onDirtyChange?.(isDirty);
   }, [isDirty, onDirtyChange]);
 
   const update = (key: keyof typeof form, value: string) => {
-    setForm(prev => ({ ...prev, [key]: value }));
+    setForm(prev => {
+      const next = { ...prev, [key]: value };
+      if (key === "tutorSlug" && prev.message === startingMessage(tutors, prev.tutorSlug)) {
+        next.message = startingMessage(tutors, value);
+      }
+      return next;
+    });
     setSubmitError("");
   };
 
@@ -127,7 +141,7 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
           studentName: "",
           studentAge: "",
           subjectLevel: "",
-          message: ""
+          message: startingMessage(tutors, initialTutorSlug)
         });
         setAttemptedSubmit(false);
         setTouched({});

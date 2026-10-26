@@ -205,6 +205,8 @@ async function runTutorProfileSmokeCheck(
     );
   }
   await tabTo(page, "enquiry-message");
+  // Replace the note the message starts with.
+  await page.keyboard.press("Control+A");
   await fillFocused(page, "Maya would benefit from essay planning support.");
   await tabTo(page, "button-submit-enquiry");
 
@@ -343,6 +345,8 @@ async function runBrowserSmokeCheck() {
       );
     }
     await tabTo(page, "enquiry-message");
+    // Replace the note the message starts with.
+    await page.keyboard.press("Control+A");
     await fillFocused(page, "Maya would benefit from essay planning support.");
 
     await page.keyboard.press("Tab");
