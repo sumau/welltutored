@@ -217,16 +217,16 @@ at a tilt like her card.
 for names and the hero, 600 for section headings and labels, 400 for reading.
 
 ### Hierarchy
-- **Display** (700, clamp 42–72px, 0.95, -0.04em): the Home headline only,
-  kept to one line on desktop so the tutor cards below it lead.
+- **Display** (700, clamp 42–72px, 0.95, -0.04em; clamp 44–60px from `lg`,
+  where it takes two lines in the grid's first box): the Home headline only.
 - **Tutor name** (700, clamp 26–30px on her card, wrapping rather than cut short, 1.0, -0.04em; clamp 44–68px
   on her profile): the largest thing on her card.
 - **Headline** (600–700, clamp 32–48px, 1.05, -0.03em): section headings
   ("How an enquiry works", "Learning with her name", the enquiry page's
   title). "About her name" on a profile is a step smaller (clamp 30–40px).
-- **Lead** (400, 18px, 1.6): a tutor's summary under her name on her
-  profile. Home's tagline beside the headline is smaller (15px), its first
-  line semibold.
+- **Lead** (400, 18px, 1.5–1.6): a tutor's summary under her name on her
+  profile, and Home's tagline under the headline, its first clause
+  semibold.
 - **Title** (600–700, 19–20px, 1.35): a tutor's subject, step titles.
 - **Body** (400, 16px, 1.5–1.6): summaries, profile text. Lines capped around
   46em on profiles.
@@ -247,15 +247,15 @@ Content sits in a centred column: 1210px for the nav and profile, 1150px
 for section content. Gutters are 24px on small screens and 30px from `md`
 (768px). Sections breathe with 56px of vertical padding, 80px from `md`.
 
-The tutor grid is one column, two from `md` (768px, capped at 908px wide) and
-three from `xl` (1280px), with 28px gaps. Cards are landscape and all the same
-height, about 240px, so two rows of three fit under the headline on a laptop
-window 800px tall or more (1440×900 screens and up). On a desktop screen under 760px tall the hero's
-padding tightens to keep them there.
-
-The Home hero is the tutors: a one-line headline with a short right-aligned
-tagline level with its last line, then the tutor grid straight away, so the first cards show in the first screen at every
-width and six show whole on most laptops. "How an enquiry works" follows the grid directly; under its
+The Home hero is the tutors. Below `lg` (1024px) the headline and tagline
+stack above the tutor grid: one column, two from `md` (768px), 28px gaps.
+From `lg` it is one grid of three columns and equal rows, 32px apart and
+44px between rows: the
+headline, with the tagline under it, takes the first box, straight on the
+white page, and a tutor card fills each box after it. Five tutors
+fill two rows, whole in the first screen of a 1440×900 laptop; six to eight
+start a third, whose tops show above the fold. On a desktop screen under 760px tall the hero's top padding
+tightens. "How an enquiry works" follows the grid directly; under its
 three steps, a safeguarding line links to the Safeguarding dialog. Desktop
 nav links collapse into a rounded dropdown card below `md`. The body never goes narrower than 320px.
 
@@ -324,16 +324,17 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 - **Content:** rules 26px apart: her name, her subject, and her university
   and qualification in smaller 12.5px type, each wrapping to a second line
   rather than being cut short; a blank rule; then four lines of
-  her summary, about 165 characters. The profile has the rest. Cards in a
+  her summary, about 165 characters (three lines, about 120 characters,
+  on Home, for shorter cards and more white between them). The profile has the rest. Cards in a
   row stretch to the tallest.
 - **Intake:** her intake pill is stuck on the card's top edge at the right,
   half on and half off, like a label.
 - **Shape:** landscape. It links to her profile, and an arrow at the right
   end of her name says so, since a phone never sees the hover lift. A tutor who is full comes
   after the ones taking students.
-- **On Home:** centred rows of three (two on tablets), so a short last row
-  sits in the middle rather than leaving a gap. Both rows fit a laptop
-  screen 800px tall or more under the headline.
+- **On Home:** below `lg`, centred rows of two, so a short last row sits in
+  the middle rather than leaving a gap; from `lg`, the boxes of the hero's
+  grid.
 - **Arrival:** on Home the cards are dealt onto the page once, 90ms apart
   (`.deal-in`).
 - **Loading:** while the tutors load, nothing shows: three invisible cards

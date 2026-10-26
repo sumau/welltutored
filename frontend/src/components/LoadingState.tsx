@@ -22,7 +22,7 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
         <div className="invisible flex flex-wrap justify-center gap-[28px]" aria-hidden="true">
           {Array.from({ length: 3 }, (_, index) => (
             <div
-              className="note-card flex flex-col w-full sm:max-w-[440px] md:max-w-none md:w-[calc((100%-28px)/2)] xl:w-[calc((100%-56px)/3)] min-h-[240px] px-[20px] pt-[20px] pb-[14px]"
+              className="note-card flex flex-col w-full sm:max-w-[440px] md:max-w-none md:w-[calc((100%-28px)/2)] min-h-[240px] px-[20px] pt-[20px] pb-[14px]"
               style={{ "--tint": "hsl(var(--muted))", "--rest": CARD_REST[index] } as React.CSSProperties}
               data-testid={`tutor-card-skeleton-${index + 1}`}
               key={index}
