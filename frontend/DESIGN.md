@@ -337,9 +337,11 @@ The one card on the public site, in `.note-card` in `src/index.css`.
   grid.
 - **Arrival:** on Home the cards are dealt onto the page once, 90ms apart
   (`.deal-in`).
-- **Loading:** while the tutors load, nothing shows: three invisible cards
-  hold their space in the same grid, so the real cards land where they were
-  and no grey cards flash up first. "Loading tutors..." is for screen
+- **Loading:** while the tutors load, nothing shows: two invisible cards,
+  each as tall as a card with one line of name, subject and university,
+  hold their space in the same grid (from `lg`, the two boxes beside the
+  headline), so the real cards land where they were and no grey cards
+  flash up first. "Loading tutors..." is for screen
   readers only.
 
 ### Paper notes

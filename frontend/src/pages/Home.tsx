@@ -54,9 +54,7 @@ export default function Home() {
             </div>
             <h2 className="sr-only">The tutors</h2>
             {tutorsLoading ? (
-              <div className="lg:col-span-2">
-                <LoadingState variant="tutor-grid" message="Loading tutors..." />
-              </div>
+              <LoadingState variant="tutor-grid" message="Loading tutors..." />
             ) : tutorsError ? (
               <div className="lg:col-span-2">
                 <ErrorState
@@ -71,8 +69,9 @@ export default function Home() {
             ) : (
               // Centred rows below lg, so five tutors sit as two, two and one
               // in the middle, not with a gap; from lg the cards are the
-              // grid's own boxes.
-              <ul className="list-none m-0 p-0 flex flex-wrap justify-center gap-[28px] lg:contents" aria-label="The tutors" data-testid="tutor-grid">
+              // grid's own boxes. `role="list"` keeps it a list for Safari,
+              // which drops the role of a list that has no box.
+              <ul role="list" className="list-none m-0 p-0 flex flex-wrap justify-center gap-[28px] lg:contents" aria-label="The tutors" data-testid="tutor-grid">
                 {listedTutors.map((tutor, index) => (
                   <li key={tutor.id} className="deal-in flex w-full sm:max-w-[440px] md:max-w-none md:w-[calc((100%-28px)/2)] lg:w-auto" style={{ "--delay": `${index * 90}ms` } as React.CSSProperties}>
                     <TutorCard

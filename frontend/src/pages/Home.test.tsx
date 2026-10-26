@@ -121,8 +121,9 @@ test("renders the homepage structure and a localized tutor loading state immedia
   assert.ok(rendered.container.querySelector("[data-testid=button-home-enquire]"));
   assert.ok(rendered.container.querySelector("[data-testid=tutor-loading-state]"));
   assert.equal(rendered.container.querySelector("[data-testid=loading-state]"), null);
-  const skeletonGrid = rendered.container.querySelector("[data-testid=tutor-card-skeleton-3]")?.parentElement;
+  const skeletonGrid = rendered.container.querySelector("[data-testid=tutor-card-skeleton-2]")?.closest("[aria-hidden]");
   assert.equal(skeletonGrid?.getAttribute("aria-hidden"), "true");
+  assert.ok(skeletonGrid?.contains(rendered.container.querySelector("[data-testid=tutor-card-skeleton-1]")));
 
   await act(async () => {
     resolveRequest(new Response("[]", { headers: { "content-type": "application/json" } }));
