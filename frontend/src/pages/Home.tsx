@@ -42,12 +42,12 @@ export default function Home() {
               six to eight a third. */}
           <div className="lg:grid lg:grid-cols-3 lg:auto-rows-fr lg:gap-x-[32px] lg:gap-y-[44px]">
             <div className="max-w-[34rem] mb-[32px] lg:mb-0">
-              <h1 id="home-hero-title" className="text-[clamp(42px,5.2vw,72px)] lg:text-[clamp(44px,4vw,60px)] leading-[0.95] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
+              <h1 id="home-hero-title" className="text-[clamp(42px,5.2vw,72px)] lg:text-[clamp(50px,4.6vw,68px)] leading-[0.95] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
                 Tutors to look up to.
               </h1>
               <p className="text-[18px] leading-[1.5] mt-[20px] mb-0 text-foreground/80 [text-wrap:pretty]" data-testid="hero-copy">
-                <strong className="font-semibold text-foreground">Tutoring to help young women grow,</strong>{" "}
-                from a select community of women who know their subjects and how to teach them.
+                <strong className="block font-semibold text-foreground">Tutoring to help young women grow,</strong>
+                from a select community of women who{" "}<br className="hidden xl:inline" />know their subjects and how to teach them.
               </p>
             </div>
             <h2 className="sr-only">The tutors</h2>

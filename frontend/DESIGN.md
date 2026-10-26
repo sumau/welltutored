@@ -217,7 +217,7 @@ at a tilt like her card.
 for names and the hero, 600 for section headings and labels, 400 for reading.
 
 ### Hierarchy
-- **Display** (700, clamp 42–72px, 0.95, -0.04em; clamp 44–60px from `lg`,
+- **Display** (700, clamp 42–72px, 0.95, -0.04em; clamp 50–68px from `lg`,
   where it takes two lines in the grid's first box): the Home headline only.
 - **Tutor name** (700, clamp 26–30px on her card, wrapping rather than cut short, 1.0, -0.04em; clamp 44–68px
   on her profile): the largest thing on her card.
@@ -225,8 +225,8 @@ for names and the hero, 600 for section headings and labels, 400 for reading.
   ("How an enquiry works", "Learning with her name", the enquiry page's
   title). "About her name" on a profile is a step smaller (clamp 30–40px).
 - **Lead** (400, 18px, 1.5–1.6): a tutor's summary under her name on her
-  profile, and Home's tagline under the headline, its first clause
-  semibold.
+  profile, and Home's tagline under the headline: its first clause
+  semibold on a line of its own, the rest broken after "who" from `xl`.
 - **Title** (600–700, 19–20px, 1.35): a tutor's subject, step titles.
 - **Body** (400, 16px, 1.5–1.6): summaries, profile text. Lines capped around
   46em on profiles.
