@@ -22,14 +22,14 @@ interface LoadingStateProps {
 export function LoadingState({ message = "Loading...", variant = "page" }: LoadingStateProps) {
   if (variant === "tutor-grid") {
     return (
-      <div className="lg:contents" data-testid="tutor-loading-state">
+      <div className="md:contents" data-testid="tutor-loading-state">
         {/* Two invisible note cards, a short tutor's, laid out like Home's
-            tutor grid: from lg they fill the two boxes beside the headline,
+            tutor grid: from md they fill the boxes after the headline,
             so the real cards land where these were, without grey cards
             flashing up first. */}
-        <div className="invisible flex flex-wrap justify-center gap-[28px] lg:contents" aria-hidden="true">
+        <div className="invisible flex flex-wrap justify-center gap-[28px] md:contents" aria-hidden="true">
           {Array.from({ length: 2 }, (_, index) => (
-            <div className="flex w-full sm:max-w-[440px] md:max-w-none md:w-[calc((100%-28px)/2)] lg:w-auto" key={index}>
+            <div className="flex w-full sm:max-w-[440px] md:max-w-none md:w-auto" key={index}>
               <TutorCard
                 tutor={placeholderTutor}
                 rest={CARD_REST[index]}
