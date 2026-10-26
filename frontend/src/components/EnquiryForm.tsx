@@ -178,11 +178,7 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
         className="flex flex-col gap-4"
         data-testid="enquiry-form"
         noValidate
-        aria-describedby="enquiry-form-instructions"
       >
-        <p id="enquiry-form-instructions" className="text-[14px] text-muted-foreground leading-[1.5]">
-          Fields marked with an asterisk are required.
-        </p>
         {/* Parent Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label htmlFor="enquiry-parent-name" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
