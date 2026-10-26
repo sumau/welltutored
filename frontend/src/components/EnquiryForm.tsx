@@ -6,9 +6,7 @@ import type { Tutor } from "@/client";
 import { SafeguardingNote } from "@/components/SafeguardingNote";
 
 interface EnquiryFormProps {
-  tutor?: Tutor;
   tutors?: Tutor[];
-  compact?: boolean;
   // The tutor to start with in the list, such as one named in the link.
   initialTutorSlug?: string;
   onTutorChange?: (slug: string) => void;
@@ -17,7 +15,7 @@ interface EnquiryFormProps {
   onDirtyChange?: (dirty: boolean) => void;
 }
 
-export function EnquiryForm({ tutor, tutors = [], compact = false, initialTutorSlug = "", onTutorChange, onDirtyChange }: EnquiryFormProps) {
+export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange, onDirtyChange }: EnquiryFormProps) {
   const createEnquiry = useCreateEnquiry();
   const [receipt, setReceipt] = useState<EnquiryReceipt | null>(null);
   const [submitError, setSubmitError] = useState("");
@@ -33,7 +31,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false, initialTutorS
   const [form, setForm] = useState({
     name: "",
     email: "",
-    tutorSlug: tutor?.slug || initialTutorSlug,
+    tutorSlug: initialTutorSlug,
     studentName: "",
     studentAge: "",
     subjectLevel: "",
@@ -125,7 +123,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false, initialTutorS
         setForm({
           name: "",
           email: "",
-          tutorSlug: tutor?.slug || initialTutorSlug,
+          tutorSlug: initialTutorSlug,
           studentName: "",
           studentAge: "",
           subjectLevel: "",
@@ -146,7 +144,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false, initialTutorS
     return (
       <div
         ref={receiptRef}
-        className={`text-center py-10 px-4 ${compact ? 'paper-sheet' : ''}`}
+        className="text-center py-10 px-4"
         data-testid="enquiry-success"
         role="status"
         aria-live="polite"
@@ -174,12 +172,7 @@ export function EnquiryForm({ tutor, tutors = [], compact = false, initialTutorS
   }
 
   return (
-    <div className={`${compact ? 'paper-sheet p-6 md:p-8' : ''}`} id="enquire" data-testid="enquiry-form-container">
-      {tutor?.intake === "full" ? (
-        <div className="rounded-[20px] border border-border bg-background p-6 text-[15px] text-muted-foreground leading-[1.6]" data-testid="enquiry-unavailable">
-          {tutor.name} is not currently accepting enquiries. Please choose another tutor or check back later.
-        </div>
-      ) : (
+    <div id="enquire" data-testid="enquiry-form-container">
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-4"
@@ -232,8 +225,8 @@ export function EnquiryForm({ tutor, tutors = [], compact = false, initialTutorS
           </label>
         </div>
 
-        {/* Tutor Selection (if not pre-selected) */}
-        {!tutor && tutors.length > 0 && (
+        {/* Tutor Selection */}
+        {tutors.length > 0 && (
           <label htmlFor="enquiry-tutor" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
             Tutor you are interested in *
             <select
@@ -364,7 +357,6 @@ export function EnquiryForm({ tutor, tutors = [], compact = false, initialTutorS
 
         <SafeguardingNote className="mt-4" />
       </form>
-      )}
     </div>
   );
 }

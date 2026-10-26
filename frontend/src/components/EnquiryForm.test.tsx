@@ -38,9 +38,9 @@ type RenderedForm = {
   dom: JSDOM;
 };
 
+// By default the tutor is chosen, as when /enquire is opened from her profile.
 type RenderFormOptions = {
-  tutor?: Tutor;
-  tutors?: Tutor[];
+  initialTutorSlug?: string;
   onDirtyChange?: (dirty: boolean) => void;
 };
 
@@ -97,8 +97,8 @@ async function renderForm(options: RenderFormOptions = {}): Promise<RenderedForm
     root.render(
       <QueryClientProvider client={queryClient}>
         <EnquiryForm
-          tutor={Object.prototype.hasOwnProperty.call(options, "tutor") ? options.tutor : tutor}
-          tutors={options.tutors}
+          tutors={[tutor]}
+          initialTutorSlug={options.initialTutorSlug ?? tutor.slug}
           onDirtyChange={options.onDirtyChange}
         />
       </QueryClientProvider>,
@@ -233,7 +233,7 @@ test("invalid email and short message errors are announced and tied to their fie
 });
 
 test("keyboard users can complete an enquiry, recover validation focus, and reach the success receipt", async () => {
-  const rendered = await renderForm({ tutor: undefined, tutors: [tutor] });
+  const rendered = await renderForm({ initialTutorSlug: "" });
   const form = rendered.container.querySelector<HTMLFormElement>("[data-testid=enquiry-form]")!;
   const controls = Array.from(
     form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>(
