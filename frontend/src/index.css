@@ -208,12 +208,12 @@ body:has(.public-site) {
   .note-card-head {
     border-bottom: 2px solid hsl(var(--foreground) / 0.55);
   }
-  /* Well Tutored's notes: stacked on phones, three square notes side by
-     side from 640px. */
+  /* Well Tutored's notes: stacked like the tutor cards below 768px, then
+     three landscape notes side by side, as wide in total as the tutor grid. */
   .note-row { display: grid; gap: 24px; }
-  @media (min-width: 640px) {
-    .note-row { grid-template-columns: repeat(3, 1fr); gap: 28px; }
-    .note-row > .note-card { aspect-ratio: 1; }
+  @media (min-width: 768px) {
+    .note-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+    .note-row > .note-card { aspect-ratio: 3 / 2; }
   }
   /* The tutors' cards are dealt onto the page once, on arrival. */
   .deal-in {

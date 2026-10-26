@@ -230,8 +230,9 @@ from `sm` and grow if her text needs more room.
 
 The Home hero is the tutors: a one-line headline and its lead, then the tutor
 grid straight away, so the first cards show in the first screen at every
-width. The three paper notes come after the grid, square and side by side
-from `sm` (640px) in the grid's first 908px, and stacked below `sm`. Desktop
+width. The three paper notes come after the grid, stacked like the tutor cards
+below `md`, then side by side as 3:2 landscape notes that fill the same
+width as the tutor grid (908px from `md`, the full 1150px from `xl`). Desktop
 nav links collapse into a rounded dropdown card below `md`. The body never goes narrower than 320px.
 
 ## Elevation & Depth
@@ -294,7 +295,7 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 White note cards with a 1px Hairline edge, for Well Tutored's own words:
 - **Home:** three notes ("Small and hand-picked", "How we teach",
   "Helping young women grow") after the tutors under the headline "About
-  our agency", square and ruled to the bottom.
+  our agency", landscape and ruled to the bottom.
 - **Profile, "Learning with":** her teaching points, on her tint section.
 
 ### Approach card

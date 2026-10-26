@@ -76,11 +76,11 @@ export default function Home() {
           <h2 id="home-about-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[28px] md:mb-[36px]">
             About our agency
           </h2>
-          <ul className="note-row list-none m-0 p-0 max-w-[908px]" data-testid="notes">
+          <ul className="note-row list-none m-0 p-0 md:max-w-[908px] xl:max-w-none" data-testid="notes">
             {NOTES.map((note) => (
               <li
                 key={note.title}
-                className="note-card flex flex-col border border-border px-[18px] pt-[16px] pb-[16px]"
+                className="note-card flex flex-col border border-border px-[18px] pt-[16px] pb-[16px] sm:max-w-[440px] md:max-w-none"
                 style={{ "--tint": "hsl(var(--card))", "--rest": note.r } as React.CSSProperties}
               >
                 <b className="note-card-head block text-[20px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
