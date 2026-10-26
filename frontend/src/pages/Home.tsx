@@ -37,16 +37,18 @@ export default function Home() {
       <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] [@media(min-width:1280px)_and_(max-height:760px)]:pt-[24px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
         <div className="max-w-[1150px] mx-auto">
           {/* From lg, one grid of three columns: the headline and tagline
-              take the first box and the tutors the rest, every box the
-              height of the tallest, so five tutors fill two rows and
-              six to eight a third. */}
-          <div className="lg:grid lg:grid-cols-3 lg:auto-rows-fr lg:gap-x-[32px] lg:gap-y-[44px]">
+              take the first box and the tutors the rest, each row as tall
+              as its tallest card, so five tutors fill two rows and six to
+              eight a third. */}
+          <div className="lg:grid lg:grid-cols-3 lg:gap-x-[32px] lg:gap-y-[44px]">
             <div className="max-w-[34rem] mb-[32px] lg:mb-0">
               <h1 id="home-hero-title" className="text-[clamp(42px,5.2vw,72px)] lg:text-[clamp(50px,4.6vw,68px)] leading-[0.95] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
                 Tutors to look up to.
               </h1>
               <p className="text-[18px] leading-[1.5] mt-[20px] mb-0 text-foreground/80 [text-wrap:pretty]" data-testid="hero-copy">
-                <strong className="block font-semibold text-foreground">Tutoring to help young women grow,</strong>
+                {/* Its own line except between lg and xl, where the narrow
+                    first box would break it after "young". */}
+                <strong className="block lg:inline xl:block font-semibold text-foreground">Tutoring to help young women grow,</strong>{" "}
                 from a select community of women who{" "}<br className="hidden xl:inline" />know their subjects and how to teach them.
               </p>
             </div>
@@ -77,7 +79,6 @@ export default function Home() {
                       tutor={tutor}
                       rest={CARD_REST[index % CARD_REST.length]}
                       href={`/tutors/${tutor.slug}`}
-                      tight
                       className="w-full"
                       testId={`tutor-card-${tutor.slug}`}
                     />

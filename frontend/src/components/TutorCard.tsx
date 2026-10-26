@@ -12,13 +12,11 @@ export const CARD_REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
 // rather than being cut short), a blank rule and four of her summary. Cards in
 // a row stretch to the tallest. With `href` it opens that page, and an arrow
 // at the end of her name says so, since a phone never sees the hover lift;
-// without, it only shows who she is. A `tight` card (Home's) shows three lines
-// of her summary, not four, so it is a rule shorter.
+// without, it only shows who she is.
 export function TutorCard({
   tutor,
   rest,
   href,
-  tight = false,
   onClick,
   className = "",
   testId,
@@ -26,7 +24,6 @@ export function TutorCard({
   tutor: Tutor;
   rest: string;
   href?: string;
-  tight?: boolean;
   // Runs before the link is followed; preventing the default stays put.
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
   className?: string;
@@ -46,7 +43,7 @@ export function TutorCard({
       <div className="note-card-body flex-1 text-[15px] [--rule:26px]">
         <b className="block text-[17px] font-bold [text-wrap:balance]">{tutor.subject}</b>
         <span className="block text-[12.5px]">{tutor.university}, {tutor.qualification}</span>
-        <p className={`m-0 mt-[26px] ${tight ? "line-clamp-3" : "min-h-[104px] line-clamp-4"}`}>{tutor.profileSummary}</p>
+        <p className="m-0 mt-[26px] min-h-[104px] line-clamp-4">{tutor.profileSummary}</p>
       </div>
     </>
   );

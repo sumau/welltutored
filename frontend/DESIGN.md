@@ -226,7 +226,8 @@ for names and the hero, 600 for section headings and labels, 400 for reading.
   title). "About her name" on a profile is a step smaller (clamp 30–40px).
 - **Lead** (400, 18px, 1.5–1.6): a tutor's summary under her name on her
   profile, and Home's tagline under the headline: its first clause
-  semibold on a line of its own, the rest broken after "who" from `xl`.
+  semibold, on a line of its own except between `lg` and `xl`, where it
+  runs on; the rest broken after "who" from `xl`.
 - **Title** (600–700, 19–20px, 1.35): a tutor's subject, step titles.
 - **Body** (400, 16px, 1.5–1.6): summaries, profile text. Lines capped around
   46em on profiles.
@@ -249,8 +250,8 @@ for section content. Gutters are 24px on small screens and 30px from `md`
 
 The Home hero is the tutors. Below `lg` (1024px) the headline and tagline
 stack above the tutor grid: one column, two from `md` (768px), 28px gaps.
-From `lg` it is one grid of three columns and equal rows, 32px apart and
-44px between rows: the
+From `lg` it is one grid of three columns, 32px apart and 44px between
+rows, each row as tall as its tallest card: the
 headline, with the tagline under it, takes the first box, straight on the
 white page, and a tutor card fills each box after it. Five tutors
 fill two rows, whole in the first screen of a 1440×900 laptop; six to eight
@@ -324,8 +325,7 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 - **Content:** rules 26px apart: her name, her subject, and her university
   and qualification in smaller 12.5px type, each wrapping to a second line
   rather than being cut short; a blank rule; then four lines of
-  her summary, about 165 characters (three lines, about 120 characters,
-  on Home, for shorter cards and more white between them). The profile has the rest. Cards in a
+  her summary, about 165 characters. The profile has the rest. Cards in a
   row stretch to the tallest.
 - **Intake:** her intake pill is stuck on the card's top edge at the right,
   half on and half off, like a label.
