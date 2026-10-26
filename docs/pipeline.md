@@ -67,7 +67,7 @@ checks, and how to run one by hand, is in [smoke-checks.md](smoke-checks.md).
 | Check | Runs against | When | Covers |
 |---|---|---|---|
 | `verify` | The repository, with a dedicated test database | Every PR | Tests (including `test:smoke`), API codegen, typecheck, build, docs, CSS budget |
-| [CI Smoke](#the-ci-smoke) (`ci-smoke` job) | A throwaway build of the production image, with a seeded throwaway database and the Clerk development instance | Every PR that isn't a draft | The [Public Site](smoke-checks.md#the-public-site-smoke), [Enquiry](smoke-checks.md#the-enquiry-smoke) and [Workspace](smoke-checks.md#the-workspace-smoke) Smokes. A PR from a fork skips the Workspace Smoke |
+| [CI Smoke](#the-ci-smoke) (`ci-smoke` job) | A throwaway build of the production image, with a seeded throwaway database and the Clerk development instance | Every PR that isn't a draft and changes more than Markdown | The [Public Site](smoke-checks.md#the-public-site-smoke), [Enquiry](smoke-checks.md#the-enquiry-smoke) and [Workspace](smoke-checks.md#the-workspace-smoke) Smokes. A PR from a fork skips the Workspace Smoke |
 | [Health Check](#blue-green-deploys) (`/api/healthz`) | The new Fly machine | During a [Deploy](#the-deploy-job), before it takes traffic | Process up, database answers `SELECT 1` within 3s |
 | [Prod Smoke](#post-deploy-validation) (`prod-smoke` job) | `https://welltutored.co.uk`, its other hostnames, and `https://clerk.welltutored.co.uk` | After a [Deploy](#the-deploy-job) | The [Public Site](smoke-checks.md#the-public-site-smoke), [Enquiry](smoke-checks.md#the-enquiry-smoke) and [Domain](smoke-checks.md#the-domain-smoke) Smokes |
 | Manual sign-in | `https://welltutored.co.uk` | After merging an auth, Clerk or `@clerk/*` change | The production Clerk instance's settings and cookies |
@@ -131,7 +131,8 @@ Only the `ci-smoke` job has Clerk credentials; see
 ## The CI Smoke
 
 The `ci-smoke` job runs the [CI Smoke](../GLOSSARY.md#delivery) alongside
-`verify`, on every pull request that isn't a draft. It is a required check.
+`verify`, on every pull request that isn't a draft and changes more than
+Markdown files; the `changes` job lists the files. It is a required check.
 GitHub counts a skipped job as passing, so marking a draft ready for review
 runs the workflow again, and the CI Smoke with it. It
 checks that the production image starts and serves the site, which `verify`
