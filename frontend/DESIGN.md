@@ -257,7 +257,9 @@ white page, and a tutor card fills each box after it. Five tutors
 fill two rows, whole in the first screen of a 1440×900 laptop; six to eight
 start a third, whose tops show above the fold. On a desktop screen under 760px tall the hero's top padding
 tightens. "How an enquiry works" follows the grid directly; under its
-three steps, a safeguarding line links to the Safeguarding dialog. Desktop
+three steps, a safeguarding line links to the Safeguarding dialog. The
+hero keeps only 30px of bottom padding from `md`, so the steps follow the
+grid at the same distance as any other section break. Desktop
 nav links collapse into a rounded dropdown card below `md`. The body never goes narrower than 320px.
 
 ## Elevation & Depth
@@ -394,6 +396,8 @@ card shadow, but straight and unruled, so fields stay easy to fill in.
 ### Inputs / Fields
 - **Style:** white field, 1px Field Line border, 10px corners, 12px × 14px
   padding, 16px text. Labels sit above in 14px semibold.
+- **Selects:** the same field, with an indigo chevron at the right so it
+  reads as a list to open.
 - **Focus:** the border turns School Indigo.
 - **Error:** a plain Error Red message under the field; a submit failure shows
   in a pale red box with a red border.

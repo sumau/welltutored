@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as React from "react";
 import { useCreateEnquiry, type EnquiryReceipt } from "@/client";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import type { Tutor } from "@/client";
 import { SafeguardingNote } from "@/components/SafeguardingNote";
 
@@ -226,23 +226,26 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
           {tutors.length > 0 && (
             <label htmlFor="enquiry-tutor" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
               Tutor you are interested in *
-              <select
-                id="enquiry-tutor"
-                name="tutorSlug"
-                ref={(element) => { fieldRefs.current.tutorSlug = element; }}
-                className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none"
-                value={form.tutorSlug}
-                onChange={e => update("tutorSlug", e.target.value)}
-                onBlur={() => markTouched("tutorSlug")}
-                aria-invalid={showError("tutorSlug")}
-                aria-describedby={showError("tutorSlug") ? "enquiry-tutor-error" : undefined}
-                data-testid="input-tutor-select"
-              >
-                <option value="">Select a tutor</option>
-                {tutors.map(t => (
-                  <option key={t.slug} value={t.slug}>{t.name} ({t.subject})</option>
-                ))}
-              </select>
+              <span className="relative flex items-center">
+                <select
+                  id="enquiry-tutor"
+                  name="tutorSlug"
+                  ref={(element) => { fieldRefs.current.tutorSlug = element; }}
+                  className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none w-full pr-12"
+                  value={form.tutorSlug}
+                  onChange={e => update("tutorSlug", e.target.value)}
+                  onBlur={() => markTouched("tutorSlug")}
+                  aria-invalid={showError("tutorSlug")}
+                  aria-describedby={showError("tutorSlug") ? "enquiry-tutor-error" : undefined}
+                  data-testid="input-tutor-select"
+                >
+                  <option value="">Select a tutor</option>
+                  {tutors.map(t => (
+                    <option key={t.slug} value={t.slug}>{t.name} ({t.subject})</option>
+                  ))}
+                </select>
+                <ChevronDown size={18} className="pointer-events-none absolute right-4 text-foreground" aria-hidden="true" />
+              </span>
               {showError("tutorSlug") && <span id="enquiry-tutor-error" className="font-normal text-destructive" role="alert">{errors.tutorSlug}</span>}
             </label>
           )}
@@ -290,24 +293,27 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
           </label>
           <label htmlFor="enquiry-student-age" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
             Student's age *
-            <select
-              id="enquiry-student-age"
-              name="studentAge"
-              ref={(element) => { fieldRefs.current.studentAge = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none"
-              value={form.studentAge}
-              onChange={e => update("studentAge", e.target.value)}
-              onBlur={() => markTouched("studentAge")}
-              aria-invalid={showError("studentAge")}
-              aria-describedby={showError("studentAge") ? "enquiry-student-age-error" : undefined}
-              data-testid="input-student-age"
-            >
-              <option value="">Select</option>
-              <option value="Under 13">Under 13</option>
-              <option value="13-15">13–15</option>
-              <option value="16-17">16–17</option>
-              <option value="18+">18+</option>
-            </select>
+            <span className="relative flex items-center">
+              <select
+                id="enquiry-student-age"
+                name="studentAge"
+                ref={(element) => { fieldRefs.current.studentAge = element; }}
+                className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none w-full pr-12"
+                value={form.studentAge}
+                onChange={e => update("studentAge", e.target.value)}
+                onBlur={() => markTouched("studentAge")}
+                aria-invalid={showError("studentAge")}
+                aria-describedby={showError("studentAge") ? "enquiry-student-age-error" : undefined}
+                data-testid="input-student-age"
+              >
+                <option value="">Select</option>
+                <option value="Under 13">Under 13</option>
+                <option value="13-15">13–15</option>
+                <option value="16-17">16–17</option>
+                <option value="18+">18+</option>
+              </select>
+              <ChevronDown size={18} className="pointer-events-none absolute right-4 text-foreground" aria-hidden="true" />
+            </span>
             {showError("studentAge") && <span id="enquiry-student-age-error" className="font-normal text-destructive" role="alert">{errors.studentAge}</span>}
           </label>
         </div>

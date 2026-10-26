@@ -34,7 +34,7 @@ export default function Home() {
     <main className="flex-1" data-testid="page-home">
       {/* Hero: the headline and tagline in the first box of the tutors' grid.
           "Back to the tutors" links scroll here. */}
-      <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] [@media(min-width:1280px)_and_(max-height:760px)]:pt-[24px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
+      <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] [@media(min-width:1280px)_and_(max-height:760px)]:pt-[24px] pb-[56px] md:pb-[30px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
         <div className="max-w-[1150px] mx-auto">
           {/* From md, one grid of two columns, three from lg: the headline
               and tagline take the first box and the tutors the rest, each

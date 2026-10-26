@@ -81,7 +81,7 @@ export default function Enquiry() {
             >
               Make an enquiry
             </h1>
-            <EnquiryStepList steps={enquirySteps("enquire", chosenTutor?.firstName)} className="lg:gap-[12px]" />
+            <EnquiryStepList steps={enquirySteps("enquire", chosenTutor?.firstName)} className="lg:gap-[12px] lg:mb-[12px]" />
             {/* Her card once she's chosen, so it's clear who the enquiry is
                 for, its foot level with the form's. It links back to her profile. */}
             {chosenTutor && (
@@ -92,7 +92,7 @@ export default function Enquiry() {
                 onClick={(event) => {
                   if (formDirty && !window.confirm(LEAVE_WARNING)) event.preventDefault();
                 }}
-                rest="-1.5deg"
+                rest="1.5deg"
                 className="hidden lg:flex lg:mt-auto max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
                 testId="enquiry-tutor-card"
               />
