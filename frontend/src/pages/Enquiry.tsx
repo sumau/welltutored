@@ -72,7 +72,7 @@ export default function Enquiry() {
             <ArrowLeft size={15} /> All tutors
           </Link>
         </div>
-        <div className="max-w-[1150px] mx-auto grid grid-cols-1 lg:grid-cols-[0.82fr_1.18fr] gap-[40px] lg:gap-[72px] items-start">
+        <div className="max-w-[1150px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] gap-[40px] lg:gap-[72px] items-start">
           <div className="grid gap-[24px]">
             <h1
               id="enquiry-title"
