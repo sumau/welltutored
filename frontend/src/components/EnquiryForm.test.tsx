@@ -244,9 +244,9 @@ test("keyboard users can complete an enquiry, recover validation focus, and reac
     "enquiry-parent-name",
     "enquiry-parent-email",
     "enquiry-tutor",
+    "enquiry-subject-level",
     "enquiry-student-name",
     "enquiry-student-age",
-    "enquiry-subject-level",
     "enquiry-message",
     "button-submit-enquiry",
   ];
@@ -257,9 +257,9 @@ test("keyboard users can complete an enquiry, recover validation focus, and reac
     "Eleanor James",
     "eleanor@example.com",
     "alice-smith",
+    "GCSE English Literature",
     "Maya",
     "13-15",
-    "GCSE English Literature",
     "Maya would benefit from essay planning support.",
   ];
   const originalFetch = globalThis.fetch;

@@ -62,9 +62,9 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
     errors.email = "Enter a valid email address.";
   }
   if (!form.tutorSlug) errors.tutorSlug = "Choose a tutor.";
+  if (!form.subjectLevel.trim()) errors.subjectLevel = "Enter the subject and level.";
   if (!form.studentName.trim()) errors.studentName = "Enter the student's name.";
   if (!form.studentAge) errors.studentAge = "Choose the student's age.";
-  if (!form.subjectLevel.trim()) errors.subjectLevel = "Enter the subject and level.";
   if (!form.message.trim()) {
     errors.message = "Tell us a little about what support would help.";
   } else if (form.message.trim().length < 10) {
@@ -193,7 +193,7 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
               type="text"
               autoComplete="name"
               ref={(element) => { fieldRefs.current.name = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
+              className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
               placeholder="e.g. Eleanor James"
               value={form.name}
               onChange={e => update("name", e.target.value)}
@@ -212,7 +212,7 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
               type="email"
               autoComplete="email"
               ref={(element) => { fieldRefs.current.email = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
+              className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
               placeholder="you@example.com"
               value={form.email}
               onChange={e => update("email", e.target.value)}
@@ -225,30 +225,51 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
           </label>
         </div>
 
-        {/* Tutor Selection */}
-        {tutors.length > 0 && (
-          <label htmlFor="enquiry-tutor" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
-            Tutor you are interested in *
-            <select
-              id="enquiry-tutor"
-              name="tutorSlug"
-              ref={(element) => { fieldRefs.current.tutorSlug = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none"
-              value={form.tutorSlug}
-              onChange={e => update("tutorSlug", e.target.value)}
-              onBlur={() => markTouched("tutorSlug")}
-              aria-invalid={showError("tutorSlug")}
-              aria-describedby={showError("tutorSlug") ? "enquiry-tutor-error" : undefined}
-              data-testid="input-tutor-select"
-            >
-              <option value="">Select a tutor</option>
-              {tutors.map(t => (
-                <option key={t.slug} value={t.slug}>{t.name} ({t.subject})</option>
-              ))}
-            </select>
-            {showError("tutorSlug") && <span id="enquiry-tutor-error" className="font-normal text-destructive" role="alert">{errors.tutorSlug}</span>}
+        {/* Tutor and subject, side by side so the form fits a laptop screen */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {tutors.length > 0 && (
+            <label htmlFor="enquiry-tutor" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+              Tutor you are interested in *
+              <select
+                id="enquiry-tutor"
+                name="tutorSlug"
+                ref={(element) => { fieldRefs.current.tutorSlug = element; }}
+                className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none"
+                value={form.tutorSlug}
+                onChange={e => update("tutorSlug", e.target.value)}
+                onBlur={() => markTouched("tutorSlug")}
+                aria-invalid={showError("tutorSlug")}
+                aria-describedby={showError("tutorSlug") ? "enquiry-tutor-error" : undefined}
+                data-testid="input-tutor-select"
+              >
+                <option value="">Select a tutor</option>
+                {tutors.map(t => (
+                  <option key={t.slug} value={t.slug}>{t.name} ({t.subject})</option>
+                ))}
+              </select>
+              {showError("tutorSlug") && <span id="enquiry-tutor-error" className="font-normal text-destructive" role="alert">{errors.tutorSlug}</span>}
+            </label>
+          )}
+          <label htmlFor="enquiry-subject-level" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
+            Subject and level *
+            <input 
+              id="enquiry-subject-level"
+              name="subjectLevel"
+              type="text"
+              autoComplete="off"
+              ref={(element) => { fieldRefs.current.subjectLevel = element; }}
+              className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
+              placeholder="e.g. GCSE English Literature"
+              value={form.subjectLevel}
+              onChange={e => update("subjectLevel", e.target.value)}
+              onBlur={() => markTouched("subjectLevel")}
+              aria-invalid={showError("subjectLevel")}
+              aria-describedby={showError("subjectLevel") ? "enquiry-subject-level-error" : undefined}
+              data-testid="input-subject-level"
+            />
+            {showError("subjectLevel") && <span id="enquiry-subject-level-error" className="font-normal text-destructive" role="alert">{errors.subjectLevel}</span>}
           </label>
-        )}
+        </div>
 
         {/* Student Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -260,7 +281,7 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
               type="text"
               autoComplete="section-student name"
               ref={(element) => { fieldRefs.current.studentName = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
+              className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
               placeholder="First name"
               value={form.studentName}
               onChange={e => update("studentName", e.target.value)}
@@ -277,7 +298,7 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
               id="enquiry-student-age"
               name="studentAge"
               ref={(element) => { fieldRefs.current.studentAge = element; }}
-              className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none"
+              className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors appearance-none"
               value={form.studentAge}
               onChange={e => update("studentAge", e.target.value)}
               onBlur={() => markTouched("studentAge")}
@@ -295,26 +316,6 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
           </label>
         </div>
 
-        <label htmlFor="enquiry-subject-level" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
-          Subject and level *
-          <input 
-            id="enquiry-subject-level"
-            name="subjectLevel"
-            type="text"
-            autoComplete="off"
-            ref={(element) => { fieldRefs.current.subjectLevel = element; }}
-            className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors"
-            placeholder="e.g. GCSE English Literature"
-            value={form.subjectLevel}
-            onChange={e => update("subjectLevel", e.target.value)}
-            onBlur={() => markTouched("subjectLevel")}
-            aria-invalid={showError("subjectLevel")}
-            aria-describedby={showError("subjectLevel") ? "enquiry-subject-level-error" : undefined}
-            data-testid="input-subject-level"
-          />
-          {showError("subjectLevel") && <span id="enquiry-subject-level-error" className="font-normal text-destructive" role="alert">{errors.subjectLevel}</span>}
-        </label>
-
         <label htmlFor="enquiry-message" className="flex flex-col gap-1.5 text-[14px] font-semibold text-foreground">
           What would you like the tutor to know? *
           <textarea 
@@ -322,8 +323,8 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
             name="message"
             autoComplete="off"
             ref={(element) => { fieldRefs.current.message = element; }}
-            rows={4}
-            className="rounded-[10px] border border-input bg-card px-3.5 py-3 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors resize-none"
+            rows={3}
+            className="rounded-[10px] border border-input bg-card px-3.5 py-2.5 text-[16px] font-normal text-foreground placeholder:text-muted-foreground focus:border-foreground outline-none transition-colors resize-none"
             placeholder="A little about what the student is working on, and what support might feel useful..."
             value={form.message}
             onChange={e => update("message", e.target.value)}
@@ -345,17 +346,19 @@ export function EnquiryForm({ tutors = [], initialTutorSlug = "", onTutorChange,
           {isSubmitting ? "Submitting your enquiry." : ""}
         </p>
 
-        <button 
-          type="submit"
-          ref={submitButtonRef}
-          disabled={isSubmitting || createEnquiry.isPending}
-          className="mt-2 rounded-full bg-primary text-primary-foreground text-[16px] font-semibold px-7 py-4 hover:bg-primary-border transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          data-testid="button-submit-enquiry"
-        >
-          {isSubmitting ? 'Sending...' : 'Send enquiry'}
-        </button>
-
-        <SafeguardingNote className="mt-4" />
+        {/* The note sits beside the button from sm up, to keep the form short. */}
+        <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-5">
+          <button 
+            type="submit"
+            ref={submitButtonRef}
+            disabled={isSubmitting || createEnquiry.isPending}
+            className="shrink-0 rounded-full bg-primary text-primary-foreground text-[16px] font-semibold px-7 py-3.5 hover:bg-primary-border transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="button-submit-enquiry"
+          >
+            {isSubmitting ? 'Sending...' : 'Send enquiry'}
+          </button>
+          <SafeguardingNote className="sm:border-t-0 sm:pt-0 sm:border-l sm:pl-5" />
+        </div>
       </form>
     </div>
   );
