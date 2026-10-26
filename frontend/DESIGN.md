@@ -21,9 +21,9 @@ colors:
 typography:
   display:
     fontFamily: "Instrument Sans, sans-serif"
-    fontSize: "clamp(46px, 7vw, 108px)"
+    fontSize: "clamp(38px, 5vw, 68px)"
     fontWeight: 700
-    lineHeight: 0.92
+    lineHeight: 0.95
     letterSpacing: "-0.04em"
   tutor-name:
     fontFamily: "Instrument Sans, sans-serif"
@@ -185,7 +185,7 @@ backgrounds that aren't hers.
 never as a faint wash or a text colour.
 
 **The White Paper Rule.** A note that speaks for Well Tutored rather than one
-tutor (the hero notes, a tutor's teaching points) is white, never a tint. A
+tutor (the Home notes, a tutor's teaching points) is white, never a tint. A
 tint on it would read as that tutor's.
 
 ## Typography
@@ -197,14 +197,13 @@ tint on it would read as that tutor's.
 for names and the hero, 600 for section headings and labels, 400 for reading.
 
 ### Hierarchy
-- **Display** (700, clamp 46–92px, 0.92, -0.04em): the Home hero headline
-  only.
+- **Display** (700, clamp 38–68px, 0.95, -0.04em): the Home headline only,
+  kept to one line on desktop so the tutor cards below it lead.
 - **Tutor name** (700, clamp 30–36px on her card, 1.0, -0.04em; clamp 44–68px
   on her profile): the largest thing on her card.
-- **Headline** (600, clamp 32–48px, 1.05, -0.03em): section headings ("Meet
-  the tutors", "How an enquiry works").
-- **Lead** (500, clamp 20–26px, 1.35): the hero's supporting line, capped at
-  22em.
+- **Headline** (600, clamp 32–48px, 1.05, -0.03em): section headings ("How
+  an enquiry works").
+- **Lead** (500, clamp 19–24px, 1.35): the line under the Home headline.
 - **Title** (600–700, 19–20px, 1.35): a tutor's subject, step titles.
 - **Body** (400, 16px, 1.5–1.6): summaries, profile text. Lines capped around
   46em on profiles.
@@ -221,16 +220,19 @@ Sans inside `.public-site`.
 
 ## Layout
 
-Content sits in a centred column: 1210px for the nav, hero and profile, 1150px
+Content sits in a centred column: 1210px for the nav and profile, 1150px
 for section content. Gutters are 24px on small screens and 30px from `md`
 (768px). Sections breathe with 56px of vertical padding, 80px from `md`.
 
 The tutor grid is one column, two from `md` (768px, capped at 908px wide) and
 three from `xl` (1280px), with 28px column and 36px row gaps. Cards are square
-from `sm` and grow if her text needs more room. The Home hero is the headline
-with its lead beneath, beside a row of three paper notes from `lg` (1024px),
-1 : 1.1. Below `lg` the notes sit under the headline; below `sm` (640px) they
-stack. Desktop nav links collapse into a rounded dropdown
+from `sm` and grow if her text needs more room.
+
+The Home hero is the tutors: a one-line headline and its lead, then the tutor
+grid straight away, so the first cards show in the first screen at every
+width. The nav's "Meet the tutors" scrolls to it. The three paper notes come
+after the grid, square and side by side from `sm` (640px) in the grid's first
+908px, and stacked below `sm`. Desktop nav links collapse into a rounded dropdown
 card below `md`. The body never goes narrower than 320px.
 
 ## Elevation & Depth
@@ -284,12 +286,14 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 - **Content:** her name with her intake pill beside it, then on the rules her
   subject, university and qualification, and her summary (up to five lines).
 - **Shape:** square from `sm`. It links to her profile.
+- **Arrival:** on Home the cards are dealt onto the page once, 90ms apart
+  (`.deal-in`).
 
 ### Paper notes
 White note cards with a 1px Hairline edge, for Well Tutored's own words:
-- **Home hero:** three notes ("Small and hand-picked", "How we teach",
-  "Helping young women grow") side by side, overlapping only at their edges,
-  dealt in once on arrival.
+- **Home:** three notes ("Small and hand-picked", "How we teach",
+  "Helping young women grow") after the tutors, square and ruled to the
+  bottom.
 - **Profile, "Learning with":** her teaching points, on her tint section.
 
 ### Approach card

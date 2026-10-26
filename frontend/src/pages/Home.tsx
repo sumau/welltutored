@@ -10,13 +10,11 @@ import {
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
-// Three notes beside the hero, on plain white paper: each colour belongs to
-// one tutor, so the notes take none. On wider screens left and top place
-// each one in the row.
-const HERO_NOTES = [
-  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", r: "-3deg", left: "0%", top: "4%" },
-  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", r: "2deg", left: "33%", top: "0%" },
-  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", r: "-1.5deg", left: "66%", top: "6%" },
+// Well Tutored's own notes, shown after the tutors.
+const NOTES = [
+  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", r: "-1.5deg" },
+  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", r: "1deg" },
+  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", r: "-0.5deg" },
 ];
 
 export default function Home() {
@@ -26,7 +24,7 @@ export default function Home() {
   });
 
   // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
-  // loaded, so the grid has its full height.
+  // loaded, so the page has its full height.
   React.useEffect(() => {
     if (tutorsLoading || window.location.hash !== "#tutors") return;
     scrollToTutors("auto");
@@ -34,39 +32,16 @@ export default function Home() {
 
   return (
     <main className="flex-1" data-testid="page-home">
-      {/* Hero: the headline and who it's for, beside three notes on how we work */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-[40px] lg:gap-[56px] lg:items-center" id="top">
-        <div>
-          <h1 id="home-hero-title" className="text-[clamp(46px,6.6vw,92px)] leading-[0.92] tracking-[-0.04em] font-bold m-0" data-testid="hero-title">
-            Female tutors for young women.
-          </h1>
-          <p className="text-[clamp(20px,1.9vw,26px)] leading-[1.35] font-medium m-0 mt-[24px] max-w-[22em] [text-wrap:balance]" data-testid="hero-copy">
-            Helping them grow, flourish and thrive.
-          </p>
-        </div>
-        <ul className="note-fan list-none m-0 p-0 w-full max-w-[620px] lg:justify-self-end" aria-label="How we work" data-testid="hero-notes">
-          {HERO_NOTES.map((note, index) => (
-            <li
-              key={note.title}
-              className="note-card border border-border px-[16px] pt-[14px] pb-[14px]"
-              style={{ "--tint": "hsl(var(--card))", "--rest": note.r, "--delay": `${index * 90}ms`, left: note.left, top: note.top } as React.CSSProperties}
-            >
-              <b className="note-card-head block text-[18px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
-              <p className="note-card-body m-0 text-[16px] [--rule:26px]">{note.text}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Tutors, one card each, under a heading the nav's link scrolls to */}
-      <section className="px-6 md:px-[30px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-tutors-title">
+      {/* Hero: the tutors themselves, under one short line on who they are.
+          The nav's "Meet the tutors" link scrolls here. */}
+      <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
         <div className="max-w-[1150px] mx-auto">
-          <div className="mb-[28px]">
-            <h2 id="home-tutors-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[8px]">
-              Meet the tutors
-            </h2>
-            <p className="text-muted-foreground text-[18px] leading-[1.5] m-0">
-              Brilliant women who know their subjects and how to teach them.
+          <div className="mb-[32px] md:mb-[44px]">
+            <h1 id="home-hero-title" className="text-[clamp(38px,5vw,68px)] leading-[0.95] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
+              Female tutors for young women.
+            </h1>
+            <p className="text-[clamp(19px,1.7vw,24px)] leading-[1.35] font-medium m-0 mt-[14px] [text-wrap:balance]" data-testid="hero-copy">
+              Helping them grow, flourish and thrive.
             </p>
           </div>
           {tutorsLoading ? (
@@ -77,9 +52,9 @@ export default function Home() {
               onRetry={refetchTutors}
             />
           ) : (
-            <ul className="list-none m-0 p-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px] md:max-w-[908px] xl:max-w-none" data-testid="tutor-grid">
+            <ul className="list-none m-0 p-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-[28px] gap-y-[36px] md:max-w-[908px] xl:max-w-none" aria-label="The tutors" data-testid="tutor-grid">
               {(tutors || []).map((tutor, index) => (
-                <li key={tutor.id} className="flex">
+                <li key={tutor.id} className="deal-in flex" style={{ "--delay": `${index * 90}ms` } as React.CSSProperties}>
                   <TutorCard
                     tutor={tutor}
                     rest={CARD_REST[index % CARD_REST.length]}
@@ -91,6 +66,25 @@ export default function Home() {
               ))}
             </ul>
           )}
+        </div>
+      </section>
+
+      {/* Three notes on how we work, on plain white paper: each colour
+          belongs to one tutor, so the notes take none. */}
+      <section className="px-6 md:px-[30px] pb-[56px] md:pb-[80px]" aria-label="How we work">
+        <div className="max-w-[1150px] mx-auto">
+          <ul className="note-row list-none m-0 p-0 max-w-[908px]" data-testid="notes">
+            {NOTES.map((note) => (
+              <li
+                key={note.title}
+                className="note-card flex flex-col border border-border px-[18px] pt-[16px] pb-[16px]"
+                style={{ "--tint": "hsl(var(--card))", "--rest": note.r } as React.CSSProperties}
+              >
+                <b className="note-card-head block text-[20px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
+                <p className="note-card-body flex-1 m-0 text-[16px] [--rule:26px]">{note.text}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
