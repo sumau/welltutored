@@ -18,7 +18,7 @@ export function enquirySteps(where: "home" | "enquire", chosenFirstName?: string
       text: "A parent or guardian sends the enquiry. You don't need an account.",
     },
     {
-      title: chosenFirstName ? `${chosenFirstName} replies` : "She replies",
+      title: chosenFirstName ? `${chosenFirstName} replies` : "The tutor replies",
       text: `${chosenFirstName ?? "She"} reads every enquiry and replies herself.`,
     },
   ];

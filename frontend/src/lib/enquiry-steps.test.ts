@@ -6,7 +6,7 @@ test("Home and /enquire give the same steps, differing only in where she is chos
   const home = enquirySteps("home");
   const enquire = enquirySteps("enquire");
 
-  assert.deepEqual(home.map((step) => step.title), ["Choose a tutor", "Tell us about the student", "She replies"]);
+  assert.deepEqual(home.map((step) => step.title), ["Choose a tutor", "Tell us about the student", "The tutor replies"]);
   assert.deepEqual(enquire.map((step) => step.title), home.map((step) => step.title));
   assert.notEqual(home[0].text, enquire[0].text);
   assert.deepEqual(home.slice(1), enquire.slice(1));
