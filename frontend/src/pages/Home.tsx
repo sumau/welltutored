@@ -10,13 +10,12 @@ import {
   publicTutorRequestOptions,
 } from "@/lib/public-tutor-query";
 
-// Three notes beside the hero, on plain white paper: each colour belongs to
-// one tutor, so the notes take none. On wider screens left and top place
-// each one in the row.
-const HERO_NOTES = [
-  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", r: "-3deg", left: "0%", top: "4%" },
-  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", r: "2deg", left: "33%", top: "0%" },
-  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", r: "-1.5deg", left: "66%", top: "6%" },
+// The hero note's points, written to the student: each idea in bold, then
+// what it looks like in a lesson.
+const LESSON_POINTS = [
+  ["Confidence.", "Ask anything, as many times as you need, until it makes sense."],
+  ["Curiosity.", "See how what you're learning connects to the world outside the classroom."],
+  ["Growth.", "Go at your pace, and notice how far you've come."],
 ];
 
 export default function Home() {
@@ -34,28 +33,30 @@ export default function Home() {
 
   return (
     <main className="flex-1" data-testid="page-home">
-      {/* Hero: the headline and who it's for, beside three notes on how we work */}
-      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-[40px] lg:gap-[56px] lg:items-center" id="top">
+      {/* Hero: the headline and who it's for, beside one note on what lessons are like */}
+      <section aria-labelledby="home-hero-title" className="max-w-[1210px] mx-auto px-6 md:px-[30px] pt-[32px] md:pt-[64px] pb-[48px] md:pb-[80px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-[40px] lg:gap-[56px] lg:items-center" id="top">
         <div>
-          <h1 id="home-hero-title" className="text-[clamp(46px,6.6vw,92px)] leading-[0.92] tracking-[-0.04em] font-bold m-0" data-testid="hero-title">
-            Female tutors for young women.
+          <h1 id="home-hero-title" className="text-[clamp(36px,4.4vw,60px)] leading-[0.98] tracking-[-0.04em] font-bold m-0 [text-wrap:balance]" data-testid="hero-title">
+            Learn to love learning.
           </h1>
           <p className="text-[clamp(20px,1.9vw,26px)] leading-[1.35] font-medium m-0 mt-[24px] max-w-[22em] [text-wrap:balance]" data-testid="hero-copy">
-            Helping them grow, flourish and thrive.
+            Personalised tutoring for young women, from women who've been where you are.
           </p>
         </div>
-        <ul className="note-fan list-none m-0 p-0 w-full max-w-[620px] lg:justify-self-end" aria-label="How we work" data-testid="hero-notes">
-          {HERO_NOTES.map((note, index) => (
-            <li
-              key={note.title}
-              className="note-card border border-border px-[16px] pt-[14px] pb-[14px]"
-              style={{ "--tint": "hsl(var(--card))", "--rest": note.r, "--delay": `${index * 90}ms`, left: note.left, top: note.top } as React.CSSProperties}
-            >
-              <b className="note-card-head block text-[18px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
-              <p className="note-card-body m-0 text-[16px] [--rule:26px]">{note.text}</p>
-            </li>
-          ))}
-        </ul>
+        <div
+          className="note-card hero-note border border-border px-[24px] md:px-[28px] pt-[20px] md:pt-[24px] pb-[20px] md:pb-[24px] lg:justify-self-center"
+          style={{ "--tint": "hsl(var(--card))" } as React.CSSProperties}
+          data-testid="hero-note"
+        >
+          <h2 className="note-card-head text-[clamp(22px,2vw,26px)] leading-[1.1] tracking-[-0.03em] font-bold m-0 pb-[10px]">What lessons are like</h2>
+          <ul className="note-card-body list-none m-0 p-0 text-[17px] md:text-[18px] [--rule:28px]">
+            {LESSON_POINTS.map(([idea, text]) => (
+              <li key={idea}>
+                <b>{idea}</b> {text}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* Tutors, one card each, under a heading the nav's link scrolls to */}
@@ -66,7 +67,7 @@ export default function Home() {
               Meet the tutors
             </h2>
             <p className="text-muted-foreground text-[18px] leading-[1.5] m-0">
-              Brilliant women who know their subjects and how to teach them.
+              A select community of women who know their subjects and how to teach them.
             </p>
           </div>
           {tutorsLoading ? (

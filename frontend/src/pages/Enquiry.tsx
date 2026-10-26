@@ -93,7 +93,6 @@ export default function Enquiry() {
               <TutorCard
                 key={chosenTutor.slug}
                 tutor={chosenTutor}
-                rest="-1.5deg"
                 className="hidden md:flex mt-[24px] max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
                 testId="enquiry-tutor-card"
               />

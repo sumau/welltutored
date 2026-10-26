@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import type { Tutor } from "@/client";
 import { intakeLabels, intakePillClasses, intakePillDotClasses } from "@/lib/intake";
 
-// Each note card rests at its own slight angle, as if laid on a desk.
+// Each linked note card rests at its own slight angle, as if laid on a desk.
 export const CARD_REST = ["-1.5deg", "1deg", "-0.5deg", "1.5deg", "-1deg"];
 
 // A tutor's note card in her tint: her name with her intake beside it, then
@@ -17,7 +17,7 @@ export function TutorCard({
   testId,
 }: {
   tutor: Tutor;
-  rest: string;
+  rest?: string;
   href?: string;
   className?: string;
   testId?: string;

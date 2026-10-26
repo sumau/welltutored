@@ -137,9 +137,6 @@ export function TutorResources({ tutor }: { tutor: Tutor }) {
   );
 }
 
-// Her teaching points rest at alternating slight angles, like Home's notes.
-const POINT_REST = ["-1.5deg", "1deg", "-0.5deg"];
-
 export default function TutorProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { data: tutor, isLoading, error, refetch } = useGetTutor(slug as string, {
@@ -194,7 +191,7 @@ export default function TutorProfile() {
         </div>
         <figure
           className="note-card w-full max-w-[460px] lg:justify-self-center m-0 px-[26px] md:px-[34px] pt-[24px] md:pt-[30px] pb-[24px] md:pb-[30px]"
-          style={{ "--tint": tutor.tint, "--rest": "1.5deg" } as React.CSSProperties}
+          style={{ "--tint": tutor.tint } as React.CSSProperties}
         >
           <figcaption className="note-card-head text-[clamp(26px,2.6vw,32px)] leading-[1.1] tracking-[-0.03em] font-bold pb-[12px]">
             {firstName}'s approach
@@ -254,7 +251,7 @@ export default function TutorProfile() {
               <article
                 key={`${point.title}-${index}`}
                 className="note-card px-[22px] pt-[20px] pb-[18px]"
-                style={{ "--tint": "hsl(var(--card))", "--rest": POINT_REST[index % POINT_REST.length] } as React.CSSProperties}
+                style={{ "--tint": "hsl(var(--card))" } as React.CSSProperties}
               >
                 <h3 className="note-card-head font-serif font-bold text-[22px] leading-[1.2] tracking-[-0.02em] m-0 pb-[10px]">
                   {point.title}

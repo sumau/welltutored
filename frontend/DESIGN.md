@@ -138,8 +138,8 @@ and marketplace UI (search bars, filters, star ratings, price-sorted grids).
 - One ink colour, School Indigo, for all text, buttons and the footer.
 - Colour comes only from each tutor's own tint, at full strength.
 - Big, bold, tightly tracked sans headings in a single family.
-- Note cards: 3px corners, ruled lines, a soft paper shadow, a slight resting
-  tilt that straightens on hover.
+- Note cards: 3px corners, ruled lines, a soft paper shadow; ones that link
+  rest at a slight tilt that straightens on hover.
 - Pill-shaped buttons and badges; everything else is flat.
 - Low density and generous white space.
 
@@ -271,13 +271,15 @@ indigo above each enquiry step.
 
 ### Note card (signature)
 The one card on the public site, in `.note-card` in `src/index.css`.
-- **Shape:** 3px corners, the soft paper shadow, resting at a slight angle
-  (between -1.5° and 1.5°, set per card with `--rest`).
+- **Shape:** 3px corners, the soft paper shadow. A card that is a link rests
+  at a slight angle (between -1.5° and 1.5°, set per card with `--rest`); any
+  other card lies flat.
 - **Head:** the title above a 2px rule at 55% indigo (`.note-card-head`).
 - **Body:** text sits on faint ruled lines (16% indigo) every 28px; each line
   of text is one rule tall (`.note-card-body`, `--rule` to change the
   spacing).
-- **Hover / Focus:** lifts 6px and straightens over 320ms.
+- **Hover / Focus:** a linked card lifts 6px and straightens over 320ms; a
+  card that isn't a link doesn't move.
 
 ### Tutor card
 - **Background:** the tutor's tint.
@@ -287,9 +289,10 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 
 ### Paper notes
 White note cards with a 1px Hairline edge, for Well Tutored's own words:
-- **Home hero:** three notes ("Small and hand-picked", "How we teach",
-  "Helping young women grow") side by side, overlapping only at their edges,
-  dealt in once on arrival.
+- **Home hero:** one landscape note beside the headline, headed "What
+  lessons are like", with three points written to the student, each led by a
+  bold word (Confidence, Curiosity, Growth). Its body type and 28px rules
+  match a tutor card, and it is dealt in once on arrival.
 - **Profile, "Learning with":** her teaching points, on her tint section.
 
 ### Approach card
