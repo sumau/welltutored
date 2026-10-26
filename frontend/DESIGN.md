@@ -138,8 +138,9 @@ and marketplace UI (search bars, filters, star ratings, price-sorted grids).
 - One ink colour, School Indigo, for all text, buttons and the footer.
 - Colour comes only from each tutor's own tint, at full strength.
 - Big, bold, tightly tracked sans headings in a single family.
-- Note cards: 3px corners, ruled lines, a soft paper shadow, a slight resting
-  tilt that straightens on hover.
+- Note cards: 3px corners, ruled lines, a soft paper shadow. A tutor's
+  tinted card rests at a slight tilt that straightens on hover; white notes
+  sit straight.
 - Pill-shaped buttons and badges; everything else is flat.
 - Low density and generous white space.
 
@@ -185,8 +186,8 @@ backgrounds that aren't hers.
 never as a faint wash or a text colour.
 
 **The White Paper Rule.** A note that speaks for Well Tutored rather than one
-tutor (the Home notes, a tutor's teaching points) is white, never a tint. A
-tint on it would read as that tutor's.
+tutor (the Home notes, a tutor's teaching points) is white, never a tint, and
+straight, never tilted. A tint or a tilt on it would read as that tutor's.
 
 ## Typography
 
@@ -273,8 +274,9 @@ indigo above each enquiry step.
 
 ### Note card (signature)
 The one card on the public site, in `.note-card` in `src/index.css`.
-- **Shape:** 3px corners, the soft paper shadow, resting at a slight angle
-  (between -1.5° and 1.5°, set per card with `--rest`).
+- **Shape:** 3px corners, the soft paper shadow. A tinted card rests at a
+  slight angle (between -1.5° and 1.5°, set per card with `--rest`); a white
+  note leaves `--rest` unset and sits straight.
 - **Head:** the title above a 2px rule at 55% indigo (`.note-card-head`).
 - **Body:** text sits on faint ruled lines (16% indigo) every 28px; each line
   of text is one rule tall (`.note-card-body`, `--rule` to change the

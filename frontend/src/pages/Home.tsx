@@ -12,9 +12,9 @@ import {
 
 // Well Tutored's own notes, shown after the tutors.
 const NOTES = [
-  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject.", r: "-1.5deg" },
-  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world.", r: "1deg" },
-  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of.", r: "-0.5deg" },
+  { title: "Small and hand\u2011picked", text: "A few women tutors, each chosen for deep expertise in her subject." },
+  { title: "How we teach", text: "Lessons that build her confidence and make her curious about the world." },
+  { title: "Helping young women grow", text: "Role models as well as teachers, showing her what she's capable of." },
 ];
 
 export default function Home() {
@@ -69,8 +69,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About our agency: three notes on plain white paper. Each colour
-          belongs to one tutor, so the notes take none. */}
+      {/* About our agency: three notes on plain white paper, set straight.
+          The colour and the tilt belong to the tutors, so the notes take
+          neither. */}
       <section className="px-6 md:px-[30px] pb-[56px] md:pb-[80px]" aria-labelledby="home-about-title">
         <div className="max-w-[1150px] mx-auto">
           <h2 id="home-about-title" className="text-[clamp(32px,4vw,48px)] leading-[1.05] tracking-[-0.03em] font-semibold m-0 mb-[28px] md:mb-[36px]">
@@ -81,7 +82,7 @@ export default function Home() {
               <li
                 key={note.title}
                 className="note-card flex flex-col border border-border px-[18px] pt-[16px] pb-[16px] sm:max-w-[440px] md:max-w-none"
-                style={{ "--tint": "hsl(var(--card))", "--rest": note.r } as React.CSSProperties}
+                style={{ "--tint": "hsl(var(--card))" } as React.CSSProperties}
               >
                 <b className="note-card-head block text-[20px] leading-[1.15] tracking-[-0.02em] pb-[8px]">{note.title}</b>
                 <p className="note-card-body flex-1 m-0 text-[16px] [--rule:26px]">{note.text}</p>

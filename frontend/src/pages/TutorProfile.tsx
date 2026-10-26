@@ -137,9 +137,6 @@ export function TutorResources({ tutor }: { tutor: Tutor }) {
   );
 }
 
-// Her teaching points rest at alternating slight angles, like Home's notes.
-const POINT_REST = ["-1.5deg", "1deg", "-0.5deg"];
-
 export default function TutorProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { data: tutor, isLoading, error, refetch } = useGetTutor(slug as string, {
@@ -243,7 +240,7 @@ export default function TutorProfile() {
 
       <TutorBackground tutor={tutor} />
 
-      {/* Teaching Style: white notes on her own tint, as beside Home's hero */}
+      {/* Teaching Style: straight white notes on her own tint, like Home's */}
       <section className="px-6 md:px-[30px] py-[60px] md:py-[88px]" style={{ backgroundColor: tutor.tint }}>
         <div className="max-w-[1150px] mx-auto">
           <h2 className="font-serif font-bold tracking-[-0.03em] text-[clamp(32px,3.8vw,48px)] leading-[1.05] m-0 mb-[36px]">
@@ -254,7 +251,7 @@ export default function TutorProfile() {
               <article
                 key={`${point.title}-${index}`}
                 className="note-card px-[22px] pt-[20px] pb-[18px]"
-                style={{ "--tint": "hsl(var(--card))", "--rest": POINT_REST[index % POINT_REST.length] } as React.CSSProperties}
+                style={{ "--tint": "hsl(var(--card))" } as React.CSSProperties}
               >
                 <h3 className="note-card-head font-serif font-bold text-[22px] leading-[1.2] tracking-[-0.02em] m-0 pb-[10px]">
                   {point.title}
