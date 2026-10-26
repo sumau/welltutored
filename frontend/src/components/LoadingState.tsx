@@ -16,28 +16,21 @@ export function LoadingState({ message = "Loading...", variant = "page" }: Loadi
         aria-live="polite"
         aria-busy="true"
       >
-        {/* Blank note cards laid out like Home's tutor grid, so the real
-            cards land where these were. */}
-        <div className="flex flex-wrap justify-center gap-[28px]" aria-hidden="true">
+        {/* Invisible note cards laid out like Home's tutor grid: they hold the
+            space so the real cards land where these were, without grey cards
+            flashing up first. */}
+        <div className="invisible flex flex-wrap justify-center gap-[28px]" aria-hidden="true">
           {Array.from({ length: 3 }, (_, index) => (
             <div
               className="note-card flex flex-col w-full sm:max-w-[440px] md:max-w-none md:w-[calc((100%-28px)/2)] xl:w-[calc((100%-56px)/3)] min-h-[240px] px-[20px] pt-[20px] pb-[14px]"
               style={{ "--tint": "hsl(var(--muted))", "--rest": CARD_REST[index] } as React.CSSProperties}
               data-testid={`tutor-card-skeleton-${index + 1}`}
               key={index}
-            >
-              <div className="note-card-head pb-[10px]">
-                <div className="h-[30px] w-48 rounded-[3px] skeleton-shimmer" />
-              </div>
-              <div className="note-card-body flex-1 [--rule:26px] pt-[8px] space-y-[14px]">
-                <div className="h-3 w-40 rounded-[3px] skeleton-shimmer" />
-                <div className="h-3 w-56 rounded-[3px] skeleton-shimmer" />
-              </div>
-            </div>
+            />
           ))}
         </div>
         <p
-          className="text-muted-foreground text-[14px] font-medium"
+          className="sr-only"
           data-testid="loading-message"
         >
           {message}
