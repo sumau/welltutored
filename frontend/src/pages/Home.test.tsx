@@ -196,7 +196,7 @@ test("the enquiry steps link to safeguarding", async () => {
   );
 
   const safeguarding = rendered.container.querySelector("[data-testid=safeguarding-note]");
-  assert.match(safeguarding?.textContent ?? "", /Enquiries for under-18s come from a parent or guardian/);
+  assert.match(safeguarding?.textContent ?? "", /Under-18s enquire through a parent or guardian/);
   const { onOpenPolicy } = await import("@/lib/policy-dialog");
   const opened: string[] = [];
   const stopListening = onOpenPolicy((policy) => opened.push(policy));

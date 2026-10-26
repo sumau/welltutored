@@ -336,9 +336,10 @@ The one card on the public site, in `.note-card` in `src/index.css`.
   screen 800px tall or more under the headline.
 - **Arrival:** on Home the cards are dealt onto the page once, 90ms apart
   (`.deal-in`).
-- **Loading:** while the tutors load, three blank Mist note cards stand in
-  the same grid, at the same tilts and height, with shimmering bars for the
-  name and subject, so the real cards land where they were.
+- **Loading:** while the tutors load, nothing shows: three invisible cards
+  hold their space in the same grid, so the real cards land where they were
+  and no grey cards flash up first. "Loading tutors..." is for screen
+  readers only.
 
 ### Paper notes
 White note cards on a tutor's tint section, for her teaching points under
@@ -365,8 +366,9 @@ A tutor's profile has no form of its own: the enquiry form lives only on
 an enquiry works"), one line saying she replies herself, and a "Make an
 enquiry" pill to `/enquire` with her chosen, like the hero's button and the
 header's. From `md` the pill sits level with the heading, as on Home; on a
-phone it follows the line, so the line isn't stranded under the button. A
-full tutor's ending says she is full for now and links to the other tutors.
+phone it follows the line, so the line isn't stranded under the button. The
+Safeguarding note closes the section, as under Home's steps. A full tutor's
+ending says she is full for now, links to the other tutors, and has no note.
 
 ### Enquiry steps
 The three steps of an enquiry, worded once (`src/lib/enquiry-steps.ts`)
@@ -377,9 +379,10 @@ title bold and the text muted on the same line.
 
 ### Safeguarding note
 One fixed paragraph wherever an enquiry is described or sent: under Home's
-steps and under the form. A Hairline rule above, an indigo shield icon,
-15px muted text, and a bold underlined "Read how we keep students safe"
-that opens the Safeguarding dialog and turns Indigo Lift on hover.
+steps, at the end of a tutor's profile, and under the form. A Hairline rule
+above, an indigo shield icon, 15px muted text short enough to fit one line on
+a laptop, ending in a bold underlined "Read how we keep students safe" that
+opens the Safeguarding dialog and turns Indigo Lift on hover.
 
 ### Paper sheet
 Forms sit on `.paper-sheet`: white, a Hairline edge, 3px corners and the note
