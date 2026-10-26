@@ -9,6 +9,7 @@ import { CARD_REST } from "@/components/TutorCard";
 import { EmptyPage } from "@/pages/not-found";
 import { PUBLIC_RESOURCES_ENABLED } from "@/lib/features";
 import { ResourceTypeLabel } from "@/components/ResourceType";
+import { SafeguardingNote } from "@/components/SafeguardingNote";
 import { intakeLabels, intakePillDotClasses } from "@/lib/intake";
 import {
   publicTutorQueryOptions,
@@ -48,6 +49,7 @@ export function TutorEnquiry({ tutor }: { tutor: Tutor }) {
           </Link>
         )}
       </div>
+      {!isFull && <SafeguardingNote className="max-w-[1150px] mx-auto mt-[40px]" />}
     </section>
   );
 }

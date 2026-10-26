@@ -7,7 +7,6 @@ import { ArrowRight, Clock3, List, Printer, Share2 } from "lucide-react";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { useToast } from "@/hooks/use-toast";
-import { EnquiryForm } from "@/components/EnquiryForm";
 import { ResourceTypeLabel } from "@/components/ResourceType";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -217,13 +216,14 @@ function ResourceDetailContent() {
           <p className="text-[#CEC1B4] text-[15px] leading-[1.65] mb-10 max-w-[500px] mx-auto">
             Our tutors are ready to help you apply these ideas to your own work. Enquire directly to set up a first session.
           </p>
-          <div className="bg-background text-foreground text-left max-w-[600px] mx-auto shadow-2xl rounded-sm">
-             <EnquiryForm compact={true} tutors={[{
-               slug: resource.tutorSlug,
-               name: resource.tutorName,
-               subject: resource.subject
-             } as any]} />
-          </div>
+          {/* The same pill as the end of a tutor's profile, with the author chosen. */}
+          <Link
+            href={`/enquire?tutor=${resource.tutorSlug}`}
+            className="rounded-full bg-primary text-primary-foreground text-[17px] font-semibold px-6 py-3.5 hover:bg-primary-border transition-colors inline-flex w-fit"
+            data-testid="resource-enquiry-link"
+          >
+            Make an enquiry
+          </Link>
         </div>
       </section>
     </main>
