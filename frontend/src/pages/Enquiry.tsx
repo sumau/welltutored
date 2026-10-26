@@ -93,7 +93,7 @@ export default function Enquiry() {
                   if (formDirty && !window.confirm(LEAVE_WARNING)) event.preventDefault();
                 }}
                 rest="-1.5deg"
-                className="hidden lg:flex mt-[24px] max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
+                className="hidden lg:flex mt-[8px] max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
                 testId="enquiry-tutor-card"
               />
             )}
