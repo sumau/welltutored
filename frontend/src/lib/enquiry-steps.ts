@@ -19,7 +19,7 @@ export function enquirySteps(where: "home" | "enquire", chosenFirstName?: string
     },
     {
       title: chosenFirstName ? `${chosenFirstName} replies` : "The tutor replies",
-      text: `${chosenFirstName ?? "The tutor"} reads every enquiry and replies herself.`,
+      text: `${chosenFirstName ?? "She"} reads every enquiry and replies herself.`,
     },
   ];
 }
