@@ -13,6 +13,9 @@ name: CI
 
 on:
   pull_request:
+    # The default types plus ready_for_review, so ci-smoke runs when a draft
+    # is marked ready rather than waiting for the next push.
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -92,6 +95,9 @@ jobs:
   # the exact image Fly builds and ships (that one carries the pk_live_ key).
   ci-smoke:
     name: ci-smoke
+    # Skipped on drafts. A skipped job counts as passing for a required check,
+    # so ready_for_review above is what makes it run before a merge.
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
