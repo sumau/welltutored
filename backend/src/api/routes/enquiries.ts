@@ -23,10 +23,11 @@ import {
 const router: IRouter = Router();
 const simpleEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const deliveryMessages = {
-  pending: "Your enquiry was recorded and is waiting for staff delivery.",
-  delivered: "Your enquiry has been delivered to the Well Tutored team.",
-  failed:
-    "Your enquiry was recorded, but delivery needs staff attention. You do not need to submit it again.",
+  pending: (tutorName: string) =>
+    `Your enquiry was recorded and is waiting to be delivered to ${tutorName}.`,
+  delivered: (tutorName: string) => `Your enquiry has been delivered to ${tutorName}.`,
+  failed: (tutorName: string) =>
+    `Your enquiry was recorded, but delivery to ${tutorName} needs attention. You do not need to submit it again.`,
 } as const;
 
 type DeliveryStatus = keyof typeof deliveryMessages;
@@ -49,7 +50,7 @@ function enquiryReceipt(
     tutorName,
     receivedAt: enquiry.createdAt.toISOString(),
     deliveryStatus,
-    message: deliveryMessages[deliveryStatus],
+    message: deliveryMessages[deliveryStatus](tutorName),
   };
 }
 

@@ -37,12 +37,11 @@ type RenderedHome = {
   queryClient: QueryClient;
   dom: JSDOM;
   originalFetch: typeof globalThis.fetch;
+  scrolls: Array<{ id: string; behavior?: ScrollBehavior }>;
 };
 
-function installDom() {
-  const dom = new JSDOM("<!doctype html><html><body></body></html>", {
-    url: "http://localhost/",
-  });
+function installDom(url: string) {
+  const dom = new JSDOM("<!doctype html><html><body></body></html>", { url });
 
   Object.assign(globalThis, {
     window: dom.window,
@@ -65,8 +64,16 @@ function installDom() {
   return dom;
 }
 
-async function renderHome(fetchImplementation: typeof globalThis.fetch): Promise<RenderedHome> {
-  const dom = installDom();
+async function renderHome(
+  fetchImplementation: typeof globalThis.fetch,
+  url = "http://localhost/",
+): Promise<RenderedHome> {
+  const dom = installDom(url);
+  // jsdom doesn't lay out pages, so it has no scrollIntoView: record the calls.
+  const scrolls: RenderedHome["scrolls"] = [];
+  dom.window.HTMLElement.prototype.scrollIntoView = function (options?: boolean | ScrollIntoViewOptions) {
+    scrolls.push({ id: this.id, behavior: typeof options === "object" ? options.behavior : undefined });
+  };
   const originalFetch = globalThis.fetch;
   globalThis.fetch = fetchImplementation;
   const [{ createRoot }, { default: Home }] = await Promise.all([
@@ -90,7 +97,7 @@ async function renderHome(fetchImplementation: typeof globalThis.fetch): Promise
     );
   });
 
-  return { container, root, queryClient, dom, originalFetch };
+  return { container, root, queryClient, dom, originalFetch, scrolls };
 }
 
 async function cleanupHome({ container, root, queryClient, dom, originalFetch }: RenderedHome) {
@@ -110,7 +117,7 @@ test("renders the homepage structure and a localized tutor loading state immedia
   });
   const rendered = await renderHome(async () => request);
 
-  assert.equal(rendered.container.querySelector("[data-testid=hero-title]")?.textContent, "Academic excellence,personalised for her.");
+  assert.equal(rendered.container.querySelector("[data-testid=hero-title]")?.textContent, "Tutors to look up to.");
   assert.ok(rendered.container.querySelector("[data-testid=button-home-enquire]"));
   assert.ok(rendered.container.querySelector("[data-testid=tutor-loading-state]"));
   assert.equal(rendered.container.querySelector("[data-testid=loading-state]"), null);
@@ -139,6 +146,100 @@ test("renders tutor cards after the tutor request succeeds without replacing the
   assert.ok(rendered.container.querySelector("[data-testid=tutor-grid]"));
   assert.ok(rendered.container.querySelector("[data-testid=tutor-card-alice-smith]"));
   assert.equal(rendered.container.querySelector("[data-testid=tutor-loading-state]"), null);
+
+  await cleanupHome(rendered);
+});
+
+test("lists full tutors after the ones taking students", async () => {
+  const fullTutor = { ...tutor, id: 2, slug: "nora-lewis", name: "Nora Lewis", intake: "full" as const };
+  const rendered = await renderHome(async () =>
+    new Response(JSON.stringify([fullTutor, tutor]), {
+      headers: { "content-type": "application/json" },
+    }),
+  );
+
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  });
+
+  const slugs = Array.from(
+    rendered.container.querySelectorAll("[data-testid^=tutor-card-]"),
+    (card) => card.getAttribute("data-testid"),
+  );
+  assert.deepEqual(slugs, ["tutor-card-alice-smith", "tutor-card-nora-lewis"]);
+
+  await cleanupHome(rendered);
+});
+
+test("says so when no tutors are listed", async () => {
+  const rendered = await renderHome(async () =>
+    new Response(JSON.stringify([]), {
+      headers: { "content-type": "application/json" },
+    }),
+  );
+
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  });
+
+  assert.ok(rendered.container.querySelector("[data-testid=tutor-grid-empty]"));
+  assert.equal(rendered.container.querySelector("[data-testid=tutor-grid]"), null);
+
+  await cleanupHome(rendered);
+});
+
+test("the enquiry steps link to safeguarding", async () => {
+  const rendered = await renderHome(async () =>
+    new Response(JSON.stringify([tutor]), {
+      headers: { "content-type": "application/json" },
+    }),
+  );
+
+  const safeguarding = rendered.container.querySelector("[data-testid=safeguarding-note]");
+  assert.match(safeguarding?.textContent ?? "", /Enquiries for under-18s come from a parent or guardian/);
+  const { onOpenPolicy } = await import("@/lib/policy-dialog");
+  const opened: string[] = [];
+  const stopListening = onOpenPolicy((policy) => opened.push(policy));
+  await act(async () => {
+    rendered.container.querySelector<HTMLButtonElement>("[data-testid=safeguarding-link]")!.click();
+  });
+  stopListening();
+  assert.deepEqual(opened, ["safeguarding"]);
+
+  await cleanupHome(rendered);
+});
+
+test("opening /#tutors jumps to the tutors once they load", async () => {
+  const rendered = await renderHome(
+    async () =>
+      new Response(JSON.stringify([tutor]), {
+        headers: { "content-type": "application/json" },
+      }),
+    "http://localhost/#tutors",
+  );
+
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  });
+
+  assert.deepEqual(rendered.scrolls, [{ id: "tutors", behavior: "auto" }]);
+  assert.equal(document.activeElement?.id, "tutors");
+
+  await cleanupHome(rendered);
+});
+
+test("opening Home without an anchor keeps the scroll", async () => {
+  const rendered = await renderHome(async () =>
+    new Response(JSON.stringify([tutor]), {
+      headers: { "content-type": "application/json" },
+    }),
+  );
+
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  });
+
+  assert.deepEqual(rendered.scrolls, []);
 
   await cleanupHome(rendered);
 });

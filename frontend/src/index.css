@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -22,23 +22,23 @@
 
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-primary-border: var(--primary-border);
+  --color-primary-border: hsl(var(--primary-border));
 
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-secondary-border: var(--secondary-border);
+  --color-secondary-border: hsl(var(--secondary-border));
 
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-muted-border: var(--muted-border);
+  --color-muted-border: hsl(var(--muted-border));
 
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-accent-border: var(--accent-border);
+  --color-accent-border: hsl(var(--accent-border));
 
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-destructive-border: var(--destructive-border);
+  --color-destructive-border: hsl(var(--destructive-border));
 
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
@@ -133,6 +133,110 @@
   --sidebar-ring: 15 62% 59%;
 }
 
+/* The public site, prototype "Colour bands": white and indigo ink, with
+   each tutor's own tint at full strength. Scoped to the public Shell. */
+.public-site {
+  --background: 0 0% 100%;
+  --foreground: 247 44% 21%;
+  --card: 0 0% 100%;
+  --card-foreground: 247 44% 21%;
+  --border: 248 18% 87%;
+  --card-border: 248 18% 87%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 247 44% 21%;
+  --popover-border: 248 18% 87%;
+
+  --primary: 247 44% 21%;
+  --primary-foreground: 0 0% 100%;
+  --primary-border: 247 44% 42%;
+
+  --secondary: 250 22% 95%;
+  --secondary-foreground: 247 44% 21%;
+  --secondary-border: 248 18% 87%;
+
+  --muted: 250 22% 95%;
+  --muted-foreground: 247 12% 40%;
+  --muted-border: 248 18% 87%;
+
+  --accent: 250 22% 95%;
+  --accent-foreground: 247 44% 21%;
+  --accent-border: 248 18% 87%;
+
+  --input: 248 18% 75%;
+  --ring: 247 44% 21%;
+
+  --app-font-sans: 'Instrument Sans', sans-serif;
+  --app-font-serif: 'Instrument Sans', sans-serif;
+}
+
+/* The page behind the public site, seen when scrolling past either end. */
+body:has(.public-site) {
+  background-color: hsl(0 0% 100%);
+}
+
+@layer components {
+  .public-site h1, .public-site h2, .public-site h3 {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  /* A button shows the hand, like a link: Tailwind 4 leaves the arrow. */
+  .public-site button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Controls show focus. A section focused only as a jump target
+     (tabindex="-1") doesn't: it can't be pressed. */
+  .public-site :focus-visible:not([tabindex="-1"]) {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+
+  /* A tutor's note card: her tint at full strength, nearly square corners,
+     faint ruled lines every 28px under a heavier rule beneath her name. Each
+     card rests at its own slight angle; one that is a link lifts straight
+     when pointed at, so a card that does nothing doesn't look pressable. */
+  .note-card {
+    --rule: 28px;
+    background-color: var(--tint);
+    border-radius: 3px;
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.1), 0 16px 30px -18px hsl(var(--foreground) / 0.45);
+    transform: rotate(var(--rest, 0deg));
+    transition: transform 320ms cubic-bezier(.16, 1, .3, 1), box-shadow 320ms cubic-bezier(.16, 1, .3, 1);
+  }
+  a.note-card:hover,
+  a.note-card:focus-visible {
+    transform: translateY(-6px) rotate(0deg);
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.1), 0 26px 40px -20px hsl(var(--foreground) / 0.5);
+  }
+  .note-card-head {
+    border-bottom: 2px solid hsl(var(--foreground) / 0.55);
+  }
+  /* The tutors' cards are dealt onto the page once, on arrival. */
+  .deal-in {
+    animation: deal-in 900ms cubic-bezier(.16, 1, .3, 1) backwards;
+    animation-delay: var(--delay);
+  }
+  /* A plain sheet of the same paper, for forms: square-cut and shadowed
+     like a note, but straight and unruled so fields stay easy to fill in. */
+  .paper-sheet {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 3px;
+    box-shadow: 0 1px 0 hsl(var(--foreground) / 0.1), 0 16px 30px -18px hsl(var(--foreground) / 0.45);
+  }
+  /* Text in the body sits on the rules: every line is one rule tall. */
+  .note-card-body {
+    line-height: var(--rule);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(var(--rule) - 1px),
+      hsl(var(--foreground) / 0.16) calc(var(--rule) - 1px) var(--rule)
+    );
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -149,29 +253,13 @@
   }
 }
 
-@layer utilities {
-  .editorial-rule {
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--border)) 72%);
-    height: 1px;
-  }
-
-  .lift-on-hover {
-    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
-  }
-
-  .lift-on-hover:hover {
-    transform: translateY(-4px);
-  }
+@keyframes deal-in {
+  from { transform: translateY(40px) rotate(0deg); opacity: 0; }
 }
 
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes soft-pulse {
-  0%, 100% { opacity: .55; }
-  50% { opacity: 1; }
 }
 
 .page-reveal {

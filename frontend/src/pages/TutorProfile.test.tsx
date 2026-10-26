@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { Router } from "wouter";
 import type { Tutor } from "@/client";
-import { TutorAvailability, TutorBackground, TutorEnquiry, TutorResources } from "./TutorProfile";
+import { backgroundEntries, TutorAvailability, TutorBackground, TutorEnquiry, TutorResources } from "./TutorProfile";
 
 const fullTutor: Tutor = {
   id: 2,
@@ -30,13 +31,32 @@ const fullTutor: Tutor = {
 };
 
 test("full tutor profiles explain the enquiry restriction without rendering a form", () => {
-  const markup = renderToStaticMarkup(<TutorEnquiry tutor={fullTutor} />);
+  const markup = renderToStaticMarkup(
+    <Router ssrPath="/tutors/maya-shah">
+      <TutorEnquiry tutor={fullTutor} />
+    </Router>,
+  );
 
   assert.match(markup, /data-testid="tutor-enquiry-unavailable"/);
   assert.match(markup, /Maya Shah is not currently accepting enquiries/);
   assert.doesNotMatch(markup, /data-testid="enquiry-form"/);
   assert.doesNotMatch(markup, /data-testid="button-submit-enquiry"/);
   assert.doesNotMatch(markup, /<form/);
+  assert.match(markup, /data-testid="tutor-enquiry-other-tutors"/);
+  assert.doesNotMatch(markup, /data-testid="tutor-enquiry-link"/);
+});
+
+test("an accepting tutor's profile ends with a link to /enquire with her chosen, not a form", () => {
+  const markup = renderToStaticMarkup(
+    <Router ssrPath="/tutors/maya-shah">
+      <TutorEnquiry tutor={{ ...fullTutor, intake: "accepting" }} />
+    </Router>,
+  );
+
+  assert.match(markup, /<a data-testid="tutor-enquiry-link" href="\/enquire\?tutor=maya-shah"/);
+  assert.match(markup, /Ask about lessons with Maya/);
+  assert.doesNotMatch(markup, /<form/);
+  assert.doesNotMatch(markup, /data-testid="tutor-enquiry-unavailable"/);
 });
 test("tutor profiles show availability when the tutor has given it", () => {
   const markup = renderToStaticMarkup(<TutorAvailability tutor={fullTutor} />);
@@ -107,4 +127,20 @@ test("tutor profiles hide published resources while public resources are off", (
   );
 
   assert.equal(markup, "");
+});
+
+test("background entries split their dates from the role", () => {
+  assert.deepEqual(
+    backgroundEntries("Sep 2018 – Present | Maths teacher\nRan the maths club.\n\nJul 2017 | Intern"),
+    [
+      { dates: "Sep 2018 – Present", title: "Maths teacher", detail: "Ran the maths club." },
+      { dates: "Jul 2017", title: "Intern", detail: "" },
+    ],
+  );
+});
+
+test("background entries without dates show as written", () => {
+  assert.deepEqual(backgroundEntries("Taught for ten years\nin two schools."), [
+    { dates: "", title: "", detail: "Taught for ten years\nin two schools." },
+  ]);
 });
