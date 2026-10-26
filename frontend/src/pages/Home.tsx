@@ -23,8 +23,8 @@ export default function Home() {
     request: publicTutorRequestOptions,
   });
 
-  // The nav's "Meet the tutors" opens `/#tutors`. Scroll once the tutors have
-  // loaded, so the page has its full height.
+  // "Back to the tutors" on a profile or enquiry opens `/#tutors`. Scroll once
+  // the tutors have loaded, so the page has its full height.
   React.useEffect(() => {
     if (tutorsLoading || window.location.hash !== "#tutors") return;
     scrollToTutors("auto");
@@ -33,7 +33,7 @@ export default function Home() {
   return (
     <main className="flex-1" data-testid="page-home">
       {/* Hero: the tutors themselves, under one short line on who they are.
-          The nav's "Meet the tutors" link scrolls here. */}
+          "Back to the tutors" links scroll here. */}
       <section className="px-6 md:px-[30px] pt-[28px] md:pt-[48px] pb-[56px] md:pb-[80px] focus:outline-none" id="tutors" tabIndex={-1} aria-labelledby="home-hero-title">
         <div className="max-w-[1150px] mx-auto">
           <div className="mb-[32px] md:mb-[44px]">

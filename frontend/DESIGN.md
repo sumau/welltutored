@@ -230,10 +230,9 @@ from `sm` and grow if her text needs more room.
 
 The Home hero is the tutors: a one-line headline and its lead, then the tutor
 grid straight away, so the first cards show in the first screen at every
-width. The nav's "Meet the tutors" scrolls to it. The three paper notes come
-after the grid, square and side by side from `sm` (640px) in the grid's first
-908px, and stacked below `sm`. Desktop nav links collapse into a rounded dropdown
-card below `md`. The body never goes narrower than 320px.
+width. The three paper notes come after the grid, square and side by side
+from `sm` (640px) in the grid's first 908px, and stacked below `sm`. Desktop
+nav links collapse into a rounded dropdown card below `md`. The body never goes narrower than 320px.
 
 ## Elevation & Depth
 
@@ -318,8 +317,9 @@ card shadow, but straight and unruled, so fields stay easy to fill in.
 
 ### Navigation
 - **Style:** an 82px bar with the round indigo "w" disc and the lowercase
-  wordmark "well tutored" on the left, and "Meet the tutors", the primary
-  "Make an enquiry" pill and a quiet "Workspace sign in" link on the right.
+  wordmark "well tutored" on the left, which goes to the tutors at the top of
+  Home, and the primary "Make an enquiry" pill and a quiet "Workspace sign
+  in" link on the right. There is no separate tutors link: the logo is it.
 - **Mobile:** a toggle opens a 20px-cornered white card under the bar.
 
 ### Footer
