@@ -73,7 +73,7 @@ export default function Enquiry() {
           </Link>
         </div>
         <div className="max-w-[1150px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-[40px] lg:gap-[64px] items-start">
-          <div className="grid gap-[24px]">
+          <div className="flex flex-col gap-[24px] lg:gap-[16px] lg:self-stretch">
             <h1
               id="enquiry-title"
               className="font-serif text-[clamp(34px,4vw,48px)] leading-[1.08] m-0"
@@ -81,9 +81,9 @@ export default function Enquiry() {
             >
               Make an enquiry
             </h1>
-            <EnquiryStepList steps={enquirySteps("enquire", chosenTutor?.firstName)} />
+            <EnquiryStepList steps={enquirySteps("enquire", chosenTutor?.firstName)} className="lg:gap-[12px]" />
             {/* Her card once she's chosen, so it's clear who the enquiry is
-                for. It links back to her profile. */}
+                for, its foot level with the form's. It links back to her profile. */}
             {chosenTutor && (
               <TutorCard
                 key={chosenTutor.slug}
@@ -93,7 +93,7 @@ export default function Enquiry() {
                   if (formDirty && !window.confirm(LEAVE_WARNING)) event.preventDefault();
                 }}
                 rest="-1.5deg"
-                className="hidden lg:flex mt-[8px] max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
+                className="hidden lg:flex lg:mt-auto max-w-[400px] [animation:deal-in_600ms_cubic-bezier(.16,1,.3,1)_backwards]"
                 testId="enquiry-tutor-card"
               />
             )}
