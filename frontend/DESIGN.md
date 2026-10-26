@@ -278,7 +278,9 @@ The one card on the public site, in `.note-card` in `src/index.css`.
 - **Body:** text sits on faint ruled lines (16% indigo) every 28px; each line
   of text is one rule tall (`.note-card-body`, `--rule` to change the
   spacing).
-- **Hover / Focus:** lifts 6px and straightens over 320ms.
+- **Hover / Focus:** a card that is a link lifts 6px and straightens over
+  320ms. One that isn't (the Home notes, the approach card, the enquiry card)
+  stays at rest, so it doesn't look pressable.
 
 ### Tutor card
 - **Background:** the tutor's tint.

@@ -190,7 +190,8 @@ body:has(.public-site) {
 
   /* A tutor's note card: her tint at full strength, nearly square corners,
      faint ruled lines every 28px under a heavier rule beneath her name. Each
-     card rests at its own slight angle and lifts straight when pointed at. */
+     card rests at its own slight angle; one that is a link lifts straight
+     when pointed at, so a card that does nothing doesn't look pressable. */
   .note-card {
     --rule: 28px;
     background-color: var(--tint);
@@ -199,8 +200,8 @@ body:has(.public-site) {
     transform: rotate(var(--rest, 0deg));
     transition: transform 320ms cubic-bezier(.16, 1, .3, 1), box-shadow 320ms cubic-bezier(.16, 1, .3, 1);
   }
-  .note-card:hover,
-  .note-card:focus-visible {
+  a.note-card:hover,
+  a.note-card:focus-visible {
     transform: translateY(-6px) rotate(0deg);
     box-shadow: 0 1px 0 hsl(var(--foreground) / 0.1), 0 26px 40px -20px hsl(var(--foreground) / 0.5);
   }

@@ -19,6 +19,25 @@ export function Shell({
 
   const closeMenu = () => setMenuOpen(false);
 
+  // An open policy dialog takes focus, closes on Escape, and hands focus back
+  // to the button that opened it. Escape also closes the mobile menu.
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!policy && !menuOpen) return;
+    const opener = document.activeElement as HTMLElement | null;
+    if (policy) dialogRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setPolicy(null);
+      setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      if (policy) opener?.focus();
+    };
+  }, [policy, menuOpen]);
+
   // The logo links to Home. Already on Home, the pathname doesn't change, so
   // nothing would happen: go back to the top instead.
   const openHome = (event: React.MouseEvent) => {
@@ -59,6 +78,8 @@ export function Shell({
           className="md:hidden p-3 -mr-3 text-foreground rounded-full"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={menuOpen}
+          aria-controls="nav-mobile-menu"
           data-testid="nav-mobile-toggle"
         >
           {menuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -67,7 +88,7 @@ export function Shell({
 
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
-        <div className="md:hidden absolute top-[82px] left-4 right-4 rounded-[20px] bg-card z-30 px-6 py-6 border border-border flex flex-col gap-4 text-[16px] font-medium" data-testid="nav-mobile-menu">
+        <div id="nav-mobile-menu" className="md:hidden absolute top-[82px] left-4 right-4 rounded-[20px] bg-card z-30 px-6 py-6 border border-border flex flex-col gap-4 text-[16px] font-medium" data-testid="nav-mobile-menu">
           {PUBLIC_RESOURCES_ENABLED && (
             <Link href="/resources" onClick={closeMenu} data-testid="nav-mobile-resources">Insights & resources</Link>
           )}
@@ -138,18 +159,23 @@ export function Shell({
             className="bg-card w-full max-w-[530px] rounded-[20px] p-8 md:p-[45px] relative"
             onClick={e => e.stopPropagation()}
             role="dialog"
+            aria-modal="true"
+            aria-labelledby="policy-title"
+            tabIndex={-1}
+            ref={dialogRef}
           >
             <button 
               className="absolute right-4 top-4 p-2 rounded-full text-muted-foreground hover:text-foreground"
               onClick={() => setPolicy(null)}
+              aria-label="Close"
               data-testid="modal-close"
             >
               <X size={18} />
             </button>
             
-            <ShieldCheck size={26} className="text-foreground mb-5" />
+            <ShieldCheck size={26} className="text-foreground mb-5" aria-hidden="true" />
             
-            <h2 className="text-[34px] md:text-[40px] leading-[1.05] mb-5">
+            <h2 id="policy-title" className="text-[34px] md:text-[40px] leading-[1.05] mb-5">
               {policy === "safeguarding" ? "Safeguarding comes first" : "Privacy and cookies"}
             </h2>
             

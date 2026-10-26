@@ -28,7 +28,7 @@ export function TutorCard({
         <h3 className="m-0 text-[clamp(30px,2.6vw,36px)] leading-[1] tracking-[-0.04em] font-bold">
           {tutor.name}
         </h3>
-        <span className={`shrink-0 inline-flex items-center gap-[8px] rounded-full h-[28px] px-[12px] text-[15px] font-semibold leading-none mt-[2px] ${intakePillClasses[tutor.intake]}`} aria-label={`Intake: ${intakeLabels[tutor.intake]}`}>
+        <span className={`shrink-0 inline-flex items-center gap-[8px] rounded-full h-[28px] px-[12px] text-[15px] font-semibold leading-none mt-[2px] ${intakePillClasses[tutor.intake]}`}>
           <span className={`w-[8px] h-[8px] rounded-full ${intakePillDotClasses[tutor.intake]}`} aria-hidden="true" />
           {intakeLabels[tutor.intake]}
         </span>
